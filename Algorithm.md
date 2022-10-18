@@ -22,6 +22,8 @@ Here, we give a high-level description of the main attractor detection algorithm
 
    By the lemma above, we can recursively call the main procedure on $S'$ without considering any of the remaining states in $S$. 
 
+   > Giang: I think this is already included in pystablemotifs as it uses both `M` and `LDOI(M)`. 
+
 2. Find a collection of maximal trap spaces within $S$. Let's denote them $M_1, \ldots, M_k$.
 
    *Lemma/Conjecture:* Note that maximal trap spaces can have non-empty intersections, in which case we might recursively cover the same sub-space multiple times. Alternatively, we can consider a sequence of spaces that are maximal without intersecting any other space in the sequence (this is slightly different than "global" maximality). Note that this definition does not guarantee that such sequence is unique, but that is not an issue: the method should work given any such valid sequence, as these "disjoint maximal" trap spaces still cover all minimal trap spaces within $S$ (this is in fact the claim of this lemma).
@@ -30,6 +32,8 @@ Here, we give a high-level description of the main attractor detection algorithm
 
    > Sam: At the moment, this should be performed by Trappist. As far as I understand, Trappist can now compute maximal trap spaces. It is my understanding that it could also be quite easily transformed to iteratively compute the "disjoint maximal" trap spaces if desired.
 
+   > Giang: Yes. It may be possible with Trappist.
+
 3. First, assume that $M_1, \ldots, M_k$ is empty. That is, there is no sub-space of $S$ that is also a trap space. Conversely, $S$ is a minimal trap space. 
 
    Now, compute "attractor candidate states" $N \subseteq S$ that correspond to the fixed-points within $F^{\oplus}$. These "cover" every real attractor in $F$. Then, use some abstract/symbolic reachability method to pre-order the elements of $N$ based on mutual reachability. The terminal elements of this pre-order are the "true" representatives of the individual attractors.
@@ -37,6 +41,8 @@ Here, we give a high-level description of the main attractor detection algorithm
    > Sam: As far as I recall, NFVS by Van Giang uses Petri net unfolding to obtain this pre-order on $N$. To simplify the method, we may start by using symbolic BDD reachability first and only resort to other methods if this fails. In my experience, once the sub-space where the attractor resides is known, symbolic reachability is often quite fast (this is what we also use in AEON: we try to converge towards such subspace using reductions, but most of the time is spent on these reductions, not on detecting the attractor in the final subspace).
    >
    > Another alternative may be that if symbolic/unfolding analysis takes too long, we return the whole $S$ as a "reasonable approximation" of the resulting attractors.
+
+   > Giang: I agree the alternative. With the new method I presented today, I hope that after Preprocessing SSF, `F_m` has only one state. However, `F_m` still may have more than one state. In this case, all analysis may take too long time, and it is reasonable to just return the whole `S`.
 
    Finally, we return a collection of attractors $A_1, \ldots, A_k$ (or their representatives) that reside within this minimal trap space $S$.
 
