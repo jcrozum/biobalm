@@ -26,7 +26,7 @@ The bottom (terminal) strongly connected components of $STG(F)$ are called *att
 
 ##### Time reversal
 
-We can also consider the *time reversal* of $F$, denoted $F^-$. The update functions $f_i^-$ are defined such that $f_i^-(x) = \neg f_i(\neg x_1, \ldots, \neg x_n)$. The result is a network with a reversed state-transition graph compared to $F$. That is, $x \to y$ in $STG(F)$ if and only if $y \to x$ in $STG(F^-)$.
+We can also consider the *time reversal* of $F$, denoted $F^-$. The update functions $f_i^-$ are defined such that $f_i^-(x) = \neg f_i(x_1, \ldots,x_{i-1},\neg x_i,x_{i+1},\ldots x_n)$. The result is a network with a reversed state-transition graph compared to $F$. That is, $x \to y$ in $STG(F)$ if and only if $y \to x$ in $STG(F^-)$.
 
 The attractors of the time reversed network $F^-$ are the *repellers* of $F$ (also, top SCCs), and other graph-related terms are reversed similarly.
 
@@ -47,6 +47,10 @@ Note that (globally) minimal trap spaces have a strong correspondence with netw
 Observe that a trap space $S$ in the time reversed network $F^-$ corresponds to a set of states for which there are no transitions entering $S$ (in $STG(F)$). That is, once $S$ is escaped, it cannot be entered again. However, note that this does not mean that attractors of $F$ cannot be contained in any trap space of $F^-$. As long as the attractor and the weak basin of the attractor are within the same (time reversed) trap space, there is no contradiction.
 
 Finally, note that trap spaces of both $F$ and $F^-$ are SCC-closed with respect to $STG(F)$. That is, given a trap space $S$, every SCC $X$ of $STG(F)$ is either fully in $S$ (i.e. $X \cap S = S$), or outside of $S$ (i.e. $X \cap S = \emptyset$).
+
+##### Single-node driver set $\Delta$
+
+For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is the set of all variable-value pairs $(x_i,s_i)$ such that there exists a maximal trap space $M\in\mathscr{M}$  that contains the subspace obtained by percolating $x_i=s_i$.
 
 ##### TBD
 
