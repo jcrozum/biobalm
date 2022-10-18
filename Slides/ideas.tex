@@ -29,6 +29,9 @@
 \usepackage{graphicx,multirow}
 \usepackage{epsfig}
 
+% strikeout text
+\usepackage{ulem}
+
 % footnote size
 \setbeamerfont{footnote}{size=\scriptsize}
 
@@ -685,8 +688,8 @@ It is \red{very hard} for mtsNFVS to reach the best case (i.e., \(|F| = 1\)) to 
 
 \hspace{0.1cm}
 
-One example is the model shown in~\url{https://github.com/jcrozum/pystablemotifs/issues/83}.
-This network has no stable motifs, and we have exactly one attractor for each combination of source node values.
+\sout{One example is the model shown in~\url{https://github.com/jcrozum/pystablemotifs/issues/83}.
+This network has no stable motifs, and we have exactly one attractor for each combination of source node values.}
 
 \hspace{0.1cm}
 
@@ -694,9 +697,158 @@ Our general idea is as follows.
 
 \begin{itemize}
   \item We have the \blue{information} about the min. trap space. We can use this information to guide Preprocessing SSF to reach the easy cases where we can avoid or at least reduce the reachability analysis times.
-  \item \(\dots\)
 \end{itemize}
 }
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deal with the issue of huge attractors}
+
+This is a very rare case.
+We can anticipate it in advance via the information about the number of free nodes of the min. trap space.
+
+\hspace{0.1cm}
+
+In this case, it is \red{harder} for Preprocessing SSF to converge into \blue{one state} (i.e., the best case where we do not need to check the reachability).
+
+\hspace{0.1cm}
+
+However, we know that it is \blue{likely} that there is only one huge attractor and all candidate states are in this attractor.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deal with the issue of huge attractors (cont.)}
+
+My idea is as follows.
+\begin{itemize}
+  \item First, choose a pivot state \(s^{p}\) from the candidate set \(F_m\).
+  \item Second, from \(s^{p}\) create and gradually enlarge a "trap" to attract other states in \(F_m\). The trap is the set of states that can be reach \(s^{p}\).
+  \item Third, perform Preprocessing SSF and the enlargement in parallel. When a state converges into the trap, we can exclude it from \(F_m\).
+  \item Finally, we have \(F_m\) with the expectation that it contains only the pivot state.
+\end{itemize}
+
+\hspace{0.1cm}
+
+The principle is that \blue{larger trap}, \blue{more possibility} to converge it.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deal with the issue of huge attractors (cont.)}
+
+\begin{columns}
+  \begin{column}{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=1cm and 1cm, every node/.style={scale=0.8}]
+      \node[circle, draw, fill=red] (1) [] {};
+      \node[circle, draw] (4) [right=of 1] {};
+      \node[circle, draw] (2) [above left=of 1, yshift=0cm] {};
+      \node[circle, draw] (3) [right=of 2] {};
+      
+      \node[circle, draw, fill=blue] (7) [left=of 1, xshift=-1cm] {};
+      \node[circle, draw] (5) [below left=of 4, yshift=0cm] {};
+      \node[circle, draw, fill=blue] (8) [right=of 5, yshift=0cm] {};
+      \node[circle, draw] (6) [left=of 5, yshift=0cm] {};
+
+      \draw[->] (1) edge [] (2);
+      \draw[->] (2) edge [] (3);
+      \draw[->] (2) edge [] (6);
+      \draw[->] (3) edge [] (1);
+      \draw[->] (4) edge [] (1);
+      \draw[->] (4) edge [] (3);
+      \draw[->] (4) edge [] (5);
+      \draw[->] (5) edge [] (2);
+      \draw[->] (5) edge [] (8);
+      \draw[->] (6) edge [] (4);
+      \draw[->] (6) edge [] (5);
+      \draw[->] (6) edge [] (7);
+      \draw[->] (7) edge [] (2);
+      \draw[->] (8) edge [bend left] (6);
+    \end{tikzpicture}
+  \end{column}
+  \begin{column}{0.6\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=1cm and 1cm, every node/.style={scale=0.8}]
+      \node[circle, draw, fill=red] (1) [] {};
+      \node[circle, draw, fill=red] (4) [right=of 1] {};
+      \node[circle, draw, fill=blue] (2) [above left=of 1, yshift=0cm] {};
+      \node[circle, draw, fill=red] (3) [right=of 2] {};
+      
+      \node[circle, draw] (7) [left=of 1, xshift=-1cm] {};
+      \node[circle, draw] (5) [below left=of 4, yshift=0cm] {};
+      \node[circle, draw] (8) [right=of 5, yshift=0cm] {};
+      \node[circle, draw, fill=blue] (6) [left=of 5, yshift=0cm] {};
+
+      \draw[->] (1) edge [] (2);
+      \draw[->] (2) edge [] (3);
+      \draw[->] (2) edge [] (6);
+      \draw[->] (3) edge [] (1);
+      \draw[->] (4) edge [] (1);
+      \draw[->] (4) edge [] (3);
+      \draw[->] (4) edge [] (5);
+      \draw[->] (5) edge [] (2);
+      \draw[->] (5) edge [] (8);
+      \draw[->] (6) edge [] (4);
+      \draw[->] (6) edge [] (5);
+      \draw[->] (6) edge [] (7);
+      \draw[->] (7) edge [] (2);
+      \draw[->] (8) edge [bend left] (6);
+    \end{tikzpicture}
+  \end{column}
+\end{columns}
+
+\hspace{0.8cm}
+
+How to efficiently enlarge the trap (i.e., computing predecessors)?
+Using BDDs as in~\cite{DBLP:journals/bioinformatics/GargCXMM08, DBLP:conf/cav/BenesBPS21}?
+
+\hspace{0.8cm}
+
+Thanks to \blue{time-reversal}, we can compute successors (instead of predecessors in the original ABN) in the time-reversal ABN.
+
+\hspace{0.8cm}
+
+This process can purely rely on the function evaluation (not BDDs or unfoldings).
+Hence, it is expected to be viable for very large models.
+\end{frame}
+
+\begin{frame}
+\frametitle{Reachability analysis}
+
+We may still need to check the reachability in some cases, for example, there is a motif-avoidant attractor, the Preprocessing SSF is not good enough.
+
+\hspace{0.8cm}
+
+The reachability analysis is the \red{last resort} ensuring the correctness of our approach.
+
+\hspace{0.8cm}
+
+The reachability in ABNs is PSPACE-complete.
+Its research is far from our focus now.
+Hence, we should use the existing methods for the reachability analysis in a \blue{wise manner} relying on the information we have already known.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Reachability analysis (cont.)}
+
+For example, in the motif-avoidant attractor checking,
+\begin{itemize}
+  \item If \(|F| = 1\), it is likely that there is a motif-avoidant attractor, the result of the reachability analysis is likely unreachable. In this case, we should \blue{first use} a static analyzer (e.g., PINT~\cite{Pint}) that is efficient for very large models in the case of unreachable.
+\end{itemize}
+
+\hspace{0.0cm}
+
+For example, in the process of each min. trap space \(m\),
+\begin{itemize}
+  \item If \(|F_m| = 2\), it is likely that there is only one attractor and the result of the reachability analysis is always reachable. In this case, we should \blue{first use} a bounded model checking-based approach (e.g., SAT, ASP) that is efficient for very large models in the case of reachable. Goal-driven Petri net unfolding~\cite{Chatain2016} is also a possible option in this case, but I do not think it can handle very large models.
+\end{itemize}
+
+\hspace{0.0cm}
+
+We need to consider this problem thoroughly.
 
 \end{frame}
 
@@ -732,6 +884,34 @@ Note that our proposed approach contains many \blue{constituent tasks} (e.g., co
 The new system should be easy to replace new implementations for each constituent task.
 
 \end{frame}
+
+\begin{frame}
+\frametitle{Trappist: new features}
+
+Now, Trappist supports computing
+\begin{itemize}
+  \item max. trap spaces
+  \item min. trap spaces
+  \item fixed points
+\end{itemize}
+
+\hspace{0.8cm}
+
+Introduction \dots
+
+\end{frame}
+
+\begin{frame}
+\frametitle{System design}
+
+Design a new system for attractor detection and control (input/output formats, components, functions, etc.).
+
+\hspace{0.8cm}
+
+Discuss \dots
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Experimentation}
