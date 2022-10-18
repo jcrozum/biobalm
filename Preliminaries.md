@@ -52,6 +52,8 @@ Finally, note that trap spaces of both $F$ and $F^-$ are SCC-closed with respec
 
 For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is the set of all variable-value pairs $(x_i,s_i)$ such that there exists a maximal trap space $M\in\mathscr{M}$  that contains the subspace obtained by percolating $x_i=s_i$.
 
+Rozum et al. 2021 proved that if an attractor exists outside of the set $\bigcup_{M\in\mathscr{M}} M$, then that attractor must lie within the subspace defined by $\neg \Delta$, i.e., each state in the attractor must satisfy $x_i=\neg s_i \space \forall(x_i,s_i)\in\Delta$.
+
 ##### TBD
 
 Regulatory/signed influence graphs, stable motifs, feedback vertex sets,...
