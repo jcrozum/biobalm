@@ -1,0 +1,75 @@
+targets, factors
+a_secretase, ((!Cholesterol & ((!CREB & s_NMDAR) | CREB)) | (Cholesterol & ((!CREB & (!ROCK & s_NMDAR)) | (CREB & !ROCK))))
+Ab, (Ab & (APP & (!Autophagy & (BACE1 & ((!Cholesterol & ((!PICALM & Sortilin) | PICALM)) | Cholesterol)))))
+ABCA7, (ABCA7 & SREBP2)
+AKT, (AKT & (!CASP3 & (PI3K & ((!PP2A & s_NMDAR) | (PP2A & (!PTEN & s_NMDAR))))))
+APOE4, APOE4
+Apoer2, (!APOE4 & Reelin)
+Apoptosis, CASP3
+APP, ((!a_secretase & ERK) | (a_secretase & ((!Apoer2 & ERK) | (Apoer2 & ((!Dab1 & ERK) | (Dab1 & (ERK & (!Fyn | (Fyn & ((!LRP6 & (!SORL1 | (SORL1 & !Sortilin))) | (LRP6 & !SORL1)))))))))))
+ATM, ROS
+Autophagy, (beclin1 & ((!Cholesterol & (LAMP2 & (LC3 & (p62 & ULK1)))) | (Cholesterol & (LAMP2 & (LC3 & (p62 & (!ROS & ULK1)))))))
+BACE1, ((!Cholesterol & (!PGC1a & STAT3)) | (Cholesterol & !PGC1a))
+BAD, (!AKT & PP2B)
+BAX, (!AKT & (!Bcl2 & (Bim & (p53 & PUMA))))
+Bcl2, (!BAD & (!Bim | (Bim & (!JNK | (JNK & !p53)))))
+BDNF, ((!CREB & (PGC1a & Sortilin)) | (CREB & Sortilin))
+beclin1, ((!Bcl2 & ((!JNK & ROCK) | JNK)) | (Bcl2 & (!CASP3 & ((!JNK & ROCK) | JNK))))
+Bim, ((!EGR1 & FOXO) | EGR1)
+Ca_ion, e_NMDAR
+CASP2, p53
+CASP3, (BAX & Bim)
+Cdk5, ((!Ca_ion & EGR1) | Ca_ion)
+Cholesterol, (!ABCA7 | (ABCA7 & ((!Cholesterol & ((!CYP46A1 & (!LPL | (LPL & (SREBP2 & HMGCR)))) | (CYP46A1 & !LPL))) | Cholesterol)))
+CIP2A, Ab
+CLU, ((!EGR1 & p53) | EGR1)
+CREB, (!e_NMDAR | (e_NMDAR & ((!ERK & !Jacob) | (ERK & (!Jacob | (Jacob & s_NMDAR))))))
+CYP46A1, (!APP & Ca_ion)
+Dab1, (Apoer2 & !Fyn)
+Dkk1, (Ab & ((!CLU & (Dkk1 & PICALM)) | (CLU & Dkk1)))
+DLK, APOE4
+e_NMDAR, ((!Ab & PTEN) | (Ab & ((!Fyn & PTEN) | Fyn)))
+EGR1, JNK
+ERK, (ERK & ((!MKK7 & ((!PP2A & (s_NMDAR & !STEP)) | (PP2A & (s_NMDAR & (!STEP & !pTau))))) | (MKK7 & (!PP2A | (PP2A & !pTau)))))
+FOXO, (!AKT & JNK)
+Fyn, ((!Apoer2 & (Fyn & (mGluR & !STEP))) | (Apoer2 & ((!Dab1 & (Fyn & (mGluR & !STEP))) | (Dab1 & (Fyn & !STEP)))))
+GSK3beta, (!AKT & ((!Ca_ion & (GSK3beta & (!LRP6 & PP2A))) | (Ca_ion & (GSK3beta & !LRP6))))
+Jacob, ((!e_NMDAR & (ERK & s_NMDAR)) | e_NMDAR)
+JNK, ((!MKK7 & Vangl2) | MKK7)
+LAMP2, ((!PIP2 & TFEB) | PIP2)
+LC3, (!PICALM | (PICALM & ((!PIP2 & TFEB) | PIP2)))
+LPL, (!SORL1 & SREBP2)
+LRP6, (!APOE4 | (APOE4 & !Dkk1))
+MAPT, (!CREB & e_NMDAR)
+MDM2, ((!ATM & ((!CASP2 & p53) | (CASP2 & (!GSK3beta & p53)))) | (ATM & (!GSK3beta & p53)))
+mGluR, Ab
+MKK7, ((!DLK & e_NMDAR) | DLK)
+mTOR, ((!AKT & ((!Cholesterol & (ERK & !SIRT1)) | (Cholesterol & !SIRT1))) | (AKT & !SIRT1))
+p38, !STEP
+p53, ((!ATM & (!MDM2 & (p38 & p53))) | (ATM & (!MDM2 & p53)))
+p62, (!PICALM | (PICALM & ((!PIP2 & TFEB) | PIP2)))
+PGC1a, ((!CREB & (p38 & SIRT1)) | (CREB & p38))
+PI3K, ((!BDNF & ((!Dab1 & s_NMDAR) | Dab1)) | BDNF)
+PICALM, (!Ca_ion & !CASP3)
+PIP2, !synj1
+PP2A, (!APOE4 & (!CIP2A & (!GSK3beta | (GSK3beta & !mGluR))))
+PP2B, ((!Ca_ion & mGluR) | Ca_ion)
+PTEN, ROCK
+PUMA, ((!FOXO & (p53 & !s_NMDAR)) | (FOXO & !s_NMDAR))
+Reelin, !Apoptosis
+RhoA, ((!CASP2 & Vangl2) | CASP2)
+ROCK, ((!RhoA & !SIRT1) | RhoA)
+ROS, ((!Ab & (Ca_ion & (!PGC1a & ROS))) | (Ab & (!PGC1a & ROS)))
+s_NMDAR, ((!BDNF & (Fyn & (s_NMDAR & (!STEP & !pTau)))) | (BDNF & (s_NMDAR & (!STEP & !pTau))))
+SORL1, ((!BDNF & !ROCK) | BDNF)
+Sortilin, ROCK
+SREBP2, (!ABCA7 | (ABCA7 & ((!AKT & (!APP | (APP & !Cholesterol))) | AKT)))
+STAT3, Cdk5
+STEP, ((!e_NMDAR & PP2B) | (e_NMDAR & (PP2B & !s_NMDAR)))
+synj1, ((!APOE4 & (!Cdk5 & PP2B)) | APOE4)
+pTau, (!Autophagy & ((!Cdk5 & ((!ERK & (GSK3beta & (MAPT & !PP2A))) | (ERK & (MAPT & !PP2A)))) | (Cdk5 & (MAPT & !PP2A))))
+TFEB, ((!APOE4 & PP2B) | (APOE4 & (!mTOR & PP2B)))
+ULK1, !mTOR
+Vangl2, Dkk1
+SIRT1, (!APOE4 | (APOE4 & !ROS))
+HMGCR, ((!BDNF & SREBP2) | BDNF)

@@ -1,0 +1,56 @@
+targets, factors
+ca, ip3
+camk24, cam_ca
+cam_ca, ca
+dum_gab1_kin_or_jak1_gab1_mem_p, ((!jak1 & gab1_kin) | jak1)
+dum_gp80_a_il6rc, ((!gp80m_a & gp80s_a) | gp80m_a)
+dum_il6rc_p_or_grb2_vav, ((!grb2_sos & il6rc_p) | grb2_sos)
+dum_mtorc1_or_pkcd_stat3_ta, ((!mtorc1 & pkcd) | mtorc1)
+erk12, mek1
+gab1_mem, ((!erk12 & grb2_sos) | (erk12 & ((!grb2_sos & pip3) | grb2_sos)))
+gab1_mem_p, (dum_gab1_kin_or_jak1_gab1_mem_p & (gab1_mem & gab1_mem_p))
+gp130s, (!camk24 & !mk2)
+gp80m_a, il6
+gp80s_a, (!gp130s & il6)
+grb2_sos, ((!il6rc_p & shp2) | il6rc_p)
+il6rc, (dum_gp80_a_il6rc & gp130m)
+il6rc_p, (il6rc & (il6rc_p & (jak1 & (!shp2 & !shp2_a))))
+ip3, plcg
+jak1, (!shp2 & (!shp2_a & (!socs1 & !socs3)))
+mek1, raf1
+mek4, mekk1
+mek6, il6rc_p
+mekk1, rac1
+mk2, p38
+mtorc1, mtor
+p38, mek6
+pi3k, ((!gab1_mem_p & ras) | (gab1_mem_p & ((!ras & !shp2_a) | ras)))
+pip3, (pi3k & !pten)
+pkcd, mek4
+plcg, gab1_mem_p
+rac1, vav
+raf1, ras
+ras, (grb2_sos & !ras_gap)
+ras_gap, (gab1_mem_p & !shp2_a)
+shp2, (il6rc_p & (jak1 & (shp2 & (!socs3 & (!ros & !sirp1a)))))
+shp2_a, (gab1_mem_p & (shp2 & (!ros & !sirp1a)))
+socs1, stat3_ta
+socs3, ((!erk12 & ((!p38 & ((!stat3_ta & nfkb) | stat3_ta)) | p38)) | erk12)
+stat3_py, (il6rc_p & (jak1 & (!shp2 & (!shp2_a & !cyt_ptpe))))
+stat3_ta, (dum_mtorc1_or_pkcd_stat3_ta & (stat3_py & (stat3_ta & (!slim & !pias3))))
+vav, (dum_il6rc_p_or_grb2_vav & !socs1)
+slim, slim
+il6, il6
+mtor, mtor
+pdk1, pdk1
+gab1_kin, gab1_kin
+ros, ros
+gp130m, gp130m
+pten, pten
+nfkb, nfkb
+ship, ship
+pias3, pias3
+pias1, pias1
+sirp1a, sirp1a
+phlpp, phlpp
+cyt_ptpe, cyt_ptpe

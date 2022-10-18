@@ -1,0 +1,177 @@
+targets, factors
+ABL1, (ATM & !RB1)
+ACVR1, BMPR2
+ADAM17, ERK_f
+AKT1S1, !AKT_f
+AKT_f, (AKT_f & (!ATM & ((!PDPK1 & (!PHLPP1 & (!PPP1CA & mTORC2_c))) | (PDPK1 & (!PHLPP1 & !PPP1CA)))))
+AP1_c, ((!FOS & SMAD4) | FOS)
+APAF1, CYCS
+APC, ((!AXIN1 & (!DVL_f & (GSK3_f & !PRKACA))) | (AXIN1 & (!DVL_f & !PRKACA)))
+ARHGAP24, ROCK1
+ATF2, ((!ERK_f & MAPK14) | ERK_f)
+ATM, ((!ATR & BRCA1) | ATR)
+ATR, ((!ABL1 & ((!ATR & CDKN2A) | ATR)) | ABL1)
+AURKA, PAK1
+AURKB, (!ATM & CHEK1)
+AXIN1, (!AURKA & (GSK3_f & (!LRP_f & (!PPM1A & !PPP1CA))))
+BAD, (!AKT_f & (!PAK1 & (!RAF_f & !RSK_f)))
+BAK1, (!BCL2 & ((!BID & (!MCL1 & TP53)) | (BID & !MCL1)))
+BAX, ((!BID & (!MCL1 & TP53)) | (BID & !MCL1))
+BBC3, TP53
+BCL2, (!BAD & (!BBC3 & (!BID & (CREB1 & !TP53))))
+BID, ((!CASP8 & CSNK1A1) | CASP8)
+BIRC_f, (!AURKB & (!DIABLO & (STAT3 & !TP53)))
+BMPR2, (!SMURF1 & !SMURF2)
+BRCA1, ((!AKT_f & (!CCND1 & CHEK2)) | (AKT_f & !CCND1))
+BTRC, ((!AXIN1 & (GSK3_f & !LRP_f)) | (AXIN1 & !LRP_f))
+BUB1, ATM
+CASP3, (!BIRC_f & ((!CASP8 & (CASP9 & !XIAP)) | (CASP8 & !XIAP)))
+CASP8, (!CFLAR & (DD_f & !SRC))
+CASP9, (!BIRC_f & (PPP1CA & !XIAP))
+CBPp300_c, (EP300 & !TP53)
+CCNB1, !CDKN1A
+CCND1, (!CDKN2A & (!CHUK & (!GSK3_f & ((!RSK_f & STAT3) | RSK_f))))
+CCNE1, (CCNE1 & ((!CDC25A & (!CDKN1A & (!CDKN1B & (E2F1 & !TGFB1)))) | (CDC25A & (!CDKN1A & (!CDKN1B & !TGFB1)))))
+CDC25A, (!CHEK1 & (!CHEK2 & (!CSNK1A1 & (!GSK3_f & (MYC & !SMAD3)))))
+CDC42, (!ARHGAP24 & SRC)
+CDH1, (!SNAI_f & !TWIST1)
+CDKN1A, (!AKT_f & ((!BRCA1 & (!MDM2 & (!MYC & (!SKP2 & TP53)))) | (BRCA1 & (!MDM2 & (!MYC & !SKP2)))))
+CDKN1B, (!AKT_f & (!MYC & TGFB1))
+CDKN2A, !MYC
+CFLAR, ((!AKT_f & (!ITCH & MAPK14)) | (AKT_f & !ITCH))
+CFL_f, ((!LIMK1 & LIMK2) | LIMK1)
+CHEK1, (!AKT_f & ATR)
+CHEK2, ((!ATR & PLK1) | ATR)
+CHUK, ((!AKT_f & TRAF6) | AKT_f)
+CREB1, ((!AKT_f & (!ATM & (!ATR & SMAD2))) | (AKT_f & (!ATM & !ATR)))
+CREBBP, CHUK
+CSK, PRKACA
+CSNK1A1, !LRP_f
+CSNK1_f, ((!AXIN1 & DVL_f) | AXIN1)
+CTNNB1, (!APC & (!BTRC & ((!CHUK & (!CSNK1A1 & (!CSNK1_f & YAP_TAZ))) | (CHUK & (!CSNK1A1 & !CSNK1_f)))))
+CYCS, ((!BAK1 & (BAX & !BCL2)) | (BAK1 & !BCL2))
+DAAM1, DVL_f
+DD_f, (AURKA & (!CSNK1A1 & !MAP2K7))
+DIABLO, ((!BAK1 & (BAX & (!BCL2 & (!BIRC_f & DIABLO)))) | (BAK1 & (!BCL2 & (!BIRC_f & DIABLO))))
+DKK_f, (!MYC & TCF7_f)
+DUSP1, ((!ERK_f & (MSK_f & !SKP2)) | (ERK_f & !SKP2))
+DUSP6, ((!ERK_f & mTORC1_c) | ERK_f)
+DVL_f, (DVL_f & ((!FZD_f & (!ITCH & (SMAD1 & !YAP_TAZ))) | (FZD_f & (!ITCH & !YAP_TAZ))))
+E2F1, (!HES1 & !RB1)
+EGR1, (NFKB_f & !TCF7_f)
+EP300, (AKT_f & (!PRKCD & !SKI))
+ERK_f, (!DUSP6 & (ERK_f & (MEK_f & !PPP1CA)))
+FOS, ((!ERK_f & ((!FOS & SRF) | FOS)) | ERK_f)
+FOXO_f, (!AKT_f & (!CREB1 & (!CSNK1A1 & (DUSP6 & (!IKBKB & !NLK)))))
+FZD_f, !SFRP1
+GAB_f, (!ERK_f & GRB2)
+GLI_f, (!CSNK1A1 & (GLI_f & (!GSK3_f & (!PRKACA & !SUFU))))
+GRB2, ((!RTPK_f & SHC1) | RTPK_f)
+GSK3_f, (!AKT_f & (CSNK1A1 & (!DVL_f & (!ERK_f & (GSK3_f & (!MAPK14 & (!RSK_f & !S6K_f)))))))
+HES1, ((!NOTCH1 & REL_f) | NOTCH1)
+IKBKB, (DD_f & (IKBKB & (!PLK1 & (!PPM1A & !TP53))))
+ILK, (PAK1 & !TWIST1)
+ILR_f, ((!AP1_c & ((!ILR_f & LIF) | ILR_f)) | AP1_c)
+IRAK1, (ILR_f & !SOCS1)
+IRS1, (!ERK_f & (!IKBKB & !S6K_f))
+ITCH, JNK_f
+JAK_f, (ILR_f & (!PTPN6 & !SOCS1))
+JNK_f, (!DUSP1 & ((!MAP2K4 & MAP2K7) | MAP2K4))
+JUN, (!GSK3_f & JNK_f)
+KRAS, ((!PTPN11 & SOS1) | PTPN11)
+LATS_f, ((!AURKA & MOB1_f) | AURKA)
+LEF1, (!CSNK1_f & CTNNB1)
+LIF, RAF_f
+LIMK1, ((!RAC_f & ROCK1) | RAC_f)
+LIMK2, (!PRKCD & ROCK1)
+LRP_f, (!DKK_f & ((!ERK_f & (FZD_f & LRP_f)) | (ERK_f & LRP_f)))
+MAP2K3, ((!MAP3K5 & MAP3K7) | MAP3K5)
+MAP2K4, ((!MAP3K11 & MAP3K4) | MAP3K11)
+MAP2K7, ((!MAP3K7 & MAPK8IP3) | MAP3K7)
+MAP3K11, RAC_f
+MAP3K4, RAC_f
+MAP3K5, !AKT_f
+MAP3K7, ((!TAB_f & TRAF6) | TAB_f)
+MAP3K8, IKBKB
+MAPK14, (!DUSP1 & ((!MAP2K3 & (MAP2K4 & MAPK14)) | (MAP2K3 & MAPK14)))
+MAPK8IP3, ROCK1
+MAPKAPK2, MAPK14
+MCL1, (!BBC3 & ((!ERK_f & (!GSK3_f & JNK_f)) | (ERK_f & !GSK3_f)))
+MDM2, (!ABL1 & ((!AKT_f & (!ATM & (!ATR & (!CDKN2A & (!CSNK1_f & (!S6K_f & TP53)))))) | (AKT_f & (!ATM & (!ATR & (!CDKN2A & (!CSNK1_f & !S6K_f)))))))
+MEK_f, (!ERK_f & RAF_f)
+MMP_f, ((!LEF1 & STAT3) | LEF1)
+MOB1_f, STK_f
+MSK_f, ((!ERK_f & MAPK14) | ERK_f)
+MYC, (!GSK3_f & ((!PLK1 & STAT3) | PLK1))
+NFKB_f, (!CHEK1 & ((!IKBKB & MSK_f) | IKBKB))
+NLK, MAP3K7
+NOTCH1, ADAM17
+PAK1, ((!CDC42 & RAC_f) | CDC42)
+PARD6A, ((!TGFBR1 & TGFBR2) | TGFBR1)
+PDPK1, (PIK3CA & !PTEN)
+PHLPP1, !GSK3_f
+PIAS1, MAPKAPK2
+PIK3CA, ((!GAB_f & KRAS) | GAB_f)
+PLCG1, SYK
+PLK1, ((!MAPKAPK2 & PDPK1) | MAPKAPK2)
+PPM1A, PTEN
+PPP1CA, (!RTPK_f & SMAD7)
+PRKACA, ((!FOS & NFKB_f) | FOS)
+PRKCA, ((!PARD6A & (!PHLPP1 & PLCG1)) | (PARD6A & !PHLPP1))
+PRKCD, ((!CASP3 & ((!PDPK1 & PRKCD) | PDPK1)) | CASP3)
+PRKDC, ((!ATM & ATR) | ATM)
+PTCH1, GLI_f
+PTEN, (!CBPp300_c & (!GSK3_f & (ROCK1 & !SRC)))
+PTPN11, GAB_f
+PTPN6, (!PRKCA & SRC)
+RAC_f, (!ARHGAP24 & ((!PIK3CA & TIAM1) | PIK3CA))
+RAF_f, (!AKT_f & (!ERK_f & (KRAS & !RHEB)))
+RB1, (!CCND1 & (!CCNE1 & ((!CHEK1 & CHEK2) | CHEK1)))
+RBPJ, !HES1
+REL_f, ((!IKBKB & (PRKCA & !STAT1)) | (IKBKB & !STAT1))
+RHEB, !TSC_f
+RHOA, (DAAM1 & (!PARD6A & (!RAC_f & (!RND3 & !SMURF1))))
+RND3, ROCK1
+ROCK1, ((!CASP3 & ((!RHOA & ROCK1) | RHOA)) | CASP3)
+RSK_f, ((!ERK_f & PDPK1) | ERK_f)
+RTPK_f, ((!FOXO_f & (!MAPK14 & (!MEK_f & (MMP_f & RTPK_f)))) | (FOXO_f & (!MAPK14 & (!MEK_f & RTPK_f))))
+S6K_f, ((!PDPK1 & (!PHLPP1 & mTORC1_c)) | (PDPK1 & !PHLPP1))
+SFRP1, !MYC
+SHC1, (!PTEN & ((!SRC & TGFBR1) | SRC))
+SKI, !AKT_f
+SKP2, ((!EP300 & ERK_f) | EP300)
+SMAD1, ((!ACVR1 & (!ERK_f & (!GSK3_f & (!PPM1A & (!SKI & (!SMAD6 & (!SMURF1 & YAP_TAZ))))))) | (ACVR1 & (!ERK_f & (!GSK3_f & (!PPM1A & (!SKI & (!SMAD6 & !SMURF1)))))))
+SMAD2, ((!ACVR1 & (!PPM1A & (!SKI & (!SMURF2 & TGFBR1)))) | (ACVR1 & (!PPM1A & (!SKI & !SMURF2))))
+SMAD3, ((!ACVR1 & (!AKT_f & (!ERK_f & (!GSK3_f & (!PPM1A & (!SKI & (!SMAD6 & (!SMAD7 & TGFBR1)))))))) | (ACVR1 & (!AKT_f & (!ERK_f & (!GSK3_f & (!PPM1A & (!SKI & (!SMAD6 & !SMAD7))))))))
+SMAD4, (!SKI & ((!SMAD2 & (SMAD5 & (!SMAD6 & (!SMAD7 & !SMURF1)))) | (SMAD2 & (!SMAD6 & (!SMAD7 & !SMURF1)))))
+SMAD5, (ACVR1 & (!SKI & !SMURF2))
+SMAD6, ((!SMAD2 & ((!SMAD4 & SMAD6) | SMAD4)) | SMAD2)
+SMAD7, (!AXIN1 & (!ITCH & ((!SMAD2 & (SMAD4 & (SMAD7 & !SMURF2))) | (SMAD2 & (SMAD7 & !SMURF2)))))
+SMO, (CSNK1A1 & !PTCH1)
+SMURF1, SMAD7
+SMURF2, SMAD7
+SNAI_f, (!GSK3_f & ((!LATS_f & PAK1) | LATS_f))
+SOCS1, STAT1
+SOS1, (!ERK_f & PLCG1)
+SRC, (!CSK & ((!PRKACA & RTPK_f) | PRKACA))
+SRF, ((!CFL_f & RSK_f) | CFL_f)
+STAT1, ((!IKBKB & (!PIAS1 & SRC)) | (IKBKB & !PIAS1))
+STAT3, ((!IRAK1 & (!PPP1CA & SRC)) | (IRAK1 & !PPP1CA))
+STK_f, (!AKT_f & (PHLPP1 & !RAF_f))
+SUFU, !SMO
+SYK, (!CHEK1 & ILR_f)
+TAB_f, (!MAPK14 & TRAF6)
+TCF7_f, (CTNNB1 & !NLK)
+TGFB1, ((!FOS & NFKB_f) | FOS)
+TGFBR1, (!SMAD6 & (!SMAD7 & (!SMURF1 & (!SMURF2 & TGFBR2))))
+TGFBR2, (!SMURF1 & (!SMURF2 & TGFB1))
+TIAM1, !ROCK1
+TP53, (!AURKB & (EP300 & (!MDM2 & TP53)))
+TRAF6, ((!IRAK1 & TGFBR1) | IRAK1)
+TSC_f, (!AKT_f & (!ERK_f & (GSK3_f & (!IKBKB & !RSK_f))))
+TWIST1, ((!ERK_f & JNK_f) | ERK_f)
+VAV1, SYK
+XIAP, ((!AKT_f & (BIRC_f & !DIABLO)) | (AKT_f & !DIABLO))
+YAP_TAZ, (!BTRC & (!CSNK1_f & !LATS_f))
+mTORC1_c, (!AKT1S1 & ((!RHEB & RSK_f) | RHEB))
+mTORC2_c, ((!PIK3CA & (!S6K_f & TSC_f)) | (PIK3CA & !S6K_f))

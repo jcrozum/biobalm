@@ -1,0 +1,117 @@
+targets, factors
+AKT, ((!HSPs & (PIP3 & !PTCH1)) | (HSPs & !PTCH1))
+AMPK, ((!AMP_ATP & ((!ATM & ((!ATR & (!EGFR & (!FGFR3 & HIF1))) | (ATR & (!EGFR & !FGFR3)))) | (ATM & (!EGFR & !FGFR3)))) | (AMP_ATP & (!EGFR & !FGFR3)))
+AMP_ATP, !Nutrients
+APAF1, (!AKT & ((!BAX & (!BCL2 & ((!Bak & (!Bcl_XL & ((!Caspase8 & ((!HSPs & p53) | HSPs)) | Caspase8))) | (Bak & !Bcl_XL)))) | (BAX & (!BCL2 & !Bcl_XL))))
+AR, (AR & (Androgen & ((!EP300 & ((!EZH2 & ((!GLI & ((!HSPs & (!MDM2 & ((!NCOA3 & (!NCOR1 & (!NCOR2 & ((!NKX3_1 & ((!PKC & (!PTEN & SMAD)) | (PKC & !PTEN))) | (NKX3_1 & !PTEN))))) | (NCOA3 & (!NCOR1 & (!NCOR2 & !PTEN)))))) | (HSPs & (!MDM2 & (!NCOR1 & (!NCOR2 & !PTEN)))))) | (GLI & (!MDM2 & (!NCOR1 & (!NCOR2 & !PTEN)))))) | (EZH2 & (!MDM2 & (!NCOR1 & (!NCOR2 & !PTEN)))))) | (EP300 & (!MDM2 & (!NCOR1 & (!NCOR2 & !PTEN)))))))
+AR_ERG, (AR & fused_event)
+ATM, DNA_Damage
+ATR, ((!DNA_Damage & p14ARF) | DNA_Damage)
+AXIN1, GSK3
+Acidosis, Acidosis
+Androgen, Androgen
+BAD, (!AKT & (!HIF1 & (!RAF & (!YWHAZ & !p90RSK))))
+BAX, (!BCL2 & (!ETS1 & (!HIF1 & ((!JNK & (!YWHAZ & p53)) | (JNK & !YWHAZ)))))
+BCL2, (!BAD & (!BAX & (BCL2 & (!DAXX & ((!HSPs & ((!NF_kB & (RUNX2 & !p53)) | (NF_kB & !p53))) | (HSPs & !p53))))))
+BIRC5, (HSPs & !p53)
+BRCA1, ((!ATM & ((!ATR & (!Caspase3 & (!CyclinD & E2F1))) | (ATR & (!Caspase3 & !CyclinD)))) | (ATM & (!Caspase3 & !CyclinD)))
+Bak, Caspase8
+Bcl_XL, (AR & (!BAD & !p53))
+CHK1_2, (ATM & (ATR & BRCA1))
+COX4I2, HIF1
+Carcinogen, Carcinogen
+Caspase3, ((!Caspase8 & Caspase9) | Caspase8)
+Caspase8, (FADD & !cFLAR)
+Caspase9, (!AKT & (APAF1 & ((!BIRC5 & (CytoC & PTCH1)) | (BIRC5 & CytoC))))
+CyclinB, (E2F1 & !p21)
+CyclinD, (!FOXO & ((!GLI & (!GSK3 & (MYC_MAX & ((!NF_kB & (TCF & (!p15 & !p21))) | (NF_kB & (!p15 & !p21)))))) | (GLI & (!GSK3 & (MYC_MAX & (!p15 & !p21))))))
+CytoC, (!AKT & ((!BAX & (!BCL2 & ((!Bak & (!Bcl_XL & ((!Caspase8 & p53) | Caspase8))) | (Bak & !Bcl_XL)))) | (BAX & (!BCL2 & !Bcl_XL))))
+DAXX, (!ATM & (!ATR & !SPOP))
+DNA_Damage, (Carcinogen & !SPOP)
+Dsh, WNT
+E2F1, (AR & (E2F1 & (!MXI1 & !RB1)))
+EGF, EGF
+EGFR, ((!Androgen & (EGF & (!FRS2 & !TGFBR))) | (Androgen & (!FRS2 & !TGFBR)))
+EP300, AKT
+ERG, ERK
+ERK, ((!ERK & ((!MEK1_2 & RAF) | MEK1_2)) | ERK)
+ETS1, ((!ERK & (RTK & !p53)) | (ERK & !p53))
+EZH2, (AKT & ((!AR_ERG & (E2F1 & ERG)) | (AR_ERG & E2F1)))
+E_cadherin, ((!AR_ERG & (!ERG & (!NF_kB & (!Slug & (!Snail & beta_catenin))))) | (AR_ERG & (!ERG & (!NF_kB & (!Slug & !Snail)))))
+FADD, (!MAP3K1_3 & ((!PTCH1 & (!SHH & TNFalpha)) | (PTCH1 & !SHH)))
+FGF, FGF
+FGFR3, (FGF & (FGFR3 & (!FRS2 & (!PKC & !TGFBR))))
+FOS, ((!AR & ((!ERK & ETS1) | ERK)) | AR)
+FOXA1, FOXO
+FOXO, (!AKT & JNK)
+FRS2, AKT & !AKT
+GADD45, ((!SMAD & p53) | SMAD)
+GLI, (GLI & ((!SMO & (!SPOP & WNT)) | (SMO & !SPOP)))
+GSH, ((!MYC_MAX & ((!NF_kB & p21) | NF_kB)) | MYC_MAX)
+GSK3, (!AKT & (!Dsh & (MEK1_2 & (!mTORC2 & !p90RSK))))
+HIF1, (!FOXO & (HIF1 & ((!HSPs & ((!Hypoxia & ((!MYC_MAX & (!PHDs & (!VHL & ((!mTORC1 & (mTORC2 & !p53)) | (mTORC1 & !p53))))) | (MYC_MAX & (!PHDs & (!VHL & !p53))))) | (Hypoxia & (!PHDs & (!VHL & !p53))))) | (HSPs & (!PHDs & (!VHL & !p53))))))
+HSPs, (!AKT & (!BRCA1 & ((!Carcinogen & (!E2F1 & ((!FOXA1 & (HSPs & PKC)) | (FOXA1 & HSPs)))) | (Carcinogen & (!E2F1 & HSPs)))))
+Hypoxia, Hypoxia
+IKK, ((!AKT & ((!ETS1 & (!PHDs & ((!PKC & (TAK1 & (mTORC2 & !p53))) | (PKC & (mTORC2 & !p53))))) | (ETS1 & (!PHDs & (mTORC2 & !p53))))) | (AKT & ((!ETS1 & (!PHDs & ((!PKC & (TAK1 & !p53)) | (PKC & !p53)))) | (ETS1 & (!PHDs & !p53)))))
+JNK, ((!ATM & (!ERK & ((!GADD45 & ((!MAP3K1_3 & (TAK1 & !p38)) | (MAP3K1_3 & !p38))) | (GADD45 & !p38)))) | (ATM & (!ERK & !p38)))
+JUN, ((!AR & ((!ETS1 & JNK) | ETS1)) | AR)
+MAP3K1_3, (!FOS & (!JNK & (!JUN & (MAP3K1_3 & (RAS & !p38)))))
+MDM2, ((!AKT & (!ATM & (!ATR & (DAXX & (!p14ARF & p53))))) | (AKT & (!ATM & (!ATR & (DAXX & !p14ARF)))))
+MED12, !GLI
+MEK1_2, ((!MAP3K1_3 & ((!PDK1 & RAF) | PDK1)) | MAP3K1_3)
+MXI1, HIF1
+MYC, ((!AR_ERG & ((!E2F1 & ((!ERG & ((!ERK & ((!FOS & ((!GLI & (!HIF1 & ((!JUN & (MYC & ((!NF_kB & ((!SHH & (TCF & ((!mTORC1 & p38) | mTORC1))) | (SHH & ((!mTORC1 & p38) | mTORC1)))) | (NF_kB & ((!mTORC1 & p38) | mTORC1))))) | (JUN & (MYC & ((!mTORC1 & p38) | mTORC1)))))) | (GLI & (!HIF1 & (MYC & ((!mTORC1 & p38) | mTORC1)))))) | (FOS & (!HIF1 & (MYC & ((!mTORC1 & p38) | mTORC1)))))) | (ERK & (!HIF1 & (MYC & ((!mTORC1 & p38) | mTORC1)))))) | (ERG & (!HIF1 & (MYC & ((!mTORC1 & p38) | mTORC1)))))) | (E2F1 & ((!ERG & ((!ERK & ((!FOS & ((!GLI & (!HIF1 & ((!JUN & (MYC & ((!NF_kB & ((!SHH & TCF) | SHH)) | NF_kB))) | (JUN & MYC)))) | (GLI & (!HIF1 & MYC)))) | (FOS & (!HIF1 & MYC)))) | (ERK & (!HIF1 & MYC)))) | (ERG & (!HIF1 & MYC)))))) | (AR_ERG & ((!E2F1 & (!HIF1 & (MYC & ((!mTORC1 & p38) | mTORC1)))) | (E2F1 & (!HIF1 & MYC)))))
+MYC_MAX, (!MXI1 & (MYC & (!SMAD & !TGFBR)))
+NCOA3, (!SPOP & p38)
+NCOR1, !AKT
+NCOR2, (!AKT & !FOXO)
+NF1, !PKC
+NF_kB, ((!DNA_Damage & ((!E_cadherin & ((!IKK & NF_kB) | (IKK & ((!NCOA3 & ((!NF_kB & ((!PIP3 & Snail) | PIP3)) | NF_kB)) | NCOA3)))) | (E_cadherin & ((!NCOA3 & ((!NF_kB & ((!PIP3 & Snail) | PIP3)) | NF_kB)) | NCOA3)))) | (DNA_Damage & ((!NCOA3 & ((!NF_kB & ((!PIP3 & Snail) | PIP3)) | NF_kB)) | NCOA3)))
+NKX3_1, (AR & (!AR_ERG & (!ERG & PKC)))
+Nutrients, Nutrients
+PDK1, ((!HIF1 & ((!MYC_MAX & PIP3) | MYC_MAX)) | HIF1)
+PHDs, (!Hypoxia & ROS)
+PI3K, ((!EGFR & ((!FRS2 & TGFBR) | FRS2)) | EGFR)
+PIP3, (PI3K & !p53)
+PKC, (RTK & WNT)
+PTCH1, (GLI & !SHH)
+PTEN, (!NF_kB & (!Snail & p53))
+RAF, ((!EZH2 & RAS) | EZH2)
+RAGS, (!Hypoxia & Nutrients)
+RAS, ((!EGFR & ((!FRS2 & RTK) | FRS2)) | EGFR)
+RB1, (!AMPK & (CHK1_2 & (!CyclinB & (!CyclinD & !p53))))
+ROS, ((!COX4I2 & (!GSH & Hypoxia)) | (COX4I2 & !GSH))
+RTK, ((!EGFR & FGFR3) | EGFR)
+RUNX2, ((!ETS1 & (!FOXO & ((!SMAD & p38) | SMAD))) | (ETS1 & !FOXO))
+Rheb, !TSC1_2
+SHH, !ATR
+SMAD, (!AR & ((!TGFBR & TNFalpha) | TGFBR))
+SMO, (!PTCH1 & SHH)
+SPOP, SPOP
+Slug, (!DAXX & (!MDM2 & ((!NF_kB & (TCF & !p53)) | (NF_kB & !p53))))
+Snail, ((!GLI & (!GSK3 & ((!NF_kB & (SMAD & !beta_catenin)) | (NF_kB & !beta_catenin)))) | (GLI & (!GSK3 & !beta_catenin)))
+TAK1, ((!TGFBR & TNFalpha) | TGFBR)
+TCF, ((!AR_ERG & ((!ERG & (!TAK1 & beta_catenin)) | (ERG & !TAK1))) | (AR_ERG & !TAK1))
+TERT, ((!AKT & ((!GLI & ((!HIF1 & ((!MYC_MAX & ((!NF1 & (NF_kB & (!SMAD & (!ZBTB17 & (!eEF2 & !p53))))) | (NF1 & (!SMAD & (!ZBTB17 & (!eEF2 & !p53)))))) | (MYC_MAX & (!SMAD & (!ZBTB17 & (!eEF2 & !p53)))))) | (HIF1 & (!SMAD & (!ZBTB17 & (!eEF2 & !p53)))))) | (GLI & (!SMAD & (!ZBTB17 & (!eEF2 & !p53)))))) | (AKT & (!SMAD & (!ZBTB17 & (!eEF2 & !p53)))))
+TGFBR, (!MED12 & TGFb)
+TGFb, TGFb
+TNFalpha, TNFalpha
+TSC1_2, ((!AKT & ((!AMPK & ((!ERK & ((!HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))) | (HIF1 & (!RAF | (RAF & ((!p53 & !p90RSK) | p53)))))) | (ERK & ((!HIF1 & (!RAF & (p53 & !p90RSK))) | (HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))))))) | (AMPK & ((!ERK & ((!HIF1 & (!RAF | (RAF & ((!p53 & !p90RSK) | p53)))) | HIF1)) | (ERK & ((!HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))) | (HIF1 & (!RAF | (RAF & ((!p53 & !p90RSK) | p53)))))))))) | (AKT & ((!AMPK & ((!ERK & ((!HIF1 & (!RAF & (p53 & !p90RSK))) | (HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))))) | (ERK & (HIF1 & (!RAF & (p53 & !p90RSK)))))) | (AMPK & ((!ERK & ((!HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))) | (HIF1 & (!RAF | (RAF & ((!p53 & !p90RSK) | p53)))))) | (ERK & ((!HIF1 & (!RAF & (p53 & !p90RSK))) | (HIF1 & ((!RAF & ((!p53 & !p90RSK) | p53)) | (RAF & (p53 & !p90RSK)))))))))))
+VHL, (!Hypoxia & !ROS)
+WNT, ((!AR_ERG & (ERG & !p53)) | (AR_ERG & !p53))
+YWHAZ, AR
+ZBTB17, (AR & !MYC_MAX)
+beta_catenin, (!AXIN1 & ((!EZH2 & (!GSK3 & (YWHAZ & !p53))) | (EZH2 & (!GSK3 & !p53))))
+cFLAR, ((!AKT & (AR & !JNK)) | (AKT & !JNK))
+eEF2, !eEF2K
+eEF2K, ((!p70S6kab & p90RSK) | p70S6kab)
+fused_event, fused_event
+mTORC1, (AKT & (!AMPK & !TSC1_2))
+mTORC2, ((!AKT & (!AMPK & (RAGS & Rheb))) | (AKT & ((!AMPK & ((!RAGS & Rheb) | RAGS)) | (AMPK & (RAGS & Rheb)))))
+p14ARF, (E2F1 & (MYC_MAX & RAS))
+p15, ZBTB17
+p21, (!AKT & (!ERK & ((!HIF1 & (!MDM2 & (!MYC_MAX & ((!SMAD & (!TERT & ((!ZBTB17 & p53) | ZBTB17))) | (SMAD & !TERT))))) | (HIF1 & (!MDM2 & (!MYC_MAX & !TERT))))))
+p38, (!ERK & (!GADD45 & MAP3K1_3))
+p53, ((!Acidosis & (!BCL2 & ((!CHK1_2 & ((!HIF1 & (!HSPs & (!MDM2 & ((!p14ARF & (p38 & p53)) | (p14ARF & p53))))) | (HIF1 & (!HSPs & (!MDM2 & p53))))) | (CHK1_2 & (!HSPs & (!MDM2 & p53)))))) | (Acidosis & (!BCL2 & (!HSPs & (!MDM2 & p53)))))
+p70S6kab, ((!PDK1 & mTORC2) | PDK1)
+p90RSK, ((!ERK & PDK1) | ERK)
