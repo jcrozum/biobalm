@@ -52,15 +52,25 @@ Here, we give a high-level description of the main attractor detection algorithm
 
    > Sam: My understanding is that any reasonable SAT/SMT/ASP solver should be able to compute $N$ reasonably fast, assuming the list of $M_i$ is not very long. However, if the list of $M_i$ is too long for the solver, it is probably too long for step (4) as well. So realistically, it shouldn't be an issue.
 
+   > Giang: I think the case that the list of $M_i$ is very long is not an issue. If we have more $M_i$, the set $N$ will be smaller. Since we can easily add more constraints to the encoded ASP, the ASP solver can compute $N$ reasonably fast. For example, if $M_1 = \{A = 1, B = 0, C = \star\}$, we add the ASP rule `:- nA ; pB`. to the encoded ASP. `nA` corresponds to $A = 1$ and `pB` corresponds to $B = 0$.
+
    Subsequently, we compute $N' \subseteq N$ consisting of states that cannot reach any $M_i$. For this $N'$, we perform the same procedure as in step (3). That is, we pre-order them based on reachability and identify the actual attractors (or attractor representatives).
 
    > Sam: Again, symbolic reachability could be used as the first "simple" method for computing $N'$. The advantage is that $S$ and all $M_i$ have a very concise symbolic representation and there is only a limited number of variables that can be updated by the reachability process (anything that is free in $S$ but fixed in some $M_i$). Hence the practical complexity isn't really the number of network variables, but rather the number of variables in which $S$ and $M_i$ differ. If we find anything faster or more reliable, we can of course use that instead.
-
+   
    In this step, we obtain the "trap avoidant" attractors within $S$, let's denote them $A_{t+1}, \ldots, A_{k}$. Subsequently, we return the full sequence $A_1, \ldots, A_t, A_{t+1}, \ldots, A_k$. The algorithm is then complete.
 
 ##### Notes
 
 In step (5), there are other possibilities of computing $N'$, for example based on the trap spaces of the time reversal network $F^{-}$. However, these are incomplete (*Sam: as far as I know*), that is, $N'$ cannot be computed fully solely based on $F^-$. We can thus later consider speeding up the computation of $N'$ using these time-reversed trap spaces, but initially this may not be necessary.
+
+
+
+> Giang: Let $F_B$ be the set of fixed points with respect to $F^{\oplus}$ and $RS$ be the terminal restriction space. I think that $RS$ and $N'$ are not necessarily the same. Initially, we need to compute the candidate set as $F = F_B \cap RS$. If we can efficiently compute $N'$, then we can get a new (maybe smaller) candidate set as $F = F_B \cap RS \cap N'$. The problem is that it may be hard to compute the complete $RS$ or $N'$. Hence, one practical alternative is to compute a partial $RS$ or $N'$. Regarding $RS$, we can only consider the part obtained from time-reversal max. trap spaces. Regarding $N'$, we can use symbolic reachability until exceeding a threshold (e.g., a time limit or a BDD size limit). It would be great of we can get an efficient way for approximating $N'$. Note that even we get a larger candidate set $F$, it may be still acceptable thanks to the efficiency of Preprocessing SSF.
+
+
+
+> Giang: One more note is that we do not need to compute the intermediate sets of $F$ (even in a symbolic representation). First, we encode $F_B$ as an ASP $L$. Second, we add more constraints to $L$ to exclude from the solution space the states that are in $M_i$. Next, we add more constraints to $L$ to exclude from the solution space the states that are not in $RS$ and $N'$. Finally, we use an ASP solver to solve $L$ to get the candidate set $F$.
 
 ### Pseudocode
 
