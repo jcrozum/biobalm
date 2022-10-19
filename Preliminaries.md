@@ -54,6 +54,52 @@ For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is
 
 Rozum et al. 2021 proved that if an attractor exists outside of the set $\bigcup_{M\in\mathscr{M}} M$, then that attractor must lie within the subspace defined by $\neg \Delta$, i.e., each state in the attractor must satisfy $x_i=\neg s_i \space \forall(x_i,s_i)\in\Delta$.
 
+> Giang: I have two questions with this definition.
+
+First, let us consider the BN shown in Figure 4 of Rozum et al. 2021.
+$$
+f_A = (\neg A \land \neg B) \lor C\\
+
+f_B = (\neg A \land \neg B) \lor C\\
+
+f_C = A \land B
+$$
+This BN has one max. trap space $\{A = 1, B = 1, C = 1\}$.
+
+In the paper, $\Delta = \{C = 1\}$ (i.e., $\neg \Delta = \{C = 0\}$) and we have $R(X) = \neg C \land (\neg A \lor \neg B)$.
+
+$R(X) = 1$ contains three states 000, 010, and 100.
+
+However, from the definition, $\Delta$ can be $\{A = 1, C = 1\}$ (i.e., $\neg \Delta = \{A = 0, C = 0\}$).
+
+We have $LDOI(A = 0) = \{C = 0\}$.
+
+Then, we get $R(X) = (\neg C \land (\neg A \lor \neg B)) \land (\neg C \land \neg A \land B)$.
+
+$R(X) = 1$ contains only one state 010.
+
+The BN under the fully asynchronous update has one motif-avoidant attractor including three states 000, 010, and 100.
+
+Hence, the statement that "All motif-avoidant attractor states satisfy $R(X) = 1$" seems not hold.
+
+Jordan, could you please check this?
+
+
+
+Second, it seems that $\Delta$ should be as large as possible to reduce the number of states covered by $R(X) = 1$ (also the terminal restriction space).
+
+How does pystablemotifs compute $\Delta$?
+
+
+
+##### Minimum driver node of a stable motif
+
+
+
+> Giang: Jordan, could you please add the formal definition of this problem?
+
+
+
 ##### TBD
 
 Regulatory/signed influence graphs, stable motifs, feedback vertex sets,...
