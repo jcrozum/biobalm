@@ -71,12 +71,14 @@ In the paper, $\Delta = \{C = 1\}$ (i.e., $\neg \Delta = \{C = 0\}$) and we have
 $R(X) = 1$ contains three states 000, 010, and 100.
 
 However, from the definition, $\Delta$ can be $\{A = 1, C = 1\}$ (i.e., $\neg \Delta = \{A = 0, C = 0\}$).
+> Jordan: (A,1) is not an element of $\Delta$ according to the definition because percolating $A=1$ gives the subspace $1\star\star$, which does not lie within the subspace $111$. However, percolating $C=1$ gives $111$, so $(C,1)\in\Delta$.
 
 We have $LDOI(A = 0) = \{C = 0\}$.
 
 Then, we get $R(X) = (\neg C \land (\neg A \lor \neg B)) \land (\neg C \land \neg A \land B)$.
 
 $R(X) = 1$ contains only one state 010.
+> Jordan: With the correct $\Delta$, $R(X)=1$ on the set $\{(A,B,C): C=0, A\wedge B=0\}$, i.e., the set $\{000,010,100\}$, which is the full motif-avoidant attractor in this case (but may contain additional states in general).
 
 The BN under the fully asynchronous update has one motif-avoidant attractor including three states 000, 010, and 100.
 
@@ -93,15 +95,28 @@ How does pystablemotifs compute $\Delta$?
 
 
 > Giang: Sorry for my misunderstanding. But I think the definition may be that "For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is the set of all variable-value pairs $(x_i,s_i)$ such that **for every $(x_i,s_i)$** there exists a maximal trap space $M\in\mathscr{M}$  that contains the subspace obtained by percolating $x_i=s_i$." With this definition, $\Delta$ contains **all** such $(x_i,s_i)$, i.e., it is as large as possible.
->
+>> Jordan: I like this change, and the definitions are equivalent. I think the confusion came from whether the "such that" was inside or outside the set comprehension. Your definition eliminates this confusion.
 > 
 >
 > Giang: In addition, I think the computation of $\Delta$ is not hard. I guess that you consider all `n` possible single-node driver sets, for each you percolate and check if it is contained in a max. trap space.
+>> Jordan:  Yes, this is basically correct, but it's actually $2n$ possible single-node driver sets (because there are two states per variable).
 
 ##### Minimum driver node of a stable motif
 
+*Driver Set*: Given a maximal trap space $M$, a *driver set* of $M$ is any set $S$ of variable-value pairs $(x_i,s_i)$ such that the subspace obtained by percolating $S$ lies within the subspace $M$.
 
+*Internal Driver Set*: A driver set $S$ of a maximal trap space $M$ is an *interal driver set* if and only if the subspace defined by $S$ contains the subspace $M$. Equivalently, a driver set $S$ is an internal driver set if every variable-value pair in $S$ corresponds to a fixed variable of $M$.
 
+*Minimal Driver Set*: A driver set $S$ of a maximal trap space $M$ is minimal if there does not exist a subset $T$ of $S$ that is also a driver set of $M$.
+
+There are thus a few versions of the problem of finding driver nodes for a maximal trap space:
+1. Find all minimal driver sets
+2. Find all minimal internal driver sets
+3. Find all smallest driver sets (i.e., the minimal driver sets with the fewest number of variable-value pairs)
+4. Find the smallest internal driver sets
+5. Find any minimal driver set
+
+By default, `pystablemotifs` tries to solve problem 2. There is an option to have it attempt problems 3 or 5.
 > Giang: Jordan, could you please add the formal definition of this problem?
 
 
