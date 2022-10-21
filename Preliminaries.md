@@ -92,6 +92,12 @@ How does pystablemotifs compute $\Delta$?
 
 
 
+> Giang: Sorry for my misunderstanding. But I think the definition may be that "For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is the set of all variable-value pairs $(x_i,s_i)$ such that **for every $(x_i,s_i)$** there exists a maximal trap space $M\in\mathscr{M}$  that contains the subspace obtained by percolating $x_i=s_i$." With this definition, $\Delta$ contains **all** such $(x_i,s_i)$, i.e., it is as large as possible.
+>
+> 
+>
+> Giang: In addition, I think the computation of $\Delta$ is not hard. I guess that you consider all `n` possible single-node driver sets, for each you percolate and check if it is contained in a max. trap space.
+
 ##### Minimum driver node of a stable motif
 
 
