@@ -95,15 +95,25 @@ How does pystablemotifs compute $\Delta$?
 
 
 > Giang: Sorry for my misunderstanding. But I think the definition may be that "For a set of maximal trap spaces, $\mathscr{M}$, $\Delta=\Delta(\mathscr{M})$ is the set of all variable-value pairs $(x_i,s_i)$ such that **for every $(x_i,s_i)$** there exists a maximal trap space $M\in\mathscr{M}$  that contains the subspace obtained by percolating $x_i=s_i$." With this definition, $\Delta$ contains **all** such $(x_i,s_i)$, i.e., it is as large as possible.
->> Jordan: I like this change, and the definitions are equivalent. I think the confusion came from whether the "such that" was inside or outside the set comprehension. Your definition eliminates this confusion.
-> 
+> > Jordan: I like this change, and the definitions are equivalent. I think the confusion came from whether the "such that" was inside or outside the set comprehension. Your definition eliminates this confusion.
+> >
+> > > Giang: Now, I completely understand $\Delta$. Thank you.
+>
 >
 > Giang: In addition, I think the computation of $\Delta$ is not hard. I guess that you consider all `n` possible single-node driver sets, for each you percolate and check if it is contained in a max. trap space.
->> Jordan:  Yes, this is basically correct, but it's actually $2n$ possible single-node driver sets (because there are two states per variable).
+> > Jordan:  Yes, this is basically correct, but it's actually $2n$ possible single-node driver sets (because there are two states per variable).
+> >
+> > > Giang: My bad. It should be $2n$ indeed.
+
+
+
+> Giang: Once we have obtained $\Delta$, we can get $R(X) = 1$ in which all motif-avoidant attractors must reside. I guess that you are trying to find a **finer** formulation for $R(X)$ based on time-reversal. This means to prune more parts of the state space. Is it right?
 
 ##### Minimum driver node of a stable motif
 
 *Driver Set*: Given a maximal trap space $M$, a *driver set* of $M$ is any set $S$ of variable-value pairs $(x_i,s_i)$ such that the subspace obtained by percolating $S$ lies within the subspace $M$.
+
+> Giang: I think there is another possible definition that is "Given a maximal trap space $M$, a *driver set* of $M$ is any set $S$ of variable-value pairs $(x_i, s_i)$ such that **all minimal trap spaces** of $N_S$ lies within the subspace $M$ where $N_S$ is the BN obtained from the original BN by fixing all node $x_i$ to $s_i$." This definition is stronger than the old one. Indeed, if a driver set satisfies the old definition, it also satisfies the new definition, whereas if a driver set does not satisfy the old definition, it may satisfy the new definition. For example, consider the example BN shown in Slide "Improve the accuracy" of my presentation. Following the old definition, we should get the minimum control policy $\{x_1 = 1, x_3 = 0\}$. Following the new definition, we should get the minimum control policy $\{x_3 = 0\}$ that does not satisfy the old definition. How do you think about the new definition?
 
 *Internal Driver Set*: A driver set $S$ of a maximal trap space $M$ is an *interal driver set* if and only if the subspace defined by $S$ contains the subspace $M$. Equivalently, a driver set $S$ is an internal driver set if every variable-value pair in $S$ corresponds to a fixed variable of $M$.
 
@@ -117,6 +127,11 @@ There are thus a few versions of the problem of finding driver nodes for a maxim
 5. Find any minimal driver set
 
 By default, `pystablemotifs` tries to solve problem 2. There is an option to have it attempt problems 3 or 5.
+
+
+
+> Giang: Regarding the target control process, I assume that we want to find all minimum control policies that drive any initial state of the network to a desirable min. trap space $m$. I think the benefit when considering the sequences of max. trap spaces leading to $m$ and only the internal nodes (i.e., the history internal control) is that the number of possible solutions is only $O(\sum_{i = 1}^k (2^{|D(M_i)|}))$ instead of $O(2^n)$ where $D(M_i)$ is the set of fixed variables of trap space $M_i$, $n$ is the number of nodes of the original BN, and $\sum_{i = 1}^k |D(M_i)| \leq n$ (leading to $\sum_{i = 1}^k (2^{|D(M_i)|}) << 2^n$). However, if we consider both internal and external nodes with respect to a max. trap space, this benefit disappears as the number of possible solutions is $O(2^n)$. Hence, I think if we consider both internal and external nodes, we should consider **directly** the target min. trap space $m$ instead of the sequences of max. trap spaces leading to it. This would be a better approach.
+
 > Giang: Jordan, could you please add the formal definition of this problem?
 
 
