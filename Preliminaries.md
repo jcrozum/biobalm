@@ -108,12 +108,14 @@ How does pystablemotifs compute $\Delta$?
 
 
 > Giang: Once we have obtained $\Delta$, we can get $R(X) = 1$ in which all motif-avoidant attractors must reside. I guess that you are trying to find a **finer** formulation for $R(X)$ based on time-reversal. This means to prune more parts of the state space. Is it right?
+>> Jordan: That is correct, but my original idea for how to build this finer formulation does not work. I have also been trying to come up with a way to combine $R(X)=1$ and the set $F$ from `mtsNFVS` in a more elegant way, but I have not had any breakthroughs there.
 
 ##### Minimum driver node of a stable motif
 
 *Driver Set*: Given a maximal trap space $M$, a *driver set* of $M$ is any set $S$ of variable-value pairs $(x_i,s_i)$ such that the subspace obtained by percolating $S$ lies within the subspace $M$.
 
 > Giang: I think there is another possible definition that is "Given a maximal trap space $M$, a *driver set* of $M$ is any set $S$ of variable-value pairs $(x_i, s_i)$ such that **all minimal trap spaces** of $N_S$ lies within the subspace $M$ where $N_S$ is the BN obtained from the original BN by fixing all node $x_i$ to $s_i$." This definition is stronger than the old one. Indeed, if a driver set satisfies the old definition, it also satisfies the new definition, whereas if a driver set does not satisfy the old definition, it may satisfy the new definition. For example, consider the example BN shown in Slide "Improve the accuracy" of my presentation. Following the old definition, we should get the minimum control policy $\{x_1 = 1, x_3 = 0\}$. Following the new definition, we should get the minimum control policy $\{x_3 = 0\}$ that does not satisfy the old definition. How do you think about the new definition?
+>> Jordan: My concern is that it is possible for $N_S$ to have attractors that lie outside any of its minimal trap spaces. In the definition I wrote, the driver set *guarantees* convergence to $M$, but in your proposed definition, this is not always the case. This could be fixed in your definition by replacing **all minimal trap spaces** with **all attractors**, but then the computation becomes more difficult.
 
 *Internal Driver Set*: A driver set $S$ of a maximal trap space $M$ is an *interal driver set* if and only if the subspace defined by $S$ contains the subspace $M$. Equivalently, a driver set $S$ is an internal driver set if every variable-value pair in $S$ corresponds to a fixed variable of $M$.
 
@@ -131,6 +133,7 @@ By default, `pystablemotifs` tries to solve problem 2. There is an option to hav
 
 
 > Giang: Regarding the target control process, I assume that we want to find all minimum control policies that drive any initial state of the network to a desirable min. trap space $m$. I think the benefit when considering the sequences of max. trap spaces leading to $m$ and only the internal nodes (i.e., the history internal control) is that the number of possible solutions is only $O(\sum_{i = 1}^k (2^{|D(M_i)|}))$ instead of $O(2^n)$ where $D(M_i)$ is the set of fixed variables of trap space $M_i$, $n$ is the number of nodes of the original BN, and $\sum_{i = 1}^k |D(M_i)| \leq n$ (leading to $\sum_{i = 1}^k (2^{|D(M_i)|}) << 2^n$). However, if we consider both internal and external nodes with respect to a max. trap space, this benefit disappears as the number of possible solutions is $O(2^n)$. Hence, I think if we consider both internal and external nodes, we should consider **directly** the target min. trap space $m$ instead of the sequences of max. trap spaces leading to it. This would be a better approach.
+>> Jordan: The benefit of considering external nodes + maximal trap spaces is that it allows you to find control policies that are inconsistent with the target attractor (e.g., setting A=0 temporarily might help drive you into an attractor that has A=1). I agree that this a more demanding task than considering the minimal trap spaces directly, but the tradeoff is that you can find valid control policies that you would otherwise miss.
 
 > Giang: Jordan, could you please add the formal definition of this problem?
 
