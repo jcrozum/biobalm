@@ -815,6 +815,80 @@ Hence, it is expected to be viable for very large models.
 \end{frame}
 
 \begin{frame}
+\frametitle{Deal with the issue of huge attractors (cont.)}
+
+\footnotesize
+\begin{columns}
+  \begin{column}{0.4\textwidth}
+    \begin{equation*}
+      \begin{cases}
+        v_1, \neg v_1 \land v_2 \land \neg v_3\\
+        v_2, \neg v_1 \lor \neg v_3\\
+        v_3, \neg v_1 \land v_2 \land \neg v_3\\
+      \end{cases}
+    \end{equation*}
+  \end{column}
+  \begin{column}{0.6\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=0.5cm and 0.5cm, every node/.style={scale=1.0}]
+      \node[] (0) [] {000};
+      \node[] (1) [right=of 0, xshift=1cm] {001};
+      \node[red] (2) [above right=of 0] {010};
+      \node[red] (3) [right=of 2, xshift=1cm] {011};
+      \node[] (4) [above=of 0, yshift=1cm] {100};
+      \node[] (5) [right=of 4, xshift=1cm] {101};
+      \node[red] (6) [above=of 2, yshift=1cm] {110};
+      \node[] (7) [above=of 3, yshift=1cm] {111};
+
+      \draw[->] (0) edge [] (2);
+      \draw[->] (1) edge [] (0);
+      \draw[->] (1) edge [] (3);
+      \draw[->, red] (2) edge [] (3);
+      \draw[->, red] (2) edge [bend right] (6);
+      \draw[->, red] (3) edge [bend right] (2);
+      \draw[->] (4) edge [] (0);
+      \draw[->] (4) edge [] (6);
+      \draw[->] (5) edge [] (1);
+      \draw[->] (5) edge [] (4);
+      \draw[->, red] (6) edge [] (2);
+      \draw[->] (7) edge [] (3);
+      \draw[->] (7) edge [] (5);
+      \draw[->] (7) edge [] (6);
+    \end{tikzpicture}
+  \end{column}
+\end{columns}
+
+\only<1>{
+\hspace{0.8cm}
+
+This BN has one min. trap space \(m = \{v_1 = \star, v_2 = \star, v_3 = \star\}\).
+There is one attractor inside \(m\), \(\{010, 011, 110\}\).
+
+\hspace{0.8cm}
+
+The time-reversal BN has one max. trap space \(\{v_1 = 1, v_2 = \star, v_3 = 1\}\), which is self-negating.
+Herein, \(\{\red{101}, 111\}\) is not in the attractor.
+
+\hspace{0.8cm}
+
+Applying the approach of mtsNFVS with \(U^-_{min} = \{v_1, v_3\}\) and \(b_1 = 1, b_3 = 1\).
+Then, \(F = \{011, 110, 101\}\).
+We can exclude \(\red{101}\) from \(F\) before any further analysis.
+}
+
+\only<2>{
+\begin{block}{Theorem}
+Let \(m\) be a trap space of a BN \(N\). Let \(N_m\) be the BN induced by \(m\) and \(N'\) be the time-reversal BN of \(N_m\). If \(s\) is an attractor state inside \(m\), then \(s\) cannot lie in any self-negating max. trap space of \(N'\).
+\end{block}
+
+\begin{block}{Proof}
+Assume \(s\) is in a self-negating max. trap space \(M\) of \(N'\). Then, all states of the attractor containing \(s\) are also in \(M\). The states satisfy \(M\) but following the transitions of \(N\), they should reach states not satisfying \(M\) because \(M\) is a self-negating max. trap space of \(N'\). This is a contradiction.
+\end{block}
+
+}
+\end{frame}
+
+\begin{frame}
 \frametitle{Reachability analysis}
 
 We may still need to check the reachability in some cases, for example, there is a motif-avoidant attractor, the Preprocessing SSF is not good enough.
@@ -890,9 +964,9 @@ The new system should be easy to replace new implementations for each constituen
 
 Now, Trappist supports computing
 \begin{itemize}
-  \item max. trap spaces
-  \item min. trap spaces
-  \item fixed points
+  \item max. trap spaces \red{(original/time-reversal BN)}
+  \item min. trap spaces \red{(original/time-reversal BN)}
+  \item fixed points \red{(original/time-reversal BN)}
 \end{itemize}
 
 \hspace{0.8cm}
