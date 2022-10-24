@@ -65,7 +65,7 @@ def pnml_to_asp(name: str) -> str:
     return "p" + name
 
 
-def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str):
+def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_reversal: str):
     """Write the ASP program for the conflict-free siphons of petri_net."""
     places = []
     for node, kind in petri_net.nodes(data="kind"):
@@ -77,11 +77,20 @@ def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str):
                     f":- {pnml_to_asp(node)}, {pnml_to_asp('-' + node)}.", file=asp_file
                 )  # conflict-freeness
         else:  # it's a transition, apply siphon (if one succ is true, one pred must be true)
-            preds = list(petri_net.predecessors(node))
-            or_preds = "; ".join(map(pnml_to_asp, preds))
-            for succ in petri_net.successors(node):
-                if succ not in preds:  # optimize obvious tautologies
-                    print(f"{or_preds} :- {pnml_to_asp(succ)}.", file=asp_file)
+            if time_reversal == "0": # compute siphons
+                preds = list(petri_net.predecessors(node))
+                or_preds = "; ".join(map(pnml_to_asp, preds))
+                for succ in petri_net.successors(node):
+                    if succ not in preds:  # optimize obvious tautologies
+                        print(f"{or_preds} :- {pnml_to_asp(succ)}.", file=asp_file)
+            else: # compute traps
+                succs = list(petri_net.successors(node))
+                or_succs = "; ".join(map(pnml_to_asp, succs))
+
+                for pred in petri_net.predecessors(node):
+                    if pred not in succs:  # optimize obvious tautologies
+                        print(f"{or_succs} :- {pnml_to_asp(pred)}.", file=asp_file)
+
                     
     if computation == "max":
         max_condition = "; ".join(pnml_to_asp(node) for node in places)
@@ -159,12 +168,12 @@ def get_solutions(
 
 
 def get_asp_output(
-    petri_net: nx.DiGraph, max_output: int, time_limit: int, computation: str
+    petri_net: nx.DiGraph, max_output: int, time_limit: int, computation: str, time_reversal: str
 ) -> str:
     """Generate and solve ASP file."""
     (_, tmpname) = tempfile.mkstemp(suffix=".lp", text=True)
     with open(tmpname, "wt") as asp_file:
-        write_asp(petri_net, asp_file, computation)
+        write_asp(petri_net, asp_file, computation, time_reversal)
     solutions = solve_asp(tmpname, max_output, time_limit, computation)
     os.unlink(tmpname)
     return solutions
@@ -177,6 +186,7 @@ def compute_trap_spaces(
     time_limit: int = 0,
     computation: str = "min",
     method: str = "asp",
+    time_reversal:str = "0",
 ) -> Generator[List[str], None, None]:
     """Do the minimal trap space computation on input file infile."""
     toclose = False
@@ -217,7 +227,7 @@ def compute_trap_spaces(
         print(" ".join(places))
 
     if method == "asp":
-        solutions_output = get_asp_output(petri_net, max_output, time_limit, computation)
+        solutions_output = get_asp_output(petri_net, max_output, time_limit, computation, time_reversal)
 
         if solutions_output == "UNSATISFIABLE":
             print(f"No {computed_object}")
@@ -275,6 +285,14 @@ def main():
         help="Solver to compute the conflict-free siphons.",
     )
     parser.add_argument(
+        "-tr",
+        "--timereversal",
+        choices=["0", "1"],
+        default=0,
+        type=str,
+        help="Original or time-reversal BN.",
+    )
+    parser.add_argument(
         "infile",
         type=argparse.FileType("r", encoding="utf-8"),
         nargs="?",
@@ -291,6 +309,7 @@ def main():
             time_limit=args.time,
             computation=args.computation,
             method=args.solver,
+            time_reversal=args.timereversal,
         ))
     except StopIteration:
         pass

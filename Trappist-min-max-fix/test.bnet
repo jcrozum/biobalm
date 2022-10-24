@@ -1,4 +1,24 @@
 targets, factors
-A, A | !B | !C
-B, A | C
-C, !B
+#v1, !v1 & v2 & !v3
+#v2, !v1 | !v3
+#v3, !v1 & v2 & !v3
+
+#v1, !v1 | !v2 | v3
+#v2, v1 & v3
+#v3, v1 | !v2 | !v3
+
+#A, A
+#B, B
+#C, A & B
+#D, !C & A
+#E, B & C
+
+# Jordan et. al. 2021
+A, (!A & !B) | C
+B, (!A & !B) | C
+C, A & B
+
+# time-reversal
+#A, (!A | B) & !C
+#B, (A | !B) & !C
+#C, !A | !B

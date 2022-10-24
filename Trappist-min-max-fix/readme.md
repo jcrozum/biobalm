@@ -14,13 +14,14 @@
 
 Run
 
-    python3 trappist.py -c max -m 1000 -t 120 -s asp test.bnet
+    python3 trappist.py -c max -m 1000 -t 120 -s asp -tr 0 test.bnet
 
 where 
 + `-c max` indicates computing max. trap spaces.
 + `-m 1000` indicates that the maximum number of solutions computed is `1000`.
 + `-t 120` indicates that the time limit is 120 seconds.
-+ `asp` indicates that the problem is encoded as an ASP (it is possible to use MaxSAT or CSP).
++ `-s asp` indicates that the problem is encoded as an ASP (it is possible to use MaxSAT or CSP).
++ `-tr 0` indicate the original BN (`-tr ` means the time-reversal BN).
 + `test.bnet` indicates the input file. Now, Trappist only supports the .bnet format.
 
 Note that a Boolean network may have no max. trap spaces.
@@ -29,7 +30,7 @@ Note that a Boolean network may have no max. trap spaces.
 
 Run 
 
-    python3 trappist.py -c min -m 1000 -t 120 -s asp test.bnet
+    python3 trappist.py -c min -m 1000 -t 120 -s asp -tr 0 test.bnet
 
 where
 + `-c min` indicates computing min. trap spaces.
@@ -40,7 +41,7 @@ Note that a Boolean network always has at least one min. trap spaces.
 
 Run
 
-​		python3 trappist.py -c fix -m 1000 -t 120 -s asp test.bnet
+    python3 trappist.py -c fix -m 1000 -t 120 -s asp -tr 0 test.bnet
 
 where
 + `-c fix` indicates computing fixed points.
