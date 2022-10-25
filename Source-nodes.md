@@ -35,3 +35,11 @@ Why?
 One possible improvement is to add constraints to the encoded ASP to ensure that **in every max. trap space, a source node is always a fixed node**.
 This still preserves the correctness of nfvs-motifs (e.g., `{'D': 1}` still appears later in the succession diagram).
 This may also reduce the running time of nfvs-motifs.
+
+
+
+One **more benefit** is that we do not need to check the existence of motif-avoidant attractors if all max. trap spaces are only the combinations of values of the source nodes.
+Consequently, we can perform the motif-avoidant attractor checking only when the current considered BN **has no source nodes**.
+Actually, in this case, the terminal restriction space is empty because the set `S[M]` of states induced by all max. trap spaces covers the **whole state space**.
+However, checking whether the BN has no source nodes can be done **syntactically**.
+If this condition holds, we do not need to compute `S[M]`.
