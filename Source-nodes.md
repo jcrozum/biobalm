@@ -30,6 +30,8 @@ Get the succession diagram by running
 However, in the succession diagram, the roots are `{A = 0, B = 0}`, `{A = 0, B = 1}`, `{A = 1, B = 0}`, and `{A = 1, B = 1}`.
 Why?
 
+> Kyu Hyong : This is intended to prevent the succession diagram getting too complicated. Source nodes make independent stable motifs(maximal trapspaces) that can appear in any order in the succesion diagram. In this example, just looking at the source nodes, we have 8 possibilities ({'A':0} then {'B':0}, {'A':0} then {'B':1}, {'A':1} then {'B':0}, {'A':1} then {'B':1}, {'B':0} then {'A':0}, {'B':0} then {'A':1}, {'B':1} then {'A':0}, {'B':1} then {'A':1}) It can be even more when considering the other stable motifs. Too avoid unnecessary complexity coming from the source nodes, pystablemotifs first considers the combination of source nodes as the roots for the succession diagram as above and then deals with the other stable motifs.
+
 One possible improvement is to add constraints to the encoded ASP to ensure that **in every max. trap space, a source node is always a fixed node**.
 This still preserves the correctness of nfvs-motifs (e.g., `{'D': 1}` still appears later in the succession diagram).
 This may also reduce the running time of nfvs-motifs.
