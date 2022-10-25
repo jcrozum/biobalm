@@ -277,6 +277,25 @@ Hereafter, we will present the general approach along with many \blue{new findin
 \end{frame}
 
 \begin{frame}
+  \frametitle{Network reduction}
+
+\centering
+\includegraphics[scale=0.33]{Figures/succession_diagram.jpg}
+
+\begin{tikzpicture}[remember picture, overlay]
+  \only<1>{\node[below=-3.0cm of current page.center, blue, fill=green!10, xshift=2.2cm, text width=0.65\textwidth] (a-1) {- There are some reduction techniques for Boolean networks that preserve attractors and trap spaces.\\- \red{leaf-node reduction}~\cite{DBLP:conf/cmsb/NaldiMC12}\\- constant-node and intermediate-node reduction~\cite{DBLP:journals/siamads/SaadatpourAR13}};}
+  
+  \only<2>{\node[below=-3.0cm of current page.center, blue, fill=green!10, xshift=2.2cm, text width=0.65\textwidth] (a-2) {- First, we can apply our whole method to the BN \(\mathcal{N}^{re}\) obtained by applying the leaf-node reduction to the original BN \(\mathcal{N}\).\\- From the results (attractors, min. trap spaces) on \(\mathcal{N}^{re}\) we can easily derive the results on \(\mathcal{N}\).};}
+  
+  \only<3>{\node[below=0cm of current page.center, blue, fill=green!10, xshift=2.2cm, text width=0.65\textwidth] (a-3) {- Second, in each \red{intermediate BN} \(N\) induced by \textbf{previous} max. trap spaces, we can apply the leaf-node reduction in the computation of \textbf{current} max. trap spaces.\\- Let \(N^{red}\) be the reduced BN. By using siphons, we can easily prove that a max. trap space of \(N^{red}\) is exactly a max. trap space of \(N\) without projection.};}
+  
+  \only<4>{\node[below=0cm of current page.center, blue, fill=green!10, xshift=2.2cm, text width=0.65\textwidth] (a-4) {Other applications of network reduction techniques to our method?};}
+  
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}
   \frametitle{Deal with the problem of large succession diagrams}
 
 \only<1>{\red{The above approach is promising. However, how to deal with the problem of large succession diagrams?}.}
