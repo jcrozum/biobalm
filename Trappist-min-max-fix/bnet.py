@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import IO
 
 import networkx as nx
+import re
 
 from pyeda.boolalg import boolfunc
 from pyeda.boolalg.bdd import bddvar, expr2bdd
@@ -50,8 +51,8 @@ def read_bnet(fileobj: IO) -> nx.DiGraph:
     """Parse a BoolNet .bnet file and build the corresponding Petri net."""
     net = nx.DiGraph()
 
-    for line in fileobj.readlines():
-        if line.startswith("#") or line.startswith("targets, factors"):
+    for line in fileobj.readlines():        
+        if line.startswith("#") or re.match(r'[tT]argets,\s*[Ff]actors', line):
             continue
         try:
             x, fx = line.replace(" ", "").replace("!", "~").split(",", maxsplit=1)
