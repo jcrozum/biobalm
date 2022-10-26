@@ -34,13 +34,21 @@ def pnml_to_asp(name: str) -> str:
         return "n" + name[1:]
     return "p" + name
 
+def pnml_to_name(name: str) -> str:
+    if name.startswith("-"):
+        return name[1:]
+    return name
 
 def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_reversal: str, subspace):
     """Write the ASP program for the conflict-free siphons of petri_net."""
     places = []
+    free_places = []
     for node, kind in petri_net.nodes(data="kind"):
         if kind == "place":
             places.append(node)
+            if not pnml_to_name(node) in subspace:
+                free_places.append(node)
+
             print("{", pnml_to_asp(node), "}.", file=asp_file, sep="")
             if not node.startswith("-"):
                 print(
@@ -60,9 +68,9 @@ def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_revers
                 for pred in petri_net.predecessors(node):
                     if pred not in succs:  # optimize obvious tautologies
                         print(f"{or_succs} :- {pnml_to_asp(pred)}.", file=asp_file)
-                    
+
     if computation == "max":
-        max_condition = "; ".join(pnml_to_asp(node) for node in places)
+        max_condition = "; ".join(pnml_to_asp(node) for node in free_places)
         print(
             f"{max_condition}.", file=asp_file
         )
