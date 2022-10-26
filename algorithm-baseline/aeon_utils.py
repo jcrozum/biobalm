@@ -25,3 +25,11 @@ def remove_static_constraints(network):
 		)
 
 	return bn
+
+def has_parameters(network):
+	if network.num_parameters() > 0:
+		return True
+	for var in network.variables():
+		if network.get_update_function(var) == None:
+			return True
+	return False

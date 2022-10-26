@@ -7,6 +7,16 @@ from pyeda.boolalg import boolfunc
 from pyeda.boolalg.bdd import bddvar, expr2bdd
 from pyeda.boolalg.expr import expr
 
+def space_to_string(network, space):
+    result = ""
+    for var in network.variables():
+        name = network.get_variable_name(var)
+        if name in space:
+            result += space[name]
+        else:
+            result += "-"
+    return result
+
 def space_to_aeon_set(stg, space):
     """
         Converts a space (dictionary of variable values) to a symbolic BDD represented set.
