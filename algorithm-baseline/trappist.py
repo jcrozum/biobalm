@@ -155,10 +155,12 @@ def get_asp_output(
     petri_net: nx.DiGraph, max_output: int, time_limit: int, computation: str, time_reversal, subspace
 ) -> str:
     """Generate and solve ASP file."""
-    (_, tmpname) = tempfile.mkstemp(suffix=".lp", text=True)
+    (fd, tmpname) = tempfile.mkstemp(suffix=".lp", text=True)
     with open(tmpname, "wt") as asp_file:
         write_asp(petri_net, asp_file, computation, time_reversal, subspace)
     solutions = solve_asp(tmpname, max_output, time_limit, computation)
+
+    os.close(fd)
     os.unlink(tmpname)
     return solutions
 
