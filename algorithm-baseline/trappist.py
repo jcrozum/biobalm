@@ -70,6 +70,7 @@ def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_revers
                         print(f"{or_succs} :- {pnml_to_asp(pred)}.", file=asp_file)
 
     if computation == "max":
+        #print(" ".join(free_places))
         max_condition = "; ".join(pnml_to_asp(node) for node in free_places)
         print(
             f"{max_condition}.", file=asp_file

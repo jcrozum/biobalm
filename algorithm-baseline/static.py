@@ -1,5 +1,3 @@
-from typing import IO
-
 import networkx as nx
 import matplotlib.pyplot as plt
 import random # importing the random module
@@ -52,17 +50,5 @@ def find_minimum_NFVS(network):
     U_neg = U # TODO: compute a minimum negative feedback vertex set
 
     return U_neg
-    
 
-def set_retained_set(U_neg: List[str], network):
-    B = {}
-
-    for node in U_neg:
-        B[node] = random.randint(0, 1)
-
-        """
-        TODO: More heuristics for setting the retained set
-        """
-
-    return B
 

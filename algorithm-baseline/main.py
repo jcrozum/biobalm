@@ -18,7 +18,8 @@ from trappist import compute_trap_spaces
 from conversions import aeon_to_petri_net, space_to_aeon_set, space_to_string
 from bnet import read_bnet
 from aeon_utils import remove_static_constraints, has_parameters
-from static import find_minimum_NFVS, set_retained_set
+from static import find_minimum_NFVS
+from motif_avoidant import motif_avoidant_check
 
 import sys
 
@@ -51,11 +52,6 @@ def attractors(network):
 
     print(" ".join(U_neg))
 
-    B = set_retained_set(U_neg, network)
-
-    for node in B.keys():
-        print(node + " = " + str(B[node]))
-
     def attractors_recursive(space, candidates):
         space_percolated = percolate(network, space)
         if space_percolated != space:
@@ -68,9 +64,8 @@ def attractors(network):
         if len(space) != stg.network().num_vars():        
             # Only check for subspaces when the current space still has some free variables remaining.
             # Otherwise the result will always be UNSAT.
-            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space)        
-            
-            
+            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space)  
+
             # Go through every trap and see if it is already resolved.
             for trap in max_traps:
                 #print(trap)
@@ -88,7 +83,10 @@ def attractors(network):
             # TODO: This is not correct, because it will look for sets of states that are
             # terminal within the candidates set. I.e. if there is a transition out from
             # candidates into a state that is not in candidates, this will not find that transition.
-            symbolic_attractor_search(stg, candidates)
+            #symbolic_attractor_search(stg, candidates)
+            print("Check for motif-avoidant attractors")
+
+            motif_avoidant_check(candidates, all_traps, U_neg)
         
     attractors_recursive({}, stg.unit_colored_vertices())
 
