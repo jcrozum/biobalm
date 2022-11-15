@@ -66,7 +66,7 @@ def attractors(network):
         if len(space) != stg.network().num_vars():        
             # Only check for subspaces when the current space still has some free variables remaining.
             # Otherwise the result will always be UNSAT.
-            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space, source_nodes=source_nodes)  
+            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space, source_nodes=source_nodes)
 
             for trap in max_traps:
                 print(trap)
@@ -90,8 +90,7 @@ def attractors(network):
             # candidates into a state that is not in candidates, this will not find that transition.
             #symbolic_attractor_search(stg, candidates)
             print("Check for motif-avoidant attractors")
-
-            motif_avoidant_check(candidates, all_traps, U_neg)
+            motif_avoidant_check(candidates, all_traps, U_neg, petri_net, subspace=space, source_nodes=source_nodes)
         
     attractors_recursive({}, stg.unit_colored_vertices())
 

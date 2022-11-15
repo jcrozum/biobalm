@@ -178,7 +178,7 @@ def get_asp_output(
 
 def compute_trap_spaces(
     petri_net: nx.DiGraph,
-    source_nodes: List[str],
+    source_nodes: List[str] = [],
     max_output: int = 0,
     time_limit: int = 0,
     computation: str = "min",    
