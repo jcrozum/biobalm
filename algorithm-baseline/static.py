@@ -13,9 +13,20 @@ A python package for approximating minimum feedback vertex sets
 """
 from FVSpython3 import FVS as FVS
 
+def get_source_nodes(network):
+    source_nodes = []
+
+    for variable in network.variables():
+        var_name = network.get_variable_name(variable)
+        function = network.get_update_function(variable)
+
+        if function.strip() == var_name:
+            source_nodes.append(var_name)
+
+    return source_nodes
+
 def find_minimum_NFVS(network):
     nodes = []
-    source_nodes = []
     INx = {}
 
     for variable in network.variables():
@@ -23,8 +34,6 @@ def find_minimum_NFVS(network):
         function = network.get_update_function(variable)
 
         nodes.append(var_name)
-        if function.strip() == var_name:
-            source_nodes.append(var_name)
 
         fx = expr(function.replace("!", "~"))
 

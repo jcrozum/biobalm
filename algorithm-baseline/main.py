@@ -18,7 +18,7 @@ from trappist import compute_trap_spaces
 from conversions import aeon_to_petri_net, space_to_aeon_set, space_to_string
 from bnet import read_bnet
 from aeon_utils import remove_static_constraints, has_parameters
-from static import find_minimum_NFVS
+from static import get_source_nodes, find_minimum_NFVS
 from motif_avoidant import motif_avoidant_check
 
 import sys
@@ -52,6 +52,8 @@ def attractors(network):
 
     print(" ".join(U_neg))
 
+    source_nodes = get_source_nodes(network)
+
     def attractors_recursive(space, candidates):
         space_percolated = percolate(network, space)
         if space_percolated != space:
@@ -64,7 +66,10 @@ def attractors(network):
         if len(space) != stg.network().num_vars():        
             # Only check for subspaces when the current space still has some free variables remaining.
             # Otherwise the result will always be UNSAT.
-            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space)  
+            max_traps = compute_trap_spaces(petri_net, computation="max", subspace=space, source_nodes=source_nodes)  
+
+            for trap in max_traps:
+                print(trap)
 
             # Go through every trap and see if it is already resolved.
             for trap in max_traps:

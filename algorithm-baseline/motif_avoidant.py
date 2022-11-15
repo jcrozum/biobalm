@@ -9,8 +9,8 @@ from typing import List, Set
 def motif_avoidant_check(candidates, all_traps, U_neg: List[str]):
     B = set_retained_set(U_neg, candidates)
 
-    for node in B.keys():
-        print(node + " = " + str(B[node]))
+    # for node in B.keys():
+    #     print(node + " = " + str(B[node]))
 
     F = compute_candidate_set(U_neg, B, candidates)
 
@@ -18,7 +18,7 @@ def motif_avoidant_check(candidates, all_traps, U_neg: List[str]):
         F = PreprocessingSSF(F, all_traps)
 
         if not F.is_empty():
-            print ("Start the filtering process")
+            # print ("Start the filtering process")
 
             A = FilteringProcess(F, all_traps)
 

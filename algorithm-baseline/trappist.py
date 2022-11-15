@@ -39,7 +39,7 @@ def pnml_to_name(name: str) -> str:
         return name[1:]
     return name
 
-def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_reversal: str, subspace):
+def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_reversal: str, subspace, source_nodes: List[str]):
     """Write the ASP program for the conflict-free siphons of petri_net."""
     places = []
     free_places = []
@@ -75,6 +75,16 @@ def write_asp(petri_net: nx.DiGraph, asp_file: IO, computation: str, time_revers
         print(
             f"{max_condition}.", file=asp_file
         )
+
+        """More constraints for source nodes"""
+        for node in source_nodes:
+            if not node in subspace:
+                pA = pnml_to_asp(node)
+                nA = pnml_to_asp("-" + node)
+
+                print(f"{pA} ; {nA}."
+                    , file=asp_file
+                )
 
     for fixed_variable in subspace:
         if subspace[fixed_variable] == "1":
@@ -153,12 +163,12 @@ def get_solutions(
 
 
 def get_asp_output(
-    petri_net: nx.DiGraph, max_output: int, time_limit: int, computation: str, time_reversal, subspace
+    petri_net: nx.DiGraph, max_output: int, time_limit: int, computation: str, time_reversal, subspace, source_nodes: List[str]
 ) -> str:
     """Generate and solve ASP file."""
     (fd, tmpname) = tempfile.mkstemp(suffix=".lp", text=True)
     with open(tmpname, "wt") as asp_file:
-        write_asp(petri_net, asp_file, computation, time_reversal, subspace)
+        write_asp(petri_net, asp_file, computation, time_reversal, subspace, source_nodes)
     solutions = solve_asp(tmpname, max_output, time_limit, computation)
 
     os.close(fd)
@@ -168,6 +178,7 @@ def get_asp_output(
 
 def compute_trap_spaces(
     petri_net: nx.DiGraph,
+    source_nodes: List[str],
     max_output: int = 0,
     time_limit: int = 0,
     computation: str = "min",    
@@ -191,7 +202,7 @@ def compute_trap_spaces(
     else:
         raise ValueError("Support computing only max. trap spaces, min. trap spaces, and fixed points")
 
-    solutions_output = get_asp_output(petri_net, max_output, time_limit, computation, time_reversal, subspace)
+    solutions_output = get_asp_output(petri_net, max_output, time_limit, computation, time_reversal, subspace, source_nodes)
 
     if solutions_output == "UNSATISFIABLE":
         return []            
