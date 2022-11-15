@@ -18,6 +18,7 @@ from trappist import compute_trap_spaces
 from conversions import aeon_to_petri_net, space_to_aeon_set, space_to_string
 from bnet import read_bnet
 from aeon_utils import remove_static_constraints, has_parameters
+from static import find_minimum_NFVS, set_retained_set
 
 import sys
 
@@ -45,6 +46,15 @@ def is_subspace(x, y):
 def attractors(network):
     petri_net = aeon_to_petri_net(network)
     stg = SymbolicAsyncGraph(network)
+
+    U_neg = find_minimum_NFVS(network)
+
+    print(" ".join(U_neg))
+
+    B = set_retained_set(U_neg, network)
+
+    for node in B.keys():
+        print(node + " = " + str(B[node]))
 
     def attractors_recursive(space, candidates):
         space_percolated = percolate(network, space)
@@ -107,7 +117,7 @@ if __name__ == "__main__":
     network = remove_static_constraints(network)
     print(network)
 
-    while True:
-        attractors(network)
+    #while True:
+    #    attractors(network)
 
-    #attractors(network)
+    attractors(network)
