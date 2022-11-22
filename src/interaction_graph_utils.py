@@ -1,5 +1,5 @@
-from biodivine_aeon import BooleanNetwork
-from networkx import DiGraph
+from biodivine_aeon import BooleanNetwork # type: ignore
+from networkx import DiGraph # type: ignore
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     """

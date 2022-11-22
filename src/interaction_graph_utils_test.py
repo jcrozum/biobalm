@@ -1,5 +1,5 @@
 
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork # type:ignore
 from interaction_graph_utils import infer_signed_interaction_graph
 
 def test_ig_inference():
