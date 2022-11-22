@@ -46,25 +46,3 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
                 raise Exception(f"Unreachable: unknown monotonicity {reg['monotonicity']}.")
         ig.add_edge(source, target, sign=sign)
     return ig
-
-if __name__ == '__main__':
-    bn = BooleanNetwork.from_bnet("""
-        # Just a normal function.
-        b, a | !b
-        # Contradiciton on `a` - the regulation should not appear in the result
-        # Also, non-monotonic dependence on b and c.
-        a, (a & !a) | (b <=> c)
-        c, c
-    """)
-    ig = infer_signed_interaction_graph(bn)
-
-    edges = { edge:ig.get_edge_data(edge[0], edge[1])['sign'] for edge in ig.edges }
-    assert len(edges) == 5
-    assert edges[('a', 'b')] == "+"
-    assert edges[('b', 'b')] == "-"
-    assert edges[('b', 'a')] == "?"
-    assert edges[('c', 'a')] == "?"
-    assert edges[('c', 'c')] == "+"
-    assert ('a', 'a') not in edges
-    
-    print("All checks passed.")
