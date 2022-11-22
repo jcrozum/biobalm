@@ -5,11 +5,12 @@
     keys and values `'0'`/`'1'` assigned to fixed variables.
 """
 
-import pyeda.boolalg.expr as pyeda_expression
-from pyeda.inter import *
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph
+from pyeda.inter import expr, Expression, Not, And, Or, Equal, Xor, Implies # type: ignore
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
 
-def is_subspace(x, y) -> bool:
+from pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda
+
+def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
     """
         Checks if `x` is a subspace of `y`.
     """
@@ -20,7 +21,7 @@ def is_subspace(x, y) -> bool:
             return False
     return True
 
-def is_trap_space(bn: BooleanNetwork, space) -> bool:
+def is_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
     """
         Checks if the given `space` is a trap space in the given `BooleanNetwork`.
     """
@@ -34,7 +35,7 @@ def is_trap_space(bn: BooleanNetwork, space) -> bool:
                 return False
     return True
 
-def percolate_space(network: BooleanNetwork, space: dict) -> dict:
+def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
     """
         Takes a Boolean network and a space (partial assignment of `"0"`/`"1"` 
         to the network variables). It then percolates the values in the given 
@@ -42,36 +43,37 @@ def percolate_space(network: BooleanNetwork, space: dict) -> dict:
         of the given `network`. 
         
         If the argument is a trap space, then the result is a subspace of 
-        the argument and is also a trap space. However, when the argument is
-        a general space, the result is still a subspace, but not necessarily
-        a trap.
+        the argument and is also a trap space. 
+        
+        However, when the argument is a general space, the percolation can 
+        actually lead "outside" of the original space. In such case, the original 
+        fixed value is *not* modified and the conflict will remain in the 
+        resulting space.
 
-        Additionally, if the argument is not a trap space, the result
-        can percolate completely outside of the given space, in which case
-        we return `None`.
+        We then return these percolated values for the conflicting variables
+        as a second member of the result tuple.
     """
     # Make a copy of the original space
     result = { var:space[var] for var in space }
+    conflicts = {}
     done = False
     while not done:
         done = True
         for var in network.variables():
             var_name = network.get_variable_name(var)            
-            expression = expr(network.get_update_function(var).replace("!", "~"))
+            expression = aeon_to_pyeda(network.get_update_function(var))
             expression = percolate_pyeda_expression(expression, result)
-            is_constant = expression == expr(True) or expression == expr(False)
             if expression == expr(True) or expression == expr(False):                
                 if var_name not in result:
-                    # Fortunately, PyEDA resolved true as '1' and false as '0', 
+                    # Fortunately, PyEDA resolves true as '1' and false as '0', 
                     # so we can use this directly.
                     result[var_name] = str(expression)
                     done = False
-                elif result[var_name] != str(expression):
-                    # This space percolates completely outside of the original space.
-                    return None
-    return result
+                if var_name in result and result[var_name] != str(expression):
+                    conflicts[var_name] = str(expression)
+    return (result, conflicts)
 
-def percolate_network(bn: BooleanNetwork, space: dict) -> BooleanNetwork:
+def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwork:
     """
         Takes an AEON.py Boolean network and a space (partial assignment of
         network variables to `'0'`/`'1'`). It then produces a new network with
@@ -79,23 +81,17 @@ def percolate_network(bn: BooleanNetwork, space: dict) -> BooleanNetwork:
 
         There are two caveats to this operation:
         
-            (1) The given space must be a trap space. Otherwise, there would
-            be no meaningful relationship between the dynamics of the original
-            and the percolated network. If the argument is not a trap space,
-            the function returns `None`.
+            (1) If the given space is *not* a trap space, it is up to you to figure
+            out what the relationship between the original and the resulting dynamics 
+            is. For trap spaces, we know that everything inside that trap space
+            is preserved. If the space is not a trap space, you have now cut away 
+            all outgoing transitions.
 
             (2) The underlying regulatory graph of the new network retains all 
             regulations of the original network, but all integrity constraints 
             (essentiality, monotonicity) are removed, because they most likely 
             no longer hold in the new network.
     """
-
-    percolated = percolate_space(bn, space)
-    if not (percolated and is_trap_space(bn, percolated)):
-        return None
-
-    # Use the percolated space, just in case it is smaller.
-    space = percolated
     
     # Make a copy of the original regulatory network, but without integrity constraints.
     old_rg = bn.graph()
@@ -112,19 +108,23 @@ def percolate_network(bn: BooleanNetwork, space: dict) -> BooleanNetwork:
     for var in bn.variables():
         name = bn.get_variable_name(var)
         new_var = new_bn.find_variable(name)    # The ids should be the same, but just in case.
-        expression = expr(bn.get_update_function(var).replace("!", "~"))
-        expression = percolate_pyeda_expression(expression, space)
-        # True/False and negation in PyEDA are different, rest should be the same.
-        if expression == expr(True):
-            new_bn.set_update_function(new_var, "true")
-        elif expression == expr(False):
-            new_bn.set_update_function(new_var, "false")
+        new_expr = None
+        if name in space:
+            # If the value is fixed, just use it as a value directly.
+            if space[name] == "1":
+                new_expr = expr(True)
+            if space[name] == "0":
+                new_expr = expr(False)            
         else:
-            new_bn.set_update_function(new_var, str(expression).replace("~", "!"))        
+            # If the value is not fixed, use a simplified expression.
+            expression = aeon_to_pyeda(bn.get_update_function(var))
+            new_expr = percolate_pyeda_expression(expression, space)
+
+        new_bn.set_update_function(var, pyeda_to_aeon(new_expr))        
 
     return new_bn
 
-def percolate_pyeda_expression(expression, space: dict):
+def percolate_pyeda_expression(expression: Expression, space: dict[str, str]) -> Expression:
     """
         Takes a PyEDA expression and a subspace (dictionary assigning `"1"`/`"0"` to
         a subset of variables). Returns a simplified expression that is valid
@@ -132,48 +132,6 @@ def percolate_pyeda_expression(expression, space: dict):
         The resulting expression does not depend on the variables which are fixed 
         in the given `space`.
     """
-
-    def substitute(expression, space: dict):
-        """
-            Substitutes the know constants from the given space into the PyEDA expression.
-        """
-        if type(expression) == pyeda_expression._One or type(expression) == pyeda_expression._Zero:
-            # Keep constants.
-            return expression
-        if type(expression) == pyeda_expression.Variable:
-            # Positive literals are resolved through `space` if possible.
-            key = str(expression)
-            if key in space:
-                return expr(space[key])                
-            else:
-                return expression
-        if type(expression) == pyeda_expression.Complement:
-            # Complement is just a negative literal.
-            key = str(expression.inputs[0])
-            if key in space:
-                return Not(expr(space[key]))                
-            else:
-                return expression
-        if type(expression) == pyeda_expression.NotOp:
-            inner = substitute(expression.x, space)
-            return Not(expression)
-        if type(expression) == pyeda_expression.AndOp:
-            inner = [substitute(x, space) for x in expression.xs]
-            return And(*inner)
-        if type(expression) == pyeda_expression.OrOp:
-            inner = [substitute(x, space) for x in expression.xs]
-            return Or(*inner)
-        if type(expression) == pyeda_expression.EqualOp:
-            inner = [substitute(x, space) for x in expression.xs]
-            return Equal(*inner)
-        if type(expression) == pyeda_expression.XorOp:
-            inner = [substitute(x, space) for x in expression.xs]
-            return Xor(inner)
-        if type(expression) == pyeda_expression.ImpliesOp:
-            p = substitute(expression.xs[0], space)
-            q = substitute(expression.xs[1], space)
-            return Implies(p, q)
-        raise Exception(f"Unknown PyEDA operator: {type(expression)}.")
-	
-    expression = substitute(expression, space)
+    substitution = { x: expr(space[x]) for x in space }
+    expression = substitute_variables_in_expression(expression, substitution)
     return expression.simplify()
