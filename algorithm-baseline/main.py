@@ -23,21 +23,6 @@ from motif_avoidant import motif_avoidant_check
 
 import sys
 
-def symbolic_attractor_search(stg, candidates):
-    while not candidates.is_empty():
-        pivot = candidates.pick_vertex()
-        bwd = reach_bwd(stg, pivot, candidates)
-        fwd = reach_fwd(stg, pivot, candidates)
-
-        scc = fwd.intersect(bwd)
-        if fwd.minus(bwd).is_empty():
-            print("Attractor", scc)
-            if scc.cardinality() < 100:
-                for state in scc.vertices().list_vertices():
-                    print(state)
-
-        candidates = candidates.minus(bwd)
-
 def is_subspace(x, y):
     for key in y:
         if (not key in x) or x[key] != y[key]:
@@ -85,10 +70,6 @@ def attractors(network):
 
         candidates = candidates.minus(covered)
         if not candidates.is_empty():
-            # TODO: This is not correct, because it will look for sets of states that are
-            # terminal within the candidates set. I.e. if there is a transition out from
-            # candidates into a state that is not in candidates, this will not find that transition.
-            #symbolic_attractor_search(stg, candidates)
             print("Check for motif-avoidant attractors")
             motif_avoidant_check(candidates, all_traps, U_neg, petri_net, subspace=space, source_nodes=source_nodes)
         
