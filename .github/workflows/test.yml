@@ -1,0 +1,23 @@
+name: test
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    # TODO: Later we can add more python versions but for now one should be enough.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+          architecture: x64
+      - name: Install repo dependencies
+        run: pip install -r requirements.txt
+      - name: Install pytest
+        run: pip install pytest pytest-md pytest-emoji
+      - name: Run pytest
+        run: pytest
