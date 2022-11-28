@@ -37,7 +37,7 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
         if not reg['observable']:
             # In general, a fully specified network should only contain 
             # observable (i.e. essential) regulations.
-            raise Exception("Unreachable: You are using this on partically specified networks, aren't you?")
+            raise Exception("Unreachable: You are using this on partially specified networks, aren't you?")
         source = rg.get_variable_name(reg['source'])
         target = rg.get_variable_name(reg['target'])
         sign = "?"        
