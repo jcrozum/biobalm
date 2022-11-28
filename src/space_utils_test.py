@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from biodivine_aeon import BooleanNetwork # type: ignore
 from pyeda.inter import * # type: ignore
 

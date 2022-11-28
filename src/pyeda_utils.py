@@ -1,16 +1,24 @@
+from __future__ import annotations
 """
     Some utility methods, mainly for converting and modifying PyEDA expressions.
 """
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pyeda.inter import Expression # type: ignore
+
 import pyeda.boolalg.expr as pyeda_expression # type: ignore
-from pyeda.inter import Expression, Not, And, Or, Equal, Xor, Implies # type: ignore
+from pyeda.inter import Not, And, Or, Equal, Xor, Implies # type: ignore
+
+PYEDA_TRUE = pyeda_expression.expr(1)
+PYEDA_FALSE = pyeda_expression.expr(0)
 
 def substitute_variables_in_expression(expression: Expression, items: dict[str, Expression]) -> Expression:    
     """
         A substitution method which replaces all occurences of the variables specified in `items`
         with the corresponding `Expression` objects.
     """
-    if type(expression) == pyeda_expression._One or type(expression) == pyeda_expression._Zero:
+    if expression == PYEDA_TRUE or expression == PYEDA_FALSE:
         # Keep constants.
         return expression
     if type(expression) == pyeda_expression.Variable:
@@ -56,9 +64,9 @@ def pyeda_to_aeon(expression: Expression) -> str:
         Note: Right now, I have not found a better way to do this. If you find something
         simpler, go for it...
     """
-    if type(expression) == pyeda_expression._One:
+    if expression == PYEDA_TRUE:
         return "true"
-    if type(expression) == pyeda_expression._Zero:        
+    if expression == PYEDA_FALSE:        
         return "false"
     if type(expression) == pyeda_expression.Variable:
         return str(expression)        

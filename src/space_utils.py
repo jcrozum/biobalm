@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
 
@@ -5,10 +6,14 @@
     keys and values `'0'`/`'1'` assigned to fixed variables.
 """
 
-from pyeda.inter import expr, Expression, Not, And, Or, Equal, Xor, Implies # type: ignore
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pyeda.inter import Expression # type: ignore
+
+from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
 
-from pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda
+from pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
 def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
     """
@@ -63,7 +68,7 @@ def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dic
             var_name = network.get_variable_name(var)            
             expression = aeon_to_pyeda(network.get_update_function(var))
             expression = percolate_pyeda_expression(expression, result)
-            if expression == expr(True) or expression == expr(False):                
+            if expression == PYEDA_TRUE or expression == PYEDA_FALSE:                
                 if var_name not in result:
                     # Fortunately, PyEDA resolves true as '1' and false as '0', 
                     # so we can use this directly.
@@ -112,9 +117,9 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
         if name in space:
             # If the value is fixed, just use it as a value directly.
             if space[name] == "1":
-                new_expr = expr(True)
+                new_expr = PYEDA_TRUE
             if space[name] == "0":
-                new_expr = expr(False)            
+                new_expr = PYEDA_FALSE
         else:
             # If the value is not fixed, use a simplified expression.
             expression = aeon_to_pyeda(bn.get_update_function(var))
