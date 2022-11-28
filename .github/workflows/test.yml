@@ -22,8 +22,8 @@ jobs:
       - name: Install mypy
         run: pip install mypy
       - name: Run mypy check
-        run: mypy src
+        run: mypy nfvsmotifs
       - name: Install pytest
         run: pip install pytest pytest-md pytest-emoji      
       - name: Run pytest
-        run: pytest
+        run: python3 -m pytest tests
