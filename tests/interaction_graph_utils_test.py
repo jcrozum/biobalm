@@ -1,6 +1,6 @@
 
 from biodivine_aeon import BooleanNetwork # type:ignore
-from interaction_graph_utils import infer_signed_interaction_graph
+from nfvsmotifs.interaction_graph_utils import infer_signed_interaction_graph
 
 def test_ig_inference():
     bn = BooleanNetwork.from_bnet("""

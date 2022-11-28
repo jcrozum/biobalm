@@ -1,4 +1,9 @@
-from biodivine_aeon import BooleanNetwork # type: ignore
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from biodivine_aeon import BooleanNetwork # type: ignore
+
 from networkx import DiGraph # type: ignore
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
