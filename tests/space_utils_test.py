@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 from biodivine_aeon import BooleanNetwork # type: ignore
 from pyeda.inter import * # type: ignore
 
-from space_utils import *
+from nfvsmotifs.space_utils import *
 
 def test_is_subspace():
     assert is_subspace({'x': '0', 'y': '1'}, {'x': '0'})

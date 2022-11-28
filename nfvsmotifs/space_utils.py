@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
 
-from pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
+from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
 def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
     """
@@ -83,7 +83,6 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
         Takes an AEON.py Boolean network and a space (partial assignment of
         network variables to `'0'`/`'1'`). It then produces a new network with
         update functions percolated based on the supplied space.
-
         There are two caveats to this operation:
         
             (1) If the given space is *not* a trap space, it is up to you to figure
@@ -91,7 +90,6 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
             is. For trap spaces, we know that everything inside that trap space
             is preserved. If the space is not a trap space, you have now cut away 
             all outgoing transitions.
-
             (2) The underlying regulatory graph of the new network retains all 
             regulations of the original network, but all integrity constraints 
             (essentiality, monotonicity) are removed, because they most likely 
