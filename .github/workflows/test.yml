@@ -24,7 +24,7 @@ jobs:
       - name: Run mypy check
         run: mypy nfvsmotifs
       - name: Install pytest
-        run: pip install pytest pytest-md pytest-emoji pytest-cov      
+        run: pip install pytest pytest-cov      
       - name: Run pytest
         run: python3 -m pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nfvsmotifs tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
