@@ -455,6 +455,49 @@ Of course, we need to improve both its \red{time-efficiency} and \red{accuracy}.
 
 \end{frame}
 
+\begin{frame}%[allowframebreaks]
+  \frametitle{Target control: more observations on PyBoolNet~\cite{cifuentes2020control}}
+
+\centering
+\begin{tikzpicture}[node distance = 2cm, auto]
+  \node [draw, rectangle, fill=green!50, minimum height=2em] (target) {Phenotype};
+    
+  % text width= 2.9em
+
+  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of target] (BN) {Boolean network};
+  
+  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of BN] (i_trapspaces) {Intersected trap spaces};
+  
+  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of i_trapspaces] (PI) {Prime implicants};
+  
+  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of target] (s_trapspaces) {Selected trap spaces};
+  
+  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of s_trapspaces] (space_of_attraction) {Spaces of attraction};
+  
+  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of space_of_attraction] (control_strategies) {Control strategies};
+
+  \draw [->] (target) -- (s_trapspaces);
+  \draw [->] (target) -- (i_trapspaces);
+  \draw [->] (BN) -- (PI);
+  \draw [->] (PI) -- (i_trapspaces);
+  \draw [->] (i_trapspaces) -- (s_trapspaces);
+  \draw [->] (PI) -- (space_of_attraction);
+  \draw [->] (s_trapspaces) -- (space_of_attraction);
+  \draw [->] (space_of_attraction) -- (control_strategies);
+    
+    % %\path [line] (B-2) -- (D-2);
+    % \draw [->] (B-2) -- node[anchor=south] {\red{By Proposition 3.6.2}} (D-2);
+    
+  \only<2>{\node[above=0.2cm of i_trapspaces, red, text width=5cm, xshift=-2.5cm] (note-1) {compute\_trapspaces\_that\_intersect\_subspace};}
+
+  \only<3>{\node[above=0.2cm of PI, red, text width=5cm, xshift=4cm] (note-2) {Used for percolation};}
+  
+    % \only<3>{\node[below=1.2cm of C, red, text width=12cm, fill=green!20] (D-4) {In the dissertation, we have analyzed in detail some cases in which the result of \textbf{ApproABN} is incorrect. We have also provided some reasons convincing the accuracy of \textbf{ApproABN} that will be confirmed by the conducted experiments on real biological networks.};}
+    % \only<3>{\draw[->, red] (D-4) -- (D-3);}
+\end{tikzpicture}
+
+\end{frame}
+
 \begin{frame}
 \frametitle{Target control with the full succession diagram}
 
