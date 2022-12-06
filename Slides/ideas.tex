@@ -456,46 +456,151 @@ Of course, we need to improve both its \red{time-efficiency} and \red{accuracy}.
 \end{frame}
 
 \begin{frame}%[allowframebreaks]
-  \frametitle{Target control: more observations on PyBoolNet~\cite{cifuentes2020control}}
+\frametitle{Target control: more observations on PyBoolNet~\cite{cifuentes2020control}}
 
-\centering
-\begin{tikzpicture}[node distance = 2cm, auto]
-  \node [draw, rectangle, fill=green!50, minimum height=2em] (target) {Phenotype};
+  \centering
+  \begin{tikzpicture}[node distance = 2cm, auto]
+    \node [draw, rectangle, fill=green!50, minimum height=2em] (target) {Phenotype};
+
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of target] (BN) {Boolean network};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of BN] (i_trapspaces) {Intersected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of i_trapspaces] (PI) {Prime implicants};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of target] (s_trapspaces) {Selected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of s_trapspaces] (space_of_attraction) {Spaces of attraction};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of space_of_attraction] (control_strategies) {Control strategies};
+
+    \draw [->] (target) -- (s_trapspaces);
+    \draw [->] (target) -- (i_trapspaces);
+    \draw [->] (BN) -- (PI);
+    \draw [->] (PI) -- (i_trapspaces);
+    \draw [->] (i_trapspaces) -- (s_trapspaces);
+    \draw [->] (PI) -- (space_of_attraction);
+    \draw [->] (s_trapspaces) -- (space_of_attraction);
+    \draw [->] (space_of_attraction) -- (control_strategies);
     
-  % text width= 2.9em
+    \only<2>{\node[above=0.2cm of i_trapspaces, red, text width=5cm, xshift=-2.5cm] (note-2) {compute\_trapspaces\_that\_intersect\_subspace};}
 
-  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of target] (BN) {Boolean network};
+    \only<3>{\node[above=0.2cm of PI, red, text width=5cm, xshift=4cm] (note-3) {Used for percolation};}
   
-  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of BN] (i_trapspaces) {Intersected trap spaces};
+    \only<4>{\node[above=0.2cm of space_of_attraction, red, text width=8cm, xshift=-3cm] (note-4) {Exploration of all possible sub-spaces whose numbers of fixed variables are up to \(\operatorname{min}(m, n)\) (\(m\) is the maximum size of the control strategies)};}
   
-  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of i_trapspaces] (PI) {Prime implicants};
+    \only<5>{\node[above=0.2cm of i_trapspaces, red, text width=8cm, xshift=0cm] (note-5) {The number of intersected trap spaces may be huge for large-scale models.};}
+    \only<5>{\node[draw, rectangle, minimum height=3em, below=-1cm of i_trapspaces, red, text width=4.7cm] (e-5) {};}
   
-  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of target] (s_trapspaces) {Selected trap spaces};
+    \only<6>{\node[below=0.5cm of PI, red, text width=8cm, xshift=0cm] (note-6) {The number of prime implicants may be huge for models with high average connectivity.};}
+    \only<6>{\node[draw, rectangle, minimum height=3em, below=-1cm of PI, red, text width=4.7cm] (e-6) {};}
   
-  \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of s_trapspaces] (space_of_attraction) {Spaces of attraction};
+    \only<7>{\node[above=0.2cm of space_of_attraction, red, text width=7cm, xshift=-1.5cm] (note-7) {The number of explored sub-spaces is exponential in \(n\) in the worst case.};}
+    \only<7>{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-7) {};}
   
-  \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of space_of_attraction] (control_strategies) {Control strategies};
+  \end{tikzpicture}
+\end{frame}
 
-  \draw [->] (target) -- (s_trapspaces);
-  \draw [->] (target) -- (i_trapspaces);
-  \draw [->] (BN) -- (PI);
-  \draw [->] (PI) -- (i_trapspaces);
-  \draw [->] (i_trapspaces) -- (s_trapspaces);
-  \draw [->] (PI) -- (space_of_attraction);
-  \draw [->] (s_trapspaces) -- (space_of_attraction);
-  \draw [->] (space_of_attraction) -- (control_strategies);
+\begin{frame}%[allowframebreaks]
+\frametitle{Target control: more observations on PyBoolNet~\cite{FontanalsLaura2022}}
+
+  \centering
+  \begin{tikzpicture}[node distance = 2cm, auto]
+    \node [draw, rectangle, fill=green!50, minimum height=2em] (target) {Phenotype};
+
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of target] (BN) {Boolean network};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of BN] (i_trapspaces) {Intersected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of i_trapspaces] (PI) {Prime implicants};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of target] (s_trapspaces) {Selected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of s_trapspaces] (space_of_attraction) {Spaces of attraction};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of space_of_attraction] (control_strategies) {Control strategies};
+
+    \draw [->] (target) -- (s_trapspaces);
+    \draw [->] (target) -- (i_trapspaces);
+    \draw [->] (BN) -- (PI);
+    \draw [->] (PI) -- (i_trapspaces);
+    \draw [->] (i_trapspaces) -- (s_trapspaces);
+    \draw [->] (PI) -- (space_of_attraction);
+    \draw [->] (s_trapspaces) -- (space_of_attraction);
+    \draw [->] (space_of_attraction) -- (control_strategies);
+  
+    \only<1>{\node[above=0.2cm of space_of_attraction, red, text width=7cm, xshift=-1.5cm] (note-1) {The number of explored sub-spaces is exponential in \(n\) in the worst case.};}
+    \only<1->{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-1-1) {};}
     
-    % %\path [line] (B-2) -- (D-2);
-    % \draw [->] (B-2) -- node[anchor=south] {\red{By Proposition 3.6.2}} (D-2);
-    
-  \only<2>{\node[above=0.2cm of i_trapspaces, red, text width=5cm, xshift=-2.5cm] (note-1) {compute\_trapspaces\_that\_intersect\_subspace};}
-
-  \only<3>{\node[above=0.2cm of PI, red, text width=5cm, xshift=4cm] (note-2) {Used for percolation};}
+    \only<1->{\node[draw, rectangle, minimum height=3em, below=-1cm of i_trapspaces, red, text width=4.7cm] (e-1-2) {};}
   
-    % \only<3>{\node[below=1.2cm of C, red, text width=12cm, fill=green!20] (D-4) {In the dissertation, we have analyzed in detail some cases in which the result of \textbf{ApproABN} is incorrect. We have also provided some reasons convincing the accuracy of \textbf{ApproABN} that will be confirmed by the conducted experiments on real biological networks.};}
-    % \only<3>{\draw[->, red] (D-4) -- (D-3);}
-\end{tikzpicture}
+    \only<1->{\node[draw, rectangle, minimum height=3em, below=-1cm of PI, red, text width=4.7cm] (e-1-3) {};}
+    
+    \only<2>{\node[above=0.2cm of space_of_attraction, red, text width=7cm, xshift=-1.5cm] (note-2) {Propose a new implementation for this step based on ASP.};}
+    
+    \only<3>{\node[above=0.2cm of space_of_attraction, red, text width=6cm, xshift=-1.5cm] (note-2) {It is possible to optimize the ASP encoding.};}
+  
+    \only<4>{\node[above=0.2cm of space_of_attraction, red, text width=11cm, xshift=-3.5cm] (note-2) {However, even with an optimal ASP encoding, the running time of the ASP solver may still large because the search space of the problem itself is intrinsically huge (\(\mathcal{O}(\sum_{k = 1}^{\operatorname{min}(m, n)}2^i \times \binom{n}{k})\)).};}
+    
+    \only<5>{\node[above=0.2cm of space_of_attraction, red, text width=6cm, xshift=-1.5cm] (note-2) {Hence, we retain the opinion that pystablemotifs has much more potential than the others.};}
+  \end{tikzpicture}
+\end{frame}
 
+\begin{frame}%[allowframebreaks]
+\frametitle{Some potential improvements to PyBoolNet~\cite{FontanalsLaura2022}}
+
+  \centering
+  \begin{tikzpicture}[node distance = 2cm, auto]
+    \node [draw, rectangle, fill=green!50, minimum height=2em] (target) {Phenotype};
+
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of target] (BN) {Boolean network};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of BN] (i_trapspaces) {Intersected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of i_trapspaces] (PI) {Prime implicants};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of target] (s_trapspaces) {Selected trap spaces};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, right=1.2cm of s_trapspaces] (space_of_attraction) {Spaces of attraction};
+  
+    \node [draw, rectangle, fill=green!50, minimum height=2em, below=1.2cm of space_of_attraction] (control_strategies) {Control strategies};
+
+    \draw [->] (target) -- (s_trapspaces);
+    \draw [->] (target) -- (i_trapspaces);
+    \draw [->] (BN) -- (PI);
+    \draw [->] (PI) -- (i_trapspaces);
+    \draw [->] (i_trapspaces) -- (s_trapspaces);
+    \draw [->] (PI) -- (space_of_attraction);
+    \draw [->] (s_trapspaces) -- (space_of_attraction);
+    \draw [->] (space_of_attraction) -- (control_strategies);
+  
+    \only<1>{\node[draw, rectangle, minimum height=3em, below=-1cm of PI, red, text width=4.7cm] (e-1-1) {};}
+    
+    \only<1>{\node[draw, rectangle, minimum height=3em, below=-1cm of i_trapspaces, red, text width=4.7cm] (e-1-2) {};}
+  
+    \only<1>{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-1-3) {};}
+    
+    \only<2>{\node[below=0.5cm of PI, red, text width=8cm, xshift=0cm] (note-2-1) {Use Trappist.};}
+    \only<2>{\node[draw, rectangle, minimum height=9em, below=-1.3cm of i_trapspaces, red, text width=4cm] (e-2-1) {};}
+    \only<2>{\node[draw, rectangle, minimum height=3em, below=-1cm of target, red, text width=3cm] (e-2-2) {};}
+    \only<2>{\node[below=0.2cm of target, red, text width=6cm, xshift=2cm] (note-2-2) {Target can be a minimal trap space.};}
+    
+    \only<3>{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-3) {};}
+    \only<3>{\node[above=0.2cm of space_of_attraction, red, text width=8cm, xshift=-2.5cm] (note-3) {However, we need to adjust the ASP encoding because it relies on prime implicants. The new ASP encoding should rely on Boolean functions instead.};}
+    
+    \only<4>{\node[below=0.5cm of PI, red, text width=8cm, xshift=0cm] (note-4) {The bottleneck on the number of intersected trap spaces still remains.};}
+    \only<4>{\node[draw, rectangle, minimum height=9em, below=-1.3cm of i_trapspaces, red, text width=4cm] (e-4) {};}
+    
+    \only<5>{\node[below=0.5cm of PI, red, text width=8cm, xshift=0cm] (note-5) {We can use BDDs to compute and represent the set of intersected trap spaces (also the set of selected trap spaces).};}
+    \only<5>{\node[draw, rectangle, minimum height=13.2em, below=-2.9cm of i_trapspaces, red, text width=4.7cm, xshift=-0.3cm] (e-5) {};}
+    
+    \only<6>{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-6) {};}
+    \only<6>{\node[above=0.2cm of space_of_attraction, red, text width=8cm, xshift=-2.5cm] (note-6) {However, we need to adjust the ASP encoding because it relies on the set of selected trap spaces. We need to encode the BDD as ASP rules.};}
+    
+    \only<7>{\node[draw, rectangle, minimum height=3em, below=-1cm of space_of_attraction, red, text width=4cm] (e-7) {};}
+    \only<7>{\node[above=0.2cm of space_of_attraction, red, text width=11cm, xshift=-3.5cm] (note-7) {Along with optimizing the ASP encoding, I wonder if we can write a conference paper based on these new ideas. Of course, the first thing we need to do is to develop a concrete method, implement it, and then test it on large real-world models.};}
+    
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
@@ -529,6 +634,35 @@ Of course, we need to improve both its \red{time-efficiency} and \red{accuracy}.
 \end{tikzpicture}
 
 \end{frame}
+
+\begin{frame}
+\frametitle{Control features}
+
+\begin{center}
+\includegraphics[scale=0.3]{Figures/control_approach.jpg}
+\end{center}
+
+\only<1>{Model checking-based method~\cite{CifuentesFontanals2022}\footnote{Cifuentes-Fontanals L, Tonello E and Siebert H (2022) Control in Boolean Networks With Model Checking. Front. Appl. Math. Stat. 8:838546. doi: 10.3389/fams.2022.838546}}
+
+\only<2>{I hope to develop more \blue{control features} for nfvs-motifs: complex attractor, sub-space, arbitrary subset. I am thinking about this.}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Model checking-based method~\cite{CifuentesFontanals2022}}
+
+\begin{center}
+\includegraphics[scale=0.4]{Figures/MC_data_set.jpg}
+\end{center}
+
+\only<1>{The running time of the model checking-based method (MC) is large (\red{several hours}).}
+
+\only<2>{We can see that MC seems \red{to be not time-efficient} for large-scale models.}
+
+\only<3>{It would be great if nfvs-motifs can provide all features as MC does but run much rapidly.}
+
+\end{frame}
+
 
 \begin{frame}
   \frametitle{Improve the accuracy}
