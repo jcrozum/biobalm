@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork # type: ignore
+    from biodivine_aeon import VariableId # type: ignore
+    from typing import Union, Optional
 
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph # type: ignore
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
@@ -51,3 +53,98 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
                 raise Exception(f"Unreachable: unknown monotonicity {reg['monotonicity']}.")
         ig.add_edge(source, target, sign=sign)
     return ig
+
+def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
+    """
+        A helper method to transform between a "signed digraph" and AEON's `RegulatoryGraph`.
+
+        All nodes of the digraph should have string identifiers. Edges can be optionally 
+        annotated with a `sign` value `"+"`, `"-"` or `"?"` (however, `"?"` is treated the 
+        same as a missing `sign` annotation).
+    """
+    rg = RegulatoryGraph(list(graph.nodes()))
+    for edge in graph.edges():
+        edge_data = graph.get_edge_data(edge[0], edge[1])
+        monotonicity = None
+        if 'sign' in edge_data:
+            sign = edge_data['sign']
+            if sign == '+':
+                monotonicity = 'activation'
+            elif sign == '-':
+                monotonicity = 'inhibition'
+            elif sign != '?':
+                raise Exception(f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'")
+        rg.add_regulation({
+            'source': edge[0],
+            'target': edge[1],
+            'observable': True, # For now, observability is not in the graph.
+            'monotonicity': monotonicity
+        })
+
+    return rg
+
+
+def feedback_vertex_set(
+    network: Union[BooleanNetwork, RegulatoryGraph, DiGraph], 
+    parity: Optional[str] = None, 
+    subgraph: Optional[list[Union[str, VariableId]]] = None
+) -> list[str]:
+    """
+        Compute a "decent enough" approximation of a minimal feedback vertex set (FVS) of
+        a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
+        on its edges.
+
+        There are two optional parameters:
+
+         - `parity`: Can be either `positive` or 'negative'. If parity is specified, only cycles of the 
+            specified parity are considered (e.g. if `parity='negative'`, there can still be positive
+            cycles in the graph not covered by the returned feedback vertex set).
+         - `subgraph`: A list of network variables (either string names or AEON `VariableId` 
+            objects are fine). If given, the result is the FVS of the sub-graph induced by
+            these network nodes.
+
+        The result is a list of variable names representing the FVS. The variables are always sorted
+        based on the order in which they appear in the network (which is typically lexicographic, 
+        if the network is loaded from a file and not made "by hand").
+
+        The method should be deterministic (the same pseudo-optimal FVS is returned every time).
+    """
+    if type(network) == BooleanNetwork:
+        network = network.graph()
+    if type(network) == DiGraph:
+        network = _digraph_to_regulatory_graph(network)
+    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph)
+    return [network.get_variable_name(x) for x in fvs]
+
+def independent_cycles(
+    network: Union[BooleanNetwork, RegulatoryGraph],
+    parity: Optional[str] = None,
+    subgraph: Optional[list[Union[str, VariableId]]] = None
+) -> list[list[str]]:
+    """
+        Compute a "decent enough" approximation of the maximal set of independent cycles of
+        a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
+        on its edges.
+
+        There are two optional parameters:
+
+         - `parity`: Can be either `positive` or `negative`. If parity is specified, only cycles of
+            the specified parity are considered (e.g. if `pairty='negative'`, there can still be positive
+            cycles in the graph which are not covered by this independent cycle set).
+         - `subgraph`: A list of network variables (either string names or AEON `VariableId` objects
+            are fine). If given, the result is restricted to the sub-graph induced by these network
+            nodes.
+
+        The result is a list of cycles, such that each cycle is a list of variable names in the order 
+        in which they appear on the cycle. The cycles are sorted by increasing length.
+
+        In general, the method should be deterministic (the same pseudo-optimal cycles are returned
+        every time). However, while I believe the sorting should be stable too, please treat the 
+        order of returned cycles with caution :)
+    """
+    if type(network) == BooleanNetwork:
+        network = network.graph()
+    if type(network) == DiGraph:
+        network = _digraph_to_regulatory_graph(network)
+    ic = network.independent_cycles(parity=parity, restriction=subgraph)
+    return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
