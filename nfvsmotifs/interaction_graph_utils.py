@@ -90,9 +90,9 @@ def feedback_vertex_set(
     subgraph: Optional[list[Union[str, VariableId]]] = None
 ) -> list[str]:
     """
-        Compute a "decent enough" approximation of a minimal feedback vertex set (FVS) of
+        Compute an approximately minimal feedback vertex set (FVS) of
         a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
-        on its edges.
+        on its edges. The result is guaranteed to be a feedback vertex set, but it might not be minimal.
 
         There are two optional parameters:
 
@@ -122,9 +122,10 @@ def independent_cycles(
     subgraph: Optional[list[Union[str, VariableId]]] = None
 ) -> list[list[str]]:
     """
-        Compute a "decent enough" approximation of the maximal set of independent cycles of
+        Compute an approximately maximal set of independent cycles of
         a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
-        on its edges.
+        on its edges. The result is guaranteed to be a set of independent cycles, but it may
+        not be maximal.
 
         There are two optional parameters:
 
