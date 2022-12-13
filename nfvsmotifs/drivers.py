@@ -5,8 +5,8 @@ from nfvsmotifs.space_utils import percolate_space
 
 def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, str], dict[str, str]]:
     """
-    find LDOIs of single node fixes
-    TODO: take LDOIs of the original system for speed-up
+    finds LDOIs of every single node state
+    TODO: take an initial set of LDOIs (e.g., of the original system) as an argument for speed-up
     """
     LDOIs = {}
     for var in bn.variables():
@@ -22,17 +22,20 @@ def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, str], dict[str
 
     return LDOIs
 
-def find_single_drivers(max_trap, bn: BooleanNetwork, LDOIs: dict = {}) -> list[tuple[str, str]]:
+def find_single_drivers(target_subspace: dict[str, str], 
+                        bn: BooleanNetwork, 
+                        LDOIs: dict[tuple[str, str],dict[str, str]] | None = None
+                        ) -> list[tuple[str, str]]:
     """
-    find all the single node drivers for a given maximal trapspace(stablemotif)
+    find all the single node drivers for a given target_subspace, 
+    usually (but not necessarily) a maximal trapspace (stablemotif)
     """
-    if LDOIs == {}:
+    if LDOIs is None:
         LDOIs = find_single_node_LDOIs(bn)
 
     drivers = []
-    for fix in LDOIs:
-        LDOI = LDOIs[fix]
-        if max_trap.items() <= LDOI.items():
+    for fix, LDOI in LDOIs.items():
+        if target_subspace.items() <= LDOI.items():
             drivers.append(fix)
 
     return drivers
