@@ -37,7 +37,7 @@ def substitute_variables_in_expression(expression: Expression, items: dict[str, 
             return expression
     if type(expression) == pyeda_expression.NotOp:
         inner = substitute_variables_in_expression(expression.x, items)
-        return Not(expression)
+        return Not(inner)
     if type(expression) == pyeda_expression.AndOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return And(*inner)

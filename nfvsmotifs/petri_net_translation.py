@@ -63,6 +63,27 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     # return it for convenience.
     return network
 
+def variable_to_place(variable: str, positive: bool) -> str:
+    """
+        Convert the name of a network variable to the name of the corresponding positive 
+        or negative Petri net place.
+    """
+    if positive:
+        return f"b1_{variable}"
+    else:
+        return f"b0_{variable}"
+
+def place_to_variable(place: str) -> Tuple[str, bool]:
+    """
+        Convert the name of a Petri net place to the name of the network variable, plus
+        a Boolean indicating whether the original place was positive or negative.
+    """
+    if place.startswith("b1_"):
+        return (place[3:], True)
+    elif place.startswith("b0_"):
+        return (place[3:], False)
+    else:
+        raise Exception(f"Invalid place name: `{place}`.")
 
 def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     """
@@ -84,8 +105,8 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     places = {}
     for var in network.variables():
         name = network.get_variable_name(var)
-        p_name = f"b1_{name}"
-        n_name = f"b0_{name}"
+        p_name = variable_to_place(name, positive=True)
+        n_name = variable_to_place(name, positive=False)
         pn.add_node(p_name, kind="place")
         pn.add_node(n_name, kind="place")
         places[name] = (n_name, p_name)

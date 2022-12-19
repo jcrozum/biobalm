@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
@@ -34,9 +35,10 @@ def is_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
         var_name = bn.get_variable_name(var)
 
         if var_name in space:
-            expression = expr(bn.get_update_function(var).replace("!", "~"))
+            expression = aeon_to_pyeda(bn.get_update_function(var))
             expression = percolate_pyeda_expression(expression, space)
             if space[var_name] != str(expression):
+                print(space[var_name], str(expression), bn.get_update_function(var), space)
                 return False
     return True
 
