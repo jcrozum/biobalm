@@ -25,13 +25,15 @@ jobs:
         run: mypy nfvsmotifs
       - name: Install pytest
         run: pip install pytest pytest-cov      
+      # Correctness is tested on larger networks, while for coverage, we use
+      # a smaller subset, since it should not have a significant impact on it.
       - name: Run pytest (without coverage)
-        run: python3 -m pytest tests/
+        run: python3 -m pytest --networksize 100 tests/
       # The reason why we have to run pytest twice is that saving the coverage report will erase
       # the exit code and so the workflow would succeed even if there are failing tests.
       # (this could be of course solved using the magic of unix, but for now, this is simpler)
       - name: Run pytest again with coverage
-        run: python3 -m pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nfvsmotifs tests/ | tee pytest-coverage.txt
+        run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nfvsmotifs tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
