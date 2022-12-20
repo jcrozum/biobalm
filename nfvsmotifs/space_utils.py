@@ -27,9 +27,16 @@ def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
             return False
     return True
 
-def is_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
+def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
     """
-        Checks if the given `space` is a trap space in the given `BooleanNetwork`.
+        Uses percolation to check if the given `space` is a trap space in the given `BooleanNetwork`.
+
+        Note that this does not perform any sophisticated "semantic" analysis of the update functions.
+        For example, if the update function contains a contradiction/tautology, this method will not 
+        be able to take this into account. However, aside from such "degenerate" cases, this should 
+        still work in typical practical scenarios.
+
+        If you need a guaranteed test, you can try `SymbolicAsyncGraph::is_trap_set` instead.
     """
     for var in bn.variables():
         var_name = bn.get_variable_name(var)

@@ -23,10 +23,10 @@ def test_space_percolation():
 
     assert {'a': '0', 'b': '0', 'c': '0'} == percolate_space(bn, {'a': '0'})[0]
     assert {} == percolate_space(bn, {'a': '0'})[1]
-    assert is_trap_space(bn, {'a': '0', 'b': '0', 'c': '0'})
+    assert is_syntactic_trap_space(bn, {'a': '0', 'b': '0', 'c': '0'})
     assert {'a': '1', 'b': '1', 'c': '1'} == percolate_space(bn, {'a': '1'})[0]
     assert {} == percolate_space(bn, {'a': '1'})[1]
-    assert is_trap_space(bn, {'a': '1', 'b': '1', 'c': '1'})
+    assert is_syntactic_trap_space(bn, {'a': '1', 'b': '1', 'c': '1'})
 
     bn = BooleanNetwork.from_bnet("""
     a, b
@@ -38,8 +38,8 @@ def test_space_percolation():
     assert {'a': '0', 'b': '0', 'c': '0'} == percolate_space(bn, {'a': '0', 'b': '0', 'c': '0'})[0]
     # The conflict is on b---the rest is fine.
     assert {'b': '1'} == percolate_space(bn, {'a': '0', 'b': '0', 'c': '0'})[1]
-    assert not is_trap_space(bn, {'a': '0'})
-    assert is_trap_space(bn, {})
+    assert not is_syntactic_trap_space(bn, {'a': '0'})
+    assert is_syntactic_trap_space(bn, {})
 
 def test_network_percolation():
     bn = BooleanNetwork.from_bnet("""
