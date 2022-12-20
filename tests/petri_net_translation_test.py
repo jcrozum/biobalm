@@ -1,6 +1,6 @@
 from nfvsmotifs.petri_net_translation import sanitize_network_names, network_to_petrinet
-from biodivine_aeon import RegulatoryGraph, BooleanNetwork
-from networkx import DiGraph, is_isomorphic
+from biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
+from networkx import DiGraph, is_isomorphic # type: ignore
 import pytest
 
 def test_sanitization():
