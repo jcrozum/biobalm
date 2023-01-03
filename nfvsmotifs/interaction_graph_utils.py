@@ -8,6 +8,19 @@ if TYPE_CHECKING:
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph # type: ignore
 
+from typing import List, Set
+from networkx.algorithms import bipartite
+
+from pyeda.boolalg.expr import expr
+from pyeda.boolalg.bdd import expr2bdd, bddvar
+
+from nfvsmotifs.SignedGraph import SignedGraph
+
+"""
+A python package for approximating minimum feedback vertex sets
+"""
+from nfvsmotifs.FVSpython3 import FVS as FVS
+
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     """
         Takes an arbitrary `BooleanNetwork` and extracts a signed interacion graph 
@@ -149,3 +162,139 @@ def independent_cycles(
         network = _digraph_to_regulatory_graph(network)
     ic = network.independent_cycles(parity=parity, restriction=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
+
+
+def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
+
+    """
+    BDD variables
+    """
+    bdd_vars = {}
+
+    """
+    BDDs of Boolean functions
+    """
+    bdd_funs = {}
+
+    """
+    Negative feedback vertex set
+    """
+    U_neg = []
+
+    """
+    List of source nodes
+    """
+
+    source_nodes = []
+
+    """
+    Node to input nodes
+    """
+
+    INx = {}
+
+    for variable in network.variables():
+        var_name = network.get_variable_name(variable)
+        function = network.get_update_function(variable)
+
+        if function.strip() == var_name:
+            source_nodes.append(var_name)
+
+        fx = expr(function.replace("!", "~"))
+
+        INx[var_name] = fx.support # list of nodes appearing in Boolean function fx
+
+        vx = bddvar(var_name)
+        fx = expr2bdd(expr(fx))
+
+        bdd_vars[var_name] = vx
+        bdd_funs[var_name] = fx
+
+    nodes = bdd_funs.keys()
+            
+    """Build the unsigned and signed interaction graphs"""
+    u_ig = DiGraph()
+    s_ig = SignedGraph(nodes)
+    
+    for x in nodes:
+        u_ig.add_node(x)
+
+        fx = bdd_funs[x]
+
+        for y in INx[x]:
+            is_actual_arc = False
+
+            vy = bdd_vars[str(y)]
+            
+            fx_res_vy_0 = fx.restrict({vy: 0})
+            fx_res_vy_1 = fx.restrict({vy: 1})
+
+            pos_arc = ~fx_res_vy_0 & fx_res_vy_1
+            neg_arc = fx_res_vy_0 & ~fx_res_vy_1
+
+            if pos_arc.is_one() or pos_arc.satisfy_one():
+                # a positive arc with weight = 1
+                s_ig.setEdge(str(y), str(x), 1)
+                is_actual_arc = True
+
+            if neg_arc.is_one() or neg_arc.satisfy_one():
+                # a negative arc with weight = -1
+                s_ig.setEdge(str(y), str(x), -1)
+                is_actual_arc = True
+
+            if is_actual_arc == True:
+                u_ig.add_edge(str(y), str(x))
+
+
+    """First, find feedback vertex set"""
+    U = FVS.FVS(u_ig)
+
+    U = list(set(U) - set(source_nodes))
+
+    """Second, filter feedback vertex set to get an negative feedback vertex set"""
+    U_neg = s_ig.getSelfNegativeLoops()
+    U_candidate = []
+
+    for v in U:
+        if not v in U_neg:
+            U_candidate.append(v)
+
+    for v in U_neg:
+        s_ig.removeVertex(v)
+
+    for v in source_nodes:
+        s_ig.removeVertex(v)
+    
+    while not IsNoNegativeCycle(s_ig):
+        v = SelectByDegreeNegative(s_ig, U_candidate)
+
+        if len(v) == 0:
+            break
+    
+        U_candidate.remove(v)
+
+        U_neg.append(v)
+        
+        s_ig.removeVertex(v)
+
+    
+    return U_neg
+
+
+def IsNoNegativeCycle(s_ig: SignedGraph) -> bool:
+    udGraph = s_ig.convertToUDGraph()
+    return bipartite.is_bipartite(udGraph)
+
+
+def SelectByDegreeNegative(s_ig: SignedGraph, U_candidate: list[str]) -> str:
+    v_selected = ""
+    maxNegDeg = -1
+
+    for v in U_candidate:
+        v_neg_deg = s_ig.GetDegreeNegative(v)
+
+        if v_neg_deg >= maxNegDeg:
+            v_selected = v
+            maxNegDeg = v_neg_deg
+
+    return v_selected
