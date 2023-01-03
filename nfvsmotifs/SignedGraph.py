@@ -1,10 +1,10 @@
 import os
-import networkx as nx
+import networkx as nx # type: ignore
 
 class SignedGraph:
     V: int
-    adjacencyListPositive: dict
-    adjacencyListNegative: dict
+    adjacencyListPositive: dict[str, list[str]]
+    adjacencyListNegative: dict[str, list[str]]
     
     def __init__(self, listVertex: list[str]):
         self.V = len(listVertex)

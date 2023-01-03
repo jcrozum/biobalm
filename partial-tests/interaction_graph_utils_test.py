@@ -177,11 +177,11 @@ def test_fvs_accuracy_CASCADE3():
     file_path = os.getcwd() + "/CASCADE3.bnet"
     bn_real = BooleanNetwork.from_file(file_path)
 
-    nfvs_aeon = feedback_vertex_set(bn_real, parity='negative')
+    nfvs_aeon = feedback_vertex_set(bn_real.infer_regulatory_graph().graph(), parity='negative')
     nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
 
     assert len(nfvs_mtsNFVS) <= 19 # the result of mtsNFVS is 19
-    assert len(nfvs_aeon) <= 22 # the result of AEON is 23
+    assert len(nfvs_aeon) <= 21 # the result of AEON is 21
     
 
 def test_fvs_accuracy_SIPC():
@@ -192,10 +192,53 @@ def test_fvs_accuracy_SIPC():
     file_path = os.getcwd() + "/SIPC.bnet"
     bn_real = BooleanNetwork.from_file(file_path)
 
-    nfvs_aeon = feedback_vertex_set(bn_real, parity='negative')
+    nfvs_aeon = feedback_vertex_set(bn_real.infer_regulatory_graph().graph(), parity='negative')
     nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
 
     assert len(nfvs_mtsNFVS) <= 13 # the result of mtsNFVS is 13
-    assert len(nfvs_aeon) <= 25 # the result of AEON is 26
+    assert len(nfvs_aeon) <= 13 # the result of AEON is 13
+
+
+def test_fvs_accuracy_CASCADE2():
+    """
+    Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the SIPC model <https://doi.org/10.7554/eLife.72626>.
+    Note that the result of mtsNFVS is not deterministic.
+    """
+    file_path = os.getcwd() + "/CASCADE2.bnet"
+    bn_real = BooleanNetwork.from_file(file_path)
+
+    nfvs_aeon = feedback_vertex_set(bn_real.infer_regulatory_graph().graph(), parity='negative')
+    nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
+
+    assert len(nfvs_mtsNFVS) <= 17 # the result of mtsNFVS is 17
+    assert len(nfvs_aeon) <= 20 # the result of AEON is 20
     
 
+def test_fvs_accuracy_Cell_Cycle_2019():
+    """
+    Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the Cell-Cycle-2019 model <https://doi.org/10.1371/journal.pcbi.1006402>.
+    Note that the result of mtsNFVS is not deterministic.
+    """
+    file_path = os.getcwd() + "/Cell-Cycle-2019.bnet"
+    bn_real = BooleanNetwork.from_file(file_path)
+
+    nfvs_aeon = feedback_vertex_set(bn_real.infer_regulatory_graph().graph(), parity='negative')
+    nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
+
+    assert len(nfvs_mtsNFVS) <= 26 # the result of mtsNFVS is 26
+    assert len(nfvs_aeon) <= 25 # the result of AEON is 25
+
+
+def test_fvs_accuracy_EMT_Mechanosensing():
+    """
+    Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the EMT_Mechanosensing model <https://doi.org/10.1101/2022.08.29.505701>.
+    Note that the result of mtsNFVS is not deterministic.
+    """
+    file_path = os.getcwd() + "/EMT_Mechanosensing.bnet"
+    bn_real = BooleanNetwork.from_file(file_path)
+
+    nfvs_aeon = feedback_vertex_set(bn_real.infer_regulatory_graph().graph(), parity='negative')
+    nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
+
+    assert len(nfvs_mtsNFVS) <= 38 # the result of mtsNFVS is 38
+    assert len(nfvs_aeon) <= 19 # the result of AEON is 19
