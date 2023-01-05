@@ -246,7 +246,6 @@ def _create_clingo_constraints_fixed_point(
             continue
         elif kind == "transition":
             preds = list(petri_net.predecessors(node))
-            atoms = []
 
             pred_rhs = "; ".join(preds)
             ctl.add("base", [], f":- {pred_rhs}.")
