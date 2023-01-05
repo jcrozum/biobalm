@@ -191,3 +191,129 @@ def _create_clingo_constraints(
                 ctl.add(f"{variable_to_place(variable, True)}; {variable_to_place(variable, False)}.")
 
     return ctl     
+
+
+def _clingo_model_to_space_fixed_point(model: Model) -> Dict[str, str]:    
+    space = {}
+
+    for atom in model.symbols(atoms=True):
+        atom_str = str(atom)
+        (variable, is_positive) = place_to_variable(atom_str)
+        
+        # This should be prevented by the "conflic-free" property of the result, 
+        # but just in case.
+        assert variable not in space
+
+        # Note that this is opposite to the case of trap spaces. If "positive" symbol
+        # appears in the solution, we fix the value to "1". Otherwise, we fix the value "0"
+
+        space[variable] = "1" if is_positive else "0"
+
+    return space
+
+
+def _create_clingo_constraints_fixed_point(
+    petri_net: DiGraph,
+    nodes: List[str],
+) -> Control:
+    """
+        Generate the ASP characterizing all deadlocks of the Petri net (equivalently all fixed points of the Boolean network).
+    """
+    
+    dom_mod = "--dom-mod=3, 16" # for fixed points
+    
+    # "0" specifies that all solutions should be listed (we implement the limit
+    # later using callbacks).
+    # TODO: Explain what remaining options mean and why we need them?
+    ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
+
+    # Declare places and their conflicts based on network variables.
+    for node in nodes:
+        p_name = variable_to_place(node, positive=True)
+        n_name = variable_to_place(node, positive=False)
+
+        # Declare a positive and negative symbol.        
+        ctl.add("base", [], f"{{{p_name}}}.")
+        ctl.add("base", [], f"{{{n_name}}}.")
+
+        # Assert there is a fixed point.     
+        ctl.add("base", [], f":- {p_name}, {n_name}.")
+        ctl.add("base", [], f"{p_name} ; {n_name}.")
+
+
+    for node, kind in petri_net.nodes(data="kind"):
+        if kind == "place":
+            continue
+        elif kind == "transition":
+            preds = list(petri_net.predecessors(node))
+            atoms = []
+
+            pred_rhs = "; ".join(preds)
+            ctl.add("base", [], f":- {pred_rhs}.")
+        else:
+            raise Exception(f"Unexpected node kind: `{kind}`.")
+
+
+    return ctl 
+
+
+def compute_fixed_point_reduced_STG_async(
+    petri_net: DiGraph,
+    nodes: List[str],
+    retained_set: Dict[str, str],
+    on_solution: Callable[[Dict[str, str]], bool],
+):
+    """
+        The same as the `trappist` method, but instead of returning a list of spaces as a result, the
+        spaces are returned to the supplied `on_solution` callback. You can stop the enumeration by
+        returning `False` from this callback.
+    """
+
+    reduced_petri_net = petri_net.copy()
+    for node in retained_set.keys():
+        b_i = retained_set[node]
+        source_place = ""
+
+        if b_i == "0":
+            source_place = variable_to_place(node, positive=False)
+
+        if b_i == "1":
+            source_place = variable_to_place(node, positive=True)
+
+        preds = list(reduced_petri_net.predecessors(source_place))
+        succs = list(reduced_petri_net.successors(source_place))
+
+        deleted_transitions = list(set(succs) - set(preds))
+
+        for trans in deleted_transitions:
+            reduced_petri_net.remove_node(trans)
+
+
+    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes)
+    ctl.ground([("base", [])])
+    result = ctl.solve(yield_=True)
+    if type(result) == SolveHandle:
+        with result as iterator:
+            for model in iterator:                    
+                if not on_solution(_clingo_model_to_space_fixed_point(model)):
+                    break
+    # Else: unsat, hence we don't do anything.
+
+
+def compute_fixed_point_reduced_STG(
+    petri_net: DiGraph,
+    nodes: List[str],
+    retained_set: Dict[str, str], 
+    solution_limit: Optional[int] = None,    
+) -> List[Dict[str, str]]:
+    """
+        Now, this method only support computing all fixed points of the reduced STG with respect to the retained set of Boolean values.
+        We can add more constraints to this method further, e.g., avoidant sub-spaces (self-negating time-reversal trap spaces).
+    """
+
+    results = []
+    def save_result(x):
+        results.append(x)
+        return solution_limit == None or len(results) < solution_limit
+    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result)
+    return results
