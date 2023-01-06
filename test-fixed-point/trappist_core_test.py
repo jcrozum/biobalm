@@ -16,6 +16,9 @@ def test_network_fixed_point_reduced_STG():
 
     petri_net = network_to_petrinet(bn)
     nodes = []
+    avoid_subspace_1 = {"x1" : "1", "x2" : "1"}
+    avoid_subspace_2 = {}
+    avoid_subspace_3 = {"x2" : "1"}
 
     for var in bn.variables():
         name = bn.get_variable_name(var)
@@ -26,9 +29,25 @@ def test_network_fixed_point_reduced_STG():
     candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set)
     assert len(candidate_set) == 2 # candidate_set = {00, 11}
 
+    candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces=[avoid_subspace_1])
+    assert len(candidate_set) == 1 # candidate_set = {00}
+
+    candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces=[avoid_subspace_2])
+    assert len(candidate_set) == 0 # candidate_set = empty
+
     retained_set = {"x1" : "1", "x2" : "1"}
     candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set)
     assert len(candidate_set) == 3 # candidate_set = {01, 10, 11}
+
+    candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces=[avoid_subspace_1])
+    assert len(candidate_set) == 2 # candidate_set = {01, 10}
+
+    candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces=[avoid_subspace_2])
+    assert len(candidate_set) == 0 # candidate_set = empty
+
+    candidate_set = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces=[avoid_subspace_3])
+    assert len(candidate_set) == 1 # candidate_set = {10}
+
 
     
 

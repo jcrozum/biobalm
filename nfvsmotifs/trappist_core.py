@@ -215,6 +215,7 @@ def _clingo_model_to_space_fixed_point(model: Model) -> Dict[str, str]:
 def _create_clingo_constraints_fixed_point(
     petri_net: DiGraph,
     nodes: List[str],
+    avoid_subspaces: List[Dict[str, str]] = [],
 ) -> Control:
     """
         Generate the ASP characterizing all deadlocks of the Petri net (equivalently all fixed points of the Boolean network).
@@ -252,6 +253,19 @@ def _create_clingo_constraints_fixed_point(
         else:
             raise Exception(f"Unexpected node kind: `{kind}`.")
 
+    # Ensure that fixed points can't lie in either subspace in `avoid_subspaces`. 
+    for to_avoid in avoid_subspaces:
+        if len(to_avoid) > 0:
+            """
+                Note that there is oppsite to the case of trap spaces.
+                m(x) = 0 ~ place b0_x and m(x) = 1 ~ place b1_x
+            """
+            fixed_list = [ variable_to_place(var, (to_avoid[var] == "1")) for var in to_avoid ]
+            fixed_vars = ", ".join(fixed_list)
+            ctl.add("base", [], f":- {fixed_vars}.")
+        else:
+            ctl.add("base", [], f"#false.")
+            break # There is no solution and we do not need to process more.
 
     return ctl 
 
@@ -261,6 +275,7 @@ def compute_fixed_point_reduced_STG_async(
     nodes: List[str],
     retained_set: Dict[str, str],
     on_solution: Callable[[Dict[str, str]], bool],
+    avoid_subspaces: List[Dict[str, str]] = [],
 ):
     """
         The same as the `trappist` method, but instead of returning a list of spaces as a result, the
@@ -288,7 +303,7 @@ def compute_fixed_point_reduced_STG_async(
             reduced_petri_net.remove_node(trans)
 
 
-    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes)
+    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes, avoid_subspaces)
     ctl.ground([("base", [])])
     result = ctl.solve(yield_=True)
     if type(result) == SolveHandle:
@@ -302,17 +317,18 @@ def compute_fixed_point_reduced_STG_async(
 def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
     nodes: List[str],
-    retained_set: Dict[str, str], 
-    solution_limit: Optional[int] = None,    
+    retained_set: Dict[str, str],
+    avoid_subspaces: List[Dict[str, str]] = [],
+    solution_limit: Optional[int] = None,
 ) -> List[Dict[str, str]]:
     """
-        Now, this method only support computing all fixed points of the reduced STG with respect to the retained set of Boolean values.
-        We can add more constraints to this method further, e.g., avoidant sub-spaces (self-negating time-reversal trap spaces).
+        Now, this method supports computing all fixed points of the reduced STG with respect to the retained set of Boolean values.
+        This also supports finding the states that do not belong to avoidant sub-spaces.
     """
 
     results = []
     def save_result(x):
         results.append(x)
         return solution_limit == None or len(results) < solution_limit
-    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result)
+    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result, avoid_subspaces=avoid_subspaces)
     return results
