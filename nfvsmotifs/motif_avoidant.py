@@ -147,7 +147,7 @@ def PintReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: 
     return "False"
 
 
-def SATReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> str:
+def SATReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram, d_bound: int) -> str:
     # TODO
 
     return "False"
@@ -156,4 +156,4 @@ def SATReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: B
 def MoleReach(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> bool:
     # TODO
     
-    return "False"
+    return False
