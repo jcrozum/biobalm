@@ -5,9 +5,10 @@ from pyeda.boolalg.expr import expr # type:ignore
 from typing import List, Set, Dict # type: ignore
 
 from biodivine_aeon import BooleanNetwork # type:ignore
-from nfvsmotifs.motif_avoidant import PreprocessingSSF # type:ignore
+from nfvsmotifs.motif_avoidant import PreprocessingSSF, FilteringProcess # type:ignore
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda # type:ignore
 from nfvsmotifs.state_utils import state_2_bdd, list_state_2_bdd, eval_function, is_member_bdd # type:ignore
+from nfvsmotifs.petri_net_translation import network_to_petrinet # type:ignore
 
 def test_preprocessing_ssf_not_optimal():
     bn = BooleanNetwork.from_bnet("""
@@ -31,8 +32,8 @@ def test_preprocessing_ssf_not_optimal():
 
     """
         The minimum NFVS is {x1, x2}.
-        If b_1 = 0 and b_2 = 0, then F = {00}.
-        If b_1 = 1 and b_2 = 1, then F = {01, 10}.
+        If b_1 = 0 and b_2 = 0, then F = [00].
+        If b_1 = 1 and b_2 = 1, then F = [01, 10].
     """
 
     # F = {00}
@@ -73,9 +74,33 @@ def test_preprocessing_ssf_optimal():
     """
         The minimum NFVS is {A, B}.
         Assume that b_A = 0 and b_B = 0.
-        Then F = {000}.
+        Then F = [000].
     """
 
     F = [s0]
     F = PreprocessingSSF(bn, F, terminal_res_space)
     assert len(F) == 0
+
+
+def test_filtering_process():
+    bn = BooleanNetwork.from_bnet("""
+        x1, (x1 & x2) | (!x1 & !x2)
+        x2, (x1 & x2) | (!x1 & !x2)
+    """)
+    
+    s0 = {'x1': 0, 'x2': 0}
+    s1 = {'x1': 0, 'x2': 1}
+    s2 = {'x1': 1, 'x2': 0}
+    s3 = {'x1': 1, 'x2': 1}
+
+    """
+        Assume that F = [00] and terminal_res_space = {00, 01, 10}
+    """
+
+    F = [s0]
+    terminal_res_space = list_state_2_bdd([s0, s1, s2])
+
+    motif_avoidant_atts = FilteringProcess(bn, network_to_petrinet(bn), F, terminal_res_space)
+
+    # motif_avoidant_atts = [00]
+    assert len(motif_avoidant_atts) == 1

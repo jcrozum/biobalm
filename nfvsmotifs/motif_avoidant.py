@@ -95,4 +95,65 @@ def FilteringProcess(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[s
         TODO: Filtering out the candidate set by using the reachability analysis.
     """
 
+    target_set = ~terminal_res_space
+    F_bdd = list_state_2_bdd(F)
+    A = 0
+
+    while len(F) > 0:
+        state = F.pop(0)
+
+        state_bdd = state_2_bdd(state)
+        F_bdd = F_bdd & ~state_bdd
+
+        joint_target_set = target_set | F_bdd | A
+
+        if ABNReach(network, petri_net, state, joint_target_set) == False:
+            A = A | state_bdd
+            list_motif_avoidant_atts.append(state)
+        
+
     return list_motif_avoidant_atts
+
+
+def ABNReach(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> bool:
+    is_reachable: bool = False
+
+    # The first phase using Pint <https://loicpauleve.name/pint/doc/transient-analysis.html>
+    pint_result = PintReach(network, state, joint_target_set)
+
+    if pint_result == "True":
+        is_reachable = True
+    elif pint_result == "False":
+        is_reachable = False
+    else:
+        # The second phase using SAT-based bounded model checking
+        d_bound: int = 20
+        sat_result = SATReach(network, state, joint_target_set, d_bound)
+
+        if sat_result == "True":
+            is_reachable = True
+        else:
+            # The final phase using Petri net unfoldings
+            # This phase is the last resort ensuring the correctness of ABNReach
+
+            is_reachable = MoleReach(network, petri_net, state, joint_target_set)
+
+    return is_reachable
+
+
+def PintReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> str:
+    # TODO
+
+    return "False"
+
+
+def SATReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> str:
+    # TODO
+
+    return "False"
+
+
+def MoleReach(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> bool:
+    # TODO
+    
+    return "False"
