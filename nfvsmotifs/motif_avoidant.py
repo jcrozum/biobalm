@@ -26,10 +26,10 @@ def motif_avoidant_check(network: BooleanNetwork, petri_net: DiGraph, F: list[di
     """
     list_motif_avoidant_atts = []
 
-    if not F.is_empty():
+    if len(F) > 0:
         F = PreprocessingSSF(network, F, terminal_res_space)
 
-        if not F.is_empty():
+        if len(F) > 0:
             """
                 PreprocessingSSF does not reach the best case.
                 Hence we need to use the reachability analysis on the asynchronous Boolean network.
@@ -88,8 +88,8 @@ def PreprocessingSSF(network: BooleanNetwork, F: list[dict[str, int]], terminal_
     return F_result
 
 
-def FilteringProcess(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram):
-    list_motif_avoidant_atts = []
+def FilteringProcess(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram) -> list[dict[str, int]]:
+    list_motif_avoidant_atts: list[dict[str, int]] = []
 
     """
         TODO: Filtering out the candidate set by using the reachability analysis.
