@@ -1,0 +1,15 @@
+(* This model has been automatically generated using colomoto/logicalmodels
+ * You may want to optimize this model for pint using the following command:
+       pint-export --simplify -i model.an -o model.an
+ * where model.an is this file.
+ *)
+
+"x1" [0, 1]
+"x2" [0, 1]
+
+"x1" 0 -> 1 when "x2"=0
+"x1" 1 -> 0 when "x2"=0
+
+"x2" 0 -> 1 when "x1"=0
+"x2" 1 -> 0 when "x1"=0
+
