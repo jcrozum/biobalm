@@ -5,7 +5,7 @@ from pyeda.boolalg.expr import expr # type:ignore
 from typing import List, Set, Dict # type: ignore
 
 from biodivine_aeon import BooleanNetwork # type:ignore
-from nfvsmotifs.motif_avoidant import PreprocessingSSF, FilteringProcess, PintReach, ABNReach_current_version # type:ignore
+from nfvsmotifs.motif_avoidant import PreprocessingSSF, FilteringProcess, ABNReach_current_version # type:ignore
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda # type:ignore
 from nfvsmotifs.state_utils import state_2_bdd, list_state_2_bdd, eval_function, is_member_bdd # type:ignore
 from nfvsmotifs.petri_net_translation import network_to_petrinet # type:ignore
@@ -38,12 +38,12 @@ def test_preprocessing_ssf_not_optimal():
 
     # F = {00}
     F = [s0]
-    F = PreprocessingSSF(bn, F, terminal_res_space)
+    F = PreprocessingSSF(bn, F, terminal_res_space, I_MAX=1000)
     assert len(F) == 1
 
     # F = {01, 10}
     F = [s1, s2]
-    F = PreprocessingSSF(bn, F, terminal_res_space)
+    F = PreprocessingSSF(bn, F, terminal_res_space, I_MAX=1000)
     assert len(F) == 1
     
 
@@ -78,41 +78,11 @@ def test_preprocessing_ssf_optimal():
     """
 
     F = [s0]
-    F = PreprocessingSSF(bn, F, terminal_res_space)
+    F = PreprocessingSSF(bn, F, terminal_res_space, I_MAX=1000)
     assert len(F) == 0
 
 
-def test_PintReach():
-    bn_name = "test"
-    bn = BooleanNetwork.from_bnet("""
-        x1, (x1 & x2) | (!x1 & !x2)
-        x2, (x1 & x2) | (!x1 & !x2)
-    """)
-    
-    s0 = {'x1': 0, 'x2': 0}
-    s1 = {'x1': 0, 'x2': 1}
-    s2 = {'x1': 1, 'x2': 0}
-    s3 = {'x1': 1, 'x2': 1}
-
-    joint_target_set = list_state_2_bdd([s3])
-    pint_result = PintReach(bn, s0, joint_target_set, bn_name)
-    assert pint_result == "Inconc" # 00 does not reach 11, but Pint cannot determine
-
-    joint_target_set = list_state_2_bdd([s0])
-    pint_result = PintReach(bn, s3, joint_target_set, bn_name)
-    assert pint_result == "False" # 11 does not reach 00
-
-    joint_target_set = list_state_2_bdd([s1])
-    pint_result = PintReach(bn, s0, joint_target_set, bn_name)
-    assert pint_result == "True" # 00 reaches 01
-
-    joint_target_set = list_state_2_bdd([s1, s3])
-    pint_result = PintReach(bn, s0, joint_target_set, bn_name)
-    assert pint_result == "True" # 00 reaches 01
-
-
 def test_ABNReach_current_version():
-    bn_name = "test"
     bn = BooleanNetwork.from_bnet("""
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
@@ -123,25 +93,26 @@ def test_ABNReach_current_version():
     s2 = {'x1': 1, 'x2': 0}
     s3 = {'x1': 1, 'x2': 1}
 
+    petri_net = network_to_petrinet(bn)
+
     joint_target_set = list_state_2_bdd([s3])
-    is_reachable = ABNReach_current_version(bn, s0, joint_target_set, bn_name)
+    is_reachable = ABNReach_current_version(bn, petri_net, s0, joint_target_set)
     assert is_reachable ==  False # 00 does not reach 11, Pint cannot determinem but Mole can
 
     joint_target_set = list_state_2_bdd([s0])
-    is_reachable = ABNReach_current_version(bn, s3, joint_target_set, bn_name)
+    is_reachable = ABNReach_current_version(bn, petri_net, s3, joint_target_set)
     assert is_reachable == False # 11 does not reach 00
 
     joint_target_set = list_state_2_bdd([s1])
-    is_reachable = ABNReach_current_version(bn, s0, joint_target_set, bn_name)
+    is_reachable = ABNReach_current_version(bn, petri_net, s0, joint_target_set)
     assert is_reachable == True # 00 reaches 01
 
     joint_target_set = list_state_2_bdd([s1, s3])
-    is_reachable = ABNReach_current_version(bn, s0, joint_target_set, bn_name)
+    is_reachable = ABNReach_current_version(bn, petri_net, s0, joint_target_set)
     assert is_reachable == True # 00 reaches 01
 
 
 def test_FilteringProcess():
-    bn_name = "test"
     bn = BooleanNetwork.from_bnet("""
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
@@ -155,9 +126,8 @@ def test_FilteringProcess():
     terminal_res_space = list_state_2_bdd([s0, s1, s2])
     petri_net = network_to_petrinet(bn)
 
-
     F = [s1, s2] # Candidate set after finishing PreprocessingSSF
-    list_motif_avoidant_atts = FilteringProcess(bn, petri_net, F, terminal_res_space, bn_name)
+    list_motif_avoidant_atts = FilteringProcess(bn, petri_net, F, terminal_res_space)
     assert len(list_motif_avoidant_atts) == 1 # a motif-avoidant attractor {00, 01, 10}
 
 
