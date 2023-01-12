@@ -74,14 +74,10 @@ def PreprocessingSSF(network: BooleanNetwork, F: list[dict[str, int]], terminal_
             random.shuffle(nodes)
 
             for node in nodes:
-                #print(node)
                 state[node] = eval_function(funs_bdd[node], state)
-
-            #print(state)
 
             if is_member_bdd(state, F_bdd) or is_member_bdd(state, target_set):
                 reach_target_set = True
-                #print("Reach terget set")
                 break
 
         if reach_target_set == False:
@@ -111,38 +107,12 @@ def FilteringProcess(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[s
 
         joint_target_set = target_set | F_bdd | A
 
-        if ABNReach(network, petri_net, state, joint_target_set, bn_name) == False:
+        if ABNReach_current_version(network, state, joint_target_set, bn_name) == False:
             A = A | state_bdd
             list_motif_avoidant_atts.append(state)
         
 
     return list_motif_avoidant_atts
-
-
-def ABNReach(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram, bn_name: str) -> bool:
-    is_reachable: bool = False
-
-    # The first phase using Pint <https://loicpauleve.name/pint/doc/transient-analysis.html>
-    pint_result = PintReach(network, state, joint_target_set, bn_name)
-
-    if pint_result == "True":
-        is_reachable = True
-    elif pint_result == "False":
-        is_reachable = False
-    else:
-        # The second phase using SAT-based bounded model checking
-        d_bound: int = 20
-        sat_result = SATReach(network, state, joint_target_set, d_bound, bn_name)
-
-        if sat_result == "True":
-            is_reachable = True
-        else:
-            # The final phase using Petri net unfoldings
-            # This phase is the last resort ensuring the correctness of ABNReach
-
-            is_reachable = MoleReach(network, petri_net, state, joint_target_set, bn_name)
-
-    return is_reachable
 
 
 def Pint_get_goal_from_bdd(joint_target_set: BinaryDecisionDiagram) -> Goal:
@@ -181,16 +151,65 @@ def Pint_get_goal_from_bdd(joint_target_set: BinaryDecisionDiagram) -> Goal:
     return goal
 
 
+def ABNReach_current_version(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram, bn_name: str) -> bool:
+    # In this version, we only use Pint.
+    # If the result of Pint is True (i.e., reachable) or False (i.e., unreachable), we simply return this result.
+    # If the result of Pint is Inconc (i.e., not determining whether reachable or unreachable), Pint falls back to an exact model checker (e.g., Mole).
+    # However, in the latter case, we can exploit the goal reduction technique of Pint.
+
+    is_reachable: bool = False
+
+    # Assume that we have the .an file in the current dictory
+    # In the future, we can build the asynchronous automaton (input of Pint) from the BooleanNetwork object)
+    an_file = os.getcwd() + "/" + bn_name + ".an"
+
+    m = pypint.load(an_file)
+
+    # set the initial state
+    for node in state:
+        m.initial_state[node] = state[node]
+
+    # get the goal
+    goal = Pint_get_goal_from_bdd(joint_target_set)
+
+    is_reachable = m.reachability(goal=goal, fallback='mole')
+
+    return is_reachable
+
+
+def ABNReach_under_review_version(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram, bn_name: str) -> bool:
+    is_reachable: bool = False
+
+    # The first phase using Pint <https://loicpauleve.name/pint/doc/transient-analysis.html>
+    pint_result = PintReach(network, state, joint_target_set, bn_name)
+
+    if pint_result == "True":
+        is_reachable = True
+    elif pint_result == "False":
+        is_reachable = False
+    else:
+        # The second phase using SAT-based bounded model checking
+        d_bound: int = 20
+        sat_result = SATReach(network, state, joint_target_set, d_bound, bn_name)
+
+        if sat_result == "True":
+            is_reachable = True
+        else:
+            # The final phase using Petri net unfoldings
+            # This phase is the last resort ensuring the correctness of ABNReach
+
+            is_reachable = MoleReach(network, petri_net, state, joint_target_set, bn_name)
+
+    return is_reachable
+
+
 def PintReach(network: BooleanNetwork, state: dict[str, int], joint_target_set: BinaryDecisionDiagram, bn_name: str) -> str:
-    # TODO
     # Install Pint on Linux by: `conda install -c colomoto pint`
     # Install the Python interface of Pint by: `pip3 install -U pypint`
 
     # Assume that we have the .an file in the current dictory
     # In the future, we can build the asynchronous automaton (input of Pint) from the BooleanNetwork object)
     an_file = os.getcwd() + "/" + bn_name + ".an"
-
-    #print(an_file)
 
     m = pypint.load(an_file)
 
