@@ -25,7 +25,7 @@ from pypint import Goal # type:ignore
     The terminal restriction space is represented as a BDD.
 """
 
-def motif_avoidant_check(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram) -> list[dict[str, int]]:
+def motif_avoidant_check(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram, I_MAX: int) -> list[dict[str, int]]:
     """
         Return the list of states corresponding to motif-avoidant attractors.
         This list may be empty, indicating that there are no motif-avoidant attractors.
@@ -33,7 +33,7 @@ def motif_avoidant_check(network: BooleanNetwork, petri_net: DiGraph, F: list[di
     list_motif_avoidant_atts = []
 
     if len(F) > 0:
-        F = PreprocessingSSF(network, F, terminal_res_space)
+        F = PreprocessingSSF(network, F, terminal_res_space, I_MAX)
 
         if len(F) > 0:
             """
@@ -195,7 +195,7 @@ def write_an_file_from_petri_net(network: BooleanNetwork, petri_net: DiGraph, an
 
                 conds.append(cond)
 
-            conds = " and ".join(conds)
+            conds_str = " and ".join(conds)
 
             value_change = source_place[1] + " -> " + target_place[1]
 
@@ -204,7 +204,7 @@ def write_an_file_from_petri_net(network: BooleanNetwork, petri_net: DiGraph, an
 
             # write the transition
             print(
-                f"\"{node_name}\" {value_change} when {conds}", file=an_file
+                f"\"{node_name}\" {value_change} when {conds_str}", file=an_file
             )
 
 
