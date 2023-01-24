@@ -1,19 +1,29 @@
 from __future__ import annotations
 """
-    Operations on states
+    Utility operations on states. State (or a subspace) is represented as a dictionary of model 
+    variables mapping keys to 0/1 values.
 """
 
-from pyeda.boolalg import boolfunc # type:ignore
-from pyeda.boolalg.bdd import bddvar, expr2bdd, BinaryDecisionDiagram # type:ignore
-from pyeda.boolalg.expr import expr # type:ignore
+from pyeda.boolalg.bdd import bddvar # type:ignore
 
-from typing import List, Dict # type: ignore
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import List, Dict, Optional
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable # type:ignore
 
-def state_2_bdd(state: dict[str, int]) -> BinaryDecisionDiagram:
+def _state_dict_to_bdd_valuation(state: Dict[str, int]) -> Dict[BDDVariable, int]:
+    """
+        Convert state variables in a dictionary to their BDD counterparts.
+    """
+    return { bddvar(x): y for (x,y) in state.items() }
+
+def state_to_bdd(state: Dict[str, int]) -> BinaryDecisionDiagram:
+    """
+        Convert a state variables to a BDD encoding the state singleton.
+    """
     state_bdd = 1
 
-    for node in state:
-        value = state[node]
+    for node, value in state.items():
         node_bdd = bddvar(node)
 
         if value == 1:
@@ -25,41 +35,48 @@ def state_2_bdd(state: dict[str, int]) -> BinaryDecisionDiagram:
     return state_bdd
 
 
-def list_state_2_bdd(states: list[dict[str, int]]) -> BinaryDecisionDiagram:
+def state_list_to_bdd(states: List[Dict[str, int]]) -> BinaryDecisionDiagram:
+    """
+        Convert a list of state dictionaries to a BDD representation.
+    """
     result_bdd = 0
 
     for state in states:
-        result_bdd = result_bdd | state_2_bdd(state)
+        result_bdd = result_bdd | state_to_bdd(state)
 
     return result_bdd
 
+def function_restrict(f: BinaryDecisionDiagram, state: Dict[str, int]) -> BinaryDecisionDiagram:
+    """
+        Restrict the validity of the given BDD function to valuations which 
+        are compatible with the given state variable dictionary.
+    """
+    bdd_state = _state_dict_to_bdd_valuation(state)
+    return f.restrict(bdd_state)
 
-def eval_function(f: BinaryDecisionDiagram, state: dict[str, int]) -> int:
+def function_eval(f: BinaryDecisionDiagram, state: Dict[str, int]) -> Optional[int]:
+    """
+        Evaluate a BDD function in the given state to an integer value. If the state is incomplete
+        (i.e. it is a space), the function may not evaluate to an exact integer. In such case,
+        `None` is returned.
+    """
     if f.is_zero():
         return 0
 
-    state_bdd_dict = {}
-    for node in state:
-        node_bdd = bddvar(node)
-        state_bdd_dict[node_bdd] = state[node]
-
-    f_strict = f.restrict(state_bdd_dict)
-
-    if f_strict.is_one():
+    reduced_f = function_restrict(f, state)
+    if reduced_f.is_one():
         return 1
-    else:
+    if reduced_f.is_zero():
         return 0
+    return None
 
-
-def is_member_bdd(state: dict[str, int], f: BinaryDecisionDiagram) -> bool:
+def function_is_true(f: BinaryDecisionDiagram, state: Dict[str, int]) -> bool:
+    """
+        Returns `True` if the given BDD function evaluates to `1` for the given 
+        state (or space). 
+    """
     if f.is_zero():
         return False
 
-    state_bdd_dict = {}
-    for node in state:
-        node_bdd = bddvar(node)
-        state_bdd_dict[node_bdd] = state[node]
-
-    f_strict = f.restrict(state_bdd_dict)
-
-    return f_strict.is_one()
+    return function_restrict(f, state).is_one()
+    

@@ -1,239 +1,245 @@
-import random # type: ignore
-import os # type: ignore
-import tempfile # type: ignore
+from __future__ import annotations
 
-from pyeda.boolalg import boolfunc # type:ignore
-from pyeda.boolalg.bdd import bddvar, expr2bdd, BinaryDecisionDiagram # type:ignore
-from pyeda.boolalg.expr import expr # type:ignore
-
+import random
+from functools import reduce
+from networkx import DiGraph # type:ignore
+from pyeda.boolalg.bdd import expr2bdd # type:ignore
+from pypint import InMemoryModel, Goal # type:ignore
 from biodivine_aeon import BooleanNetwork # type: ignore
 
-from typing import List, Set, Dict, IO # type: ignore
+from nfvsmotifs.petri_net_translation import place_to_variable
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
+from nfvsmotifs.state_utils import state_to_bdd, state_list_to_bdd, function_eval, function_is_true
 
-from networkx import DiGraph # type: ignore
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import List, Dict
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram # type:ignore
 
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda # type:ignore
-from nfvsmotifs.state_utils import state_2_bdd, list_state_2_bdd, eval_function, is_member_bdd # type:ignore
-from nfvsmotifs.petri_net_translation import network_to_petrinet # type:ignore
-
-import pypint # type:ignore
-from pypint import Goal # type:ignore
 
 """
-    A state is represented as a dict.
-    The considered Boolean network is represented by a BooleanNetwork object provided by AEON.
-    The terminal restriction space is represented as a BDD.
+    A module responsible for detecting motif-avoidant attractors within terminal restriction space.
 """
 
-def motif_avoidant_check(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram, I_MAX: int) -> list[dict[str, int]]:
+def detect_motif_avoidant_attractors(
+    network: BooleanNetwork,
+    petri_net: DiGraph,
+    candidates: List[Dict[str, int]],
+    terminal_restriction_space: BinaryDecisionDiagram,
+    max_iterations: int
+) -> List[Dict[str, int]]:
     """
-        Return the list of states corresponding to motif-avoidant attractors.
-        This list may be empty, indicating that there are no motif-avoidant attractors.
-    """
-    list_motif_avoidant_atts = []
-
-    if len(F) > 0:
-        F = PreprocessingSSF(network, F, terminal_res_space, I_MAX)
-
-        if len(F) > 0:
-            """
-                PreprocessingSSF does not reach the best case.
-                Hence we need to use the reachability analysis on the asynchronous Boolean network.
-            """
-
-            list_motif_avoidant_atts = FilteringProcess(network, petri_net, F, terminal_res_space)
-
-
-    return list_motif_avoidant_atts
-
-
-def PreprocessingSSF(network: BooleanNetwork, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram, I_MAX: int) -> list[dict[str, int]]:
-    """
-        I_MAX: the maximum number of iterations of PreprocessingSSF
+        Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
+        Other method inputs:
+         - `network` and `petri_net` represent the model in which the property should be checked.
+         - `terminal_restriction_space` is a symbolic set of states which contains all motif avoidant 
+            attractors (i.e. if a candidate state can leave this set, the candidate cannot be an attractor).
+         - `max_iterations` specifies how much time should be spent on the "simpler" preprocessing
+            before applying a more complete method.
     """
 
-    F_result = []
+    if len(candidates) == 0:
+        return []
+    
+    candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations)
 
-    target_set = ~terminal_res_space
-    F_bdd = list_state_2_bdd(F)
+    if len(candidates) == 0:
+        return []
 
-    nodes = []
-    funs_bdd = {}
+    return _filter_candidates(petri_net, candidates, terminal_restriction_space)
+
+def _preprocess_candidates(
+    network: BooleanNetwork,
+    candidates: List[Dict[str, int]],
+    terminal_restriction_space: BinaryDecisionDiagram,
+    max_iterations: int
+) -> List[Dict[str, int]]:
+    """
+        A fast but incomplete method for eliminating spurious attractor candidates. 
+
+        The idea is to build the symbolic encoding of the given `network`, and then
+        randomly simulate transitions for individual states, trying to reach a state
+        outside of the `terminal_restriction_space`.
+
+        TODO (1): There are multiple places where we build the symbolic encoding, and it
+        will surely introduce extra overhead. We might want to just create the encoding
+        once and then pass it around.
+
+        TODO (2): We could probably make this algorithm slighlty less random by doing
+        a limited version of symbolic reachability. I.e. instead of simulating just one
+        state transition in each step, compute the whole successor BDD and then test 
+        against that. Once the BDD becomes too large after several steps, we can just 
+        pick a single state from it and start again. Sam: I'll add a version of this
+        later, once we can actually benchmark how it performs :)
+    """
+
+    # First, build the symbolic encoding:
+    variables = []
+    update_functions = {}
     for var in network.variables():
         var_name = network.get_variable_name(var)
-        nodes.append(var_name)
+        variables.append(var_name)
+        function_expression = network.get_update_function(var)
+        function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
+        update_functions[var_name] = function_bdd
 
-        function = network.get_update_function(var)
-        function = aeon_to_pyeda(function)
+    symbolic_candidates = state_list_to_bdd(candidates)
+    filtered_candidates = []
+    for state in candidates:
+        state_bdd = state_to_bdd(state)
 
-        fx = expr2bdd(function)
-        funs_bdd[var_name] = fx
+        # Remove state from the symbolic set. If we can prove that is
+        # is not an attractor, we will put it back.
+        symbolic_candidates = symbolic_candidates & ~state_bdd
 
+        simulation = state.copy()   # A copy of the state that we can overwrite.
+        is_valid_candidate = True
+        for _ in range(max_iterations):
+            # Advance all variables by one step in random order.
+            random.shuffle(variables)
+            for var in variables:
+                step = function_eval(update_functions[var], simulation)
+                assert step is not None
+                simulation[var] = step
 
-    for state in F:
-        state_bdd = state_2_bdd(state)
-        F_bdd = F_bdd & ~state_bdd
-
-        reach_target_set = False
-        for i in range(1, I_MAX + 1):
-            random.shuffle(nodes)
-
-            for node in nodes:
-                state[node] = eval_function(funs_bdd[node], state)
-
-            if is_member_bdd(state, F_bdd) or is_member_bdd(state, target_set):
-                reach_target_set = True
+            if function_is_true(symbolic_candidates, simulation):
+                # The state can reach some other state in the candidate
+                # set. This does not mean it cannot be an attractor, but
+                # it means it is sufficient to keep considering the other
+                # candidate.
+                is_valid_candidate = False
                 break
 
-        if reach_target_set == False:
-            F_bdd = F_bdd | state_bdd
-            F_result.append(state)
+            if not function_is_true(terminal_restriction_space, simulation):
+                # The state can reach some other state outside of the
+                # terminal restriction space, which means it cannot be
+                # a motif avoidant attractor in this subspace.
+                is_valid_candidate = False
+                break
 
+        if is_valid_candidate:
+            # If we cannot rule out the candidate, we can put it back
+            # into candidate set.
+            symbolic_candidates = symbolic_candidates | state_bdd
+            filtered_candidates.append(state)
+    
+    return filtered_candidates
+            
 
-    return F_result
-
-
-def FilteringProcess(network: BooleanNetwork, petri_net: DiGraph, F: list[dict[str, int]], terminal_res_space: BinaryDecisionDiagram) -> list[dict[str, int]]:
-    list_motif_avoidant_atts: list[dict[str, int]] = []
-
+def _filter_candidates(
+    petri_net: DiGraph,
+    candidates: List[Dict[str, int]],
+    terminal_restriction_space: BinaryDecisionDiagram
+) -> List[Dict[str, int]]:
     """
-        Filtering out the candidate set by using the reachability analysis.
+        Filter candidate states using reachability procedure in Pint.
     """
 
-    target_set = ~terminal_res_space
-    F_bdd = list_state_2_bdd(F)
-    A = 0
+    avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
+    filtered_candidates = []
 
-    while len(F) > 0:
-        state = F.pop(0)
+    for state in candidates:
+        state_bdd = state_to_bdd(state)
 
-        state_bdd = state_2_bdd(state)
-        F_bdd = F_bdd & ~state_bdd
+        # Remove state from the symbolic set. If we can prove that is
+        # is not an attractor, we will put it back.
+        avoid_states = avoid_states & ~state_bdd
 
-        joint_target_set = target_set | F_bdd | A
+        if _Pint_reachability(petri_net, state, avoid_states) == False:
+            avoid_states = avoid_states | state_bdd
+            filtered_candidates.append(state)
 
-        if ABNReach_current_version(network, petri_net, state, joint_target_set) == False:
-            A = A | state_bdd
-            list_motif_avoidant_atts.append(state)
-        
+    return filtered_candidates
 
-    return list_motif_avoidant_atts
+def _Pint_reachability(
+    petri_net: DiGraph,
+    initial_state: Dict[str, int],
+    target_states: BinaryDecisionDiagram
+) -> bool:
+    """
+        Use Pint to check if a given `initial_state` can possibly reach some state
+        in the `target_states` BDD.
 
+        TODO: Here, if the result of static analysis is inconclusive, Pint falls back to `mole`
+        model checker. However, in the future, we might also explore other methods, such as
+        petri net reduction or symbolic reachability.
+    """
+    if target_states.is_zero():
+        return False    # Cannot reach a stat in an empty set.
 
-def Pint_get_goal_from_bdd(joint_target_set: BinaryDecisionDiagram) -> Goal:
-    list_path = []
+    # Build a Pint model through an automata network and copy
+    # over the initial condition.
+    pint_model = InMemoryModel(petri_net_as_automata_network(petri_net))
+    for var, level in initial_state.items():
+        pint_model.initial_state[var] = level
 
-    for i, t in enumerate(joint_target_set.satisfy_all()):
-        list_path.append(t)
+    goal = _Pint_build_symbolic_goal(target_states)
 
+    return pint_model.reachability(goal=goal, fallback='mole')
 
-    if len(list_path) > 0:
-        t = list_path.pop(0)
+def _Pint_build_symbolic_goal(states: BinaryDecisionDiagram) -> Goal:
+    """
+        A helper method which (very explicitly) converts a set of states
+        represented through a BDD into a Pint `Goal`.
+    """
+    assert not states.is_zero()
 
-        node_goal_str = []
+    goals = []
+    for clause in states.satisfy_all():
+        goal_atoms = [ f"{var}={level}" for var, level in clause.items() ]
+        goals.append(Goal(",".join(goal_atoms)))
 
-        for p, v in t.items():
-            if v == 0:
-                node_goal_str.append(str(p) + "=0")
-            else:
-                node_goal_str.append(str(p) + "=1")
+    return reduce(lambda a, b: a | b, goals)
 
-        goal = Goal(",".join(node_goal_str))
+def petri_net_as_automata_network(petri_net: DiGraph) -> str:
+    """
+        Takes a Petri net which was created by implicant encoding from a Boolean network,
+        and builds an automata network file (`.an`) compatible with the Pint tool.
 
+        TODO: This is one of those things that would probably be better served by having
+        an "explicit" `PetriNetEncoding` class.
+    """
+    auotmata_network = ""
 
-    for t in list_path:
-        node_goal_str = []
-
-        for p, v in t.items():
-            if v == 0:
-                node_goal_str.append(str(p) + "=0")
-            else:
-                node_goal_str.append(str(p) + "=1")
-
-        goal = goal | Goal(",".join(node_goal_str))
-
-
-    return goal
-
-
-def write_an_file_from_petri_net(network: BooleanNetwork, petri_net: DiGraph, an_file: IO):
-    nodes = []
-    for var in network.variables():
-        var_name = network.get_variable_name(var)
-        nodes.append(var_name)
-
-    # write list of automata
-    domain = "[0, 1]"
-    for node in nodes:
-        print(
-            f"\"{node}\" {domain}", file=an_file
-        )
-
-    # write list of transitions
-    for node, kind in petri_net.nodes(data="kind"):
-        if kind == "place":
+    # Go through all PN places and save them as model variables.
+    variable_set = set()
+    for place, kind in petri_net.nodes(data="kind"):
+        if kind != "place":
             continue
-        else:  # it's a transition
-            preds = list(petri_net.predecessors(node))
-            succs = list(petri_net.successors(node))
+        variable_set.add(place_to_variable(place)[0])
+    variables = sorted(variable_set)
 
-            # value change
-            source_places = list(set(preds) - set(succs))
-            source_place = source_places[0]
-            target_places = list(set(succs) - set(preds))
-            target_place = target_places[0]
+    # Declare all variables with 0/1 domains.
+    for var in variables:
+        auotmata_network += f"\"{var}\" [0, 1]\n"
 
-            # the list of conditions for the transition
-            preds.remove(source_place)
-            succs.remove(target_place)
+    for transition, kind in petri_net.nodes(data="kind"):
+        if kind != "transition":
+            continue
+        
+        predecessors = set(petri_net.predecessors(transition))
+        successors = set(petri_net.successors(transition))
 
-            conds = []
-            for pred in preds:
-                node_name = "\"" + pred[3:] + "\""
-                value = pred[1]
-                cond = node_name + "=" + value
+        # The value under modification is the only 
+        # value that is different between successors and predecessors.
+        source_place = next(iter(predecessors - successors))
+        target_place = next(iter(successors - predecessors)) 
+        
+        (s_var, s_level) = place_to_variable(source_place)
+        (t_var, t_level) = place_to_variable(target_place)
+        assert s_var == t_var
 
-                conds.append(cond)
+        # The remaining places represent the necessary conditions.
+        # Here, we transform them into a text format.
+        conditions = sorted(predecessors.intersection(successors))
+        conditions = [ place_to_variable(p) for p in conditions ]
+        conditions = [ f"\"{var}\"={int(level)}" for var, level in conditions ]
 
-            conds_str = " and ".join(conds)
-
-            value_change = source_place[1] + " -> " + target_place[1]
-
-            # node name
-            node_name = source_place[3:]
-
-            # write the transition
-            print(
-                f"\"{node_name}\" {value_change} when {conds_str}", file=an_file
-            )
-
-
-def ABNReach_current_version(network: BooleanNetwork, petri_net: DiGraph, state: dict[str, int], joint_target_set: BinaryDecisionDiagram) -> bool:
-    # In this version, we only use Pint.
-    # If the result of Pint is True (i.e., reachable) or False (i.e., unreachable), we simply return this result.
-    # If the result of Pint is Inconc (i.e., not determining whether reachable or unreachable), Pint falls back to an exact model checker (e.g., Mole).
-    # However, in the latter case, we can exploit the goal reduction technique of Pint.
-
-    is_reachable: bool = False
- 
-    (fd, tmpname) = tempfile.mkstemp(suffix=".an", text=True)
-    with open(tmpname, "wt") as an_file:
-        write_an_file_from_petri_net(network, petri_net, an_file)
-
-    m = pypint.load(tmpname)
-
-    # set the initial state
-    for node in state:
-        m.initial_state[node] = state[node]
-
-    # get the goal
-    goal = Pint_get_goal_from_bdd(joint_target_set)
-
-    is_reachable = m.reachability(goal=goal, fallback='mole')
-
-    # close .an file after finishing reachability analysis
-    os.close(fd)
-    os.unlink(tmpname)
-
-    return is_reachable
+        # A pint rule consists of a variable name, value transition,
+        # and a list of necessary conditions for the change.
+        rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)} when {' and '.join(conditions)}\n"
+        auotmata_network += rule
+    
+    print(auotmata_network)
+    return auotmata_network
 
