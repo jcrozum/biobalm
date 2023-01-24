@@ -1188,6 +1188,133 @@ Discuss \dots
 
 \end{frame}
 
+\begin{frame}
+\frametitle{Computing negative feedback vertex sets}
+
+Regarding \underline{the NFVS size}, the result of AEON is \blue{better} than that of mtsNFVS is most cases for real-world models. This is \red{opposite} for the case of random models.
+
+\hspace{0.8cm}
+
+Regarding \underline{the running time}, AEON is much faster than mtsNFVS for both real-world and random models.
+
+\hspace{0.8cm}
+
+There is a \red{matter} needed to be considered in our whole algorithm. If we only compute the NFVS (for the original ABN) one time, we can try both AEON and mtsNFVS. But, if we compute an NFVS for each intermediate ABN (induced in a maximal trap space or stable motif), we should try only AEON because of its time efficiency.
+
+\hspace{0.8cm}
+
+Of course, we can try all options and see which is the best. 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Computing negative feedback vertex sets (cont.)}
+
+``I think I have discovered the cause of the check failure. On line 62 of \texttt{SignedGraph.py}, there is the line \dots''
+
+\hspace{0.8cm}
+
+Indeed, \texttt{SignedGraph.py} is my own code (not of the FVSpython code).
+Note that the FVSpython code only computes an FVS, not an NFVS.
+Hence, I think the FVSpython code was properly converted from python 2 to python 3.
+
+\hspace{0.8cm}
+
+Now, the easiest option is that I will fix my own code so that it is properly compliant with python 3.
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\frametitle{Compute the candidate set of states}
+
+I first recall that the candidate set of states is the set of fixed points of the reduced STG with respect to an NFVS and a set of Boolean values assigned to nodes in this NFVS.
+
+\hspace{0cm}
+
+In our new algorithm, we restrict it to the terminal restriction space.
+Specifically, we can ignore states belonging:
+\begin{itemize}
+  \item Stable motifs of \(G\): already in form of sub-spaces.
+  \item Self-negating stable motifs of \(TR(G)\): already in form of sub-spaces.
+  \item States for which \(R(X)\) is zero: needed to convert to a list of sub-spaces.
+\end{itemize}
+
+\hspace{0cm}
+
+Actually, we only need to find the DNF of \(R(X)\).
+The computation of prime implicants is \blue{not necessary}.
+There are two cases:
+\begin{itemize}
+  \item \(R(X)\) is represented by a BDD: the union of all paths from the root to the one node. Each path is represented as a sub-space.
+  \item \(R(X)\) is represented by an expression (e.g., pyeda expr): each conjunction of the DNF is represented as a sub-space. As I know, the DNF conversion of pyeda does not require the computation of prime implicants.
+\end{itemize}
+
+\hspace{0cm}
+
+In addition, the \(\texttt{compute\_fixed\_point\_reduced\_STG}\) function should be included a new parameter \(\texttt{induced\_sub\_space}\), which ensures that all fixed points are inside a given maximal trap space.
+Note however that this is needed if we only use the NFVS of the original ABN.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Motif-avoidant checking}
+
+``I highlighted a few minor style issues, plus a question about one of the functions in \texttt{state\_utils.py} \dots''
+
+\hspace{0cm}
+
+I assume that for a state, the value of every node is specified.
+But of course, for the case that we do not specify all the values of the regulators of \(f\), an exception should be thrown.
+
+\hspace{0cm}
+
+I will fix it and other minor style issues.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Next steps}
+
+I propose to start writing the manuscript in parallel with the
+implementation. 
+We have four people and I think this strategy will help us to save a lot of time.
+
+\hspace{0cm}
+
+\underline{Publication plan}: is it similar to the case of the stable motifs-based method?
+\begin{enumerate}
+  \item A main journal paper: do you have any target in mind?
+  \item A tool paper: Application notes in Oxford Bioinformatics?
+\end{enumerate}
+
+\hspace{0cm}
+
+What do you think?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{A new related paper}
+
+I have just found a related paper.
+
+Sugyun An, So-Yeong Jang, Sang-Min Park, Chun-Kyung Lee, Hoon-Min Kim, Kwang-Hyun Cho, \emph{Global stabilizing control of large-scale biomolecular regulatory networks}, Bioinformatics, 2023;, btad045
+
+\hspace{0cm}
+
+It is compared to pystablemotifs for the target control.
+
+\hspace{0cm}
+
+I have not read the details yet. But for me, again the results reported in this paper seem not to be reliable because:
+
+\begin{itemize}
+  \item ``Among the biological Boolean networks in the Cell Collective (Helikar, et al., 2012), we selected 39 networks that have more than two attractors (including at least one point attractor) when all input nodes are fixed with the Off state.''
+  \item From Fig 6.C, I found that it omits the \texttt{inflammatory-bowel} model (in the Cell Collective). This model has 47 nodes, and it is hard for PyBoolnet.
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Experimentation}
