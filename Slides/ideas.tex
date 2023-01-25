@@ -1241,13 +1241,17 @@ Specifically, we can ignore states belonging:
 
 \hspace{0cm}
 
-Actually, we only need to find the DNF of \(R(X)\).
+Actually, we only need to find the DNF of \(\neg R(X)\).
 The computation of prime implicants is \blue{not necessary}.
 There are two cases:
 \begin{itemize}
-  \item \(R(X)\) is represented by a BDD: the union of all paths from the root to the one node. Each path is represented as a sub-space.
-  \item \(R(X)\) is represented by an expression (e.g., pyeda expr): each conjunction of the DNF is represented as a sub-space. As I know, the DNF conversion of pyeda does not require the computation of prime implicants.
+  \item \(\neg R(X)\) is represented by a BDD: the union of all paths from the root to the one node. Each path is represented as a sub-space.
+  \item \(\neg R(X)\) is represented by an expression (e.g., pyeda expr): each conjunction of the DNF is represented as a sub-space. As I know, the DNF conversion of pyeda does not require the computation of prime implicants.
 \end{itemize}
+
+\hspace{0cm}
+
+Samuel: Since \(R(X)\) depends on the Boolean update functions, can we encode the avoidant of states in \(\neg R(X)\) directly in the encoded ASP (i.e., no need a DNF)?
 
 \hspace{0cm}
 
