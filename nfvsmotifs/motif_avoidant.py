@@ -240,6 +240,5 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
         rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)} when {' and '.join(conditions)}\n"
         auotmata_network += rule
     
-    print(auotmata_network)
     return auotmata_network
 
