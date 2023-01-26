@@ -17,6 +17,16 @@ jobs:
         with:
           python-version: 3.9
           architecture: x64
+      - name: Fetch and install native Pint
+        run: | 
+          wget https://github.com/pauleve/pint/releases/download//2019-05-24/pint_2019-05-24_amd64.deb
+          sudo apt install ./pint_2019-05-24_amd64.deb
+      - name: Fetch and install Mole
+        run: | 
+          wget http://www.lsv.fr/~schwoon/tools/mole/mole-140428.tar.gz
+          tar -xvf mole-140428.tar.gz
+          (cd ./mole-140428 && make)
+          (cd ./mole-140428 && pwd >> $GITHUB_PATH)
       - name: Install repo dependencies
         run: pip install -r requirements.txt
       - name: Install mypy
