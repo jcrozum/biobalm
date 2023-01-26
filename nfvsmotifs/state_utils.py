@@ -4,7 +4,7 @@ from __future__ import annotations
     variables mapping keys to 0/1 values.
 """
 
-from pyeda.boolalg.bdd import bddvar # type:ignore
+from pyeda.boolalg.bdd import bddvar, BDDONE, BDDZERO # type:ignore
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ def state_to_bdd(state: Dict[str, int]) -> BinaryDecisionDiagram:
     """
         Convert a state variables to a BDD encoding the state singleton.
     """
-    state_bdd = 1
+    state_bdd = BDDONE
 
     for node, value in state.items():
         node_bdd = bddvar(node)
@@ -39,8 +39,7 @@ def state_list_to_bdd(states: List[Dict[str, int]]) -> BinaryDecisionDiagram:
     """
         Convert a list of state dictionaries to a BDD representation.
     """
-    result_bdd = 0
-
+    result_bdd = BDDZERO
     for state in states:
         result_bdd = result_bdd | state_to_bdd(state)
 

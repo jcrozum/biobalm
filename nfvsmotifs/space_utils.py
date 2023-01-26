@@ -76,6 +76,11 @@ def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dic
         for var in network.variables():
             var_name = network.get_variable_name(var)            
             expression = aeon_to_pyeda(network.get_update_function(var))
+            
+            # if the var is already constant, it doesn't count
+            if expression == PYEDA_TRUE or expression == PYEDA_FALSE: 
+                continue
+            
             expression = percolate_pyeda_expression(expression, result)
             if expression == PYEDA_TRUE or expression == PYEDA_FALSE:                
                 if var_name not in result:
@@ -85,6 +90,7 @@ def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dic
                     done = False
                 if var_name in result and result[var_name] != str(expression):
                     conflicts[var_name] = str(expression)
+    
     return (result, conflicts)
 
 def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwork:
