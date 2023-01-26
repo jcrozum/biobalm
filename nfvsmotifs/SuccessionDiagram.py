@@ -1,12 +1,13 @@
-import networkx as nx
+from __future__ import annotations
 
-from biodivine_aeon import BooleanNetwork
+import networkx as nx # type: ignore
+
+from biodivine_aeon import BooleanNetwork  # type: ignore
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.trappist_core import trappist
 from nfvsmotifs.space_utils import percolate_network, percolate_space
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.state_utils import state_list_to_bdd
-
 
 class SuccessionDiagram():
     def __init__(self, network: BooleanNetwork):
@@ -38,7 +39,7 @@ class SuccessionDiagram():
                 petri_net = network_to_petrinet(reduced_network)
                 
                 # TODO: properly compute candidates
-                candidates = []
+                candidates: list[dict[str,int]] = []
                 attractors = detect_motif_avoidant_attractors(
                     reduced_network, petri_net, candidates, terminal_restriction_space, AVOIDANCE_ITERATIONS)
 
@@ -47,7 +48,7 @@ class SuccessionDiagram():
                 for fixed_vars in stable_motifs:
                     fixed_vars_perc, _ = percolate_space(
                         reduced_network, fixed_vars)
-
+                    
                     # TODO: check to see if the reduced network has already been found
                     perc_match_ind = None
 

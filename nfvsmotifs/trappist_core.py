@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from networkx import DiGraph # type: ignore
     from biodivine_aeon import BooleanNetwork # type: ignore    
-    from typing import List, Dict, Optional, Callable
+    from typing import Callable
     from clingo import Model
 
 from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable
@@ -15,11 +15,11 @@ from clingo import Control, SolveHandle
 
 def trappist_async(
     network: BooleanNetwork,
-    on_solution: Callable[[Dict[str, str]], bool],
+    on_solution: Callable[[dict[str, int]], bool],
     problem: str = "min",
     reverse_time: bool = False,   
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [], 
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [], 
 ):
     """
         The same as the `trappist` method, but instead of returning a list of spaces as a result, the
@@ -48,10 +48,10 @@ def trappist(
     network: BooleanNetwork, 
     problem: str = "min", 
     reverse_time: bool = False, 
-    solution_limit: Optional[int] = None,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],    
-) -> List[Dict[str, str]]:
+    solution_limit: int | None = None,
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],    
+) -> list[dict[str, int]]:
     """
         Solve the given `problem` for the given `network` using the Trappist algorithm, internally relying on the 
         Python bindings of the `clingo` ASP solver.
@@ -74,7 +74,7 @@ def trappist(
     trappist_async(network, on_solution=save_result, problem=problem, reverse_time=reverse_time, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
     return results
 
-def _clingo_model_to_space(model: Model) -> Dict[str, str]:    
+def _clingo_model_to_space(model: Model) -> dict[str, int]:    
     space = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -85,7 +85,7 @@ def _clingo_model_to_space(model: Model) -> Dict[str, str]:
         # Note that this is counterintuitive but correct. If "positive" symbol
         # appears in the solution, we want to fix the value to "0". This is indeed
         # the intended behaviour of the algorithm.
-        space[variable] = "0" if is_positive else "1"
+        space[variable] = 0 if is_positive else 1
     return space
 
 def _create_clingo_constraints(
@@ -93,9 +93,9 @@ def _create_clingo_constraints(
     petri_net: DiGraph, 
     problem: str = "min", 
     reverse_time: bool = False,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],
-    optimize_source_variables: List[str] = [],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+    optimize_source_variables: list[str] = [],
 ) -> Control:
     """
         Translate the given Petri net (represented as a `DiGraph`; see also `petri_net_translation` 

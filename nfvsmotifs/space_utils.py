@@ -27,7 +27,7 @@ def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
             return False
     return True
 
-def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
+def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
     """
         Uses percolation to check if the given `space` is a trap space in the given `BooleanNetwork`.
 
@@ -44,12 +44,12 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, str]) -> bool:
         if var_name in space:
             expression = aeon_to_pyeda(bn.get_update_function(var))
             expression = percolate_pyeda_expression(expression, space)
-            if space[var_name] != str(expression):
+            if str(space[var_name]) != str(expression):
                 print(space[var_name], str(expression), bn.get_update_function(var), space)
                 return False
     return True
 
-def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
+def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dict[str, int], dict[str, int]]:
     """
         Takes a Boolean network and a space (partial assignment of `"0"`/`"1"` 
         to the network variables). It then percolates the values in the given 
@@ -86,14 +86,14 @@ def percolate_space(network: BooleanNetwork, space: dict[str, str]) -> tuple[dic
                 if var_name not in result:
                     # Fortunately, PyEDA resolves true as '1' and false as '0', 
                     # so we can use this directly.
-                    result[var_name] = str(expression)
+                    result[var_name] = int(str(expression))
                     done = False
-                if var_name in result and result[var_name] != str(expression):
-                    conflicts[var_name] = str(expression)
+                if var_name in result and result[var_name] != int(str(expression)):
+                    conflicts[var_name] = int(str(expression))
     
     return (result, conflicts)
 
-def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwork:
+def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwork:
     """
         Takes an AEON.py Boolean network and a space (partial assignment of
         network variables to `'0'`/`'1'`). It then produces a new network with
@@ -110,7 +110,6 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
             (essentiality, monotonicity) are removed, because they most likely 
             no longer hold in the new network.
     """
-    
     # Make a copy of the original regulatory network, but without integrity constraints.
     old_rg = bn.graph()
     new_rg = RegulatoryGraph([bn.get_variable_name(var) for var in bn.variables()])
@@ -129,10 +128,12 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
         new_expr = None
         if name in space:
             # If the value is fixed, just use it as a value directly.
-            if space[name] == "1":
+            if space[name] == 1:
                 new_expr = PYEDA_TRUE
-            if space[name] == "0":
+            elif space[name] == 0:
                 new_expr = PYEDA_FALSE
+            else:
+                raise ValueError(f'{space[name]=} is not a valid variable value')
         else:
             # If the value is not fixed, use a simplified expression.
             expression = aeon_to_pyeda(bn.get_update_function(var))
@@ -142,7 +143,7 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, str]) -> BooleanNetwo
 
     return new_bn
 
-def percolate_pyeda_expression(expression: Expression, space: dict[str, str]) -> Expression:
+def percolate_pyeda_expression(expression: Expression, space: dict[str, int]) -> Expression:
     """
         Takes a PyEDA expression and a subspace (dictionary assigning `"1"`/`"0"` to
         a subset of variables). Returns a simplified expression that is valid
