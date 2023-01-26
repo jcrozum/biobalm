@@ -1,0 +1,55 @@
+\frametitle{Compute the candidate set of states}
+
+I first recall that the candidate set of states is the set of fixed points of the reduced STG with respect to an NFVS and a set of Boolean values assigned to nodes in this NFVS.
+
+\hspace{0cm}
+
+In our new algorithm, we restrict it to the terminal restriction space.
+Specifically, we can ignore states belonging:
+\begin{itemize}
+  \item Stable motifs of \(G\): already in form of sub-spaces.
+  \item Self-negating stable motifs of \(TR(G)\): already in form of sub-spaces.
+  \item States for which \(R(X)\) is zero: needed to convert to a list of sub-spaces.
+\end{itemize}
+
+\hspace{0cm}
+
+Actually, we only need to find the DNF of \(\neg R(X)\).
+The computation of prime implicants is \blue{not necessary}.
+There are two cases:
+\begin{itemize}
+  \item \(\neg R(X)\) is represented by a BDD: the union of all paths from the root to the one node. Each path is represented as a sub-space.
+  \item \(\neg R(X)\) is represented by an expression (e.g., pyeda expr): each conjunction of the DNF is represented as a sub-space. As I know, the DNF conversion of pyeda does not require the computation of prime implicants.
+\end{itemize}
+
+\hspace{0cm}
+
+Samuel: Since \(R(X)\) depends on the Boolean update functions, can we encode the avoidance of states in \(\neg R(X)\) directly in the encoded ASP (i.e., no need a DNF)?
+
+\hspace{0cm}
+
+Giang: It is possible. Let consider for example \(\neg R(X) = ((A \lor B) \land \neg C) \lor D\). Then the encoded ASP using the characterization of deadlocks should be:
+
+\begin{verbatim*}
+:- pD.
+:- temp1 ; nC.
+temp1 :- pA.
+temp2 :- pB.
+\end{verbatim*}
+
+This ASP has the same set of answer sets (maybe not equivalent to) as the ASP using the DNF of \(\neg R(X)\) (i.e., \((A \land \neg C) \lor (B \land \neg C) \lor D\)) as follows:
+
+\begin{verbatim*}
+:- pD.
+:- pA ; nC.
+:- pB ; nC.
+\end{verbatim*}
+
+Note that in general obtaining a single DNF may be exponential.
+The above approach does not required the DNF of \(\neg R(X)\), it only relies on the syntax of \(\neg R(X)\).
+
+\hspace{0cm}
+
+In addition, the \(\texttt{compute\_fixed\_point\_reduced\_STG}\) function should be included a new parameter \(\texttt{induced\_sub\_space}\), which ensures that all fixed points are inside a given maximal trap space.
+Note however that this is needed if we only use the NFVS of the original ABN.
+

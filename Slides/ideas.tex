@@ -14,6 +14,8 @@
 
 \usepackage{hyperref}
 
+%\usepackage{verbatim}
+
 % row color
 \usepackage{color, colortbl}
 \definecolor{LightCyan}{rgb}{0.88,1,1}
@@ -1224,7 +1226,7 @@ Now, the easiest option is that I will fix my own code so that it is properly co
 
 \end{frame}
 
-\begin{frame}[allowframebreaks]
+\begin{frame}[fragile,allowframebreaks]
 \frametitle{Compute the candidate set of states}
 
 I first recall that the candidate set of states is the set of fixed points of the reduced STG with respect to an NFVS and a set of Boolean values assigned to nodes in this NFVS.
@@ -1251,7 +1253,29 @@ There are two cases:
 
 \hspace{0cm}
 
-Samuel: Since \(R(X)\) depends on the Boolean update functions, can we encode the avoidant of states in \(\neg R(X)\) directly in the encoded ASP (i.e., no need a DNF)?
+Samuel: Since \(R(X)\) depends on the Boolean update functions, can we encode the avoidance of states in \(\neg R(X)\) directly in the encoded ASP (i.e., no need a DNF)?
+
+\hspace{0cm}
+
+Giang: It is possible. Let consider for example \(\neg R(X) = ((A \lor B) \land \neg C) \lor D\). Then the encoded ASP using the characterization of deadlocks should be:
+
+\begin{verbatim*}
+:- pD.
+:- temp1 ; nC.
+temp1 :- pA.
+temp2 :- pB.
+\end{verbatim*}
+
+This ASP has the same set of answer sets (maybe not equivalent to) as the ASP using the DNF of \(\neg R(X)\) (i.e., \((A \land \neg C) \lor (B \land \neg C) \lor D\)) as follows:
+
+\begin{verbatim*}
+:- pD.
+:- pA ; nC.
+:- pB ; nC.
+\end{verbatim*}
+
+Note that in general obtaining a single DNF may be exponential.
+The above approach does not required the DNF of \(\neg R(X)\), it only relies on the syntax of \(\neg R(X)\).
 
 \hspace{0cm}
 
