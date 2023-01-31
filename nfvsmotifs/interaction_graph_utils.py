@@ -9,10 +9,10 @@ from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph # type: ignore
 
 from typing import List, Set
-from networkx.algorithms import bipartite
+from networkx.algorithms import bipartite # type: ignore
 
-from pyeda.boolalg.expr import expr
-from pyeda.boolalg.bdd import expr2bdd, bddvar
+from pyeda.boolalg.expr import expr # type: ignore
+from pyeda.boolalg.bdd import expr2bdd, bddvar # type: ignore
 
 from nfvsmotifs.SignedGraph import SignedGraph
 
@@ -193,9 +193,13 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
     INx = {}
 
+    nodes = []
+
     for variable in network.variables():
         var_name = network.get_variable_name(variable)
         function = network.get_update_function(variable)
+
+        nodes.append(var_name)
 
         if function.strip() == var_name:
             source_nodes.append(var_name)
@@ -210,7 +214,6 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
         bdd_vars[var_name] = vx
         bdd_funs[var_name] = fx
 
-    nodes = bdd_funs.keys()
             
     """Build the unsigned and signed interaction graphs"""
     u_ig = DiGraph()
@@ -234,12 +237,12 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
             if pos_arc.is_one() or pos_arc.satisfy_one():
                 # a positive arc with weight = 1
-                s_ig.setEdge(str(y), str(x), 1)
+                s_ig.set_edge(str(y), str(x), 1)
                 is_actual_arc = True
 
             if neg_arc.is_one() or neg_arc.satisfy_one():
                 # a negative arc with weight = -1
-                s_ig.setEdge(str(y), str(x), -1)
+                s_ig.set_edge(str(y), str(x), -1)
                 is_actual_arc = True
 
             if is_actual_arc == True:
@@ -252,7 +255,7 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
     U = list(set(U) - set(source_nodes))
 
     """Second, filter feedback vertex set to get an negative feedback vertex set"""
-    U_neg = s_ig.getSelfNegativeLoops()
+    U_neg = s_ig.get_self_negative_loops()
     U_candidate = []
 
     for v in U:
@@ -260,13 +263,13 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
             U_candidate.append(v)
 
     for v in U_neg:
-        s_ig.removeVertex(v)
+        s_ig.remove_vertex(v)
 
     for v in source_nodes:
-        s_ig.removeVertex(v)
+        s_ig.remove_vertex(v)
     
-    while not IsNoNegativeCycle(s_ig):
-        v = SelectByDegreeNegative(s_ig, U_candidate)
+    while not is_no_negative_cycle(s_ig):
+        v = select_by_negative_degree(s_ig, U_candidate)
 
         if len(v) == 0:
             break
@@ -275,26 +278,26 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
         U_neg.append(v)
         
-        s_ig.removeVertex(v)
+        s_ig.remove_vertex(v)
 
     
     return U_neg
 
 
-def IsNoNegativeCycle(s_ig: SignedGraph) -> bool:
-    udGraph = s_ig.convertToUDGraph()
+def is_no_negative_cycle(s_ig: SignedGraph) -> bool:
+    udGraph = s_ig.convert_to_undirected_graph()
     return bipartite.is_bipartite(udGraph)
 
 
-def SelectByDegreeNegative(s_ig: SignedGraph, U_candidate: list[str]) -> str:
+def select_by_negative_degree(s_ig: SignedGraph, U_candidate: list[str]) -> str:
     v_selected = ""
-    maxNegDeg = -1
+    max_neg_deg = -1
 
     for v in U_candidate:
-        v_neg_deg = s_ig.GetDegreeNegative(v)
+        v_neg_deg = s_ig.get_negative_degree(v)
 
-        if v_neg_deg >= maxNegDeg:
+        if v_neg_deg >= max_neg_deg:
             v_selected = v
-            maxNegDeg = v_neg_deg
+            max_neg_deg = v_neg_deg
 
     return v_selected

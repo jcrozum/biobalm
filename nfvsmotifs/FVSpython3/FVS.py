@@ -2,7 +2,7 @@
 This file contains functions used to calculate feedback vertex set for graph/directed graph.
 '''
 
-import networkx as nx
+import networkx as nx # type: ignore
 #import FVS_localsearch_10_cython as FVS10
 import nfvsmotifs.FVSpython3.FVS_localsearch_10_python as FVS10
 #import FVS_localsearch_10_python as FVS10

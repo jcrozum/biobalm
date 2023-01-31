@@ -9,7 +9,7 @@ The code is written by Gang Yang, Penn State University
 '''
 
 
-import networkx as nx
+import networkx as nx # type: ignore
 import random
 import math
 import array
@@ -48,7 +48,7 @@ def get_position_plus(candidate_outgoing_neighbour, S):
 def FVS_local_search(G_input, T_0, alpha, maxMvt, maxFail, randomseed=None):
   '''
   Returns an maximum sub topological ordering of a DiGraph G.
-  FVS is G_input \ the topological ordering
+  FVS is G_input the topological ordering
   A topological ordering of a graph is an ordering of vertices such that
   the starting point of every arc occurs earlier in the ordering than
   the endpoint of the art.
