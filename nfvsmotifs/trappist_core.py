@@ -215,6 +215,7 @@ def _clingo_model_to_space_fixed_point(model: Model) -> Dict[str, str]:
 def _create_clingo_constraints_fixed_point(
     petri_net: DiGraph,
     nodes: List[str],
+    ensure_subspace: Dict[str, str] = {},
     avoid_subspaces: List[Dict[str, str]] = [],
 ) -> Control:
     """
@@ -253,6 +254,13 @@ def _create_clingo_constraints_fixed_point(
         else:
             raise Exception(f"Unexpected node kind: `{kind}`.")
 
+    # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
+    for fixed_var in ensure_subspace:
+        positive = False
+        if ensure_subspace[fixed_var] == "1":
+            positive = True
+        ctl.add("base", [], f"{variable_to_place(fixed_var, positive)}.")
+
     # Ensure that fixed points can't lie in either subspace in `avoid_subspaces`. 
     for to_avoid in avoid_subspaces:
         if len(to_avoid) > 0:
@@ -275,6 +283,7 @@ def compute_fixed_point_reduced_STG_async(
     nodes: List[str],
     retained_set: Dict[str, str],
     on_solution: Callable[[Dict[str, str]], bool],
+    ensure_subspace: Dict[str, str] = {},
     avoid_subspaces: List[Dict[str, str]] = [],
 ):
     """
@@ -303,7 +312,7 @@ def compute_fixed_point_reduced_STG_async(
             reduced_petri_net.remove_node(trans)
 
 
-    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes, avoid_subspaces)
+    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes, ensure_subspace, avoid_subspaces)
     ctl.ground([("base", [])])
     result = ctl.solve(yield_=True)
     if type(result) == SolveHandle:
@@ -318,17 +327,18 @@ def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
     nodes: List[str],
     retained_set: Dict[str, str],
+    ensure_subspace: Dict[str, str] = {},
     avoid_subspaces: List[Dict[str, str]] = [],
     solution_limit: Optional[int] = None,
 ) -> List[Dict[str, str]]:
     """
         Now, this method supports computing all fixed points of the reduced STG with respect to the retained set of Boolean values.
-        This also supports finding the states that do not belong to avoidant sub-spaces.
+        This also supports finding the states that belong to a given sub-space or do not belong to avoidant sub-spaces.
     """
 
     results = []
     def save_result(x):
         results.append(x)
         return solution_limit == None or len(results) < solution_limit
-    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result, avoid_subspaces=avoid_subspaces)
+    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
     return results

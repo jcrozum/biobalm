@@ -14,6 +14,8 @@ from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 
+from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
+
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
 def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
@@ -147,3 +149,36 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, str]) ->
     substitution = { x: expr(space[x]) for x in space }
     expression = substitute_variables_in_expression(expression, substitution)
     return expression.simplify()
+
+
+def expr_to_list_spacecs(expression: Expression) -> list[dict[str, str]]:
+    """
+        Takes a Pyeda expression.
+        Returns a list of spaces whose disjuntion is equivalent to this expression.
+    """
+
+    sub_spaces = []
+    expr_dnf = expression.to_dnf()
+
+    for cl in expr_dnf.xs:
+        sub_space = {}
+        literals = leaves(cl)
+
+        for lit in literals:
+            if isinstance(lit, Variable):
+                sub_space[str(lit)] = "1"
+            if isinstance(lit, Complement):
+                sub_space[str(lit)[1:]] = "0"
+
+        sub_spaces.append(sub_space)
+
+    return sub_spaces
+
+
+def leaves(expression: Expression) -> list[Literal]:
+    """Return all the Litterals in expression."""
+    s = []
+    for ex in expression.iter_dfs():
+        if isinstance(ex, Literal):
+            s.append(ex)
+    return s
