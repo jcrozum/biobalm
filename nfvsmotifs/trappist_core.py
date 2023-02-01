@@ -15,11 +15,11 @@ from clingo import Control, SolveHandle
 
 def trappist_async(
     network: BooleanNetwork,
-    on_solution: Callable[[Dict[str, str]], bool],
+    on_solution: Callable[[Dict[str, int]], bool],
     problem: str = "min",
     reverse_time: bool = False,   
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [], 
+    ensure_subspace: Dict[str, int] = {},
+    avoid_subspaces: List[Dict[str, int]] = [], 
 ):
     """
         The same as the `trappist` method, but instead of returning a list of spaces as a result, the
@@ -49,9 +49,9 @@ def trappist(
     problem: str = "min", 
     reverse_time: bool = False, 
     solution_limit: Optional[int] = None,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],    
-) -> List[Dict[str, str]]:
+    ensure_subspace: Dict[str, int] = {},
+    avoid_subspaces: List[Dict[str, int]] = [],    
+) -> List[Dict[str, int]]:
     """
         Solve the given `problem` for the given `network` using the Trappist algorithm, internally relying on the 
         Python bindings of the `clingo` ASP solver.
@@ -74,7 +74,7 @@ def trappist(
     trappist_async(network, on_solution=save_result, problem=problem, reverse_time=reverse_time, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
     return results
 
-def _clingo_model_to_space(model: Model) -> Dict[str, str]:    
+def _clingo_model_to_space(model: Model) -> Dict[str, int]:    
     space = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -83,9 +83,9 @@ def _clingo_model_to_space(model: Model) -> Dict[str, str]:
         # but just in case.
         assert variable not in space        
         # Note that this is counterintuitive but correct. If "positive" symbol
-        # appears in the solution, we want to fix the value to "0". This is indeed
+        # appears in the solution, we want to fix the value to 0. This is indeed
         # the intended behaviour of the algorithm.
-        space[variable] = "0" if is_positive else "1"
+        space[variable] = 0 if is_positive else 1
     return space
 
 def _create_clingo_constraints(
@@ -93,8 +93,8 @@ def _create_clingo_constraints(
     petri_net: DiGraph, 
     problem: str = "min", 
     reverse_time: bool = False,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],
+    ensure_subspace: Dict[str, int] = {},
+    avoid_subspaces: List[Dict[str, int]] = [],
     optimize_source_variables: List[str] = [],
 ) -> Control:
     """
@@ -145,13 +145,13 @@ def _create_clingo_constraints(
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
     for fixed_var in ensure_subspace:
         positive = True
-        if ensure_subspace[fixed_var] == "1":
+        if ensure_subspace[fixed_var] == 1:
             positive = False
         ctl.add(f"{variable_to_place(fixed_var, positive)}.")
     
     # Ensure that solutions can't have variables fixed based on either subspace in `avoid_subspaces`. 
     for to_avoid in avoid_subspaces:
-        fixed_list = [ variable_to_place(var, (to_avoid[var] != "1")) for var in to_avoid ]
+        fixed_list = [ variable_to_place(var, (to_avoid[var] != 1)) for var in to_avoid ]
         fixed_vars = ", ".join(fixed_list)
         ctl.add(f":- {fixed_vars}.")
 
