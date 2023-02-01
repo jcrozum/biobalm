@@ -44,8 +44,8 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
         if var_name in space:
             expression = aeon_to_pyeda(bn.get_update_function(var))
             expression = percolate_pyeda_expression(expression, space)
-            if space[var_name] != expression:
-                print(space[var_name], expression, bn.get_update_function(var), space)
+            if str(space[var_name]) != str(expression):
+                print(space[var_name], str(expression), bn.get_update_function(var), space)
                 return False
     return True
 
@@ -81,10 +81,10 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dic
                 if var_name not in result:
                     # Fortunately, PyEDA resolves true as '1' and false as '0', 
                     # so we can use this directly.
-                    result[var_name] = expression
+                    result[var_name] = int(expression)
                     done = False
-                if var_name in result and result[var_name] != expression:
-                    conflicts[var_name] = expression
+                if var_name in result and result[var_name] != int(expression):
+                    conflicts[var_name] = int(expression)
     return (result, conflicts)
 
 def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwork:
