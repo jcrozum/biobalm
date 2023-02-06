@@ -151,7 +151,7 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, str]) ->
     return expression.simplify()
 
 
-def expr_to_list_spacecs(expression: Expression) -> list[dict[str, str]]:
+def expr_to_list_spaces(expression: Expression) -> list[dict[str, str]]:
     """
         Takes a Pyeda expression.
         Returns a list of spaces whose disjuntion is equivalent to this expression.
@@ -162,7 +162,7 @@ def expr_to_list_spacecs(expression: Expression) -> list[dict[str, str]]:
 
     for cl in expr_dnf.xs:
         sub_space = {}
-        literals = leaves(cl)
+        literals = get_literals(cl)
 
         for lit in literals:
             if isinstance(lit, Variable):
@@ -175,7 +175,7 @@ def expr_to_list_spacecs(expression: Expression) -> list[dict[str, str]]:
     return sub_spaces
 
 
-def leaves(expression: Expression) -> list[Literal]:
+def get_literals(expression: Expression) -> list[Literal]:
     """Return all the Litterals in expression."""
     s = []
     for ex in expression.iter_dfs():
