@@ -4,7 +4,7 @@ import networkx as nx # type: ignore
 
 from biodivine_aeon import BooleanNetwork  # type: ignore
 from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.trappist_core import trappist
+from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
 from nfvsmotifs.space_utils import percolate_network, percolate_space
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.state_utils import state_list_to_bdd
@@ -37,9 +37,11 @@ class SuccessionDiagram():
                 # TODO: properly create terminal restriction space; for now, just avoid stable motifs
                 terminal_restriction_space = ~state_list_to_bdd(stable_motifs)
                 petri_net = network_to_petrinet(reduced_network)
+                nodes = [network.get_variable_name(var) for var in network.variables()]
+                retained_set = {n:1 for n in nodes}
                 
                 # TODO: properly compute candidates
-                candidates: list[dict[str,int]] = []
+                candidates = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces = stable_motifs)
                 attractors = detect_motif_avoidant_attractors(
                     reduced_network, petri_net, candidates, terminal_restriction_space, AVOIDANCE_ITERATIONS)
 

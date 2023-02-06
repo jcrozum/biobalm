@@ -191,3 +191,16 @@ def _create_clingo_constraints(
                 ctl.add(f"{variable_to_place(variable, True)}; {variable_to_place(variable, False)}.")
 
     return ctl     
+
+
+# Dummy function to be replaced later
+def compute_fixed_point_reduced_STG(
+    petri_net: DiGraph,
+    nodes: list[str],
+    retained_set: dict[str, int],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+    solution_limit: int | None = None,
+) -> list[dict[str, int]]:
+    return []
+    
