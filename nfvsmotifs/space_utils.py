@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda, expression_literals
 
 from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
 
@@ -151,34 +151,39 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, str]) ->
     return expression.simplify()
 
 
-def expr_to_list_spaces(expression: Expression) -> list[dict[str, str]]:
+def expression_to_space_list(expression: Expression) -> list[dict[str, str]]:
     """
-        Takes a Pyeda expression.
-        Returns a list of spaces whose disjuntion is equivalent to this expression.
+        Convert a PyEDA expression to a list of subspaces whose union represents
+        an equivalent set of network states.
+
+        Note that the spaces are not necessarily pair-wise disjoint. Also,
+        the list is not necessarily minimal.
     """
+
+    # TODO: 
+    #  Function `to_dnf` in PyEDA actually produces a minimal
+    #  (or at least in some sense canonical) DNF. In the future, we might
+    #  want to either enforce this explicitly or relax this requirement. 
 
     sub_spaces = []
-    expr_dnf = expression.to_dnf()
+    expression_dnf = expression.to_dnf()
 
-    for cl in expr_dnf.xs:
+    for clause in expression_dnf.xs:
         sub_space = {}
-        literals = get_literals(cl)
 
-        for lit in literals:
-            if isinstance(lit, Variable):
-                sub_space[str(lit)] = "1"
-            if isinstance(lit, Complement):
-                sub_space[str(lit)[1:]] = "0"
-
+        # Since we know this is a DNF clause, it can only be
+        # a literal, or a conjunction of literals.
+        literals = [clause] if isinstance(clause, Literal) else clause.xs
+        
+        for literal in literals:
+            var = str(literal.inputs[0])
+            if isinstance(literal, Variable):
+                sub_space[var] = "1"
+            elif isinstance(literal, Complement):
+                sub_space[var] = "0"
+            else:
+                raise Exception(f"Unreachable: Invalid literal type `{type(literal)}`.")
+        
         sub_spaces.append(sub_space)
 
     return sub_spaces
-
-
-def get_literals(expression: Expression) -> list[Literal]:
-    """Return all the Litterals in expression."""
-    s = []
-    for ex in expression.iter_dfs():
-        if isinstance(ex, Literal):
-            s.append(ex)
-    return s

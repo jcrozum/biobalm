@@ -56,3 +56,14 @@ def test_network_percolation():
     assert "true" == percolated_bn.get_update_function("c")
     assert "b" == percolated_bn.get_update_function("a")
     assert "!a" == percolated_bn.get_update_function("b")
+
+def test_expression_to_spaces():
+    e = expr("(a & c) | (~d & (a | c)) | f")
+
+    spaces = expression_to_space_list(e)
+
+    assert {'f': '1'} in spaces
+    assert {'a': '1', 'c': '1'} in spaces
+    assert {'d': '0', 'a': '1'} in spaces
+    assert {'d': '0', 'c': '1'} in spaces
+    assert {'a': '1', 'c': '0'} not in spaces

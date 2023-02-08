@@ -74,7 +74,14 @@ def trappist(
     trappist_async(network, on_solution=save_result, problem=problem, reverse_time=reverse_time, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
     return results
 
-def _clingo_model_to_space(model: Model) -> Dict[str, str]:    
+def _clingo_model_to_space(model: Model) -> Dict[str, str]:  
+    """
+        Convert a clingo `Model` to a subspace.
+
+        This is a "negative" conversion, because the method for computing fixed points
+        produces "negative" models (i.e. the space is represented by negative atoms
+        present in the model).
+    """  
     space = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -193,7 +200,15 @@ def _create_clingo_constraints(
     return ctl     
 
 
-def _clingo_model_to_space_fixed_point(model: Model) -> Dict[str, str]:    
+def _clingo_model_to_fixed_point(model: Model) -> dict[str, str]:   
+    """
+        Convert a clingo `Model` to a subspace representing a single fixed point.
+        That is, the space should have all model variables fixed.
+
+        This is a "positive" conversion, because the method for computing fixed points
+        produces "positive" models (i.e. the space is represented by positive atoms
+        present in the model).
+    """ 
     space = {}
 
     for atom in model.symbols(atoms=True):
@@ -205,21 +220,22 @@ def _clingo_model_to_space_fixed_point(model: Model) -> Dict[str, str]:
         assert variable not in space
 
         # Note that this is opposite to the case of trap spaces. If "positive" symbol
-        # appears in the solution, we fix the value to "1". Otherwise, we fix the value "0"
+        # appears in the solution, we fix the value to "1". Otherwise, we fix the value to "0".
 
         space[variable] = "1" if is_positive else "0"
 
     return space
 
 
-def _create_clingo_constraints_fixed_point(
+def _create_clingo_fixed_point_constraints(
     petri_net: DiGraph,
     nodes: List[str],
     ensure_subspace: Dict[str, str] = {},
     avoid_subspaces: List[Dict[str, str]] = [],
 ) -> Control:
     """
-        Generate the ASP characterizing all deadlocks of the Petri net (equivalently all fixed points of the Boolean network).
+        Generate the ASP characterizing all deadlocks of the Petri net (equivalently all 
+        fixed points of the Boolean network).
     """
     
     dom_mod = "--dom-mod=3, 16" # for fixed points
@@ -265,7 +281,7 @@ def _create_clingo_constraints_fixed_point(
     for to_avoid in avoid_subspaces:
         if len(to_avoid) > 0:
             """
-                Note that there is oppsite to the case of trap spaces.
+                Note that this is opposite to the case of trap spaces.
                 m(x) = 0 ~ place b0_x and m(x) = 1 ~ place b1_x
             """
             fixed_list = [ variable_to_place(var, (to_avoid[var] == "1")) for var in to_avoid ]
@@ -280,29 +296,27 @@ def _create_clingo_constraints_fixed_point(
 
 def compute_fixed_point_reduced_STG_async(
     petri_net: DiGraph,
-    nodes: List[str],
-    retained_set: Dict[str, str],
-    on_solution: Callable[[Dict[str, str]], bool],
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],
+    nodes: list[str],
+    retained_set: dict[str, str],
+    on_solution: Callable[[dict[str, str]], bool],
+    ensure_subspace: dict[str, str] = {},
+    avoid_subspaces: list[dict[str, str]] = [],
 ):
     """
-        The same as the `trappist` method, but instead of returning a list of spaces as a result, the
-        spaces are returned to the supplied `on_solution` callback. You can stop the enumeration by
+        The same as the `compute_fixed_point_reduced_STG`, but instead of returning a 
+        list of fixed-points as a result, the states are returned to the supplied 
+        `on_solution` callback. You can stop the enumeration by
         returning `False` from this callback.
     """
 
+    # Build a copy of the original Petri net where the
+    # variables in the retained set can only change their 
+    # value towards the "retain value".
     reduced_petri_net = petri_net.copy()
     for node in retained_set.keys():
         b_i = retained_set[node]
-        source_place = ""
-
-        if b_i == "0":
-            source_place = variable_to_place(node, positive=False)
-
-        if b_i == "1":
-            source_place = variable_to_place(node, positive=True)
-
+        source_place = variable_to_place(node, positive = (b_i == "1"))
+        
         preds = list(reduced_petri_net.predecessors(source_place))
         succs = list(reduced_petri_net.successors(source_place))
 
@@ -311,29 +325,34 @@ def compute_fixed_point_reduced_STG_async(
         for trans in deleted_transitions:
             reduced_petri_net.remove_node(trans)
 
-
-    ctl = _create_clingo_constraints_fixed_point(reduced_petri_net, nodes, ensure_subspace, avoid_subspaces)
+    ctl = _create_clingo_fixed_point_constraints(reduced_petri_net, nodes, ensure_subspace, avoid_subspaces)
     ctl.ground([("base", [])])
     result = ctl.solve(yield_=True)
     if type(result) == SolveHandle:
         with result as iterator:
             for model in iterator:                    
-                if not on_solution(_clingo_model_to_space_fixed_point(model)):
+                if not on_solution(_clingo_model_to_fixed_point(model)):
                     break
     # Else: unsat, hence we don't do anything.
 
 
 def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
-    nodes: List[str],
-    retained_set: Dict[str, str],
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],
-    solution_limit: Optional[int] = None,
-) -> List[Dict[str, str]]:
+    nodes: list[str],
+    retained_set: dict[str, str],
+    ensure_subspace: dict[str, str] = {},
+    avoid_subspaces: list[Dict[str, str]] = [],
+    solution_limit: int | None = None,
+) -> list[dict[str, str]]:
     """
-        Now, this method supports computing all fixed points of the reduced STG with respect to the retained set of Boolean values.
-        This also supports finding the states that belong to a given sub-space or do not belong to avoidant sub-spaces.
+        This method computes the fixed points of the given Petri-net-encoded Boolean network.
+        This makes it possible to modify the Petri net instead of re-encoding the BN repeatedly
+        for multiple subsequnet queries.
+
+        The arguments `ensure_subspace`, `avoid_subspaces`, and `solution_limit` work exactly 
+        the same way as in the `trappist` method. Meanwhile, the `retained_set` argument is 
+        applied as  a restriction on the transitions of the Petri net, forcing given variables 
+        to retain the specified values.
     """
 
     results = []
