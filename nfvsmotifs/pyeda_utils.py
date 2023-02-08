@@ -105,5 +105,9 @@ def aeon_to_pyeda(expression: str) -> Expression:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
     """    
-    #return pyeda_expression.expr(expression.replace("!", "~"))
-    return pyeda_expression.expr(expression.replace("!", "~").replace("true",'1').replace("false",'0'))
+    # AEON expressions are mostly compatible with PyEDA, except for
+    # the negation operator and Boolean constants.
+    expression = expression.replace("!", "~")
+    expression = expression.replace("true", "1")
+    expression = expression.replace("false", "0")
+    return pyeda_expression.expr(expression)
