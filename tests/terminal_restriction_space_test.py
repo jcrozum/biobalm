@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork   
+from biodivine_aeon import BooleanNetwork # type: ignore
 from nfvsmotifs.trappist_core import trappist
 from nfvsmotifs.terminal_restriction_space import *
 from nfvsmotifs.aeon_utils import remove_static_constraints

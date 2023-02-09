@@ -1,5 +1,5 @@
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork # type: ignore
 
 def test_succession_diagram_structure():
     bn = BooleanNetwork.from_bnet("""
