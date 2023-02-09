@@ -12,7 +12,9 @@ if TYPE_CHECKING:
 
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda, expression_literals
+
+from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
 
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
@@ -169,3 +171,41 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, int]) ->
     substitution = { x: expr(space[x]) for x in space }
     expression = substitute_variables_in_expression(expression, substitution)
     return expression.simplify()
+
+
+def expression_to_space_list(expression: Expression) -> list[dict[str, str]]:
+    """
+        Convert a PyEDA expression to a list of subspaces whose union represents
+        an equivalent set of network states.
+
+        Note that the spaces are not necessarily pair-wise disjoint. Also,
+        the list is not necessarily minimal.
+    """
+
+    # TODO: 
+    #  Function `to_dnf` in PyEDA actually produces a minimal
+    #  (or at least in some sense canonical) DNF. In the future, we might
+    #  want to either enforce this explicitly or relax this requirement. 
+
+    sub_spaces = []
+    expression_dnf = expression.to_dnf()
+
+    for clause in expression_dnf.xs:
+        sub_space = {}
+
+        # Since we know this is a DNF clause, it can only be
+        # a literal, or a conjunction of literals.
+        literals = [clause] if isinstance(clause, Literal) else clause.xs
+        
+        for literal in literals:
+            var = str(literal.inputs[0])
+            if isinstance(literal, Variable):
+                sub_space[var] = "1"
+            elif isinstance(literal, Complement):
+                sub_space[var] = "0"
+            else:
+                raise Exception(f"Unreachable: Invalid literal type `{type(literal)}`.")
+        
+        sub_spaces.append(sub_space)
+
+    return sub_spaces
