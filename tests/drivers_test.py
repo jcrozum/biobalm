@@ -22,7 +22,7 @@ def test_find_single_node_LDOIs():
     assert LDOIs[('D', 0)] == {}
     assert LDOIs[('D', 1)] == {'D': 1, 'C': 1}
 
-def test_is_find_single_drivers():
+def test_find_single_drivers():
     bn = BooleanNetwork.from_bnet("""
     S, S
     A, S | B

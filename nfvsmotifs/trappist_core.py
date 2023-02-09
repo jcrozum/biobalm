@@ -83,8 +83,9 @@ def _clingo_model_to_space(model: Model) -> dict[str, int]:
         # but just in case.
         assert variable not in space        
         # Note that this is counterintuitive but correct. If "positive" symbol
-        # appears in the solution, we want to fix the value to "0". This is indeed
+        # appears in the solution, we want to fix the value to 0. This is indeed
         # the intended behaviour of the algorithm.
+        space[variable] = 0 if is_positive else 1
         space[variable] = 0 if is_positive else 1
     return space
 
@@ -145,13 +146,13 @@ def _create_clingo_constraints(
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
     for fixed_var in ensure_subspace:
         positive = True
-        if ensure_subspace[fixed_var] == "1":
+        if ensure_subspace[fixed_var] == 1:
             positive = False
         ctl.add(f"{variable_to_place(fixed_var, positive)}.")
     
     # Ensure that solutions can't have variables fixed based on either subspace in `avoid_subspaces`. 
     for to_avoid in avoid_subspaces:
-        fixed_list = [ variable_to_place(var, (to_avoid[var] != "1")) for var in to_avoid ]
+        fixed_list = [ variable_to_place(var, (to_avoid[var] != 1)) for var in to_avoid ]
         fixed_vars = ", ".join(fixed_list)
         ctl.add(f":- {fixed_vars}.")
 

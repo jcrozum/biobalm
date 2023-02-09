@@ -3,7 +3,7 @@ from __future__ import annotations
     Some basic utility operations on spaces (partial assignments of BN variables).
 
     Each space is represented as a dictionary with a subset of variable names as 
-    keys and values `'0'`/`'1'` assigned to fixed variables.
+    keys and values `0`/`1` assigned to fixed variables.
 """
 
 from typing import TYPE_CHECKING
@@ -18,7 +18,7 @@ from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
 
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
-def is_subspace(x: dict[str, str], y: dict[str, str]) -> bool:
+def is_subspace(x: dict[str, int], y: dict[str, int]) -> bool:
     """
         Checks if `x` is a subspace of `y`.
     """
@@ -162,7 +162,7 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwo
 
 def percolate_pyeda_expression(expression: Expression, space: dict[str, int]) -> Expression:
     """
-        Takes a PyEDA expression and a subspace (dictionary assigning `"1"`/`"0"` to
+        Takes a PyEDA expression and a subspace (dictionary assigning `1`/`0` to
         a subset of variables). Returns a simplified expression that is valid
         for exactly the same members of the given `space` as the original expression. 
         The resulting expression does not depend on the variables which are fixed 
