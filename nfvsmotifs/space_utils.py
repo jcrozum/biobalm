@@ -49,9 +49,9 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
                 return False
     return True
 
-def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dict[str, int], dict[str, int]]:
+def percolate_space(network: BooleanNetwork, space: dict[str, int], strict_percolation: bool = True) -> tuple[dict[str, int], dict[str, int]]:
     """
-        Takes a Boolean network and a space (partial assignment of `"0"`/`"1"` 
+        Takes a Boolean network and a space (partial assignment of `0`/`1` 
         to the network variables). It then percolates the values in the given 
         `space` to the remaining network variables based on the update functions
         of the given `network`. 
@@ -66,9 +66,21 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dic
 
         We then return these percolated values for the conflicting variables
         as a second member of the result tuple.
+        
+        If `strict_percolation` is used, only variables that become fixed as a result 
+        of fixing the space are considered (e.g., nodes with constant update functions 
+        are not propogated). Furthermore, the variables in `space` are only returned
+        if the value of their update funciton becomes fixed as a result of percolating
+        the fixed node values specified by `space`.
     """
-    # Make a copy of the original space
-    result = { var:space[var] for var in space }
+    
+    if strict_percolation:
+        result = {}
+    else:
+        result = { var:space[var] for var in space }
+    
+    fixed = { var:space[var] for var in space }
+    
     conflicts = {}
     done = False
     while not done:
@@ -78,17 +90,20 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dic
             expression = aeon_to_pyeda(network.get_update_function(var))
             
             # If the var is already constant, it doesn't count.
-            if expression == PYEDA_TRUE or expression == PYEDA_FALSE: 
+            if (expression == PYEDA_TRUE or expression == PYEDA_FALSE) and strict_percolation: 
                 continue
             
-            expression = percolate_pyeda_expression(expression, result)
-            if expression == PYEDA_TRUE or expression == PYEDA_FALSE:                
-                if var_name not in result:
+            expression = percolate_pyeda_expression(expression, fixed)
+            if expression == PYEDA_TRUE or expression == PYEDA_FALSE: 
+                if var_name not in fixed:
                     # Fortunately, PyEDA resolves true as '1' and false as '0', 
                     # so we can use a direct conversion.
+                    fixed[var_name] = int(expression)
                     result[var_name] = int(expression)
                     done = False
-                if var_name in result and result[var_name] != int(expression):
+                if var_name in fixed and fixed[var_name] == int(expression) and var_name not in result:
+                    result[var_name] = int(expression)
+                if var_name in fixed and fixed[var_name] != int(expression):
                     conflicts[var_name] = int(expression)
     
     return (result, conflicts)
@@ -96,7 +111,7 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int]) -> tuple[dic
 def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwork:
     """
         Takes an AEON.py Boolean network and a space (partial assignment of
-        network variables to `'0'`/`'1'`). It then produces a new network with
+        network variables to `0`/`1`). It then produces a new network with
         update functions percolated based on the supplied space.
         There are two caveats to this operation:
         

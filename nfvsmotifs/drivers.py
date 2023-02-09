@@ -25,7 +25,7 @@ def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str
 def find_single_drivers(target_subspace: dict[str, int], 
                         bn: BooleanNetwork, 
                         LDOIs: dict[tuple[str, int],dict[str, int]] | None = None
-                        ) -> list[tuple[str, int]]:
+                        ) -> set[tuple[str, int]]:
     """
     find all the single node drivers for a given target_subspace, 
     usually (but not necessarily) a maximal trapspace (stablemotif)
@@ -33,9 +33,9 @@ def find_single_drivers(target_subspace: dict[str, int],
     if LDOIs is None:
         LDOIs = find_single_node_LDOIs(bn)
 
-    drivers = []
+    drivers = set()
     for fix, LDOI in LDOIs.items():
-        if target_subspace.items() <= LDOI.items():
-            drivers.append(fix)
+        if target_subspace.items() <= (LDOI.items() | {fix}):
+            drivers.add(fix)
 
     return drivers
