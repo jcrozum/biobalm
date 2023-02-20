@@ -13,7 +13,6 @@ from nfvsmotifs.state_utils import state_to_bdd, state_list_to_bdd, function_eva
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import List, Dict
     from pyeda.boolalg.bdd import BinaryDecisionDiagram # type:ignore
 
 
@@ -24,10 +23,10 @@ if TYPE_CHECKING:
 def detect_motif_avoidant_attractors(
     network: BooleanNetwork,
     petri_net: DiGraph,
-    candidates: List[Dict[str, int]],
+    candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int
-) -> List[Dict[str, int]]:
+) -> list[dict[str, int]]:
     """
         Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
         Other method inputs:
@@ -50,10 +49,10 @@ def detect_motif_avoidant_attractors(
 
 def _preprocess_candidates(
     network: BooleanNetwork,
-    candidates: List[Dict[str, int]],
+    candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int
-) -> List[Dict[str, int]]:
+) -> list[dict[str, int]]:
     """
         A fast but incomplete method for eliminating spurious attractor candidates. 
 
@@ -128,9 +127,9 @@ def _preprocess_candidates(
 
 def _filter_candidates(
     petri_net: DiGraph,
-    candidates: List[Dict[str, int]],
+    candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram
-) -> List[Dict[str, int]]:
+) -> list[dict[str, int]]:
     """
         Filter candidate states using reachability procedure in Pint.
     """
@@ -153,7 +152,7 @@ def _filter_candidates(
 
 def _Pint_reachability(
     petri_net: DiGraph,
-    initial_state: Dict[str, int],
+    initial_state: dict[str, int],
     target_states: BinaryDecisionDiagram
 ) -> bool:
     """

@@ -71,7 +71,7 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int], strict_perco
         
         If `strict_percolation` is used, only variables that become fixed as a result 
         of fixing the space are considered (e.g., nodes with constant update functions 
-        are not propogated). Furthermore, the variables in `space` are only returned
+        are not propagated). Furthermore, the variables in `space` are only returned
         if the value of their update funciton becomes fixed as a result of percolating
         the fixed node values specified by `space`.
     """

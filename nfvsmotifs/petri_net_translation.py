@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork # type: ignore    
     from pyeda.boolalg.bdd import BDDNode # type: ignore
-    from typing import Dict, Tuple
 
 from networkx import DiGraph # type: ignore
 from pyeda.boolalg.bdd import expr2bdd, bddvar
@@ -73,7 +72,7 @@ def variable_to_place(variable: str, positive: bool) -> str:
     else:
         return f"b0_{variable}"
 
-def place_to_variable(place: str) -> Tuple[str, bool]:
+def place_to_variable(place: str) -> tuple[str, bool]:
     """
         Convert the name of a Petri net place to the name of the network variable, plus
         a Boolean indicating whether the original place was positive or negative.
@@ -133,7 +132,7 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
 
 def _create_transitions(
     pn: DiGraph, 
-    places: Dict[str, Tuple[str, str]], 
+    places: dict[str, tuple[str, str]], 
     var_name: str, 
     implicant_bdd: BDDNode, 
     go_up: bool

@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biodivine_aeon import VariableId # type: ignore
-    from typing import Union, Optional
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph # type: ignore
@@ -98,9 +97,9 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
 
 
 def feedback_vertex_set(
-    network: Union[BooleanNetwork, RegulatoryGraph, DiGraph], 
-    parity: Optional[str] = None, 
-    subgraph: Optional[list[Union[str, VariableId]]] = None
+    network: BooleanNetwork | RegulatoryGraph | DiGraph, 
+    parity: str | None = None, 
+    subgraph: list[str | VariableId] | None = None
 ) -> list[str]:
     """
         Compute an approximately minimal feedback vertex set (FVS) of
@@ -130,9 +129,9 @@ def feedback_vertex_set(
     return [network.get_variable_name(x) for x in fvs]
 
 def independent_cycles(
-    network: Union[BooleanNetwork, RegulatoryGraph],
-    parity: Optional[str] = None,
-    subgraph: Optional[list[Union[str, VariableId]]] = None
+    network: BooleanNetwork | RegulatoryGraph,
+    parity: str | None = None,
+    subgraph: list[str | VariableId] | None = None
 ) -> list[list[str]]:
     """
         Compute an approximately maximal set of independent cycles of

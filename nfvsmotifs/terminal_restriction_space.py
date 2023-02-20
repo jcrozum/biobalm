@@ -3,13 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork # type: ignore    
-    from typing import List, Dict
 
 from nfvsmotifs.trappist_core import trappist
 from nfvsmotifs.space_utils import percolate_space
 
 
-def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> List[Dict[str, int]]:
+def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]:
     """
     Takes a Boolean network and gets its self-negating time-reversal trap spaces.
     To find time-reversal trap spaces in a specific trap space,
