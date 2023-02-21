@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from pyeda.inter import Expression # type: ignore
 
 import pyeda.boolalg.expr as pyeda_expression # type: ignore
+from pyeda.boolalg.expr import Literal # type: ignore
 from pyeda.inter import Not, And, Or, Equal, Xor, Implies # type: ignore
 
 PYEDA_TRUE = pyeda_expression.expr(1)
@@ -64,6 +65,7 @@ def pyeda_to_aeon(expression: Expression) -> str:
         Note: Right now, I have not found a better way to do this. If you find something
         simpler, go for it...
     """
+    
     if expression == PYEDA_TRUE:
         return "true"
     if expression == PYEDA_FALSE:        
@@ -104,4 +106,19 @@ def aeon_to_pyeda(expression: str) -> Expression:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
     """    
-    return pyeda_expression.expr(expression.replace("!", "~"))
+    # AEON expressions are mostly compatible with PyEDA, except for
+    # the negation operator and Boolean constants.
+    expression = expression.replace("!", "~")
+    expression = expression.replace("true", "1")
+    expression = expression.replace("false", "0")
+    return pyeda_expression.expr(expression)
+
+def expression_literals(expression: Expression) -> set[Literal]:
+    """
+        Compute the set of all literals appearing in the given PyEDA expression.
+    """
+    result = set()
+    for sub_expression in expression.iter_dfs():
+        if isinstance(sub_expression, Literal):
+            result.add(sub_expression)
+    return result

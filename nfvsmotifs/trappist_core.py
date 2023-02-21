@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from networkx import DiGraph # type: ignore
     from biodivine_aeon import BooleanNetwork # type: ignore    
-    from typing import List, Dict, Optional, Callable
+    from typing import Callable
     from clingo import Model
 
 from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable
@@ -15,11 +15,11 @@ from clingo import Control, SolveHandle
 
 def trappist_async(
     network: BooleanNetwork,
-    on_solution: Callable[[Dict[str, str]], bool],
+    on_solution: Callable[[dict[str, int]], bool],
     problem: str = "min",
     reverse_time: bool = False,   
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [], 
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [], 
 ):
     """
         The same as the `trappist` method, but instead of returning a list of spaces as a result, the
@@ -48,10 +48,10 @@ def trappist(
     network: BooleanNetwork, 
     problem: str = "min", 
     reverse_time: bool = False, 
-    solution_limit: Optional[int] = None,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],    
-) -> List[Dict[str, str]]:
+    solution_limit: int | None = None,
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],    
+) -> list[dict[str, int]]:
     """
         Solve the given `problem` for the given `network` using the Trappist algorithm, internally relying on the 
         Python bindings of the `clingo` ASP solver.
@@ -74,7 +74,7 @@ def trappist(
     trappist_async(network, on_solution=save_result, problem=problem, reverse_time=reverse_time, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
     return results
 
-def _clingo_model_to_space(model: Model) -> Dict[str, str]:    
+def _clingo_model_to_space(model: Model) -> dict[str, int]:    
     space = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -83,9 +83,10 @@ def _clingo_model_to_space(model: Model) -> Dict[str, str]:
         # but just in case.
         assert variable not in space        
         # Note that this is counterintuitive but correct. If "positive" symbol
-        # appears in the solution, we want to fix the value to "0". This is indeed
+        # appears in the solution, we want to fix the value to 0. This is indeed
         # the intended behaviour of the algorithm.
-        space[variable] = "0" if is_positive else "1"
+        space[variable] = 0 if is_positive else 1
+        space[variable] = 0 if is_positive else 1
     return space
 
 def _create_clingo_constraints(
@@ -93,9 +94,9 @@ def _create_clingo_constraints(
     petri_net: DiGraph, 
     problem: str = "min", 
     reverse_time: bool = False,
-    ensure_subspace: Dict[str, str] = {},
-    avoid_subspaces: List[Dict[str, str]] = [],
-    optimize_source_variables: List[str] = [],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+    optimize_source_variables: list[str] = [],
 ) -> Control:
     """
         Translate the given Petri net (represented as a `DiGraph`; see also `petri_net_translation` 
@@ -145,13 +146,13 @@ def _create_clingo_constraints(
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
     for fixed_var in ensure_subspace:
         positive = True
-        if ensure_subspace[fixed_var] == "1":
+        if ensure_subspace[fixed_var] == 1:
             positive = False
         ctl.add(f"{variable_to_place(fixed_var, positive)}.")
     
     # Ensure that solutions can't have variables fixed based on either subspace in `avoid_subspaces`. 
     for to_avoid in avoid_subspaces:
-        fixed_list = [ variable_to_place(var, (to_avoid[var] != "1")) for var in to_avoid ]
+        fixed_list = [ variable_to_place(var, (to_avoid[var] != 1)) for var in to_avoid ]
         fixed_vars = ", ".join(fixed_list)
         ctl.add(f":- {fixed_vars}.")
 
@@ -191,3 +192,166 @@ def _create_clingo_constraints(
                 ctl.add(f"{variable_to_place(variable, True)}; {variable_to_place(variable, False)}.")
 
     return ctl     
+
+
+def _clingo_model_to_fixed_point(model: Model) -> dict[str, int]:   
+    """
+        Convert a clingo `Model` to a subspace representing a single fixed point.
+        That is, the space should have all model variables fixed.
+
+        This is a "positive" conversion, because the method for computing fixed points
+        produces "positive" models (i.e. the space is represented by positive atoms
+        present in the model).
+    """ 
+    space = {}
+
+    for atom in model.symbols(atoms=True):
+        atom_str = str(atom)
+        (variable, is_positive) = place_to_variable(atom_str)
+        
+        # This should be prevented by the "conflic-free" property of the result, 
+        # but just in case.
+        assert variable not in space
+
+        # Note that this is opposite to the case of trap spaces. If "positive" symbol
+        # appears in the solution, we fix the value to "1". Otherwise, we fix the value to "0".
+
+        space[variable] = 1 if is_positive else 0
+
+    return space
+
+
+def _create_clingo_fixed_point_constraints(
+    petri_net: DiGraph,
+    nodes: list[str],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+) -> Control:
+    """
+        Generate the ASP characterizing all deadlocks of the Petri net (equivalently all 
+        fixed points of the Boolean network).
+    """
+    
+    dom_mod = "--dom-mod=3, 16" # for fixed points
+    
+    # "0" specifies that all solutions should be listed (we implement the limit
+    # later using callbacks).
+    # TODO: Explain what remaining options mean and why we need them?
+    ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
+
+    # Declare places and their conflicts based on network variables.
+    for node in nodes:
+        p_name = variable_to_place(node, positive=True)
+        n_name = variable_to_place(node, positive=False)
+
+        # Declare a positive and negative symbol.        
+        ctl.add("base", [], f"{{{p_name}}}.")
+        ctl.add("base", [], f"{{{n_name}}}.")
+
+        # Assert there is a fixed point.     
+        ctl.add("base", [], f":- {p_name}, {n_name}.")
+        ctl.add("base", [], f"{p_name} ; {n_name}.")
+
+
+    for node, kind in petri_net.nodes(data="kind"):
+        if kind == "place":
+            continue
+        elif kind == "transition":
+            preds = list(petri_net.predecessors(node))
+
+            pred_rhs = "; ".join(preds)
+            ctl.add("base", [], f":- {pred_rhs}.")
+        else:
+            raise Exception(f"Unexpected node kind: `{kind}`.")
+
+    # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
+    for fixed_var in ensure_subspace:
+        positive = False
+        if ensure_subspace[fixed_var] == "1":
+            positive = True
+        ctl.add("base", [], f"{variable_to_place(fixed_var, positive)}.")
+
+    # Ensure that fixed points can't lie in either subspace in `avoid_subspaces`. 
+    for to_avoid in avoid_subspaces:
+        if len(to_avoid) > 0:
+            """
+                Note that this is opposite to the case of trap spaces.
+                m(x) = 0 ~ place b0_x and m(x) = 1 ~ place b1_x
+            """
+            fixed_list = [ variable_to_place(var, (to_avoid[var] == "1")) for var in to_avoid ]
+            fixed_vars = ", ".join(fixed_list)
+            ctl.add("base", [], f":- {fixed_vars}.")
+        else:
+            ctl.add("base", [], f"#false.")
+            break # There is no solution and we do not need to process more.
+
+    return ctl 
+
+
+def compute_fixed_point_reduced_STG_async(
+    petri_net: DiGraph,
+    nodes: list[str],
+    retained_set: dict[str, int],
+    on_solution: Callable[[dict[str, int]], bool],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+):
+    """
+        The same as the `compute_fixed_point_reduced_STG`, but instead of returning a 
+        list of fixed-points as a result, the states are returned to the supplied 
+        `on_solution` callback. You can stop the enumeration by
+        returning `False` from this callback.
+    """
+
+    # Build a copy of the original Petri net where the
+    # variables in the retained set can only change their 
+    # value towards the "retain value".
+    reduced_petri_net = petri_net.copy()
+    for node in retained_set.keys():
+        b_i = retained_set[node]
+        source_place = variable_to_place(node, positive = (b_i == "1"))
+        
+        preds = list(reduced_petri_net.predecessors(source_place))
+        succs = list(reduced_petri_net.successors(source_place))
+
+        deleted_transitions = list(set(succs) - set(preds))
+
+        for trans in deleted_transitions:
+            reduced_petri_net.remove_node(trans)
+
+    ctl = _create_clingo_fixed_point_constraints(reduced_petri_net, nodes, ensure_subspace, avoid_subspaces)
+    ctl.ground([("base", [])])
+    result = ctl.solve(yield_=True)
+    if type(result) == SolveHandle:
+        with result as iterator:
+            for model in iterator:                    
+                if not on_solution(_clingo_model_to_fixed_point(model)):
+                    break
+    # Else: unsat, hence we don't do anything.
+
+
+def compute_fixed_point_reduced_STG(
+    petri_net: DiGraph,
+    nodes: list[str],
+    retained_set: dict[str, int],
+    ensure_subspace: dict[str, int] = {},
+    avoid_subspaces: list[dict[str, int]] = [],
+    solution_limit: int | None = None,
+) -> list[dict[str, int]]:
+    """
+        This method computes the fixed points of the given Petri-net-encoded Boolean network.
+        This makes it possible to modify the Petri net instead of re-encoding the BN repeatedly
+        for multiple subsequnet queries.
+
+        The arguments `ensure_subspace`, `avoid_subspaces`, and `solution_limit` work exactly 
+        the same way as in the `trappist` method. Meanwhile, the `retained_set` argument is 
+        applied as  a restriction on the transitions of the Petri net, forcing given variables 
+        to retain the specified values.
+    """
+
+    results = []
+    def save_result(x):
+        results.append(x)
+        return solution_limit == None or len(results) < solution_limit
+    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
+    return results

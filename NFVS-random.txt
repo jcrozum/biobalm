@@ -1,0 +1,240 @@
+1.bnet (100 nodes)
+AEON: 13 (0.01)
+mtsNFVS: 11 (0.29)
+=========
+10.bnet (100 nodes)
+AEON: 14 (0.01)
+mtsNFVS: 14 (0.32)
+=========
+11.bnet (100 nodes)
+AEON: 18 (0.02)
+mtsNFVS: 13 (0.33)
+=========
+12.bnet (100 nodes)
+AEON: 13 (0.01)
+mtsNFVS: 12 (0.28)
+=========
+13.bnet (100 nodes)
+AEON: 12 (0.01)
+mtsNFVS: 16 (0.30)
+=========
+14.bnet (100 nodes)
+AEON: 18 (0.02)
+mtsNFVS: 14 (0.29)
+=========
+15.bnet (100 nodes)
+AEON: 15 (0.02)
+mtsNFVS: 11 (0.40)
+=========
+16.bnet (100 nodes)
+AEON: 17 (0.01)
+mtsNFVS: 16 (0.27)
+=========
+17.bnet (100 nodes)
+AEON: 17 (0.02)
+mtsNFVS: 15 (0.53)
+=========
+18.bnet (100 nodes)
+AEON: 15 (0.02)
+mtsNFVS: 12 (0.36)
+=========
+19.bnet (100 nodes)
+AEON: 12 (0.01)
+mtsNFVS: 11 (0.40)
+=========
+2.bnet (100 nodes)
+AEON: 16 (0.02)
+mtsNFVS: 14 (0.29)
+=========
+20.bnet (100 nodes)
+AEON: 15 (0.01)
+mtsNFVS: 12 (0.34)
+=========
+21.bnet (200 nodes)
+AEON: 29 (0.07)
+mtsNFVS: 19 (3.21)
+=========
+22.bnet (200 nodes)
+AEON: 24 (0.07)
+mtsNFVS: 21 (1.35)
+=========
+23.bnet (200 nodes)
+AEON: 28 (0.06)
+mtsNFVS: 24 (2.74)
+=========
+24.bnet (200 nodes)
+AEON: 29 (0.07)
+mtsNFVS: 19 (1.94)
+=========
+25.bnet (200 nodes)
+AEON: 27 (0.08)
+mtsNFVS: 20 (2.04)
+=========
+26.bnet (200 nodes)
+AEON: 30 (0.10)
+mtsNFVS: 21 (3.91)
+=========
+27.bnet (200 nodes)
+AEON: 28 (0.08)
+mtsNFVS: 22 (2.71)
+=========
+28.bnet (200 nodes)
+AEON: 28 (0.07)
+mtsNFVS: 22 (1.25)
+=========
+29.bnet (200 nodes)
+AEON: 27 (0.09)
+mtsNFVS: 19 (2.27)
+=========
+3.bnet (100 nodes)
+AEON: 13 (0.01)
+mtsNFVS: 10 (0.47)
+=========
+30.bnet (200 nodes)
+AEON: 31 (0.08)
+mtsNFVS: 22 (5.40)
+=========
+31.bnet (200 nodes)
+AEON: 26 (0.07)
+mtsNFVS: 21 (2.32)
+=========
+32.bnet (200 nodes)
+AEON: 22 (0.06)
+mtsNFVS: 22 (1.55)
+=========
+33.bnet (200 nodes)
+AEON: 29 (0.07)
+mtsNFVS: 22 (2.02)
+=========
+34.bnet (200 nodes)
+AEON: 26 (0.06)
+mtsNFVS: 25 (1.52)
+=========
+35.bnet (200 nodes)
+AEON: 24 (0.07)
+mtsNFVS: 20 (1.10)
+=========
+36.bnet (200 nodes)
+AEON: 23 (0.05)
+mtsNFVS: 18 (1.63)
+=========
+37.bnet (200 nodes)
+AEON: 30 (0.10)
+mtsNFVS: 20 (2.17)
+=========
+38.bnet (200 nodes)
+AEON: 31 (0.08)
+mtsNFVS: 23 (2.05)
+=========
+39.bnet (200 nodes)
+AEON: 29 (0.08)
+mtsNFVS: 20 (2.20)
+=========
+4.bnet (100 nodes)
+AEON: 13 (0.01)
+mtsNFVS: 11 (0.36)
+=========
+40.bnet (200 nodes)
+AEON: 26 (0.08)
+mtsNFVS: 20 (1.95)
+=========
+41.bnet (300 nodes)
+AEON: 40 (0.24)
+mtsNFVS: 34 (7.07)
+=========
+42.bnet (300 nodes)
+AEON: 40 (0.25)
+mtsNFVS: 30 (5.79)
+=========
+43.bnet (300 nodes)
+AEON: 42 (0.26)
+mtsNFVS: 33 (4.06)
+=========
+44.bnet (300 nodes)
+AEON: 46 (0.23)
+mtsNFVS: 29 (5.81)
+=========
+45.bnet (300 nodes)
+AEON: 43 (0.20)
+mtsNFVS: 29 (5.73)
+=========
+46.bnet (300 nodes)
+AEON: 40 (0.25)
+mtsNFVS: 27 (10.53)
+=========
+47.bnet (300 nodes)
+AEON: 43 (0.21)
+mtsNFVS: 32 (4.56)
+=========
+48.bnet (300 nodes)
+AEON: 38 (0.20)
+mtsNFVS: 27 (5.34)
+=========
+49.bnet (300 nodes)
+AEON: 40 (0.19)
+mtsNFVS: 26 (5.83)
+=========
+5.bnet (100 nodes)
+AEON: 15 (0.02)
+mtsNFVS: 12 (0.36)
+=========
+50.bnet (300 nodes)
+AEON: 40 (0.21)
+mtsNFVS: 28 (5.93)
+=========
+51.bnet (300 nodes)
+AEON: 42 (0.26)
+mtsNFVS: 29 (7.29)
+=========
+52.bnet (300 nodes)
+AEON: 47 (0.24)
+mtsNFVS: 32 (5.26)
+=========
+53.bnet (300 nodes)
+AEON: 44 (0.25)
+mtsNFVS: 33 (3.72)
+=========
+54.bnet (300 nodes)
+AEON: 41 (0.20)
+mtsNFVS: 30 (8.11)
+=========
+55.bnet (300 nodes)
+AEON: 37 (0.18)
+mtsNFVS: 30 (8.28)
+=========
+56.bnet (300 nodes)
+AEON: 38 (0.20)
+mtsNFVS: 27 (5.73)
+=========
+57.bnet (300 nodes)
+AEON: 36 (0.20)
+mtsNFVS: 30 (5.83)
+=========
+58.bnet (300 nodes)
+AEON: 35 (0.17)
+mtsNFVS: 29 (4.70)
+=========
+59.bnet (300 nodes)
+AEON: 41 (0.22)
+mtsNFVS: 29 (8.63)
+=========
+6.bnet (100 nodes)
+AEON: 13 (0.01)
+mtsNFVS: 13 (0.32)
+=========
+60.bnet (300 nodes)
+AEON: 40 (0.21)
+mtsNFVS: 32 (7.05)
+=========
+7.bnet (100 nodes)
+AEON: 16 (0.02)
+mtsNFVS: 14 (0.44)
+=========
+8.bnet (100 nodes)
+AEON: 15 (0.01)
+mtsNFVS: 11 (0.45)
+=========
+9.bnet (100 nodes)
+AEON: 15 (0.01)
+mtsNFVS: 12 (0.47)
+=========
