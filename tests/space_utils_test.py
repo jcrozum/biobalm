@@ -80,8 +80,8 @@ def test_expression_to_spaces():
 
     spaces = expression_to_space_list(e)
 
-    assert {'f': '1'} in spaces
-    assert {'a': '1', 'c': '1'} in spaces
-    assert {'d': '0', 'a': '1'} in spaces
-    assert {'d': '0', 'c': '1'} in spaces
-    assert {'a': '1', 'c': '0'} not in spaces
+    assert {'f': 1} in spaces
+    assert {'a': 1, 'c': 1} in spaces
+    assert {'d': 0, 'a': 1} in spaces
+    assert {'d': 0, 'c': 1} in spaces
+    assert {'a': 1, 'c': 0} not in spaces
