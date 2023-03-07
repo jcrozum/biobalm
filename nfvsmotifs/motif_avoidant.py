@@ -25,7 +25,8 @@ def detect_motif_avoidant_attractors(
     petri_net: DiGraph,
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
-    max_iterations: int
+    max_iterations: int,
+    ensure_subspace: dict[str, int] = {}
 ) -> list[dict[str, int]]:
     """
         Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
@@ -40,7 +41,7 @@ def detect_motif_avoidant_attractors(
     if len(candidates) == 0:
         return []
     
-    candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations)
+    candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations, ensure_subspace=ensure_subspace)
 
     if len(candidates) == 0:
         return []
@@ -51,7 +52,8 @@ def _preprocess_candidates(
     network: BooleanNetwork,
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
-    max_iterations: int
+    max_iterations: int,
+    ensure_subspace: dict[str, int] = {}
 ) -> list[dict[str, int]]:
     """
         A fast but incomplete method for eliminating spurious attractor candidates. 
@@ -76,6 +78,8 @@ def _preprocess_candidates(
     variables = []
     update_functions = {}
     for var in network.variables():
+        if var in ensure_subspace: # do not update constant nodes
+            continue
         var_name = network.get_variable_name(var)
         variables.append(var_name)
         function_expression = network.get_update_function(var)
@@ -128,7 +132,7 @@ def _preprocess_candidates(
 def _filter_candidates(
     petri_net: DiGraph,
     candidates: list[dict[str, int]],
-    terminal_restriction_space: BinaryDecisionDiagram
+    terminal_restriction_space: BinaryDecisionDiagram,
 ) -> list[dict[str, int]]:
     """
         Filter candidate states using reachability procedure in Pint.

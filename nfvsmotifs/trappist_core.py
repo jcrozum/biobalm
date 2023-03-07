@@ -33,10 +33,11 @@ def trappist_async(
         name = network.get_variable_name(var)
         if network.get_update_function(var).strip() == name:
             source_nodes.append(name)
-
+    
     ctl = _create_clingo_constraints(network, petri_net, problem, reverse_time, ensure_subspace, avoid_subspaces, source_nodes)
     ctl.ground()
     result = ctl.solve(yield_=True)
+    
     if type(result) == SolveHandle:
         with result as iterator:
             for model in iterator:                    
@@ -127,8 +128,9 @@ def _create_clingo_constraints(
     # "0" specifies that all solutions should be listed (we implement the limit
     # later using callbacks).
     # TODO: Explain what remaining options mean and why we need them?
-    ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
 
+    ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
+    
     # Declare places and their conflicts based on network variables.
     for var in network.variables():
         var_name = network.get_variable_name(var)
@@ -180,7 +182,7 @@ def _create_clingo_constraints(
             raise Exception(f"Unexpected node kind: `{kind}`.")
     
     # For maximal trap spaces, we need an extra condition.
-    if problem == "max":
+    if problem == "max" and len(free_places) > 0:
         # Only spaces which are not fixed but the `ensure_subspace` are considered here.
         max_condition = "; ".join(free_places)
         ctl.add(f"{max_condition}.")
@@ -302,7 +304,6 @@ def compute_fixed_point_reduced_STG_async(
         `on_solution` callback. You can stop the enumeration by
         returning `False` from this callback.
     """
-
     # Build a copy of the original Petri net where the
     # variables in the retained set can only change their 
     # value towards the "retain value".

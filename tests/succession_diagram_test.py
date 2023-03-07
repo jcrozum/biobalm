@@ -25,7 +25,9 @@ def test_succession_diagram_structure2():
         """)
 
     SD = SuccessionDiagram(bn)
-    assert SD.G.number_of_nodes() == 8 # WARNING: this is 8 because we don't do node merger yet; will need to update test!!
+    assert SD.G.number_of_nodes() == 6 # NOTE: We are using a slightly different convention; 
+                                       # we are merging if the fixed vars match AFTER percolation, 
+                                       # whereas pystablemotifs merges BEFORE percolation
     assert SD.G.number_of_edges() == 7
     assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
     
