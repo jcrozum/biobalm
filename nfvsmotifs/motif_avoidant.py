@@ -26,7 +26,8 @@ def detect_motif_avoidant_attractors(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {}
+    ensure_subspace: dict[str, int] = {},
+    is_in_an_mts: bool = False
 ) -> list[dict[str, int]]:
     """
         Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
@@ -41,10 +42,16 @@ def detect_motif_avoidant_attractors(
     if len(candidates) == 0:
         return []
     
+    if len(candidates) == 1 and is_in_an_mts:
+        return candidates
+    
     candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations, ensure_subspace=ensure_subspace)
 
     if len(candidates) == 0:
         return []
+    
+    if len(candidates) == 1 and is_in_an_mts:
+        return candidates
 
     return _filter_candidates(petri_net, candidates, terminal_restriction_space)
 

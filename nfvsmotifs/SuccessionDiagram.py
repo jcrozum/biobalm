@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import networkx as nx  # type: ignore
 
-from biodivine_aeon import BooleanNetwork # type: ignore
+from biodivine_aeon import BooleanNetwork  # type: ignore
 from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS  # type: ignore
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
@@ -66,7 +66,8 @@ class SuccessionDiagram():
                 attractors = detect_motif_avoidant_attractors(
                     self.network, self.petri_net,
                     candidates, terminal_restriction_space, AVOIDANCE_ITERATIONS,
-                    ensure_subspace=self.G.nodes[sd_node]['fixed_vars'])
+                    ensure_subspace=self.G.nodes[sd_node]['fixed_vars'],
+                    is_in_an_mts=(len(stable_motifs) == 0))
                 self.G.nodes[sd_node]['attractors'] = attractors
 
                 for fixed_vars in stable_motifs:
