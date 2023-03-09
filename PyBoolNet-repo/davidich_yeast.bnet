@@ -11,7 +11,7 @@ targets, factors
 #    net = loadSBML("fissionYeastDavidich2008.sbml")
 #    saveNetwork(net, "fissionYeastDavidich2008.bnet")
 
-Start,         0
+Start,         Start & !Start
 
 Cdc25,         !PP&Cdc2_Cdc13 | !PP&Cdc25 | Cdc2_Cdc13&Cdc25
 Cdc2_Cdc13,    !Ste9&!Slp1&!Rum1

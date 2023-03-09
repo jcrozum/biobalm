@@ -7,7 +7,7 @@ targets, factors
 # note that AUXINS is defined as an input in the paper (AUXINS:=AUXINS) but as an underdetermined component in the model file (AUXINS:=true, AUXINS). PyBoolNet can in general not handle indeterminations but in this case the indeterminations results in a constant at 1.
 
 
-AUXINS,  1
+AUXINS,  AUXINS | !AUXINS
 
 SHR,     SHR
 

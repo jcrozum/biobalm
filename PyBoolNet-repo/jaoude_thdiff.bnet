@@ -6,26 +6,26 @@ targets, factors
 # "Model checking to assess T-helper cell plasticity"
 # Frontiers in bioengineering and biotechnology, 2014
 
-CGC,            1
-GP130,          1
-IFNAR1,         1
-IFNAR2,         1
-IFNGR1,         1
-IFNGR2,         1
-IL10RA,         1
-IL10RB,         1
-IL12RB1,        1
-IL15RA,         1
-IL17RB,         1
-IL18RA,         1
-IL18RAP,        1
-IL1RAP,         1
-IL1RL2,         1
-IL27RA,         1
-IL28RA,         1
-IL2RB,          1
-IL4RA,          1
-IL6RA,          1
+CGC,            CGC | !CGC
+GP130,          CGC | !CGC
+IFNAR1,         CGC | !CGC
+IFNAR2,         CGC | !CGC
+IFNGR1,         CGC | !CGC
+IFNGR2, CGC | !CGC
+IL10RA, CGC | !CGC
+IL10RB, CGC | !CGC
+IL12RB1, CGC | !CGC
+IL15RA, CGC | !CGC
+IL17RB, CGC | !CGC
+IL18RA, CGC | !CGC
+IL18RAP, CGC | !CGC
+IL1RAP, CGC | !CGC
+IL1RL2, CGC | !CGC
+IL27RA, CGC | !CGC
+IL28RA, CGC | !CGC
+IL2RB,  CGC | !CGC
+IL4RA,  CGC | !CGC
+IL6RA,  CGC | !CGC
 
 APC,            APC
 IFNA_e,         IFNA_e

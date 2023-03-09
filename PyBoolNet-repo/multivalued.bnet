@@ -12,14 +12,14 @@ x1_high,     x3
 x2,         x1_medium | x1_high
 x3,         x1_high & x2
 
-x4_level1,    0
-x4_level2,    1
-x4_level3,    0
+x4_level1, input & !input
+x4_level2, input | !input
+x4_level3, input & !input
 
-x5_level1,    0
-x5_level2,    0
-x5_level3,    0
-x5_level4,    1
+x5_level1, input & !input
+x5_level2, input & !input
+x5_level3, input & !input
+x5_level4, input | !input
 
-x6_level2,    1
+x6_level2, input | !input
 
