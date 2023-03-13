@@ -269,7 +269,7 @@ def _create_clingo_fixed_point_constraints(
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
     for fixed_var in ensure_subspace:
         positive = False
-        if ensure_subspace[fixed_var] == "1":
+        if ensure_subspace[fixed_var] == 1:
             positive = True
         ctl.add("base", [], f"{variable_to_place(fixed_var, positive)}.")
 
