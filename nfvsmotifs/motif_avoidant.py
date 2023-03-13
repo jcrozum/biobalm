@@ -246,9 +246,13 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
         conditions = [ f"\"{var}\"={int(level)}" for var, level in conditions ]
 
         # A pint rule consists of a variable name, value transition,
-        # and a list of necessary conditions for the change.
-        rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)} when {' and '.join(conditions)}\n"
-        auotmata_network += rule
+        # and a list of necessary conditions for the transition (if any).        
+        if len(conditions) == 0:
+            rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)}\n"
+        else:
+            rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)} when {' and '.join(conditions)}\n"
+
+        automata_network += rule
     
     return auotmata_network
 

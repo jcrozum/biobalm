@@ -63,6 +63,7 @@ class SuccessionDiagram():
                         self.petri_net, nodes, retained_set,
                         avoid_subspaces=stable_motifs,
                         ensure_subspace=self.G.nodes[sd_node]['fixed_vars'])
+                
                 attractors = detect_motif_avoidant_attractors(
                     self.network, self.petri_net,
                     candidates, terminal_restriction_space, AVOIDANCE_ITERATIONS,
@@ -74,7 +75,7 @@ class SuccessionDiagram():
                     all_fixed_vars = fixed_vars.copy()
                     all_fixed_vars.update(self.G.nodes[sd_node]['fixed_vars'])
                     fixed_vars_perc, _ = percolate_space(
-                        self.network, all_fixed_vars)
+                        self.network, all_fixed_vars, strict_percolation=False)
 
                     # TODO: check to see if the reduced network has already been found
                     perc_match_ind = None

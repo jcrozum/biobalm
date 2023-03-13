@@ -33,3 +33,33 @@ def test_succession_diagram_structure2():
     
 # TODO: add tests to verify the attractors are properly found
 # TODO: add tests for a wider variety of networks
+
+def test_succession_diagram_structure3():
+    bn = BooleanNetwork.from_bnet("""
+        AUXINS,  AUXINS | !AUXINS
+        SHR,     SHR
+        ARF,     !IAA
+        IAA,     !AUXINS
+        JKD,     SHR & SCR
+        MGP,     !WOX & SHR & SCR
+        SCR,     SHR & SCR & !MGP | SHR & SCR & JKD
+        WOX,     WOX & SHR & SCR & ARF | SHR & SCR & !MGP & ARF
+        PLT,     ARF
+        """)
+    
+    atts_true = [
+        {'ARF': 1, 'AUXINS': 1, 'IAA': 0, 'JKD': 0, 'MGP': 0, 'PLT': 1, 'SCR': 0, 'SHR': 0, 'WOX': 0},
+        {'ARF': 1, 'AUXINS': 1, 'IAA': 0, 'JKD': 0, 'MGP': 0, 'PLT': 1, 'SCR': 0, 'SHR': 1, 'WOX': 0},
+        {'ARF': 1, 'AUXINS': 1, 'IAA': 0, 'JKD': 1, 'MGP': 0, 'PLT': 1, 'SCR': 1, 'SHR': 1, 'WOX': 1},
+        {'ARF': 1, 'AUXINS': 1, 'IAA': 0, 'JKD': 1, 'MGP': 1, 'PLT': 1, 'SCR': 1, 'SHR': 1, 'WOX': 0},
+    ]
+
+    SD = SuccessionDiagram(bn)
+    
+    atts_found = [d['attractors'][0] for n,d in SD.G.nodes(data=True) if len(d['attractors']) > 0]
+    
+    assert len(atts_true) == len(atts_found)
+    assert atts_found[0] in atts_true
+    assert atts_found[1] in atts_true
+    assert atts_found[2] in atts_true
+    assert atts_found[3] in atts_true
