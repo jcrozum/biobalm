@@ -267,7 +267,7 @@ def _create_clingo_fixed_point_constraints(
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
     for fixed_var in ensure_subspace:
         positive = False
-        if ensure_subspace[fixed_var] == "1":
+        if ensure_subspace[fixed_var] == 1:
             positive = True
         ctl.add("base", [], f"{variable_to_place(fixed_var, positive)}.")
 
@@ -278,7 +278,7 @@ def _create_clingo_fixed_point_constraints(
                 Note that this is opposite to the case of trap spaces.
                 m(x) = 0 ~ place b0_x and m(x) = 1 ~ place b1_x
             """
-            fixed_list = [ variable_to_place(var, (to_avoid[var] == "1")) for var in to_avoid ]
+            fixed_list = [ variable_to_place(var, (to_avoid[var] == 1)) for var in to_avoid ]
             fixed_vars = ", ".join(fixed_list)
             ctl.add("base", [], f":- {fixed_vars}.")
         else:
@@ -309,7 +309,7 @@ def compute_fixed_point_reduced_STG_async(
     reduced_petri_net = petri_net.copy()
     for node in retained_set.keys():
         b_i = retained_set[node]
-        source_place = variable_to_place(node, positive = (b_i == "1"))
+        source_place = variable_to_place(node, positive = (b_i == 1))
         
         preds = list(reduced_petri_net.predecessors(source_place))
         succs = list(reduced_petri_net.successors(source_place))

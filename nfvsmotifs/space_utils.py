@@ -173,7 +173,7 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, int]) ->
     return expression.simplify()
 
 
-def expression_to_space_list(expression: Expression) -> list[dict[str, str]]:
+def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
     """
         Convert a PyEDA expression to a list of subspaces whose union represents
         an equivalent set of network states.
@@ -200,9 +200,9 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, str]]:
         for literal in literals:
             var = str(literal.inputs[0])
             if isinstance(literal, Variable):
-                sub_space[var] = "1"
+                sub_space[var] = 1
             elif isinstance(literal, Complement):
-                sub_space[var] = "0"
+                sub_space[var] = 0
             else:
                 raise Exception(f"Unreachable: Invalid literal type `{type(literal)}`.")
         
