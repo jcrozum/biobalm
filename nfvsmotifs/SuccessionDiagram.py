@@ -26,7 +26,6 @@ class SuccessionDiagram():
         self.petri_net = network_to_petrinet(network)
         # Negative feedback vertex set.
         self.nfvs = find_minimum_NFVS(network)
-        print(self.nfvs)
         # A directed acyclic graph representing the succession diagram.
         self.G = nx.DiGraph()
         # A dictionary used for uniqueness checks on the nodes of the succession diagram.
