@@ -180,7 +180,7 @@ def _create_clingo_constraints(
             raise Exception(f"Unexpected node kind: `{kind}`.")
     
     # For maximal trap spaces, we need an extra condition.
-    if problem == "max":
+    if problem == "max" and len(free_places) > 0:
         # Only spaces which are not fixed but the `ensure_subspace` are considered here.
         max_condition = "; ".join(free_places)
         ctl.add(f"{max_condition}.")
