@@ -41,7 +41,7 @@ class SuccessionDiagram():
                 retained_set = {n:1 for n in nodes}
                 
                 # TODO: properly compute candidates
-                candidates = compute_fixed_point_reduced_STG(petri_net, nodes, retained_set, avoid_subspaces = stable_motifs)
+                candidates = compute_fixed_point_reduced_STG(petri_net, retained_set, avoid_subspaces = stable_motifs)
                 attractors = detect_motif_avoidant_attractors(
                     reduced_network, petri_net, candidates, terminal_restriction_space, AVOIDANCE_ITERATIONS)
 

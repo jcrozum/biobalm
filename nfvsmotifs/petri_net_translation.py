@@ -160,7 +160,7 @@ def _create_transitions(
     dir_str = "up" if go_up else "down"
     for t_id, implicant in enumerate(implicant_bdd.satisfy_all()):                
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
-        pn.add_node(t_name, kind="transition")
+        pn.add_node(t_name, kind="transition", change=var_name, direction=dir_str)
         # The transition moves a token either from "zero place" to the 
         # "one place", or vice versa.
         if go_up:
