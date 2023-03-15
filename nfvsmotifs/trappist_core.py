@@ -6,15 +6,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from networkx import DiGraph # type: ignore
-    from biodivine_aeon import BooleanNetwork # type: ignore    
     from typing import Callable
     from clingo import Model
 
-from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable
+from biodivine_aeon import BooleanNetwork # type: ignore    
+from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable, extract_variable_names
 from clingo import Control, SolveHandle
 
 def trappist_async(
-    network: BooleanNetwork,
+    network: BooleanNetwork | DiGraph,
     on_solution: Callable[[dict[str, int]], bool],
     problem: str = "min",
     reverse_time: bool = False,   
@@ -26,15 +26,36 @@ def trappist_async(
         spaces are returned to the supplied `on_solution` callback. You can stop the enumeration by
         returning `False` from this callback.
     """
-    petri_net = network_to_petrinet(network)
-        
-    source_nodes = []
-    for var in network.variables():
-        name = network.get_variable_name(var)
-        if network.get_update_function(var).strip() == name:
-            source_nodes.append(name)
+    if type(network) == BooleanNetwork:
+        bn = network
+        petri_net = network_to_petrinet(network)
+    else:
+        bn = None
+        petri_net = network
 
-    ctl = _create_clingo_constraints(network, petri_net, problem, reverse_time, ensure_subspace, avoid_subspaces, source_nodes)
+    if bn is None:
+        variables = extract_variable_names(petri_net)
+    else:
+        variables = [bn.get_variable_name(v) for v in bn.variables()]
+        
+    # Source node is a node that has no transitions in the PN encoding 
+    # (i.e. it's value cannot change).
+    source_set = set(variables)
+    for (node, change_var) in petri_net.nodes(data='change'):
+        if change_var is not None and change_var in source_set:
+            source_set.remove(change_var)
+    source_nodes: list[str] = sorted(source_set)
+    
+    ctl = _create_clingo_constraints(
+        variables, 
+        petri_net, 
+        problem, 
+        reverse_time, 
+        ensure_subspace, 
+        avoid_subspaces, 
+        source_nodes
+    )
+
     ctl.ground()
     result = ctl.solve(yield_=True)
     if type(result) == SolveHandle:
@@ -45,7 +66,7 @@ def trappist_async(
     # Else: unsat, hence we don't do anything.
 
 def trappist(
-    network: BooleanNetwork, 
+    network: BooleanNetwork | DiGraph, 
     problem: str = "min", 
     reverse_time: bool = False, 
     solution_limit: int | None = None,
@@ -57,6 +78,8 @@ def trappist(
         Python bindings of the `clingo` ASP solver.
 
         Arguments:
+            - `network`: Can be either a `BooleanNetwork`, or a Petri net (`DiGraph`) compatible with the encoding
+            in `petri_net_translation` module. The behaviour is undefined for other `DiGraph` instances.
             - `problem`: `min` minimum trap spaces; `max` maximum trap spaces; `fix` fixed points. Default: `min`.
             - `reverse_time`: If `True`, a time-reversed network should be considered. Default: `False`.
             - `solution_limit`: If given, the result is limited to the given number of solutions. Default: `None`.
@@ -71,7 +94,16 @@ def trappist(
     def save_result(x):
         results.append(x)
         return solution_limit == None or len(results) < solution_limit        
-    trappist_async(network, on_solution=save_result, problem=problem, reverse_time=reverse_time, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
+    
+    trappist_async(
+        network, 
+        on_solution=save_result, 
+        problem=problem, 
+        reverse_time=reverse_time, 
+        ensure_subspace=ensure_subspace,
+        avoid_subspaces=avoid_subspaces,
+    )
+
     return results
 
 def _clingo_model_to_space(model: Model) -> dict[str, int]:    
@@ -90,7 +122,7 @@ def _clingo_model_to_space(model: Model) -> dict[str, int]:
     return space
 
 def _create_clingo_constraints(
-    network: BooleanNetwork, 
+    variables: list[str], 
     petri_net: DiGraph, 
     problem: str = "min", 
     reverse_time: bool = False,
@@ -130,8 +162,7 @@ def _create_clingo_constraints(
     ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
 
     # Declare places and their conflicts based on network variables.
-    for var in network.variables():
-        var_name = network.get_variable_name(var)
+    for var_name in variables:
         p_name = variable_to_place(var_name, positive=True)
         n_name = variable_to_place(var_name, positive=False)
         # Declare a positive and negative symbol.        
@@ -222,8 +253,8 @@ def _clingo_model_to_fixed_point(model: Model) -> dict[str, int]:
 
 
 def _create_clingo_fixed_point_constraints(
+    variables: list[str],    
     petri_net: DiGraph,
-    nodes: list[str],
     ensure_subspace: dict[str, int] = {},
     avoid_subspaces: list[dict[str, int]] = [],
 ) -> Control:
@@ -240,7 +271,7 @@ def _create_clingo_fixed_point_constraints(
     ctl = Control(["0", "--heuristic=Domain", "--enum-mod=domRec", dom_mod])
 
     # Declare places and their conflicts based on network variables.
-    for node in nodes:
+    for node in variables:
         p_name = variable_to_place(node, positive=True)
         n_name = variable_to_place(node, positive=False)
 
@@ -265,11 +296,9 @@ def _create_clingo_fixed_point_constraints(
             raise Exception(f"Unexpected node kind: `{kind}`.")
 
     # Ensure that solutions must have desired variables fixed based on `ensure_subspace`.
-    for fixed_var in ensure_subspace:
-        positive = False
-        if ensure_subspace[fixed_var] == 1:
-            positive = True
-        ctl.add("base", [], f"{variable_to_place(fixed_var, positive)}.")
+    for fixed_var, value in ensure_subspace.items():
+        place_name = variable_to_place(fixed_var, positive=bool(value))
+        ctl.add("base", [], f"{place_name}.")
 
     # Ensure that fixed points can't lie in either subspace in `avoid_subspaces`. 
     for to_avoid in avoid_subspaces:
@@ -290,7 +319,6 @@ def _create_clingo_fixed_point_constraints(
 
 def compute_fixed_point_reduced_STG_async(
     petri_net: DiGraph,
-    nodes: list[str],
     retained_set: dict[str, int],
     on_solution: Callable[[dict[str, int]], bool],
     ensure_subspace: dict[str, int] = {},
@@ -319,7 +347,13 @@ def compute_fixed_point_reduced_STG_async(
         for trans in deleted_transitions:
             reduced_petri_net.remove_node(trans)
 
-    ctl = _create_clingo_fixed_point_constraints(reduced_petri_net, nodes, ensure_subspace, avoid_subspaces)
+    ctl = _create_clingo_fixed_point_constraints(
+        extract_variable_names(reduced_petri_net),
+        reduced_petri_net, 
+        ensure_subspace, 
+        avoid_subspaces
+    )
+
     ctl.ground([("base", [])])
     result = ctl.solve(yield_=True)
     if type(result) == SolveHandle:
@@ -332,7 +366,6 @@ def compute_fixed_point_reduced_STG_async(
 
 def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
-    nodes: list[str],
     retained_set: dict[str, int],
     ensure_subspace: dict[str, int] = {},
     avoid_subspaces: list[dict[str, int]] = [],
@@ -353,5 +386,12 @@ def compute_fixed_point_reduced_STG(
     def save_result(x):
         results.append(x)
         return solution_limit == None or len(results) < solution_limit
-    compute_fixed_point_reduced_STG_async(petri_net, nodes, retained_set, on_solution=save_result, ensure_subspace=ensure_subspace, avoid_subspaces=avoid_subspaces)
+
+    compute_fixed_point_reduced_STG_async(
+        petri_net, 
+        retained_set, 
+        on_solution=save_result, 
+        ensure_subspace=ensure_subspace, 
+        avoid_subspaces=avoid_subspaces
+    )
     return results

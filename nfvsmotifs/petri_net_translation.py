@@ -84,6 +84,22 @@ def place_to_variable(place: str) -> tuple[str, bool]:
     else:
         raise Exception(f"Invalid place name: `{place}`.")
 
+def extract_variable_names(encoded_network: DiGraph) -> list[str]:
+    """
+    Extract the variable names from a Petri net encoded Boolean network.
+    
+    The variables are  sorted lexicographically, since the original BN ordering is not 
+    preserved by the Petri net. However, BNs order variables lexicographically by default,
+    so unless the Petri net was created from a custom BN (i.e. not from a model file),
+    the ordering should be the same.
+    """
+    variables = []
+    for node in encoded_network.nodes():
+        if node.startswith("b0_"):
+            variables.append(place_to_variable(node)[0])
+    
+    return sorted(variables)
+
 def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     """
         Converts a `BooleanNetwork` to a `DiGraph` representing a Petri net encoding
@@ -144,7 +160,7 @@ def _create_transitions(
     dir_str = "up" if go_up else "down"
     for t_id, implicant in enumerate(implicant_bdd.satisfy_all()):                
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
-        pn.add_node(t_name, kind="transition")
+        pn.add_node(t_name, kind="transition", change=var_name, direction=dir_str)
         # The transition moves a token either from "zero place" to the 
         # "one place", or vice versa.
         if go_up:

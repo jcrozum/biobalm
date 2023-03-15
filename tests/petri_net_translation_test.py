@@ -1,4 +1,4 @@
-from nfvsmotifs.petri_net_translation import sanitize_network_names, network_to_petrinet
+from nfvsmotifs.petri_net_translation import sanitize_network_names, network_to_petrinet, extract_variable_names
 from biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
 from networkx import DiGraph, is_isomorphic # type: ignore
 import pytest
@@ -69,4 +69,6 @@ def test_translation():
     expected.add_edge("b1_B", "tr_B_down_1")
     expected.add_edge("tr_B_down_1", "b0_B")
 
-    assert is_isomorphic(network_to_petrinet(bn), expected)
+    pn = network_to_petrinet(bn)
+    assert ["A", "B"] == extract_variable_names(pn)
+    assert is_isomorphic(pn, expected)
