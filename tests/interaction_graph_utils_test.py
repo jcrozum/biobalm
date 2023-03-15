@@ -356,6 +356,10 @@ def test_fvs_accuracy_CASCADE3():
     nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
 
     assert len(nfvs_mtsNFVS) <= 19 # the result of mtsNFVS is 19
+
+    for _i in range(10):
+        nfvs = find_minimum_NFVS(bn_real)
+        assert nfvs == nfvs_mtsNFVS
     
 
 def test_fvs_accuracy_SIPC():
@@ -486,4 +490,7 @@ def test_fvs_accuracy_SIPC():
 
     assert len(nfvs_mtsNFVS) <= 13 # the result of mtsNFVS is 13
     
+    for _i in range(10):
+        nfvs = find_minimum_NFVS(bn_real)
+        assert nfvs == nfvs_mtsNFVS
 

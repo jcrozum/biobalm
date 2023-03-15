@@ -13,6 +13,7 @@ from networkx.algorithms import bipartite # type: ignore
 from pyeda.boolalg.expr import expr # type: ignore
 from pyeda.boolalg.bdd import expr2bdd, bddvar # type: ignore
 
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 from nfvsmotifs.SignedGraph import SignedGraph
 
 """
@@ -203,7 +204,7 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
         if function.strip() == var_name:
             source_nodes.append(var_name)
 
-        fx = expr(function.replace("!", "~"))
+        fx = aeon_to_pyeda(function)
 
         INx[var_name] = fx.support # list of nodes appearing in Boolean function fx
 
@@ -249,7 +250,7 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
 
     """First, find feedback vertex set"""
-    U = FVS.FVS(u_ig)
+    U = FVS.FVS(u_ig, randomseed=0)
 
     U = list(set(U) - set(source_nodes))
 
