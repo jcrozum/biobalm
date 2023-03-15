@@ -16,6 +16,11 @@ def test_network_minimum_traps(network_file):
 
     min_max_traps = trappist(bn, problem="min") + trappist(bn, problem="max")
 
+    pn = network_to_petrinet(bn)
+    min_max_traps_pre_encoded = trappist(pn, problem="min") + trappist(pn, problem="max")
+
+    assert min_max_traps == min_max_traps_pre_encoded
+
     # We have no way of knowing if a trap is minimal/maximal, but we can still
     # verify that it is indeed a trap.
     for trap in min_max_traps:
