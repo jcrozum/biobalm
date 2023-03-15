@@ -76,15 +76,16 @@ def test_preprocessing_ssf_optimal():
 
 
 def test_ABNReach_current_version():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet("""    
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
+        x3, x3 | !x3
     """)
     
-    s0 = {'x1': 0, 'x2': 0}
-    s1 = {'x1': 0, 'x2': 1}
-    s2 = {'x1': 1, 'x2': 0}
-    s3 = {'x1': 1, 'x2': 1}
+    s0 = {'x1': 0, 'x2': 0, 'x3': 1}
+    s1 = {'x1': 0, 'x2': 1, 'x3': 1}
+    s2 = {'x1': 1, 'x2': 0, 'x3': 1}
+    s3 = {'x1': 1, 'x2': 1, 'x3': 1}
 
     petri_net = network_to_petrinet(bn)
 
