@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 import networkx as nx # type: ignore
 
 from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS
+from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS, feedback_vertex_set
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
 from nfvsmotifs.space_utils import percolate_space, intersect
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
@@ -25,7 +25,7 @@ class SuccessionDiagram():
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
         # Negative feedback vertex set.
-        self.nfvs = find_minimum_NFVS(network)
+        self.nfvs = feedback_vertex_set(network, parity="negative")#find_minimum_NFVS(network)
         # A directed acyclic graph representing the succession diagram.
         self.G = nx.DiGraph()
         # A dictionary used for uniqueness checks on the nodes of the succession diagram.
