@@ -18,6 +18,20 @@ from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
 
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
+def intersect(x: dict[str, int], y: dict[str, int]) -> dict[str, int] | None:
+    """
+    Compute the space which is the intersection of two spaces, or `None` if the spaces
+    don't intersect.
+    """
+    result = {}
+    for (k,v) in x.items():
+        result[k] = v
+    for (k,v) in y.items():
+        if k in result and result[k] != v:
+            return None
+        result[k] = v
+    return result
+
 def is_subspace(x: dict[str, int], y: dict[str, int]) -> bool:
     """
         Checks if `x` is a subspace of `y`.
