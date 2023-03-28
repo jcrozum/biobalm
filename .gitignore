@@ -144,3 +144,9 @@ dmypy.json
 *.snm
 *.synctex.gz
 *.toc
+
+# Ignore local installations of mole.
+mole-*
+
+# Ignore benchmark runs.
+_run_*
