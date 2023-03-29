@@ -179,6 +179,8 @@ class SuccessionDiagram():
         if node_id in self.expanded:
             return
 
+        self.expanded.add(node_id)
+
         current_space = self.node_space(node_id)
 
         if len(current_space) == self.network.num_vars():
