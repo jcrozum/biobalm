@@ -65,6 +65,38 @@ class SuccessionDiagram():
             d = max(d, self.node_depth(node))
         return d
 
+    def node_is_stub(self, node_id: int, is_stub: bool | None = None) -> bool:
+        """
+        Get/set whether the specified node is a stub node. 
+        
+        After becoming a stub, the node can no longer be expanded. If the node
+        is already expanded, it cannot become a stub.
+        """
+        if is_stub is None:
+            return self.G.nodes[node]["stub"]
+        else:                        
+            assert not (is_stub and len(self.successors(node)) > 0)
+
+            self.G.nodes[node]["stub"] = is_stub
+            if is_stub:
+                self.expanded.add(node)
+            else:
+                self.expanded.remove(node)
+            return is_stub
+
+    def count_stubs(self) -> int:
+        x = 0
+        for node, is_stub in self.G.nodes(data="stub"):
+            if is_shadow:
+                x += 1
+        return x
+
+    def count_expanded(self) -> int:
+        return len(self.expanded)
+
+    def count_nodes(self) -> int:
+        return self.G.number_of_nodes()
+
     def node_depth(self, node_id: int, depth: int | None = None) -> int:
         """
         Get/set the depth associated with the provided `node_id`. The depth can only increase. 
@@ -75,6 +107,16 @@ class SuccessionDiagram():
             self.G.nodes[node_id]['depth'] = max(self.G.nodes[node_id]['depth'], depth)
 
         return self.G.nodes[node_id]['depth']
+    
+    def successors(self, node_id: int) -> list[int]:
+        """
+        Compute the list of successor nodes. The node in question must be expanded.
+
+        Note that for stub nodes, the action succeeds, but returns an empty list.
+        """
+        assert node_id in self.expanded
+
+        return list(self.G.successors(node_id))
     
     def node_space(self, node_id: int) -> dict[str, int]:
         """
@@ -102,10 +144,23 @@ class SuccessionDiagram():
 
         You can set `strict = False` to check whether the node is a leaf node in general (i.e. it
         is either minimal, or not expanded).
+
+        Stub nodes do not belong to either category. They are expanded, but they are not minimal.
         """
         # TODO: This is not very efficient because it has to allocate the list, 
         # but it does not appear in any performance critical code (yet).
-        return ((not strict) or node_id in self.expanded) and len(list(self.G.successors(node_id))) == 0
+        is_stub = self.G.nodes[node_id]["stub"]
+        is_expanded = (not strict) or node_id in self.expanded
+        has_successors = len(self.successors(node_id)) > 0
+        return (not is_stub) and is_expanded and (not has_successors)
+
+    def find_all_minimal_nodes(self, strict: bool = True) -> list[int]:
+        """
+        Find all minimal trap spaces in the current succession diagram. The `strict` parameter has the same
+        semantics as in `is_minimal`. I.e. by default, only "true" minimal trap spaces are returned, but
+        with `strict=False`, the method will also return other not-expanded leaf nodes.
+        """
+        return [node for node in self.G.nodes() if self.is_minimal(node, strict)]        
 
     def expand_node(self, node_id: int, depth_limit: int | None = 0, node_limit: int | None = None) -> int:
         """
@@ -151,7 +206,10 @@ class SuccessionDiagram():
                 total_expanded += 1
 
                 if DEBUG:
-                    print(f"Total expanded: {total_expanded}/{self.G.number_of_nodes()}. Fixed vars {len(self.node_space(node))}/{self.network.num_vars()} at depth {self.node_depth(node)}.")
+                    expanded_frac = f"{len(self.expanded)}/{self.G.number_of_nodes()}"
+                    expanded_perc = 100 * len(self.expanded) / self.G.number_of_nodes()                                    
+                    fixed_vars_frac = f"{len(self.node_space(node))}/{self.network.num_vars()}"
+                    print(f"Total expanded: {expanded_frac} ({round(expanded_perc)}%). Fixed vars {fixed_vars_frac} at depth {self.node_depth(node)}.")
 
                 if (node_limit is not None) and (total_expanded >= node_limit):                    
                     return total_expanded
@@ -180,6 +238,11 @@ class SuccessionDiagram():
             return
 
         self.expanded.add(node_id)
+
+        if self.G.nodes[node_id]['stub']:
+            # Stub nodes are added to the expanded list,
+            # but are not actually expanded.
+            return
 
         current_space = self.node_space(node_id)
 
@@ -258,7 +321,7 @@ class SuccessionDiagram():
 
         if key not in self.node_indices:
             new_id = self.G.number_of_nodes()
-            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth)
+            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth, stub=False)
             self.node_indices[key] = new_id
             if parent_id is not None:
                 self.G.add_edge(parent_id, new_id, motif=stable_motif)
