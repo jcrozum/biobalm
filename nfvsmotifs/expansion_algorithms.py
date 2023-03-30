@@ -11,6 +11,32 @@ from nfvsmotifs.trappist_core import trappist
 DEBUG = False
 SYMBOLIC_PRUNING = True
 
+def trap(
+    stg: SymbolicAsyncGraph,
+    variables: list[VariableId],
+    initial: ColoredVertexSet,
+) -> ColoredVertexSet:
+    result = initial
+
+    keep_working = True
+    while keep_working:
+        keep_working = False
+    
+        for var in reversed(variables):
+            can_post_out = stg.var_can_post_out(var, result)
+
+            if not can_post_out.is_empty():
+                keep_working = True
+                result = result.minus(can_post_out)
+                
+                if DEBUG and result.symbolic_size() > 100_000:                    
+                    print(f"BDD node count: {int(result.symbolic_size() / 10)}; Reached {result.cardinality()}")                
+
+                if result.symbolic_size() > 1_000_000:
+                    return result
+                break
+    return result
+
 def reach_bwd(
     stg: SymbolicAsyncGraph,
     variables: list[VariableId],
@@ -28,7 +54,7 @@ def reach_bwd(
 
             if not pre.is_subset(result):
                 result = result.union(pre)
-                if DEBUG and result.symbolic_size() > 100_000:                    
+                if DEBUG and result.symbolic_size() > 1_000_000:                    
                     print(f"BDD node count: {int(result.symbolic_size() / 10)}; Reached {result.cardinality()}/{universe.cardinality()}")
                 keep_working = True
 
@@ -40,7 +66,204 @@ def reach_bwd(
                 break
     return result
 
-def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: int | None = None, node_limit: int | None = None):
+def simplified_dfs_expansion(sd: SuccessionDiagram):
+    root = sd.root()
+    root_space = sd.node_space(sd.root())   # This is after percolation, so it might not be the whole state space.
+    root_space_symbolic = symbolic_space(sd.symbolic, root_space)
+    root_motifs = trappist(sd.petri_net,  problem="max", ensure_subspace=root_space)
+    root_motifs = sorted(root_motifs, key=lambda x: len(x), reverse=True)
+    stack: list[tuple[int, list[dict[str, int]], ColoredVertexSet]] = [(sd.root(), root_motifs, root_space_symbolic)]
+
+    while len(stack) > 0:
+        top = stack[-1]
+        node, motifs, remaining = top
+        node_space = sd.node_space(node)
+
+        if DEBUG:
+            print(f"[{len(stack)}] Process node {node} with {len(motifs)} motifs and {remaining.cardinality()} states.")
+
+        if len(motifs) == 0:
+            if DEBUG:
+                if remaining.is_empty():                    
+                    print(" >> Done.")
+                else:
+                    print(f" >> Done. Found trap avoidant attractor: {remaining.cardinality()}")
+            sd.expanded.add(node)
+            stack.pop()
+            continue
+        
+        if remaining.is_empty():            
+            for motif in motifs:
+                child = sd.ensure_node(node, motif)
+                sd.node_is_stub(child, True)
+            if DEBUG:
+                print(f" >> Done. {len(motifs)} stubs created.")
+            sd.expanded.add(node)
+            stack.pop()            
+            continue
+
+        motif = motifs.pop()
+        motif_symbolic = symbolic_space(sd.symbolic, motif)
+        child = sd.ensure_node(node, motif)        
+        child_space = sd.node_space(child)
+        child_space_symbolic = symbolic_space(sd.symbolic, child_space)            
+
+        # If this motif is already covered, we can create a stub node.
+        # But we should still remove it from the remaining nodes.
+        is_redundant = child_space_symbolic.intersect(remaining).is_empty()
+        
+        remaining = remaining.minus(motif_symbolic)
+        if SYMBOLIC_PRUNING:
+            free_variables = [ x for x in sd.network.variables() if sd.network.get_variable_name(x) not in node_space ]
+            remaining = trap(sd.symbolic, free_variables, remaining)
+        
+        stack[-1] = (node, motifs, remaining)        
+
+        if DEBUG:
+            print(f" >> Expanding child motif into node {child}. Reduced remaining states: {remaining.cardinality()}.")
+
+        if is_redundant:            
+            sd.node_is_stub(child, True)
+            if DEBUG:
+                print(f" >> Created child is a stub.")
+            continue        
+
+        if child not in sd.expanded:
+            if len(child_space) == sd.network.num_vars():
+                print(" >> Child is a fixed-point. Done.")
+                sd.expanded.add(child)
+            else:
+                child_motifs = trappist(sd.petri_net,  problem="max", ensure_subspace=child_space)
+                if len(child_motifs) == 0:
+                    print(f" >> Child is a trap ({len(child_space)}/{sd.network.num_vars()} fixed vars). Done.")
+                    sd.expanded.add(child)
+                else:                
+                    root_motifs = sorted(child_motifs, key=lambda x: len(x), reverse=True)
+                    stack.append((child, child_motifs, child_space_symbolic))
+
+        
+
+
+
+def simplified_bfs_expansion_2(
+    sd: SuccessionDiagram,
+    node_id: int,
+    depth_limit: int | None = None,
+    node_limit: int | None = None,
+) -> int:
+    level_nodes = set([node_id])
+    visited = set()
+    
+    level = 0
+    level_remaining = { 0: sd.symbolic.unit_colored_vertices() }
+
+    total_expanded = 0
+    while len(level_nodes) > 0:
+        print(f" >> Start level with {len(level_nodes)} nodes.")
+        next_level = set()
+
+        assert level+1 not in level_remaining
+        level_remaining[level+1] = sd.symbolic.empty_colored_vertices()        
+
+        for i, node in enumerate(sorted(level_nodes, key=lambda node: len(sd.node_space(node)), reverse=True)):
+            print(f" >> {i+1} / {len(level_nodes)}")
+            if node in visited:                
+                continue
+            visited.add(node)
+
+            node_space = sd.node_space(node)
+            node_space_symbolic = symbolic_space(sd.symbolic, node_space)
+
+            # BN variables that are not fixed in this space
+            free_variables = [ x for x in sd.network.variables() if sd.network.get_variable_name(x) not in node_space ]
+
+            if node not in sd.expanded:
+                if node_space_symbolic.intersect(level_remaining[level]).is_empty():
+                    # At this point, all previous nodes have successfully covered the
+                    # state space of this node. Hence there's no need to expand it and
+                    # it can remain as a stub.
+                    sd.node_is_stub(node, True)
+                    continue
+
+                assert not sd.node_is_stub(node)
+
+                total_expanded += 1
+                sd.expanded.add(node)                
+
+                if len(node_space) == sd.network.num_vars():
+                    # This node is a fixed-point. Trappist would just
+                    # return this fixed-point again. No need to continue.
+                    if DEBUG:
+                        print(f"Found fixed-point: {node_space}.")
+                    continue
+
+                if DEBUG:
+                    print(f"[{node}] Expanding with {len(node_space)} fixed vars.")
+            
+                sub_spaces = trappist(
+                    sd.petri_net, 
+                    problem="max", 
+                    ensure_subspace=node_space,
+                )
+
+                if len(sub_spaces) == 0:
+                    if DEBUG:
+                        print(f"Found minimum trap space: {node_space}.")
+                    continue
+
+                if DEBUG:
+                    print(f"Sub-spaces: {len(sub_spaces)}")
+
+                for child in sub_spaces:
+                    sd.ensure_node(node, child)
+                
+            else:
+                # A single BFS search should only visit nodes that are not expanded.
+                # But if you rerun the search again on a diagram that is partially
+                # expanded, expanded nodes can start appearing here. In such case,
+                # we want to continue exploring, but there is no need to actually
+                # do anything with this node.                                 
+                pass
+
+            # At this point, node is either expanded or a stub.
+            if not sd.node_is_stub(node):
+                remaining = level_remaining[level].minus(node_space_symbolic)
+                if SYMBOLIC_PRUNING:
+                    remaining = trap(sd.symbolic, free_variables, remaining)
+                level_remaining[level] = remaining            
+
+            for s in sd.successors(node):
+                if s not in visited and not sd.node_is_stub(s):
+                    # Add the successor node into the next level, and add its state
+                    # space into the "remaining", uncovered state space of that level.
+                    s_space = sd.node_space(s)
+                    s_space_symbolic = symbolic_space(sd.symbolic, s_space)
+                    level_remaining[level+1] = level_remaining[level+1].union(s_space_symbolic)
+                    next_level.add(s)
+
+            if DEBUG:
+                expanded_frac = f"{len(sd.expanded)}/{sd.G.number_of_nodes()}"
+                expanded_perc = 100 * len(sd.expanded) / sd.G.number_of_nodes()
+                print(f"Total expanded: {expanded_frac} ({round(expanded_perc)}%).")
+
+            if (node_limit is not None) and (total_expanded >= node_limit):                    
+                return total_expanded
+
+        if level_remaining[level].is_empty():
+            print(f"No attractor candidates at level {level}.")
+        else:
+            print(f"Found attractor candidates at level {level}. Remaining: {level_remaining[level].cardinality()}")
+
+        if (depth_limit is not None) and (level >= depth_limit):
+            break
+
+        level += 1
+        level_nodes = next_level        
+
+    return total_expanded
+
+
+def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: int | None = None, node_limit: int | None = None) -> int:
     """
     This algorithm is based on the "exhaustive" BFS search implemented within `SuccessionDiagram.expand_node`.
     However, it uses a local criterion to reduce the number of expanded nodes (the excluded nodes are preserved
