@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 import networkx as nx # type: ignore
 
+from biodivine_aeon import SymbolicAsyncGraph
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS, feedback_vertex_set
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
@@ -24,6 +25,8 @@ class SuccessionDiagram():
         self.network = network
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
+        # A symbolic encoding of the Boolean network.
+        self.symbolic = SymbolicAsyncGraph(network)
         # Negative feedback vertex set.
         self.nfvs = feedback_vertex_set(network, parity="negative")#find_minimum_NFVS(network)
         # A directed acyclic graph representing the succession diagram.
@@ -73,21 +76,22 @@ class SuccessionDiagram():
         is already expanded, it cannot become a stub.
         """
         if is_stub is None:
-            return self.G.nodes[node]["stub"]
+            return self.G.nodes[node_id]["stub"]
         else:                        
-            assert not (is_stub and len(self.successors(node)) > 0)
+            # An already expanded node cannot become a stub.
+            is_stub = is_stub and not (node_id in self.expanded and len(self.successors(node_id)) > 0)
+            self.G.nodes[node_id]["stub"] = is_stub
 
-            self.G.nodes[node]["stub"] = is_stub
             if is_stub:
-                self.expanded.add(node)
+                self.expanded.add(node_id)
             else:
-                self.expanded.remove(node)
+                self.expanded.remove(node_id)
             return is_stub
 
     def count_stubs(self) -> int:
         x = 0
         for node, is_stub in self.G.nodes(data="stub"):
-            if is_shadow:
+            if is_stub:
                 x += 1
         return x
 
@@ -271,23 +275,7 @@ class SuccessionDiagram():
             print(f"Sub-spaces: {len(sub_spaces)}")
 
         for sub_space in sub_spaces:    
-            child_id = self.ensure_node(node_id, sub_space)
-            
-            #if DEBUG:
-            #    print(f"[{node_id}] Found child {child_id}: {sub_space} => {self.node_space(child_id)}")
-
-        
-        # TODO: These are ideas for the "partial order reduction".
-        #print(f"Found {len(sub_spaces)} sub-spaces.")
-        #branch_on = sub_spaces[0]
-        #child_id = self.ensure_node(node_id, branch_on)
-        #print(f"[{node_id}] Found main child {child_id}: {len(branch_on)}")
-
-        #for sub_space in sub_spaces[1:]:
-        #    intersection = intersect(sub_space, branch_on)
-        #    if intersection is None:
-        #        child_id = self.ensure_node(node_id, sub_space)
-        #        print(f"[{node_id}] Found conflict child {child_id}: {len(sub_space)}")
+            child_id = self.ensure_node(node_id, sub_space)                    
 
 
     def ensure_node(self, parent_id: int | None, stable_motif: dict[str, int]) -> int:
