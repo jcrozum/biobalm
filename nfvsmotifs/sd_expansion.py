@@ -28,6 +28,9 @@ def reach_bwd(
                     print(f"BDD node count: {int(result.symbolic_size() / 10)}; Reached {result.cardinality()}/{universe.cardinality()}")
                 keep_working = True
 
+                # TODO: This limit should by somehow proportional to the size of the
+                # network... something like 100_000 * variable_count seems reasonable?
+                # Furthermore, we might want to have a limit on the total number of iterations.
                 if result.symbolic_size() > 1_000_000:
                     return result
                 break
@@ -95,6 +98,7 @@ def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: i
             assert not sd.G.nodes[node]['stub']
             
             current_space = sd.node_space(node)
+            current_space_symbolic = symbolic_subspace(sd.symbolic, current_space)
 
             if len(current_space) == sd.network.num_vars():
                 # This node is a fixed-point. Trappist would just
@@ -144,10 +148,21 @@ def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: i
                     to_expand_symbolic = to_expand_symbolic.union(child_symbolic)
                     
                     if SYMBOLIC_PRUNING:
-                        to_expand_symbolic = reach_bwd(sd.symbolic, free_variables, to_expand_symbolic, current_space)
+                        to_expand_symbolic = reach_bwd(sd.symbolic, free_variables, to_expand_symbolic, current_space_symbolic)
+
+            if current_space_symbolic.is_subset(to_expand_symbolic):
+                if DEBUG:
+                    print(f"Ruled-out trap avoidant attractors.")
+                sd.attr_expanded.add(node)
+            else:
+                if DEBUG:
+                    print(f"Possible trap avoidant attractor here.")
 
             if DEBUG:
                 print(f"{len(to_skip)} sub-spaces skipped, {len(to_expand)} expanded.")
+
+            # TODO: For some reason, model 079 is very slow here. 
+            # The only reason I can think of is percolation/PyEDA parsing recursion depth?
 
             for sub_space in to_skip:
                 child_id = sd.ensure_node(node, sub_space)
