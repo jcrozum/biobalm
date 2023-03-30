@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyeda.inter import Expression # type: ignore
+    from biodivine_aeon import SymbolicAsyncGraph, ColoredVertexSet # type: ignore
 
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
@@ -223,3 +224,10 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
         sub_spaces.append(sub_space)
 
     return sub_spaces
+
+def symbolic_space(
+    stg: SymbolicAsyncGraph,
+    subspace: dict[str, int]
+) -> ColoredVertexSet:
+    transformed = { x:bool(y) for x,y in subspace.items() }
+    return stg.fix_subspace(transformed)

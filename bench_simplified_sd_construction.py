@@ -1,6 +1,6 @@
 from biodivine_aeon import BooleanNetwork
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from nfvsmotifs.sd_expansion import simplified_bfs_expansion
+from nfvsmotifs.expansion_algorithms import simplified_bfs_expansion
 import sys
 import nfvsmotifs
 

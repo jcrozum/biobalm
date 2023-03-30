@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from biodivine_aeon import SymbolicAsyncGraph, VariableId, ColoredVertexSet # type: ignore
+
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from nfvsmotifs.space_utils import percolate_space
+from nfvsmotifs.space_utils import percolate_space, symbolic_space
 from nfvsmotifs.trappist_core import trappist
 
 DEBUG = False
@@ -35,14 +39,6 @@ def reach_bwd(
                     return result
                 break
     return result
-
-
-def symbolic_subspace(
-    stg: SymbolicAsyncGraph,
-    subspace: dict[str, int]
-) -> ColoredVertexSet:
-    transformed = { x:bool(y) for x,y in subspace.items() }
-    return stg.fix_subspace(transformed)
 
 def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: int | None = None, node_limit: int | None = None):
     """
@@ -98,7 +94,7 @@ def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: i
             assert not sd.G.nodes[node]['stub']
             
             current_space = sd.node_space(node)
-            current_space_symbolic = symbolic_subspace(sd.symbolic, current_space)
+            current_space_symbolic = symbolic_space(sd.symbolic, current_space)
 
             if len(current_space) == sd.network.num_vars():
                 # This node is a fixed-point. Trappist would just
@@ -137,9 +133,9 @@ def simplified_bfs_expansion(sd: SuccessionDiagram, node_id: int, depth_limit: i
 
             while len(sub_spaces) > 0:
                 child = sub_spaces.pop()
-                child_symbolic = symbolic_subspace(sd.symbolic, child)
+                child_symbolic = symbolic_space(sd.symbolic, child)
                 child_percolated, _ = percolate_space(sd.network, child, strict_percolation=False)
-                child_percolated_symolic = symbolic_subspace(sd.symbolic, child_percolated)
+                child_percolated_symolic = symbolic_space(sd.symbolic, child_percolated)
 
                 if child_percolated_symolic.is_subset(to_expand_symbolic):
                     to_skip.append(child)

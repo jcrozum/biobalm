@@ -12,7 +12,7 @@ from biodivine_aeon import SymbolicAsyncGraph
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS, feedback_vertex_set
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
-from nfvsmotifs.space_utils import percolate_space, intersect
+from nfvsmotifs.space_utils import percolate_space, intersect, symbolic_space
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.state_utils import state_list_to_bdd
 
