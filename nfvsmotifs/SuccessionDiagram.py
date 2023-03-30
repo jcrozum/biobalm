@@ -154,8 +154,8 @@ class SuccessionDiagram():
         # TODO: This is not very efficient because it has to allocate the list, 
         # but it does not appear in any performance critical code (yet).
         is_stub = self.G.nodes[node_id]["stub"]
-        is_expanded = (not strict) or node_id in self.expanded
-        has_successors = len(self.successors(node_id)) > 0
+        is_expanded = (not strict) or node_id in self.expanded        
+        has_successors = len(self.successors(node_id)) > 0 if is_expanded else False
         return (not is_stub) and is_expanded and (not has_successors)
 
     def find_all_minimal_nodes(self, strict: bool = True) -> list[int]:
