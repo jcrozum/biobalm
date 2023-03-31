@@ -34,4 +34,4 @@ for i in range(sd.G.number_of_nodes()):
     if len(attr) > 0:
         nfvs_attractors += attr
 
-print("Attractor count:", len(nfvs_attractors))
+print("Attractors:", len(nfvs_attractors))

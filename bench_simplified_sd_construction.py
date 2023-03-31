@@ -23,6 +23,5 @@ sd = SuccessionDiagram(bn)
 expanded = simplified_dfs_expansion(sd)
 
 print(f"Succession diagram size:", sd.count_nodes())
-print(f"Expanded nodes:", expanded)
 print(f"Stub nodes:", sd.count_stubs())
 print(f"Minimal traps:", len(sd.find_all_minimal_nodes()))
