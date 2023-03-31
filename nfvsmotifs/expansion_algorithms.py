@@ -68,11 +68,19 @@ def reach_bwd(
 
 def simplified_dfs_expansion(sd: SuccessionDiagram):
     root = sd.root()
-    root_space = sd.node_space(sd.root())   # This is after percolation, so it might not be the whole state space.
+    root_space = sd.node_space(root)   # This is after percolation, so it might not be the whole state space.
     root_space_symbolic = symbolic_space(sd.symbolic, root_space)
+
+    if len(root_space) == sd.network.num_vars():
+        # A special case where the network has one fixed-point/minimal trap that is
+        # resolvable through percolation. Not super common but 
+        sd.expanded.add(root)
+        return
+
     root_motifs = trappist(sd.petri_net,  problem="max", ensure_subspace=root_space)
     root_motifs = sorted(root_motifs, key=lambda x: len(x), reverse=True)
-    stack: list[tuple[int, list[dict[str, int]], ColoredVertexSet]] = [(sd.root(), root_motifs, root_space_symbolic)]
+
+    stack: list[tuple[int, list[dict[str, int]], ColoredVertexSet]] = [(root, root_motifs, root_space_symbolic)]
 
     while len(stack) > 0:
         top = stack[-1]
@@ -95,7 +103,10 @@ def simplified_dfs_expansion(sd: SuccessionDiagram):
         if remaining.is_empty():            
             for motif in motifs:
                 child = sd.ensure_node(node, motif)
-                sd.node_is_stub(child, True)
+                if child not in sd.expanded:
+                    # It is possible that this process will re-discover an existing
+                    # expanded node. In such case, it would be invalid to mark it as stub.
+                    sd.node_is_stub(child, True)
             if DEBUG:
                 print(f" >> Done. {len(motifs)} stubs created.")
             sd.expanded.add(node)
@@ -130,12 +141,14 @@ def simplified_dfs_expansion(sd: SuccessionDiagram):
 
         if child not in sd.expanded:
             if len(child_space) == sd.network.num_vars():
-                print(" >> Child is a fixed-point. Done.")
+                if DEBUG:
+                    print(" >> Child is a fixed-point. Done.")
                 sd.expanded.add(child)
             else:
                 child_motifs = trappist(sd.petri_net,  problem="max", ensure_subspace=child_space)
                 if len(child_motifs) == 0:
-                    print(f" >> Child is a trap ({len(child_space)}/{sd.network.num_vars()} fixed vars). Done.")
+                    if DEBUG:
+                        print(f" >> Child is a trap ({len(child_space)}/{sd.network.num_vars()} fixed vars). Done.")
                     sd.expanded.add(child)
                 else:                
                     root_motifs = sorted(child_motifs, key=lambda x: len(x), reverse=True)
