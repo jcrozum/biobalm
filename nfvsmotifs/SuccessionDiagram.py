@@ -84,11 +84,12 @@ class SuccessionDiagram():
                 # Stub can be "reset" to non-stub status, in which case it is not expanded any more.
                 self.G.nodes[node_id]["stub"] = False
                 self.expanded.remove(node_id)
+                return False
             else:
                 # Node can become a stub only if it isn't expanded. If it is already expanded,
                 # it just stays expanded.
                 if node_id in self.expanded:
-                    return False
+                    raise RuntimeError("Expanded node cannot become a stub.")
                 else:
                     self.G.nodes[node_id]["stub"] = True
                     self.expanded.add(node_id)
