@@ -133,10 +133,14 @@ def simplified_dfs_expansion(sd: SuccessionDiagram):
         if DEBUG:
             print(f" >> Expanding child motif into node {child}. Reduced remaining states: {remaining.cardinality()}.")
 
-        if is_redundant:            
-            sd.node_is_stub(child, True)
-            if DEBUG:
-                print(f" >> Created child is a stub.")
+        if is_redundant:
+            if child not in sd.expanded:            
+                sd.node_is_stub(child, True)
+                if DEBUG:
+                    print(f" >> Created child is a stub.")
+            else:
+                if DEBUG:
+                    print(f" >> Child is redundant and already expanded.")
             continue        
 
         if child not in sd.expanded:

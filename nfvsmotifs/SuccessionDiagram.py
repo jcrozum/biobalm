@@ -78,15 +78,21 @@ class SuccessionDiagram():
         if is_stub is None:
             return self.G.nodes[node_id]["stub"]
         else:                        
-            # An already expanded node cannot become a stub.
-            is_stub = is_stub and not (node_id in self.expanded and len(self.successors(node_id)) > 0)
-            self.G.nodes[node_id]["stub"] = is_stub
-
-            if is_stub:
-                self.expanded.add(node_id)
-            else:
+            if self.G.nodes[node_id]["stub"] == is_stub:
+                return is_stub
+            elif self.G.nodes[node_id]["stub"]:
+                # Stub can be "reset" to non-stub status, in which case it is not expanded any more.
+                self.G.nodes[node_id]["stub"] = False
                 self.expanded.remove(node_id)
-            return is_stub
+            else:
+                # Node can become a stub only if it isn't expanded. If it is already expanded,
+                # it just stays expanded.
+                if node_id in self.expanded:
+                    return False
+                else:
+                    self.G.nodes[node_id]["stub"] = True
+                    self.expanded.add(node_id)
+                    return True
 
     def count_stubs(self) -> int:
         x = 0
