@@ -10,7 +10,7 @@ from nfvsmotifs.space_utils import percolate_space, percolate_network
 from nfvsmotifs.state_utils import state_list_to_bdd, state_to_bdd
 from nfvsmotifs.drivers import find_single_node_LDOIs, find_single_drivers
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from pyeda.inter import Not, expr2bdd, bdd2expr # type: ignore
+from pyeda.inter import Not, expr2bdd # type: ignore
 
 def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]:
     """
@@ -28,8 +28,8 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
     return self_neg_tr_trap_spaces
 
 def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
-                                    network: BooleanNetwork | None = None,
-                                    ensure_subspace: dict[str, int] | None = None,
+                                    network: BooleanNetwork,
+                                    ensure_subspace: dict[str, int],
                                     use_single_node_drivers = True, use_tr_trapspaces = True) -> BinaryDecisionDiagram:
     """
     Find the terminal restriction space.
@@ -47,10 +47,8 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
     # ~terminal restriction space includes ~R(X)
     if use_single_node_drivers:
         # Get the percolated Boolean Network
-        if ensure_subspace != None:
-            reduced_network = percolate_network(network, ensure_subspace)
-        else:
-            reduced_network = network
+        reduced_network = percolate_network(network, ensure_subspace)
+
         LDOIs = find_single_node_LDOIs(reduced_network)
 
         for stable_motif in stable_motifs:
@@ -67,9 +65,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
                 result_bdd = result_bdd | expr2bdd(expression)
             
                 # get ~delta
-                not_delta = tuple([single_node_driver[0],(single_node_driver[1]+1)%2])
+                not_delta = tuple([single_node_driver[0],(single_node_driver[1]+1)%2]) # type: ignore
                 # ~R(X) includes ~LDOI(~delta)
-                result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta])
+                result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta]) # type: ignore
 
     if use_tr_trapspaces:
         pass
