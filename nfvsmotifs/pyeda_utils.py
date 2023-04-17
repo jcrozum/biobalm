@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import lru_cache
 """
     Some utility methods, mainly for converting and modifying PyEDA expressions.
 """
@@ -102,6 +103,7 @@ def pyeda_to_aeon(expression: Expression) -> str:
         return f"({p} => {q})"
     raise Exception(f"Unknown PyEDA operator: {type(expression)}.")
 
+@lru_cache(maxsize=None)
 def aeon_to_pyeda(expression: str) -> Expression:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
