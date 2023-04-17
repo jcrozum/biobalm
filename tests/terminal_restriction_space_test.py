@@ -26,6 +26,6 @@ def test_get_terminal_restriction_space():
     """)
     stable_motifs = [{'A':1, 'B':1, 'C':1}]
 
-    TRS = get_terminal_restriction_space(stable_motifs, network, use_single_node_drivers = True, use_tr_trapspaces = True)
+    TRS = get_terminal_restriction_space(stable_motifs, network, ensure_subspace={}, use_single_node_drivers = True, use_tr_trapspaces = True)
 
     assert TRS == state_list_to_bdd([{'A':0,'B':0,'C':0},{'A':1,'B':0,'C':0},{'A':0,'B':1,'C':0}])
