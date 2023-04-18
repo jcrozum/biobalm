@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from nfvsmotifs.state_utils import function_restrict
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
 
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
 
 from pyeda.inter import expr # type: ignore
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda, expression_literals
+from nfvsmotifs.pyeda_utils import aeon_to_bdd, aeon_to_pyeda, expression_literals
 
 from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
 
@@ -96,31 +98,59 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int], strict_perco
         result = { var:space[var] for var in space }
     
     fixed = { var:space[var] for var in space }
-    
+    bdds = {}
     conflicts = {}
     done = False
     while not done:
         done = True
         for var in network.variables():
             var_name = network.get_variable_name(var)            
-            expression = aeon_to_pyeda(network.get_update_function(var))
             
-            # If the var is already constant, it doesn't count.
-            if (expression == PYEDA_TRUE or expression == PYEDA_FALSE) and strict_percolation: 
+            if var_name not in bdds:
+                bdds[var_name] = aeon_to_bdd(network.get_update_function(var))
+            
+            
+            if (bdds[var_name].is_zero() or bdds[var_name].is_one()) and strict_percolation: 
                 continue
             
-            expression = percolate_pyeda_expression(expression, fixed)
-            if expression == PYEDA_TRUE or expression == PYEDA_FALSE: 
-                if var_name not in fixed:
-                    # Fortunately, PyEDA resolves true as '1' and false as '0', 
-                    # so we can use a direct conversion.
-                    fixed[var_name] = int(expression)
-                    result[var_name] = int(expression)
-                    done = False
-                if var_name in fixed and fixed[var_name] == int(expression) and var_name not in result:
-                    result[var_name] = int(expression)
-                if var_name in fixed and fixed[var_name] != int(expression):
-                    conflicts[var_name] = int(expression)
+            bdds[var_name]=function_restrict(bdds[var_name],fixed)
+            if bdds[var_name].is_one():
+                r = 1
+            elif bdds[var_name].is_zero():
+                r = 0
+            else:
+                r = -1
+                continue
+            
+            assert r in (0,1)
+            if var_name not in fixed:    
+                fixed[var_name] = r
+                result[var_name] = r
+                done = False
+            elif fixed[var_name] == r and var_name not in result:
+                result[var_name] = r
+            elif fixed[var_name] != r:
+                conflicts[var_name] = r
+                
+                
+            # expression = aeon_to_pyeda(network.get_update_function(var))
+            
+            # # If the var is already constant, it doesn't count.
+            # if (expression == PYEDA_TRUE or expression == PYEDA_FALSE) and strict_percolation: 
+            #     continue
+            
+            # expression = percolate_pyeda_expression(expression, fixed)
+            # if expression == PYEDA_TRUE or expression == PYEDA_FALSE: 
+            #     if var_name not in fixed:
+            #         # Fortunately, PyEDA resolves true as '1' and false as '0', 
+            #         # so we can use a direct conversion.
+            #         fixed[var_name] = int(expression)
+            #         result[var_name] = int(expression)
+            #         done = False
+            #     if var_name in fixed and fixed[var_name] == int(expression) and var_name not in result:
+            #         result[var_name] = int(expression)
+            #     if var_name in fixed and fixed[var_name] != int(expression):
+            #         conflicts[var_name] = int(expression)
     
     return (result, conflicts)
 
@@ -182,7 +212,7 @@ def percolate_pyeda_expression(expression: Expression, space: dict[str, int]) ->
         The resulting expression does not depend on the variables which are fixed 
         in the given `space`.
     """
-    substitution = { x: expr(space[x]) for x in space }
+    substitution = { x: (PYEDA_TRUE if space[x] == 1 else PYEDA_FALSE) for x in space }
     expression = substitute_variables_in_expression(expression, substitution)
     return expression.simplify()
 

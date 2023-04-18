@@ -1,5 +1,6 @@
 from __future__ import annotations
 from functools import lru_cache
+
 """
     Some utility methods, mainly for converting and modifying PyEDA expressions.
 """
@@ -10,11 +11,12 @@ if TYPE_CHECKING:
 
 import pyeda.boolalg.expr as pyeda_expression # type: ignore
 from pyeda.boolalg.expr import Literal # type: ignore
-from pyeda.inter import Not, And, Or, Equal, Xor, Implies # type: ignore
+from pyeda.inter import Not, And, Or, Equal, Xor, Implies, expr2bdd # type: ignore
 
 PYEDA_TRUE = pyeda_expression.expr(1)
 PYEDA_FALSE = pyeda_expression.expr(0)
 
+    
 def substitute_variables_in_expression(expression: Expression, items: dict[str, Expression]) -> Expression:    
     """
         A substitution method which replaces all occurences of the variables specified in `items`
@@ -114,6 +116,13 @@ def aeon_to_pyeda(expression: str) -> Expression:
     expression = expression.replace("true", "1")
     expression = expression.replace("false", "0")
     return pyeda_expression.expr(expression)
+
+@lru_cache(maxsize=None)
+def aeon_to_bdd(expression: str) -> Expression:
+    """
+        Convert a Boolean expression from AEON.py to PyEDA.
+    """    
+    return expr2bdd(aeon_to_pyeda(expression))
 
 def expression_literals(expression: Expression) -> set[Literal]:
     """
