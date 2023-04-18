@@ -76,6 +76,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
     # ~terminal restriction space includes self negating time reversal trapspaces
     if use_tr_trapspaces:
         self_neg_tr_trap_spaces = get_self_neg_tr_trap_spaces(reduced_network)
-        result_bdd = result_bdd | state_list_to_bdd(self_neg_tr_trap_spaces)
+        if len(self_neg_tr_trap_spaces) == 0:
+            return ~result_bdd
+        else:
+            result_bdd = result_bdd | state_list_to_bdd(self_neg_tr_trap_spaces)
     
     return ~result_bdd
