@@ -55,6 +55,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
         for stable_motif in stable_motifs:
             # find delta
             single_node_drivers = find_single_drivers(stable_motif, reduced_network, LDOIs=LDOIs)
+            if len(single_node_drivers) == 0:
+                continue
+
             # ~R(X) includes delta
             result_bdd = result_bdd | state_to_bdd(dict(single_node_drivers))
 
