@@ -135,7 +135,7 @@ def _preprocess_candidates(
             # If we cannot rule out the candidate, we can put it back
             # into candidate set.
             # symbolic_candidates = symbolic_candidates | state_bdd
-            symbolic_candidates = symbolic_candidates.append(state)
+            symbolic_candidates.append(state)
             filtered_candidates.append(state)
     
     return filtered_candidates
