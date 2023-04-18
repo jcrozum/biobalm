@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork # type: ignore    
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable # type:ignore
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram # type:ignore
 
 from nfvsmotifs.trappist_core import trappist
 from nfvsmotifs.space_utils import percolate_space, percolate_network
@@ -44,11 +44,12 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
     # ~terminal restriction space includes stable motifs
     result_bdd = state_list_to_bdd(stable_motifs)
 
-    # ~terminal restriction space includes ~R(X)
-    if use_single_node_drivers:
+    if use_single_node_drivers or use_tr_trapspaces:
         # Get the percolated Boolean Network
         reduced_network = percolate_network(network, ensure_subspace)
 
+    # ~terminal restriction space includes ~R(X)
+    if use_single_node_drivers:
         LDOIs = find_single_node_LDOIs(reduced_network)
 
         for stable_motif in stable_motifs:
@@ -69,7 +70,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
                 # ~R(X) includes ~LDOI(~delta)
                 result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta]) # type: ignore
 
+    # ~terminal restriction space includes self negating time reversal trapspaces
     if use_tr_trapspaces:
-        pass
-
+        self_neg_tr_trap_spaces = get_self_neg_tr_trap_spaces(reduced_network)
+        result_bdd = result_bdd | state_list_to_bdd(self_neg_tr_trap_spaces)
+    
     return ~result_bdd
