@@ -10,7 +10,6 @@ def test_find_single_node_LDOIs():
     E, false
     """)
     LDOIs = find_single_node_LDOIs(bn)
-    print(LDOIs)
     assert LDOIs[('S', 0)] == {'S': 0}
     assert LDOIs[('S', 1)] == {'S': 1, 'A': 1, 'B': 1, 'C': 1, 'D': 1}
     assert LDOIs[('A', 0)] == {'B': 0}
