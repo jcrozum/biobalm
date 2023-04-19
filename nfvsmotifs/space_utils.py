@@ -132,7 +132,7 @@ def percolate_space(network: BooleanNetwork, space: dict[str, int], strict_perco
             elif fixed[var_name] != r:
                 conflicts[var_name] = r
                 
-                
+            # # This is the old expression version
             # expression = aeon_to_pyeda(network.get_update_function(var))
             
             # # If the var is already constant, it doesn't count.

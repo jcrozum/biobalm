@@ -39,7 +39,7 @@ def state_to_bdd_cacheable(state: frozenset[tuple[str, int]]) -> BinaryDecisionD
 
     return state_bdd
 
-def state_to_bdd(state: dict[str, int], usecache=True) -> BinaryDecisionDiagram:
+def state_to_bdd(state: dict[str, int], usecache: bool = True) -> BinaryDecisionDiagram:
     """
         Convert a state variables to a BDD encoding the state singleton.
     """

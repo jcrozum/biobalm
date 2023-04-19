@@ -320,11 +320,11 @@ class SuccessionDiagram():
         # terminal_restriction_space = ~state_list_to_bdd(child_spaces)
 
         # new code that should be the same as before
-        # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
-        #                                                             self.network,
-        #                                                             ensure_subspace=node_space,
-        #                                                             use_single_node_drivers=False,
-        #                                                             use_tr_trapspaces=False)
+        terminal_restriction_space = get_terminal_restriction_space(child_spaces,
+                                                                    self.network,
+                                                                    ensure_subspace=node_space,
+                                                                    use_single_node_drivers=False,
+                                                                    use_tr_trapspaces=False)
 
         # use single node drivers
         # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
@@ -340,12 +340,12 @@ class SuccessionDiagram():
         #                                                             use_single_node_drivers=False,
         #                                                             use_tr_trapspaces=True)
 
-        # use single node drivers and time reversal trapspaces
-        terminal_restriction_space = get_terminal_restriction_space(child_spaces,
-                                                                    self.network,
-                                                                    ensure_subspace=node_space,
-                                                                    use_single_node_drivers=True,
-                                                                    use_tr_trapspaces=True)
+        # # use single node drivers and time reversal trapspaces
+        # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
+        #                                                             self.network,
+        #                                                             ensure_subspace=node_space,
+        #                                                             use_single_node_drivers=True,
+        #                                                             use_tr_trapspaces=True)
 
         candidate_seeds = compute_fixed_point_reduced_STG(
             self.petri_net, 
