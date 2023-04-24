@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
 import networkx as nx # type: ignore
 
+import random # type: ignore
+
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS, feedback_vertex_set
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
@@ -15,6 +17,7 @@ from nfvsmotifs.space_utils import percolate_space, intersect
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.state_utils import state_list_to_bdd
 from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -306,7 +309,24 @@ class SuccessionDiagram():
         retained_set = node_space.copy()
         for x in self.nfvs:
             if x not in retained_set:
-                retained_set[x] = 0
+                """Set all nodes to 0"""
+                #retained_set[x] = 0
+
+                """Set nodes to values based on the majority of satisfying values of functions"""
+                fx = self.network.get_update_function(x)
+                fx = aeon_to_pyeda(fx)
+                n_input = len(list(fx.support))
+                n_poss_sat = pow(2, n_input - 1)
+
+                n_sat = fx.satisfy_count()
+
+                if n_sat > n_poss_sat:
+                    retained_set[x] = 1
+                elif n_sat < n_poss_sat:
+                    retained_set[x] = 0
+                else:
+                    retained_set[x] = random.randint(0, 1)
+
 
         child_spaces = [self.node_space(child) for child in self.G.successors(node_id)]
 
@@ -317,7 +337,7 @@ class SuccessionDiagram():
             return [retained_set]
 
         # old code
-        # terminal_restriction_space = ~state_list_to_bdd(child_spaces)
+        #terminal_restriction_space = ~state_list_to_bdd(child_spaces)
 
         # new code that should be the same as before
         terminal_restriction_space = get_terminal_restriction_space(child_spaces,

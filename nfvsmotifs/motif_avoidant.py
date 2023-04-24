@@ -92,7 +92,7 @@ def _preprocess_candidates(
             continue
         var_name = network.get_variable_name(var)
         variables.append(var_name)
-        function_expression = network.get_update_function(var)
+        function_expression = network.get_update_function(var) 
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
@@ -101,6 +101,7 @@ def _preprocess_candidates(
         symbolic_candidates = state_list_to_bdd(candidates)
         filtered_candidates = []
         for state in candidates:
+            print("Run outside mts")
             state_bdd = state_to_bdd(state)
 
             # Remove state from the symbolic set. If we can prove that is
@@ -142,6 +143,7 @@ def _preprocess_candidates(
     else:
         filtered_candidates = []
         for _ in range(max_iterations):
+            print("Run inside mts")
             random.shuffle(variables)
             symbolic_candidates = state_list_to_bdd(candidates)
             filtered_candidates = []
