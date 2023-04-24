@@ -45,7 +45,9 @@ def detect_motif_avoidant_attractors(
     if len(candidates) == 1 and is_in_an_mts:
         return candidates
     
-    candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations, ensure_subspace=ensure_subspace)
+    candidates = _preprocess_candidates(network, candidates, terminal_restriction_space, max_iterations, ensure_subspace=ensure_subspace,is_in_an_mts=is_in_an_mts)
+
+    print(f"Candidates (after): {len(candidates)}")
 
     if len(candidates) == 0:
         return []
@@ -60,7 +62,8 @@ def _preprocess_candidates(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {}
+    ensure_subspace: dict[str, int] = {},
+    is_in_an_mts: bool = False
 ) -> list[dict[str, int]]:
     """
         A fast but incomplete method for eliminating spurious attractor candidates. 
@@ -93,47 +96,78 @@ def _preprocess_candidates(
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
-    symbolic_candidates = state_list_to_bdd(candidates)
-    filtered_candidates = []
-    for state in candidates:
-        state_bdd = state_to_bdd(state)
 
-        # Remove state from the symbolic set. If we can prove that is
-        # is not an attractor, we will put it back.
-        symbolic_candidates = symbolic_candidates & ~state_bdd
+    if is_in_an_mts == False:
+        symbolic_candidates = state_list_to_bdd(candidates)
+        filtered_candidates = []
+        for state in candidates:
+            state_bdd = state_to_bdd(state)
 
-        simulation = state.copy()   # A copy of the state that we can overwrite.
-        is_valid_candidate = True
+            # Remove state from the symbolic set. If we can prove that is
+            # is not an attractor, we will put it back.
+            symbolic_candidates = symbolic_candidates & ~state_bdd
+
+            simulation = state.copy()   # A copy of the state that we can overwrite.
+            is_valid_candidate = True
+            for _ in range(max_iterations):
+                # Advance all variables by one step in random order.
+                random.shuffle(variables)
+                for var in variables:
+                    step = function_eval(update_functions[var], simulation)
+                    assert step is not None
+                    simulation[var] = step
+
+                if function_is_true(symbolic_candidates, simulation):
+                    # The state can reach some other state in the candidate
+                    # set. This does not mean it cannot be an attractor, but
+                    # it means it is sufficient to keep considering the other
+                    # candidate.
+                    is_valid_candidate = False
+                    break
+
+                if not function_is_true(terminal_restriction_space, simulation):
+                    # The state can reach some other state outside of the
+                    # terminal restriction space, which means it cannot be
+                    # a motif avoidant attractor in this subspace.
+                    is_valid_candidate = False
+                    break
+
+            if is_valid_candidate:
+                # If we cannot rule out the candidate, we can put it back
+                # into candidate set.
+                symbolic_candidates = symbolic_candidates | state_bdd
+                filtered_candidates.append(state)
+        
+        return filtered_candidates
+    else:
+        filtered_candidates = []
         for _ in range(max_iterations):
-            # Advance all variables by one step in random order.
             random.shuffle(variables)
-            for var in variables:
-                step = function_eval(update_functions[var], simulation)
-                assert step is not None
-                simulation[var] = step
+            symbolic_candidates = state_list_to_bdd(candidates)
+            filtered_candidates = []
 
-            if function_is_true(symbolic_candidates, simulation):
-                # The state can reach some other state in the candidate
-                # set. This does not mean it cannot be an attractor, but
-                # it means it is sufficient to keep considering the other
-                # candidate.
-                is_valid_candidate = False
+            for state in candidates:
+                state_bdd = state_to_bdd(state)
+                symbolic_candidates = symbolic_candidates & ~state_bdd
+
+                simulation = state.copy()
+                for var in variables:
+                    step = function_eval(update_functions[var], simulation)
+                    assert step is not None
+                    simulation[var] = step
+
+                if not function_is_true(symbolic_candidates, simulation):
+                    #symbolic_candidates = symbolic_candidates | state_bdd
+                    symbolic_candidates = symbolic_candidates | state_to_bdd(simulation)
+                    filtered_candidates.append(simulation)
+
+            if len(filtered_candidates) <= 1:
                 break
 
-            if not function_is_true(terminal_restriction_space, simulation):
-                # The state can reach some other state outside of the
-                # terminal restriction space, which means it cannot be
-                # a motif avoidant attractor in this subspace.
-                is_valid_candidate = False
-                break
+            candidates = filtered_candidates.copy()
 
-        if is_valid_candidate:
-            # If we cannot rule out the candidate, we can put it back
-            # into candidate set.
-            symbolic_candidates = symbolic_candidates | state_bdd
-            filtered_candidates.append(state)
-    
-    return filtered_candidates
+        return filtered_candidates
+
             
 
 def _filter_candidates(
@@ -144,7 +178,7 @@ def _filter_candidates(
     """
         Filter candidate states using reachability procedure in Pint.
     """
-
+    print("Run _filter_candidates")
     avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
     filtered_candidates = []
 

@@ -357,18 +357,16 @@ class SuccessionDiagram():
         if DEBUG:
             print(f"[id={node_id};children={len(child_spaces)}] Candidates: {len(candidate_seeds)}")
         
-        if len(candidate_seeds) == 1 and len(child_spaces) == 0:
-            # If this is a (non-strict) minimal trap and there is only one seed,
-            # the seed must be valid.
-            attractors = candidate_seeds
-        else:
-            attractors = detect_motif_avoidant_attractors(
-                self.network, 
-                self.petri_net, 
-                candidate_seeds, 
-                terminal_restriction_space, 
-                max_iterations=1000
-            )
+        is_in_an_mts = len(child_spaces) == 0
+        attractors = detect_motif_avoidant_attractors(
+            self.network, 
+            self.petri_net, 
+            candidate_seeds, 
+            terminal_restriction_space, 
+            max_iterations=1000,
+            ensure_subspace=node_space,
+            is_in_an_mts=is_in_an_mts
+        )
 
         if len(attractors) > 0:
             self.attractors[node_id] = attractors
