@@ -240,7 +240,7 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
         literals = [clause] if isinstance(clause, Literal) else clause.xs
         
         for literal in literals:
-            var = str(literal.inputs[0]) # type: ignore because pyright is confused by pyeda's custom @cached_property
+            var = str(literal.inputs[0])
             if isinstance(literal, Variable):
                 sub_space[var] = 1
             elif isinstance(literal, Complement):

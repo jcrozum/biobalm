@@ -171,77 +171,77 @@ def upoint2exprpoint(upoint): # -> dict[Unknown, Unknown]:
     """
     ...
 
-def Not(x, simplify=...):
+def Not(x, simplify=...): # -> Expression:
     """Expression negation operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Or(*xs, simplify=...):
+def Or(*xs, simplify=...): # -> Expression:
     """Expression disjunction (sum, OR) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def And(*xs, simplify=...):
+def And(*xs, simplify=...): # -> Expression:
     """Expression conjunction (product, AND) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Xor(*xs, simplify=...):
+def Xor(*xs, simplify=...): # -> Expression:
     """Expression exclusive or (XOR) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Equal(*xs, simplify=...):
+def Equal(*xs, simplify=...): # -> Expression:
     """Expression equality operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Implies(p, q, simplify=...):
+def Implies(p, q, simplify=...): # -> Expression:
     """Expression implication operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def ITE(s, d1, d0, simplify=...):
+def ITE(s, d1, d0, simplify=...): # -> Expression:
     """Expression If-Then-Else (ITE) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Nor(*xs, simplify=...):
+def Nor(*xs, simplify=...): # -> Expression:
     """Expression NOR (not OR) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Nand(*xs, simplify=...):
+def Nand(*xs, simplify=...): # -> Expression:
     """Expression NAND (not AND) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Xnor(*xs, simplify=...):
+def Xnor(*xs, simplify=...): # -> Expression:
     """Expression exclusive nor (XNOR) operator
 
     If *simplify* is ``True``, return a simplified expression.
     """
     ...
 
-def Unequal(*xs, simplify=...):
+def Unequal(*xs, simplify=...): # -> Expression:
     """Expression inequality operator
 
     If *simplify* is ``True``, return a simplified expression.
@@ -387,12 +387,12 @@ class Expression(boolfunc.Function):
     # @cached_property
     # def support(self): # -> frozenset[Unknown]:
     #     ...
-    support: frozenset[Any] = ...
+    support: frozenset[Expression] = ...
     
     # @cached_property
     # def inputs(self): # -> tuple[Any, ...]:
     #     ...
-    inputs: tuple[Any, ...] = ...
+    inputs: tuple[Expression, ...] = ...
     
     def restrict(self, point):
         ...
@@ -622,7 +622,7 @@ class Operator(Expression):
     # def xs(self): # -> tuple[Unknown, ...]:
     #     """Return a tuple of this operator's arguments."""
     #     ...
-    xs: tuple[Any, ...] = ...
+    xs: tuple[Expression, ...] = ...
 
 
 class NaryOp(Operator):
@@ -673,7 +673,7 @@ class NotOp(Operator):
     # def x(self): # -> Any:
     #     """For Not(x), return x."""
     #     ...
-    x: Any = ...
+    x: Expression = ...
 
 
 class ImpliesOp(Operator):

@@ -130,8 +130,7 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     t_id = 0
     for var in network.variables():
         var_name = network.get_variable_name(var)
-        function = network.get_update_function(var)
-        function = aeon_to_pyeda(function)
+        function = aeon_to_pyeda(network.get_update_function(var))
         
         vx = bddvar(var_name)
         fx = expr2bdd(function)

@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from biodivine_aeon.biodivine_aeon import VariableId # type: ignore
 
 from biodivine_aeon.biodivine_aeon import BooleanNetwork, RegulatoryGraph
-from networkx import DiGraph
+from networkx import DiGraph # type: ignore
 
 from networkx.algorithms import bipartite # type: ignore
 

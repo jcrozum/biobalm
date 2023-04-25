@@ -85,12 +85,12 @@ def _preprocess_candidates(
     # First, build the symbolic encoding:
     variables = []
     update_functions = {}
-    for var in network.variables():
-        if var in ensure_subspace: # do not update constant nodes
+    for varID in network.variables():
+        if varID in ensure_subspace: # do not update constant nodes
             continue
-        var_name = network.get_variable_name(var)
+        var_name = network.get_variable_name(varID)
         variables.append(var_name)
-        function_expression = network.get_update_function(var)
+        function_expression = network.get_update_function(varID)
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
