@@ -7,11 +7,12 @@ from functools import lru_cache
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pyeda.inter import Expression # type: ignore
+    from pyeda.boolalg.expr import Expression
 
-import pyeda.boolalg.expr as pyeda_expression # type: ignore
-from pyeda.boolalg.expr import Literal # type: ignore
-from pyeda.inter import Not, And, Or, Equal, Xor, Implies, expr2bdd # type: ignore
+import pyeda.boolalg.expr as pyeda_expression
+from pyeda.boolalg.expr import Literal, Not, And, Or, Equal, Xor, Implies
+from pyeda.boolalg.bdd import expr2bdd
+
 
 PYEDA_TRUE = pyeda_expression.expr(1)
 PYEDA_FALSE = pyeda_expression.expr(0)
@@ -43,7 +44,7 @@ def substitute_variables_in_expression(expression: Expression, items: dict[str, 
         inner = substitute_variables_in_expression(expression.x, items)
         return Not(inner)
     if type(expression) == pyeda_expression.AndOp:
-        inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
+        inner = [substitute_variables_in_expression(x, items) for x in expression.xs] 
         return And(*inner)
     if type(expression) == pyeda_expression.OrOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
@@ -122,7 +123,7 @@ def aeon_to_bdd(expression: str) -> Expression:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
     """    
-    return expr2bdd(aeon_to_pyeda(expression))
+    return expr2bdd(aeon_to_pyeda(expression)) # pyright: ignore
 
 def expression_literals(expression: Expression) -> set[Literal]:
     """

@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore
 from pyeda.inter import * # type: ignore
 
 from nfvsmotifs.space_utils import *

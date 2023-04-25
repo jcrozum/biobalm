@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork # type:ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork # type:ignore
 from nfvsmotifs.motif_avoidant import _preprocess_candidates, _filter_candidates, _Pint_reachability
 from nfvsmotifs.state_utils import state_list_to_bdd
 from nfvsmotifs.petri_net_translation import network_to_petrinet

@@ -5,11 +5,11 @@ from __future__ import annotations
 """
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from networkx import DiGraph # type: ignore
     from typing import Callable
     from clingo import Model
 
-from biodivine_aeon import BooleanNetwork # type: ignore    
+from networkx import DiGraph # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork
 from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable, extract_variable_names
 from clingo import Control, SolveHandle
 
@@ -32,23 +32,25 @@ def trappist_async(
     else:
         bn = None
         petri_net = network
+        
+    assert type(petri_net) == DiGraph  
 
     if bn is None:
-        variables = extract_variable_names(petri_net)
+        variables = extract_variable_names(petri_net) 
     else:
-        variables = [bn.get_variable_name(v) for v in bn.variables()]
-        
+        variables = [bn.get_variable_name(v) for v in bn.variables()] 
+          
     # Source node is a node that has no transitions in the PN encoding 
     # (i.e. it's value cannot change).
     source_set = set(variables)
-    for (node, change_var) in petri_net.nodes(data='change'):
+    for (node, change_var) in petri_net.nodes(data='change'): # pyright: ignore
         if change_var is not None and change_var in source_set:
             source_set.remove(change_var)
     source_nodes: list[str] = sorted(source_set)
     
     ctl = _create_clingo_constraints(
         variables, 
-        petri_net, 
+        petri_net,
         problem, 
         reverse_time, 
         ensure_subspace, 
@@ -188,7 +190,7 @@ def _create_clingo_constraints(
         ctl.add(f":- {fixed_vars}.")
 
     free_places = []
-    for node, kind in petri_net.nodes(data="kind"):
+    for node, kind in petri_net.nodes(data="kind"): # pyright: ignore
         if kind == "place":
             if place_to_variable(node)[0] not in ensure_subspace:
                 free_places.append(node)
@@ -284,7 +286,7 @@ def _create_clingo_fixed_point_constraints(
         ctl.add("base", [], f"{p_name} ; {n_name}.")
 
 
-    for node, kind in petri_net.nodes(data="kind"):
+    for node, kind in petri_net.nodes(data="kind"): # pyright: ignore
         if kind == "place":
             continue
         elif kind == "transition":
@@ -339,8 +341,8 @@ def compute_fixed_point_reduced_STG_async(
         b_i = retained_set[node]
         source_place = variable_to_place(node, positive = (b_i == 1))
         
-        preds = list(reduced_petri_net.predecessors(source_place))
-        succs = list(reduced_petri_net.successors(source_place))
+        preds = list(reduced_petri_net.predecessors(source_place)) # pyright: ignore
+        succs = list(reduced_petri_net.successors(source_place)) # pyright: ignore
 
         deleted_transitions = list(set(succs) - set(preds))
 
@@ -348,8 +350,8 @@ def compute_fixed_point_reduced_STG_async(
             reduced_petri_net.remove_node(trans)
 
     ctl = _create_clingo_fixed_point_constraints(
-        extract_variable_names(reduced_petri_net),
-        reduced_petri_net, 
+        extract_variable_names(reduced_petri_net), # pyright: ignore
+        reduced_petri_net, # pyright: ignore
         ensure_subspace, 
         avoid_subspaces
     )

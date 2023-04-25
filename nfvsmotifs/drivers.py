@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from biodivine_aeon import BooleanNetwork # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore
 from nfvsmotifs.space_utils import percolate_space
 
 def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str, int]]:

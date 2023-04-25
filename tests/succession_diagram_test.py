@@ -1,5 +1,5 @@
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, find_attractors # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, find_attractors # type: ignore
 import sys
 
 def test_succession_diagram_structure():

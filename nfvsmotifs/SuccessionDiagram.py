@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Set
-    from biodivine_aeon import BooleanNetwork  # type: ignore
+    from biodivine_aeon.biodivine_aeon import BooleanNetwork  # type: ignore
 
 
 import networkx as nx # type: ignore
@@ -249,7 +249,7 @@ class SuccessionDiagram():
         # reasonably fast (we are not doing any copies or string manipulation).
         key = 0
         for (k, v) in fixed_vars.items():
-            var_index = self.network.find_variable(k).as_index()
+            var_index = self.network.find_variable(k).as_index() # type: ignore (we are assured that find_variable does not return None here)
             # Each variable is encoded as two bits, so the total length
             # of the key is 2 * n and the offset of each variable is 2 * index.
             # 00 - unknown; 10 - zero; 11 - one                             

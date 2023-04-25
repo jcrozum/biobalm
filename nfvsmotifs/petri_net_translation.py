@@ -18,8 +18,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork # type: ignore    
-    from pyeda.boolalg.bdd import BDDNode # type: ignore
+    from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore    
+    from pyeda.boolalg.bdd import BDDNode, BinaryDecisionDiagram # type: ignore
 
 from networkx import DiGraph # type: ignore
 from pyeda.boolalg.bdd import expr2bdd, bddvar
@@ -150,7 +150,7 @@ def _create_transitions(
     pn: DiGraph, 
     places: dict[str, tuple[str, str]], 
     var_name: str, 
-    implicant_bdd: BDDNode, 
+    implicant_bdd: BinaryDecisionDiagram, 
     go_up: bool
 ):        
     """

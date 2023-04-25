@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
+from biodivine_aeon.biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
 
 def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:	
 	"""
