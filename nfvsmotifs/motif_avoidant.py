@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import random
 from functools import reduce
 from networkx import DiGraph # type:ignore
@@ -9,7 +10,7 @@ from biodivine_aeon import BooleanNetwork # type: ignore
 
 from nfvsmotifs.petri_net_translation import place_to_variable
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.state_utils import state_to_bdd, state_list_to_bdd, function_eval, function_is_true
+from nfvsmotifs.state_utils import dnf_function_is_true, remove_state_from_dnf, state_to_bdd, state_list_to_bdd, function_eval, function_is_true
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -96,17 +97,21 @@ def _preprocess_candidates(
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
-
+    print("Finish loading functions")
     if is_in_an_mts == False:
-        symbolic_candidates = state_list_to_bdd(candidates)
+        #symbolic_candidates = state_list_to_bdd(candidates)
+        symbolic_candidates = deepcopy(candidates)
         filtered_candidates = []
+        i = 1
         for state in candidates:
-            print("Run outside mts")
-            state_bdd = state_to_bdd(state)
+            print(f"Run outside mts - {i}")
+            i += 1
+            #state_bdd = state_to_bdd(state)
 
             # Remove state from the symbolic set. If we can prove that is
             # is not an attractor, we will put it back.
-            symbolic_candidates = symbolic_candidates & ~state_bdd
+            #symbolic_candidates = symbolic_candidates & ~state_bdd
+            symbolic_candidates = remove_state_from_dnf(symbolic_candidates, state)
 
             simulation = state.copy()   # A copy of the state that we can overwrite.
             is_valid_candidate = True
@@ -118,7 +123,8 @@ def _preprocess_candidates(
                     assert step is not None
                     simulation[var] = step
 
-                if function_is_true(symbolic_candidates, simulation):
+                #if function_is_true(symbolic_candidates, simulation):
+                if dnf_function_is_true(symbolic_candidates, simulation):
                     # The state can reach some other state in the candidate
                     # set. This does not mean it cannot be an attractor, but
                     # it means it is sufficient to keep considering the other
@@ -136,21 +142,24 @@ def _preprocess_candidates(
             if is_valid_candidate:
                 # If we cannot rule out the candidate, we can put it back
                 # into candidate set.
-                symbolic_candidates = symbolic_candidates | state_bdd
+                #symbolic_candidates = symbolic_candidates | state_bdd
+                symbolic_candidates.append(state)
                 filtered_candidates.append(state)
         
         return filtered_candidates
     else:
         filtered_candidates = []
-        for _ in range(max_iterations):
-            print("Run inside mts")
+        for i in range(max_iterations):
+            print(f"Run inside mts - {i + 1}")
             random.shuffle(variables)
-            symbolic_candidates = state_list_to_bdd(candidates)
+            #symbolic_candidates = state_list_to_bdd(candidates)
+            symbolic_candidates = deepcopy(candidates)
             filtered_candidates = []
 
             for state in candidates:
-                state_bdd = state_to_bdd(state)
-                symbolic_candidates = symbolic_candidates & ~state_bdd
+                #state_bdd = state_to_bdd(state)
+                #symbolic_candidates = symbolic_candidates & ~state_bdd
+                symbolic_candidates = remove_state_from_dnf(symbolic_candidates, state)
 
                 simulation = state.copy()
                 for var in variables:
@@ -158,15 +167,17 @@ def _preprocess_candidates(
                     assert step is not None
                     simulation[var] = step
 
-                if not function_is_true(symbolic_candidates, simulation):
+                #if not function_is_true(symbolic_candidates, simulation):
+                if not dnf_function_is_true(symbolic_candidates, simulation):
                     #symbolic_candidates = symbolic_candidates | state_bdd
-                    symbolic_candidates = symbolic_candidates | state_to_bdd(simulation)
+                    #symbolic_candidates = symbolic_candidates | state_to_bdd(simulation)
+                    symbolic_candidates.append(simulation)
                     filtered_candidates.append(simulation)
 
             if len(filtered_candidates) <= 1:
                 break
 
-            candidates = filtered_candidates.copy()
+            candidates = deepcopy(filtered_candidates)
 
         return filtered_candidates
 

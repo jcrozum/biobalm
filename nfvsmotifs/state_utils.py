@@ -78,3 +78,28 @@ def function_is_true(f: BinaryDecisionDiagram, state: dict[str, int]) -> bool:
 
     return function_restrict(f, state).is_one()
     
+
+def dnf_function_is_true(dnf: list[dict[str, int]], state: dict[str, int]) -> bool:
+    """
+        Returns `True` if the given DNF function evaluates to `1` for the given 
+        state (or space). 
+    """
+    if len(dnf) == 0:
+        return False
+
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            return True
+    return False
+
+def remove_state_from_dnf(dnf: list[dict[str, int]], state: dict[str, int]) -> list[dict[str, int]]:
+    """
+        Removes all conjunctions that are True in the state
+    """
+    modified_dnf = []
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            pass
+        else:
+            modified_dnf.append(conjunction)
+    return modified_dnf
