@@ -124,7 +124,7 @@ def aeon_to_bdd(expression: str) -> BinaryDecisionDiagram:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
     """    
-    return expr2bdd(aeon_to_pyeda(expression)) # pyright: ignore
+    return expr2bdd(aeon_to_pyeda(expression)) # type: ignore
 
 def expression_literals(expression: Expression) -> set[Literal]:
     """

@@ -232,7 +232,7 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
     sub_spaces = []
     expression_dnf = expression.to_dnf()
 
-    for clause in expression_dnf.xs: # pyright: ignore
+    for clause in expression_dnf.xs: # type: ignore
         sub_space = {}
 
         # Since we know this is a DNF clause, it can only be

@@ -122,11 +122,11 @@ def feedback_vertex_set(
         The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
     if type(network) == BooleanNetwork:
-        network = network.graph() # pyright: ignore
+        network = network.graph() # type: ignore
     if type(network) == DiGraph:
         network = _digraph_to_regulatory_graph(network)
-    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph) # pyright: ignore
-    return [network.get_variable_name(x) for x in fvs] # pyright: ignore
+    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph) # type: ignore
+    return [network.get_variable_name(x) for x in fvs] # type: ignore
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
