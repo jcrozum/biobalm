@@ -6,7 +6,7 @@ from functools import reduce
 from networkx import DiGraph # type:ignore
 from pyeda.boolalg.bdd import expr2bdd # type:ignore
 from pypint import InMemoryModel, Goal # type:ignore
-from biodivine_aeon import BooleanNetwork # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore
 
 from nfvsmotifs.petri_net_translation import place_to_variable
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
@@ -85,12 +85,12 @@ def _preprocess_candidates(
     # First, build the symbolic encoding:
     variables = []
     update_functions = {}
-    for var in network.variables():
-        if var in ensure_subspace: # do not update constant nodes
+    for varID in network.variables():
+        if varID in ensure_subspace: # do not update constant nodes
             continue
-        var_name = network.get_variable_name(var)
+        var_name = network.get_variable_name(varID)
         variables.append(var_name)
-        function_expression = network.get_update_function(var)
+        function_expression = network.get_update_function(varID)
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
@@ -190,7 +190,7 @@ def _Pint_reachability(
 
     goal = _Pint_build_symbolic_goal(target_states)
 
-    return pint_model.reachability(goal=goal, fallback='mole')
+    return pint_model.reachability(goal=goal, fallback='mole') # pyright: ignore
 
 def _Pint_build_symbolic_goal(states: BinaryDecisionDiagram) -> Goal:
     """
@@ -218,7 +218,7 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
 
     # Go through all PN places and save them as model variables.
     variable_set = set()
-    for place, kind in petri_net.nodes(data="kind"):
+    for place, kind in petri_net.nodes(data="kind"): # pyright: ignore
         if kind != "place":
             continue
         variable_set.add(place_to_variable(place)[0])
@@ -228,7 +228,7 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
     for var in variables:
         automata_network += f"\"{var}\" [0, 1]\n"
 
-    for transition, kind in petri_net.nodes(data="kind"):
+    for transition, kind in petri_net.nodes(data="kind"): # pyright: ignore
         if kind != "transition":
             continue
         

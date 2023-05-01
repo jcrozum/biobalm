@@ -7,11 +7,12 @@ from functools import lru_cache
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pyeda.inter import Expression # type: ignore
+    from pyeda.boolalg.expr import Expression
 
-import pyeda.boolalg.expr as pyeda_expression # type: ignore
-from pyeda.boolalg.expr import Literal # type: ignore
-from pyeda.inter import Not, And, Or, Equal, Xor, Implies, expr2bdd # type: ignore
+import pyeda.boolalg.expr as pyeda_expression
+from pyeda.boolalg.expr import Literal, Not, And, Or, Equal, Xor, Implies
+from pyeda.boolalg.bdd import BinaryDecisionDiagram, expr2bdd
+
 
 PYEDA_TRUE = pyeda_expression.expr(1)
 PYEDA_FALSE = pyeda_expression.expr(0)
@@ -39,22 +40,23 @@ def substitute_variables_in_expression(expression: Expression, items: dict[str, 
             return Not(items[key])
         else:
             return expression
+        
     if type(expression) == pyeda_expression.NotOp:
-        inner = substitute_variables_in_expression(expression.x, items)
-        return Not(inner)
-    if type(expression) == pyeda_expression.AndOp:
+        inner = [substitute_variables_in_expression(expression.x, items)]
+        return Not(*inner)
+    elif type(expression) == pyeda_expression.AndOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return And(*inner)
-    if type(expression) == pyeda_expression.OrOp:
+    elif type(expression) == pyeda_expression.OrOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Or(*inner)
-    if type(expression) == pyeda_expression.EqualOp:
+    elif type(expression) == pyeda_expression.EqualOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Equal(*inner)
-    if type(expression) == pyeda_expression.XorOp:
+    elif type(expression) == pyeda_expression.XorOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Xor(inner)
-    if type(expression) == pyeda_expression.ImpliesOp:
+    elif type(expression) == pyeda_expression.ImpliesOp:
         p = substitute_variables_in_expression(expression.xs[0], items)
         q = substitute_variables_in_expression(expression.xs[1], items)
         return Implies(p, q)
@@ -118,11 +120,11 @@ def aeon_to_pyeda(expression: str) -> Expression:
     return pyeda_expression.expr(expression)
 
 @lru_cache(maxsize=None)
-def aeon_to_bdd(expression: str) -> Expression:
+def aeon_to_bdd(expression: str) -> BinaryDecisionDiagram:
     """
         Convert a Boolean expression from AEON.py to PyEDA.
     """    
-    return expr2bdd(aeon_to_pyeda(expression))
+    return expr2bdd(aeon_to_pyeda(expression)) # pyright: ignore
 
 def expression_literals(expression: Expression) -> set[Literal]:
     """

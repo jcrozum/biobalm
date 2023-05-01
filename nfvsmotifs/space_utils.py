@@ -10,13 +10,12 @@ from nfvsmotifs.state_utils import function_restrict
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pyeda.inter import Expression # type: ignore
+    from pyeda.boolalg.expr import Expression
 
-from pyeda.inter import expr # type: ignore
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph # type: ignore
+from biodivine_aeon.biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from nfvsmotifs.pyeda_utils import aeon_to_bdd, aeon_to_pyeda, expression_literals
 
-from pyeda.boolalg.expr import Complement, Literal, Variable # type:ignore
+from pyeda.boolalg.expr import Complement, Literal, Variable
 
 from nfvsmotifs.pyeda_utils import substitute_variables_in_expression, pyeda_to_aeon, aeon_to_pyeda, PYEDA_TRUE, PYEDA_FALSE
 
@@ -185,7 +184,6 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwo
     new_bn = BooleanNetwork(new_rg)
     for var in bn.variables():
         name = bn.get_variable_name(var)
-        new_var = new_bn.find_variable(name)    # The ids should be the same, but just in case.
         new_expr = None
         if name in space:
             # If the value is fixed, just use it as a value directly.
@@ -234,7 +232,7 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
     sub_spaces = []
     expression_dnf = expression.to_dnf()
 
-    for clause in expression_dnf.xs:
+    for clause in expression_dnf.xs: # pyright: ignore
         sub_space = {}
 
         # Since we know this is a DNF clause, it can only be

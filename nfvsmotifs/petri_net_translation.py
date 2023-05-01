@@ -18,8 +18,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork # type: ignore    
-    from pyeda.boolalg.bdd import BDDNode # type: ignore
+    from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore    
+    from pyeda.boolalg.bdd import BDDNode, BinaryDecisionDiagram # type: ignore
 
 from networkx import DiGraph # type: ignore
 from pyeda.boolalg.bdd import expr2bdd, bddvar
@@ -130,8 +130,7 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     t_id = 0
     for var in network.variables():
         var_name = network.get_variable_name(var)
-        function = network.get_update_function(var)
-        function = aeon_to_pyeda(function)
+        function = aeon_to_pyeda(network.get_update_function(var))
         
         vx = bddvar(var_name)
         fx = expr2bdd(function)
@@ -150,7 +149,7 @@ def _create_transitions(
     pn: DiGraph, 
     places: dict[str, tuple[str, str]], 
     var_name: str, 
-    implicant_bdd: BDDNode, 
+    implicant_bdd: BinaryDecisionDiagram, 
     go_up: bool
 ):        
     """

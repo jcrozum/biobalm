@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon import VariableId # type: ignore
+    from biodivine_aeon.biodivine_aeon import VariableId # type: ignore
 
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph
+from biodivine_aeon.biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph # type: ignore
 
-from typing import List, Set
 from networkx.algorithms import bipartite # type: ignore
 
-from pyeda.boolalg.expr import expr # type: ignore
-from pyeda.boolalg.bdd import expr2bdd, bddvar # type: ignore
+from pyeda.boolalg.expr import expr
+from pyeda.boolalg.bdd import expr2bdd, bddvar
 
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 from nfvsmotifs.SignedGraph import SignedGraph
@@ -123,11 +122,11 @@ def feedback_vertex_set(
         The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
     if type(network) == BooleanNetwork:
-        network = network.graph()
+        network = network.graph() # pyright: ignore
     if type(network) == DiGraph:
         network = _digraph_to_regulatory_graph(network)
-    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph)
-    return [network.get_variable_name(x) for x in fvs]
+    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph) # pyright: ignore
+    return [network.get_variable_name(x) for x in fvs] # pyright: ignore
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
@@ -198,7 +197,7 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
     for variable in network.variables():
         var_name = network.get_variable_name(variable)
         function = network.get_update_function(variable)
-
+        assert function is not None
         nodes.append(var_name)
 
         if function.strip() == var_name:
