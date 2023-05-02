@@ -71,9 +71,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
                     result_bdd = result_bdd | expr2bdd(expression)
                 
                     # get ~delta
-                    not_delta = tuple([single_node_driver[0],(single_node_driver[1]+1)%2]) # type: ignore
+                    not_delta: tuple[str, int] = (single_node_driver[0],1-single_node_driver[1]) 
                     # ~R(X) includes ~LDOI(~delta)
-                    result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta]) # type: ignore
+                    result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta])
 
         # ~terminal restriction space includes self negating time reversal trapspaces
         if use_tr_trapspaces:

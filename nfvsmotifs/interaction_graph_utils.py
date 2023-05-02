@@ -239,24 +239,18 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
             vy = bdd_vars[str(y)]
 
-            fx_res_vy_0 = fx.restrict(  # pyright: ignore[reportUnknownMemberType]
-                {vy: 0}
-            )
-
-            fx_res_vy_1 = fx.restrict(  # pyright: ignore[reportUnknownMemberType]
-                {vy: 1})
+            fx_res_vy_0 = fx.restrict({vy: 0})
+            fx_res_vy_1 = fx.restrict({vy: 1})
 
             pos_arc = ~fx_res_vy_0 & fx_res_vy_1
             neg_arc = fx_res_vy_0 & ~fx_res_vy_1
 
-            if (pos_arc.is_one() or pos_arc.satisfy_one()  # pyright: ignore[reportUnknownMemberType]
-                ):
+            if pos_arc.is_one() or pos_arc.satisfy_one():
                 # a positive arc with weight = 1
                 s_ig.set_edge(str(y), str(x), 1)
                 is_actual_arc = True
 
-            if (neg_arc.is_one() or neg_arc.satisfy_one()  # pyright: ignore[reportUnknownMemberType]
-                    ):
+            if neg_arc.is_one() or neg_arc.satisfy_one():
                 # a negative arc with weight = -1
                 s_ig.set_edge(str(y), str(x), -1)
                 is_actual_arc = True

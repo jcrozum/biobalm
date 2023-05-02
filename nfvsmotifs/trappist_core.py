@@ -340,7 +340,7 @@ def compute_fixed_point_reduced_STG_async(
     # Build a copy of the original Petri net where the
     # variables in the retained set can only change their 
     # value towards the "retain value".
-    reduced_petri_net = petri_net.copy()
+    reduced_petri_net: DiGraph = petri_net.copy() # type: ignore
     for node in retained_set.keys():
         b_i = retained_set[node]
         source_place = variable_to_place(node, positive = (b_i == 1))
@@ -354,8 +354,8 @@ def compute_fixed_point_reduced_STG_async(
             reduced_petri_net.remove_node(trans) # type: ignore
 
     ctl = _create_clingo_fixed_point_constraints(
-        extract_variable_names(reduced_petri_net), # type: ignore
-        reduced_petri_net, # type: ignore
+        extract_variable_names(reduced_petri_net),
+        reduced_petri_net,
         ensure_subspace, 
         avoid_subspaces
     )
