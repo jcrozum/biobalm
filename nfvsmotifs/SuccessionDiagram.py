@@ -3,17 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Set
-    from biodivine_aeon.biodivine_aeon import BooleanNetwork  # type: ignore
+    from biodivine_aeon import BooleanNetwork
 
 
 import networkx as nx # type: ignore
 
 from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.interaction_graph_utils import find_minimum_NFVS, feedback_vertex_set
+from nfvsmotifs.interaction_graph_utils import feedback_vertex_set
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
-from nfvsmotifs.space_utils import percolate_space, intersect
+from nfvsmotifs.space_utils import percolate_space
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
-from nfvsmotifs.state_utils import state_list_to_bdd
 from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
 
 # Enables helpful "progress" messages.
@@ -62,8 +61,8 @@ class SuccessionDiagram():
         Depth is counted from zero (root has depth zero).
         """
         d = 0
-        for node in self.G.nodes():
-            d = max(d, self.node_depth(node))
+        for node in self.G.nodes(): # pyright: ignore[reportUnknownVariableType]
+            d = max(d, self.node_depth(int(node))) # pyright: ignore[reportUnknownArgumentType]
         return d
 
     def node_depth(self, node_id: int, depth: int | None = None) -> int:
@@ -71,11 +70,11 @@ class SuccessionDiagram():
         Get/set the depth associated with the provided `node_id`. The depth can only increase. 
         
         If a smaller depth is provided, the larger value is retained.
-        """
+        """    
         if depth:
-            self.G.nodes[node_id]['depth'] = max(self.G.nodes[node_id]['depth'], depth)
+            self.G.nodes[node_id]['depth'] = max(self.G.nodes[node_id]['depth'], depth) # pyright: ignore[reportUnknownArgumentType]
 
-        return self.G.nodes[node_id]['depth']
+        return self.G.nodes[node_id]['depth'] # pyright: ignore[reportUnknownVariableType]
     
     def node_space(self, node_id: int) -> dict[str, int]:
         """
@@ -84,7 +83,7 @@ class SuccessionDiagram():
         Note that this is the space *after* percolation. Hence it can hold that 
         `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
         """
-        return self.G.nodes[node_id]['fixed_vars']
+        return self.G.nodes[node_id]['fixed_vars'] # pyright: ignore[reportUnknownVariableType]
 
     def stable_motif(self, parent_id: int, child_id: int) -> dict[str, int]:
         """
@@ -94,7 +93,7 @@ class SuccessionDiagram():
         This corresponds to the maximal trap space within the `parent_id` node that, after percolation,
         yields the `child_id` node.
         """
-        return self.G.edges[parent_id, child_id]['motif']
+        return self.G.edges[parent_id, child_id]['motif'] # pyright: ignore[reportUnknownVariableType]
 
     def is_minimal(self, node_id: int, strict: bool = True) -> bool:
         """
@@ -104,9 +103,8 @@ class SuccessionDiagram():
         You can set `strict = False` to check whether the node is a leaf node in general (i.e. it
         is either minimal, or not expanded).
         """
-        # TODO: This is not very efficient because it has to allocate the list, 
-        # but it does not appear in any performance critical code (yet).
-        return ((not strict) or node_id in self.expanded) and len(list(self.G.successors(node_id))) == 0
+        is_leaf: bool = self.G.out_degree(node_id) == 0 # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        return ((not strict) or node_id in self.expanded) and  is_leaf # pyright: ignore[reportUnknownVariableType]
 
     def expand_node(self, node_id: int, depth_limit: int | None = 0, node_limit: int | None = None) -> int:
         """
@@ -131,7 +129,7 @@ class SuccessionDiagram():
         node in the diagram, but rather the distance from the initial `node_id`.
         """            
         bfs_queue = [(node_id, depth_limit)]
-        visited = set()        
+        visited: set[int] = set()        
 
         total_expanded = 0
 
@@ -162,9 +160,9 @@ class SuccessionDiagram():
 
             if (depth is None) or (depth > 0):
                 new_depth = None if depth is None else (depth - 1)
-                for s in self.G.successors(node):
+                for s in self.G.successors(node): # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
                     if s not in visited:
-                        bfs_queue.append((s, new_depth))
+                        bfs_queue.append((s, new_depth)) # pyright: ignore[reportUnknownArgumentType]
 
         return total_expanded
 
@@ -209,7 +207,8 @@ class SuccessionDiagram():
             print(f"Sub-spaces: {len(sub_spaces)}")
 
         for sub_space in sub_spaces:    
-            child_id = self.ensure_node(node_id, sub_space)
+            # TODO: use this for something or delete it
+            child_id = self.ensure_node(node_id, sub_space) # pyright: ignore[reportUnusedVariable]
             
             #if DEBUG:
             #    print(f"[{node_id}] Found child {child_id}: {sub_space} => {self.node_space(child_id)}")
@@ -247,9 +246,11 @@ class SuccessionDiagram():
         # Key is a binary encoding of the fixed_vars dictionary. Since Python has
         # arbitrary-precision integers, this should work for any network and be 
         # reasonably fast (we are not doing any copies or string manipulation).
-        key = 0
+        key: int = 0
         for (k, v) in fixed_vars.items():
-            var_index = self.network.find_variable(k).as_index() # type: ignore
+            var = self.network.find_variable(k)
+            assert var
+            var_index: int = var.as_index() 
             # Each variable is encoded as two bits, so the total length
             # of the key is 2 * n and the offset of each variable is 2 * index.
             # 00 - unknown; 10 - zero; 11 - one                             
@@ -259,10 +260,10 @@ class SuccessionDiagram():
 
         if key not in self.node_indices:
             new_id = self.G.number_of_nodes()
-            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth)
+            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth) # pyright: ignore[reportUnknownMemberType]
             self.node_indices[key] = new_id
             if parent_id is not None:
-                self.G.add_edge(parent_id, new_id, motif=stable_motif)
+                self.G.add_edge(parent_id, new_id, motif=stable_motif) # pyright: ignore[reportUnknownMemberType]
             return new_id
         else:
             existing_id = self.node_indices[key]
@@ -270,7 +271,7 @@ class SuccessionDiagram():
             if (parent_id is not None):
                 # In theory, if you abuse this, you can create multiple edges, 
                 # but this shouldn't happen with proper usage.
-                self.G.add_edge(parent_id, existing_id, motif=stable_motif)
+                self.G.add_edge(parent_id, existing_id, motif=stable_motif) # pyright: ignore[reportUnknownMemberType]
             return existing_id
         
     def expand_attractors(self, node_id: int) -> list[dict[str, int]]:
@@ -308,7 +309,7 @@ class SuccessionDiagram():
             if x not in retained_set:
                 retained_set[x] = 0
 
-        child_spaces = [self.node_space(child) for child in self.G.successors(node_id)]
+        child_spaces = [self.node_space(child) for child in self.G.successors(node_id)] # pyright: ignore
 
         if len(retained_set) == self.network.num_vars() and len(child_spaces) == 0:
             # There is only a single attractor remaining here, 

@@ -1,5 +1,5 @@
 # type: ignore
-from biodivine_aeon.biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, FixedPoints # type: ignore
+from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, FixedPoints # type: ignore
 from nfvsmotifs.trappist_core import trappist, compute_fixed_point_reduced_STG
 from nfvsmotifs.aeon_utils import remove_static_constraints
 from nfvsmotifs.space_utils import is_syntactic_trap_space

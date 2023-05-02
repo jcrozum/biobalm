@@ -1,5 +1,5 @@
 from nfvsmotifs.petri_net_translation import sanitize_network_names, network_to_petrinet, extract_variable_names
-from biodivine_aeon.biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
+from biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
 from networkx import DiGraph, is_isomorphic # type: ignore
 import pytest
 

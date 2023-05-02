@@ -9,7 +9,7 @@ from pyeda.boolalg.bdd import bddvar, BDDONE, BDDZERO # type:ignore
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable # type:ignore
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable
 
 def _state_dict_to_bdd_valuation(state: dict[str, int]) -> dict[BDDVariable, int]:
     """
@@ -26,7 +26,7 @@ def state_to_bdd_cacheable(state: frozenset[tuple[str, int]]) -> BinaryDecisionD
     """
         Convert a state variables to a BDD encoding the state singleton.
     """
-    state_bdd = BDDONE
+    state_bdd: BinaryDecisionDiagram = BDDONE
 
     for node, value in state:
         node_bdd = bddvar_cache(node)
@@ -45,7 +45,7 @@ def state_to_bdd(state: dict[str, int], usecache: bool = True) -> BinaryDecision
     """
     if usecache:
         return state_to_bdd_cacheable(frozenset(state.items()))
-    state_bdd = BDDONE
+    state_bdd: BinaryDecisionDiagram = BDDONE
 
     for node, value in state.items():
         node_bdd = bddvar(node)
@@ -63,7 +63,7 @@ def state_list_to_bdd(states: list[dict[str, int]]) -> BinaryDecisionDiagram:
     """
         Convert a list of state dictionaries to a BDD representation.
     """
-    result_bdd = BDDZERO
+    result_bdd: BinaryDecisionDiagram = BDDZERO
     for state in states:
         result_bdd = result_bdd | state_to_bdd(state)
 
@@ -120,7 +120,7 @@ def remove_state_from_dnf(dnf: list[dict[str, int]], state: dict[str, int]) -> l
     """
         Removes all conjunctions that are True in the state
     """
-    modified_dnf = []
+    modified_dnf: list[dict[str, int]] = []
     for conjunction in dnf:
         if conjunction.items() <= state.items():
             pass

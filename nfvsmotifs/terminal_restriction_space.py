@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon.biodivine_aeon import BooleanNetwork # type: ignore    
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram # type:ignore
+    from biodivine_aeon import BooleanNetwork
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram
 
 from nfvsmotifs.trappist_core import trappist
 from nfvsmotifs.space_utils import percolate_space, percolate_network
@@ -20,7 +20,7 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
     percolated network should be given as input. 
     """
     tr_trap_spaces = trappist(network, problem="max", reverse_time=True)
-    self_neg_tr_trap_spaces = []
+    self_neg_tr_trap_spaces: list[dict[str, int]] = []
     for tr_trap_space in tr_trap_spaces:
         _, conflicts = percolate_space(network, tr_trap_space)
         if conflicts:
@@ -31,7 +31,8 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
 def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
                                     network: BooleanNetwork,
                                     ensure_subspace: dict[str, int],
-                                    use_single_node_drivers = True, use_tr_trapspaces = True) -> BinaryDecisionDiagram:
+                                    use_single_node_drivers: bool = True, 
+                                    use_tr_trapspaces: bool = True) -> BinaryDecisionDiagram:
     """
     Find the terminal restriction space.
 

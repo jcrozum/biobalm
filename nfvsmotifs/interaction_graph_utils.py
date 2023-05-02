@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon.biodivine_aeon import VariableId # type: ignore
+    from biodivine_aeon import VariableId
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable
+    from pyeda.boolalg.expr import Expression
 
-from biodivine_aeon.biodivine_aeon import BooleanNetwork, RegulatoryGraph
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph
+
 from networkx import DiGraph # type: ignore
-
 from networkx.algorithms import bipartite # type: ignore
 
 from pyeda.boolalg.expr import expr
@@ -19,6 +21,7 @@ from nfvsmotifs.SignedGraph import SignedGraph
 A python package for approximating minimum feedback vertex sets
 """
 from nfvsmotifs.FVSpython3 import FVS as FVS
+
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     """
@@ -45,16 +48,17 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     ig = DiGraph()
 
     for var in rg.variables():
-        ig.add_node(rg.get_variable_name(var))
+        ig.add_node(rg.get_variable_name(var))  # type: ignore
 
     for reg in rg.regulations():
         if not reg['observable']:
-            # In general, a fully specified network should only contain 
+            # In general, a fully specified network should only contain
             # observable (i.e. essential) regulations.
-            raise Exception("Unreachable: You are using this on partially specified networks, aren't you?")
+            raise Exception(
+                "Unreachable: You are using this on partially specified networks, aren't you?")
         source = rg.get_variable_name(reg['source'])
         target = rg.get_variable_name(reg['target'])
-        sign = "?"        
+        sign = "?"
         if 'monotonicity' in reg:
             # Monotonic regulation---add only one edge.
             if reg['monotonicity'] == 'activation':
@@ -62,9 +66,11 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
             elif reg['monotonicity'] == 'inhibition':
                 sign = "-"
             else:
-                raise Exception(f"Unreachable: unknown monotonicity {reg['monotonicity']}.")
-        ig.add_edge(source, target, sign=sign)
+                raise Exception(
+                    f"Unreachable: unknown monotonicity {reg['monotonicity']}.")
+        ig.add_edge(source, target, sign=sign)  # type: ignore
     return ig
+
 
 def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     """
@@ -74,22 +80,25 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
         annotated with a `sign` value `"+"`, `"-"` or `"?"` (however, `"?"` is treated the 
         same as a missing `sign` annotation).
     """
-    rg = RegulatoryGraph(list(graph.nodes()))
-    for edge in graph.edges():
-        edge_data = graph.get_edge_data(edge[0], edge[1])
+    rg = RegulatoryGraph(list(
+        graph.nodes()  # type: ignore
+    ))
+    for edge in graph.edges():  # type: ignore
+        edge_data = graph.get_edge_data(edge[0], edge[1])  # type: ignore
         monotonicity = None
         if 'sign' in edge_data:
-            sign = edge_data['sign']
+            sign: str = edge_data['sign']  # type: ignore
             if sign == '+':
                 monotonicity = 'activation'
             elif sign == '-':
                 monotonicity = 'inhibition'
             elif sign != '?':
-                raise Exception(f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'")
+                raise Exception(
+                    f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'")
         rg.add_regulation({
             'source': edge[0],
             'target': edge[1],
-            'observable': True, # For now, observability is not in the graph.
+            'observable': True,  # For now, observability is not in the graph.
             'monotonicity': monotonicity
         })
 
@@ -97,8 +106,8 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
 
 
 def feedback_vertex_set(
-    network: BooleanNetwork | RegulatoryGraph | DiGraph, 
-    parity: str | None = None, 
+    network: BooleanNetwork | RegulatoryGraph | DiGraph,
+    parity: str | None = None,
     subgraph: list[str | VariableId] | None = None
 ) -> list[str]:
     """
@@ -122,11 +131,14 @@ def feedback_vertex_set(
         The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
     if type(network) == BooleanNetwork:
-        network = network.graph() # type: ignore
+        network = network.graph()  # type: ignore
     if type(network) == DiGraph:
         network = _digraph_to_regulatory_graph(network)
-    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph) # type: ignore
-    return [network.get_variable_name(x) for x in fvs] # type: ignore
+    assert type(network) == RegulatoryGraph
+    fvs = network.feedback_vertex_set(
+        parity=parity, restriction=subgraph)
+    return [network.get_variable_name(x) for x in fvs]
+
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
@@ -157,23 +169,25 @@ def independent_cycles(
     """
     if type(network) == BooleanNetwork:
         network = network.graph()
-    if type(network) == DiGraph:
+
+    # this should never happen, but it's easy enough to convert
+    if type(network) == DiGraph:  # type: ignore
         network = _digraph_to_regulatory_graph(network)
+
     ic = network.independent_cycles(parity=parity, restriction=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
 
 
 def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
-
     """
     BDD variables
     """
-    bdd_vars = {}
+    bdd_vars: dict[str, BDDVariable] = {}
 
     """
     BDDs of Boolean functions
     """
-    bdd_funs = {}
+    bdd_funs: dict[str, BinaryDecisionDiagram] = {}
 
     """
     Negative feedback vertex set
@@ -184,15 +198,15 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
     List of source nodes
     """
 
-    source_nodes = []
+    source_nodes: list[str] = []
 
     """
     Node to input nodes
     """
 
-    INx = {}
+    INx: dict[str, frozenset[Expression]] = {}
 
-    nodes = []
+    nodes: list[str] = []
 
     for variable in network.variables():
         var_name = network.get_variable_name(variable)
@@ -203,23 +217,20 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
         if function.strip() == var_name:
             source_nodes.append(var_name)
 
-        fx = aeon_to_pyeda(function)
+        fx_ex = aeon_to_pyeda(function)
 
-        INx[var_name] = fx.support # list of nodes appearing in Boolean function fx
+        # list of nodes appearing in Boolean function fx
+        INx[var_name] = fx_ex.support
 
-        vx = bddvar(var_name)
-        fx = expr2bdd(expr(fx))
+        bdd_vars[var_name] = bddvar(var_name)
+        bdd_funs[var_name] = expr2bdd(expr(fx_ex))
 
-        bdd_vars[var_name] = vx
-        bdd_funs[var_name] = fx
-
-            
     """Build the unsigned and signed interaction graphs"""
     u_ig = DiGraph()
     s_ig = SignedGraph(nodes)
-    
+
     for x in nodes:
-        u_ig.add_node(x)
+        u_ig.add_node(x)  # type: ignore
 
         fx = bdd_funs[x]
 
@@ -227,35 +238,40 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
             is_actual_arc = False
 
             vy = bdd_vars[str(y)]
-            
-            fx_res_vy_0 = fx.restrict({vy: 0})
-            fx_res_vy_1 = fx.restrict({vy: 1})
+
+            fx_res_vy_0 = fx.restrict(  # pyright: ignore[reportUnknownMemberType]
+                {vy: 0}
+            )
+
+            fx_res_vy_1 = fx.restrict(  # pyright: ignore[reportUnknownMemberType]
+                {vy: 1})
 
             pos_arc = ~fx_res_vy_0 & fx_res_vy_1
             neg_arc = fx_res_vy_0 & ~fx_res_vy_1
 
-            if pos_arc.is_one() or pos_arc.satisfy_one():
+            if (pos_arc.is_one() or pos_arc.satisfy_one()  # pyright: ignore[reportUnknownMemberType]
+                ):
                 # a positive arc with weight = 1
                 s_ig.set_edge(str(y), str(x), 1)
                 is_actual_arc = True
 
-            if neg_arc.is_one() or neg_arc.satisfy_one():
+            if (neg_arc.is_one() or neg_arc.satisfy_one()  # pyright: ignore[reportUnknownMemberType]
+                    ):
                 # a negative arc with weight = -1
                 s_ig.set_edge(str(y), str(x), -1)
                 is_actual_arc = True
 
             if is_actual_arc == True:
-                u_ig.add_edge(str(y), str(x))
-
+                u_ig.add_edge(str(y), str(x))  # type: ignore
 
     """First, find feedback vertex set"""
-    U = FVS.FVS(u_ig, randomseed=0)
+    U: list[str] = FVS.FVS(u_ig, randomseed=0)  # type: ignore
 
-    U = list(set(U) - set(source_nodes))
+    U = list(set(U) - set(source_nodes))  # type: ignore
 
     """Second, filter feedback vertex set to get an negative feedback vertex set"""
     U_neg = s_ig.get_self_negative_loops()
-    U_candidate = []
+    U_candidate: list[str] = []
 
     for v in U:
         if not v in U_neg:
@@ -266,26 +282,25 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
     for v in source_nodes:
         s_ig.remove_vertex(v)
-    
+
     while not is_no_negative_cycle(s_ig):
         v = select_by_negative_degree(s_ig, U_candidate)
 
         if len(v) == 0:
             break
-    
+
         U_candidate.remove(v)
 
         U_neg.append(v)
-        
+
         s_ig.remove_vertex(v)
 
-    
     return U_neg
 
 
 def is_no_negative_cycle(s_ig: SignedGraph) -> bool:
     udGraph = s_ig.convert_to_undirected_graph()
-    return bipartite.is_bipartite(udGraph)
+    return bipartite.is_bipartite(udGraph)  # type: ignore
 
 
 def select_by_negative_degree(s_ig: SignedGraph, U_candidate: list[str]) -> str:
