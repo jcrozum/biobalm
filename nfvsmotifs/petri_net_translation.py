@@ -18,13 +18,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork # type: ignore    
-    from pyeda.boolalg.bdd import BDDNode # type: ignore
+    from biodivine_aeon import BooleanNetwork
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram
 
 from networkx import DiGraph # type: ignore
 from pyeda.boolalg.bdd import expr2bdd, bddvar
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda 
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 import re
+
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     """
@@ -38,7 +39,7 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
         If `check_only=True` is specified, no renaming takes place and the function fails with
         an `Exception` instead.
     """
-    extra_id = 0 # We use extra id to resolve possible name clashes.
+    extra_id = 0  # We use extra id to resolve possible name clashes.
     for var in network.variables():
         extra_id += 1
         name = network.get_variable_name(var)
@@ -51,16 +52,18 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
                 network.set_variable_name(var, new_name)
             except:
                 # Name clash happened. Try to resolve it using a unique suffix.
-                # In the unlikely event that this too fails, fail the whole function.                
+                # In the unlikely event that this too fails, fail the whole function.
                 new_new_name = f"{new_name}_id{extra_id}"
                 try:
                     network.set_variable_name(var, new_new_name)
                 except:
-                    raise Exception(f"Cannot sanitize variable `{name}`. Both {new_name} and {new_new_name} are invalid.")
+                    raise Exception(
+                        f"Cannot sanitize variable `{name}`. Both {new_name} and {new_new_name} are invalid.")
 
     # Technically, network is modified in place, but we might as well
     # return it for convenience.
     return network
+
 
 def variable_to_place(variable: str, positive: bool) -> str:
     """
@@ -71,6 +74,7 @@ def variable_to_place(variable: str, positive: bool) -> str:
         return f"b1_{variable}"
     else:
         return f"b0_{variable}"
+
 
 def place_to_variable(place: str) -> tuple[str, bool]:
     """
@@ -84,21 +88,24 @@ def place_to_variable(place: str) -> tuple[str, bool]:
     else:
         raise Exception(f"Invalid place name: `{place}`.")
 
+
 def extract_variable_names(encoded_network: DiGraph) -> list[str]:
     """
     Extract the variable names from a Petri net encoded Boolean network.
-    
+
     The variables are  sorted lexicographically, since the original BN ordering is not 
     preserved by the Petri net. However, BNs order variables lexicographically by default,
     so unless the Petri net was created from a custom BN (i.e. not from a model file),
     the ordering should be the same.
     """
-    variables = []
-    for node in encoded_network.nodes():
+    variables: list[str] = []
+    for node in encoded_network.nodes():  # type: ignore
+        node = str(node)  # type: ignore
         if node.startswith("b0_"):
             variables.append(place_to_variable(node)[0])
-    
+
     return sorted(variables)
+
 
 def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     """
@@ -112,7 +119,8 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
     sanitize_network_names(network, check_only=True)
 
     assert network.num_parameters() == 0, "Unsupported: Network contains explicit parameters."
-    assert network.num_implicit_parameters() == 0, "Unsupported: Network contains implicit parameters."
+    assert network.num_implicit_parameters(
+    ) == 0, "Unsupported: Network contains implicit parameters."
 
     pn = DiGraph()
 
@@ -122,17 +130,15 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
         name = network.get_variable_name(var)
         p_name = variable_to_place(name, positive=True)
         n_name = variable_to_place(name, positive=False)
-        pn.add_node(p_name, kind="place")
-        pn.add_node(n_name, kind="place")
+        pn.add_node(p_name, kind="place") # pyright: ignore[reportUnknownMemberType]
+        pn.add_node(n_name, kind="place") # pyright: ignore[reportUnknownMemberType]
         places[name] = (n_name, p_name)
 
     # Create PN transitions for implicants of every BN transition.
-    t_id = 0
     for var in network.variables():
         var_name = network.get_variable_name(var)
-        function = network.get_update_function(var)
-        function = aeon_to_pyeda(function)
-        
+        function = aeon_to_pyeda(network.get_update_function(var))
+
         vx = bddvar(var_name)
         fx = expr2bdd(function)
 
@@ -140,40 +146,43 @@ def network_to_petrinet(network: BooleanNetwork) -> DiGraph:
         negative_implicants = ~fx & vx
 
         # Add 0->1 edges.
-        _create_transitions(pn, places, var_name, positive_implicants, go_up=True)
-        _create_transitions(pn, places, var_name, negative_implicants, go_up=False)
+        _create_transitions(pn, places, var_name,
+                            positive_implicants, go_up=True)
+        _create_transitions(pn, places, var_name,
+                            negative_implicants, go_up=False)
 
     return pn
-        
+
 
 def _create_transitions(
-    pn: DiGraph, 
-    places: dict[str, tuple[str, str]], 
-    var_name: str, 
-    implicant_bdd: BDDNode, 
+    pn: DiGraph,
+    places: dict[str, tuple[str, str]],
+    var_name: str,
+    implicant_bdd: BinaryDecisionDiagram,
     go_up: bool
-):        
+):
     """
         Just a helper method that creates PN transitions from BDDs representing
         positive/negative BN transitions.
     """
     dir_str = "up" if go_up else "down"
-    for t_id, implicant in enumerate(implicant_bdd.satisfy_all()):                
+    for t_id, implicant in enumerate(implicant_bdd.satisfy_all()):
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
-        pn.add_node(t_name, kind="transition", change=var_name, direction=dir_str)
-        # The transition moves a token either from "zero place" to the 
+        pn.add_node(t_name, kind="transition", # pyright: ignore[reportUnknownMemberType]
+                    change=var_name, direction=dir_str)
+        # The transition moves a token either from "zero place" to the
         # "one place", or vice versa.
         if go_up:
-            pn.add_edge(places[var_name][0], t_name)
-            pn.add_edge(t_name, places[var_name][1])
+            pn.add_edge(places[var_name][0], t_name) # pyright: ignore[reportUnknownMemberType]
+            pn.add_edge(t_name, places[var_name][1]) # pyright: ignore[reportUnknownMemberType]
         else:
-            pn.add_edge(places[var_name][1], t_name)
-            pn.add_edge(t_name, places[var_name][0])
-        for variable, value in implicant.items():  
-            variable = str(variable) # Convert from BDD variable to name.
-            if variable == var_name:
+            pn.add_edge(places[var_name][1], t_name) # pyright: ignore[reportUnknownMemberType]
+            pn.add_edge(t_name, places[var_name][0]) # pyright: ignore[reportUnknownMemberType]
+        for variable, value in implicant.items():
+            variable_str = str(variable)  # Convert from BDD variable to name.
+            if variable_str == var_name:
                 continue
             # For the remaining variables, we simply check if the required
             # token is present in the corresponding place.
-            pn.add_edge(places[variable][value], t_name)
-            pn.add_edge(t_name, places[variable][value])
+            pn.add_edge(places[variable_str][value], t_name) # pyright: ignore[reportUnknownMemberType]
+            pn.add_edge(t_name, places[variable_str][value]) # pyright: ignore[reportUnknownMemberType]

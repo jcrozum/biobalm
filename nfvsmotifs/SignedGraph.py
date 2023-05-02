@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import os
 import networkx as nx # type: ignore
 
 class SignedGraph:
-    V: int
+    num_vertices: int
     adjacency_list_positive: dict[str, list[str]]
     adjacency_list_negative: dict[str, list[str]]
     
     def __init__(self, vertex_list: list[str]):
-        self.V = len(vertex_list)
+        self.num_vertices = len(vertex_list)
         self.adjacency_list_positive = {}
         self.adjacency_list_negative = {}
         for node in vertex_list:
@@ -22,15 +21,15 @@ class SignedGraph:
 
         udGraph = nx.DiGraph()
         for node in self.adjacency_list_positive:
-            udGraph.add_node(node)
+            udGraph.add_node(node) # pyright: ignore[reportUnknownMemberType]
 
 
         for node in self.adjacency_list_negative:
             edgeList = self.adjacency_list_negative[node]
 
             for v in edgeList:
-                udGraph.add_edge(node, v)
-                udGraph.add_edge(v, node)
+                udGraph.add_edge(node, v) # pyright: ignore[reportUnknownMemberType]
+                udGraph.add_edge(v, node) # pyright: ignore[reportUnknownMemberType]
 
         
         for node in self.adjacency_list_positive:
@@ -41,11 +40,11 @@ class SignedGraph:
                     new_vertex_index += 1
 
                     new_vertex = "v_new_" + str(new_vertex_index)
-                    udGraph.add_node(new_vertex)
-                    udGraph.add_edge(node, new_vertex)
-                    udGraph.add_edge(new_vertex, node)
-                    udGraph.add_edge(new_vertex, v)
-                    udGraph.add_edge(v, new_vertex)
+                    udGraph.add_node(new_vertex) # pyright: ignore[reportUnknownMemberType]
+                    udGraph.add_edge(node, new_vertex) # pyright: ignore[reportUnknownMemberType]
+                    udGraph.add_edge(new_vertex, node) # pyright: ignore[reportUnknownMemberType]
+                    udGraph.add_edge(new_vertex, v) # pyright: ignore[reportUnknownMemberType]
+                    udGraph.add_edge(v, new_vertex) # pyright: ignore[reportUnknownMemberType]
 
 
         return udGraph
@@ -59,7 +58,7 @@ class SignedGraph:
     
 
     def get_self_negative_loops(self) -> list[str]:
-        result = []
+        result: list[str] = []
 
         for node in self.adjacency_list_negative:
             edgeList = self.adjacency_list_negative[node]
@@ -75,7 +74,7 @@ class SignedGraph:
         del self.adjacency_list_positive[v]
         del self.adjacency_list_negative[v]
         
-        self.V = self.V - 1
+        self.num_vertices = self.num_vertices - 1
         
         # update the edge list of each vertex
         for node in self.adjacency_list_positive:

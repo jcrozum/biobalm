@@ -5,11 +5,11 @@ from __future__ import annotations
 """
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from networkx import DiGraph # type: ignore
     from typing import Callable
     from clingo import Model
 
-from biodivine_aeon import BooleanNetwork # type: ignore    
+from networkx import DiGraph # type: ignore
+from biodivine_aeon import BooleanNetwork
 from nfvsmotifs.petri_net_translation import network_to_petrinet, variable_to_place, place_to_variable, extract_variable_names
 from clingo import Control, SolveHandle
 
@@ -32,23 +32,25 @@ def trappist_async(
     else:
         bn = None
         petri_net = network
+        
+    assert type(petri_net) == DiGraph  
 
     if bn is None:
-        variables = extract_variable_names(petri_net)
+        variables = extract_variable_names(petri_net) 
     else:
-        variables = [bn.get_variable_name(v) for v in bn.variables()]
-        
+        variables = [bn.get_variable_name(v) for v in bn.variables()] 
+          
     # Source node is a node that has no transitions in the PN encoding 
     # (i.e. it's value cannot change).
     source_set = set(variables)
-    for (node, change_var) in petri_net.nodes(data='change'):
-        if change_var is not None and change_var in source_set:
-            source_set.remove(change_var)
+    for (_, change_var) in petri_net.nodes(data='change'): # type: ignore
+        if change_var in source_set:
+            source_set.remove(change_var) # pyright: ignore[reportUnknownArgumentType]
     source_nodes: list[str] = sorted(source_set)
     
     ctl = _create_clingo_constraints(
         variables, 
-        petri_net, 
+        petri_net,
         problem, 
         reverse_time, 
         ensure_subspace, 
@@ -90,10 +92,13 @@ def trappist(
 
         Finally, recall that the supplied network must have its names sanitized (see `petri_net_translation` module).
     """
-    results = []
-    def save_result(x):
+    results: list[dict[str, int]] = []
+    def save_result(x: dict[str, int]) -> bool:
         results.append(x)
-        return solution_limit == None or len(results) < solution_limit        
+        if solution_limit is None:
+            return True
+        else:
+            return len(results) < solution_limit        
     
     trappist_async(
         network, 
@@ -107,7 +112,7 @@ def trappist(
     return results
 
 def _clingo_model_to_space(model: Model) -> dict[str, int]:    
-    space = {}
+    space: dict[str, int] = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
         (variable, is_positive) = place_to_variable(atom_str)
@@ -187,24 +192,25 @@ def _create_clingo_constraints(
         fixed_vars = ", ".join(fixed_list)
         ctl.add(f":- {fixed_vars}.")
 
-    free_places = []
-    for node, kind in petri_net.nodes(data="kind"):
+    free_places: list[str] = []
+    for node, kind in petri_net.nodes(data="kind"): # type: ignore
+        assert type(node) == str # pyright: ignore[reportUnknownArgumentType]
         if kind == "place":
             if place_to_variable(node)[0] not in ensure_subspace:
                 free_places.append(node)
         elif kind == "transition":
             if not reverse_time:    
                 # Compute siphons.                
-                predecessors = list(petri_net.predecessors(node))
+                predecessors: list[str] = list(petri_net.predecessors(node)) # type: ignore
                 p_disjunction = "; ".join(predecessors)                
-                for successor in petri_net.successors(node):
+                for successor in petri_net.successors(node): # type: ignore
                     if successor not in predecessors:  # optimize obvious tautologies
                         ctl.add(f"{p_disjunction} :- {successor}.")
             else:
                 # Compute traps.
-                successors = list(petri_net.successors(node))
-                s_disjunction = "; ".join(successors)
-                for predecessor in petri_net.predecessors(node):
+                successors = list(petri_net.successors(node)) # type: ignore
+                s_disjunction = "; ".join(successors) # type: ignore
+                for predecessor in petri_net.predecessors(node): # type: ignore
                     if predecessor not in successors:
                         ctl.add(f"{s_disjunction} :- {predecessor}.")
         else:
@@ -234,7 +240,7 @@ def _clingo_model_to_fixed_point(model: Model) -> dict[str, int]:
         produces "positive" models (i.e. the space is represented by positive atoms
         present in the model).
     """ 
-    space = {}
+    space: dict[str, int] = {}
 
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -284,13 +290,13 @@ def _create_clingo_fixed_point_constraints(
         ctl.add("base", [], f"{p_name} ; {n_name}.")
 
 
-    for node, kind in petri_net.nodes(data="kind"):
+    for node, kind in petri_net.nodes(data="kind"): # type: ignore
         if kind == "place":
             continue
         elif kind == "transition":
-            preds = list(petri_net.predecessors(node))
+            preds = list(petri_net.predecessors(node)) # type: ignore
 
-            pred_rhs = "; ".join(preds)
+            pred_rhs = "; ".join(preds) # type: ignore
             ctl.add("base", [], f":- {pred_rhs}.")
         else:
             raise Exception(f"Unexpected node kind: `{kind}`.")
@@ -334,22 +340,22 @@ def compute_fixed_point_reduced_STG_async(
     # Build a copy of the original Petri net where the
     # variables in the retained set can only change their 
     # value towards the "retain value".
-    reduced_petri_net = petri_net.copy()
+    reduced_petri_net: DiGraph = petri_net.copy() # type: ignore
     for node in retained_set.keys():
         b_i = retained_set[node]
         source_place = variable_to_place(node, positive = (b_i == 1))
         
-        preds = list(reduced_petri_net.predecessors(source_place))
-        succs = list(reduced_petri_net.successors(source_place))
+        preds = list(reduced_petri_net.predecessors(source_place)) # type: ignore
+        succs = list(reduced_petri_net.successors(source_place)) # type: ignore
 
-        deleted_transitions = list(set(succs) - set(preds))
+        deleted_transitions = list(set(succs) - set(preds)) # type: ignore
 
-        for trans in deleted_transitions:
-            reduced_petri_net.remove_node(trans)
+        for trans in deleted_transitions: # type: ignore
+            reduced_petri_net.remove_node(trans) # type: ignore
 
     ctl = _create_clingo_fixed_point_constraints(
         extract_variable_names(reduced_petri_net),
-        reduced_petri_net, 
+        reduced_petri_net,
         ensure_subspace, 
         avoid_subspaces
     )
@@ -382,10 +388,13 @@ def compute_fixed_point_reduced_STG(
         to retain the specified values.
     """
 
-    results = []
-    def save_result(x):
+    results: list[dict[str,int]] = []
+    def save_result(x: dict[str, int]) -> bool:
         results.append(x)
-        return solution_limit == None or len(results) < solution_limit
+        if solution_limit is None:
+            return True
+        else:
+            return len(results) < solution_limit
 
     compute_fixed_point_reduced_STG_async(
         petri_net, 

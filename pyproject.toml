@@ -1,0 +1,10 @@
+[tool.pyright]
+include = ["nfvsmotifs", "tests"]
+stubPath = "stubs"
+reportMissingImports = true
+reportMissingTypeStubs = true
+reportUntypedFunctionDecorator = true
+reportUntypedClassDecorator = true
+
+[tool.mypy]
+mypy_path = "stubs"

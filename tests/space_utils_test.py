@@ -45,6 +45,14 @@ def test_space_percolation():
     assert not is_syntactic_trap_space(bn, {'a': 0})
     assert is_syntactic_trap_space(bn, {})
 
+    bn = BooleanNetwork.from_bnet("""
+    a, !b
+    b, a
+    c, a & c & d | b & !c | c & !d
+    d, !a | d
+    """)
+    assert {'b': 1, 'c': 1} == percolate_space(bn, {'a': 1})[0]
+
 def test_constant_percolation():
     bn = BooleanNetwork.from_bnet("""
         a, true

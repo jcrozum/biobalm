@@ -1,6 +1,5 @@
 import os
-from biodivine_aeon import BooleanNetwork
-
+from biodivine_aeon import BooleanNetwork # type: ignore
 # The purpose of this file is to detect tests with `network_file` as input and 
 # then supply these tests with networks from `bbm-bnet-inputs-true` up to a certain
 # network size. This network size can be configured using `--networksize` and 
