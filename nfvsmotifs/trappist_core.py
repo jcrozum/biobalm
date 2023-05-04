@@ -27,14 +27,19 @@ def trappist_async(
     on_solution: Callable[[dict[str, int]], bool],
     problem: str = "min",
     reverse_time: bool = False,
-    ensure_subspace: dict[str, int] = {},
-    avoid_subspaces: list[dict[str, int]] = [],
+    ensure_subspace: dict[str, int] | None = None,
+    avoid_subspaces: list[dict[str, int]] | None = None,
 ):
     """
     The same as the `trappist` method, but instead of returning a list of spaces as a result, the
     spaces are returned to the supplied `on_solution` callback. You can stop the enumeration by
     returning `False` from this callback.
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
+    if avoid_subspaces is None:
+        avoid_subspaces = []
+
     if type(network) == BooleanNetwork:
         bn = network
         petri_net = network_to_petrinet(network)
@@ -82,8 +87,8 @@ def trappist(
     problem: str = "min",
     reverse_time: bool = False,
     solution_limit: int | None = None,
-    ensure_subspace: dict[str, int] = {},
-    avoid_subspaces: list[dict[str, int]] = [],
+    ensure_subspace: dict[str, int] | None = None,
+    avoid_subspaces: list[dict[str, int]] | None = None,
 ) -> list[dict[str, int]]:
     """
     Solve the given `problem` for the given `network` using the Trappist algorithm, internally relying on the
@@ -102,6 +107,11 @@ def trappist(
 
     Finally, recall that the supplied network must have its names sanitized (see `petri_net_translation` module).
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
+    if avoid_subspaces is None:
+        avoid_subspaces = []
+
     results: list[dict[str, int]] = []
 
     def save_result(x: dict[str, int]) -> bool:
@@ -144,9 +154,9 @@ def _create_clingo_constraints(
     petri_net: DiGraph,
     problem: str = "min",
     reverse_time: bool = False,
-    ensure_subspace: dict[str, int] = {},
-    avoid_subspaces: list[dict[str, int]] = [],
-    optimize_source_variables: list[str] = [],
+    ensure_subspace: dict[str, int] | None = None,
+    avoid_subspaces: list[dict[str, int]] | None = None,
+    optimize_source_variables: list[str] | None = None,
 ) -> Control:
     """
     Translate the given Petri net (represented as a `DiGraph`; see also `petri_net_translation`
@@ -168,6 +178,13 @@ def _create_clingo_constraints(
      argument. For example, if you specify that you want to avoid a particular fixed-point,
      a globally non-minimal trap space that contains this fixed-point can be still included.
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
+    if avoid_subspaces is None:
+        avoid_subspaces = []
+    if optimize_source_variables is None:
+        optimize_source_variables = []
+
     assert problem in ["min", "max", "fix"], f"Unknown problem type: {problem}"
 
     dom_mod = "--dom-mod=3, 16"  # for min. trap spaces and fixed points
@@ -278,14 +295,17 @@ def _clingo_model_to_fixed_point(model: Model) -> dict[str, int]:
 def _create_clingo_fixed_point_constraints(
     variables: list[str],
     petri_net: DiGraph,
-    ensure_subspace: dict[str, int] = {},
-    avoid_subspaces: list[dict[str, int]] = [],
+    ensure_subspace: dict[str, int] | None = None,
+    avoid_subspaces: list[dict[str, int]] | None = None,
 ) -> Control:
     """
     Generate the ASP characterizing all deadlocks of the Petri net (equivalently all
     fixed points of the Boolean network).
     """
-
+    if ensure_subspace is None:
+        ensure_subspace = {}
+    if avoid_subspaces is None:
+        avoid_subspaces = []
     dom_mod = "--dom-mod=3, 16"  # for fixed points
 
     # "0" specifies that all solutions should be listed (we implement the limit
@@ -345,8 +365,8 @@ def compute_fixed_point_reduced_STG_async(
     petri_net: DiGraph,
     retained_set: dict[str, int],
     on_solution: Callable[[dict[str, int]], bool],
-    ensure_subspace: dict[str, int] = {},
-    avoid_subspaces: list[dict[str, int]] = [],
+    ensure_subspace: dict[str, int] | None = None,
+    avoid_subspaces: list[dict[str, int]] | None = None,
 ):
     """
     The same as the `compute_fixed_point_reduced_STG`, but instead of returning a
@@ -354,6 +374,10 @@ def compute_fixed_point_reduced_STG_async(
     `on_solution` callback. You can stop the enumeration by
     returning `False` from this callback.
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
+    if avoid_subspaces is None:
+        avoid_subspaces = []
 
     # Build a copy of the original Petri net where the
     # variables in the retained set can only change their

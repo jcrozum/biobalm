@@ -36,7 +36,7 @@ def detect_motif_avoidant_attractors(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {},
+    ensure_subspace: dict[str, int] | None = None,
     is_in_an_mts: bool = False,
 ) -> list[dict[str, int]]:
     """
@@ -48,6 +48,8 @@ def detect_motif_avoidant_attractors(
      - `max_iterations` specifies how much time should be spent on the "simpler" preprocessing
         before applying a more complete method.
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
 
     if len(candidates) == 0:
         return []
@@ -77,7 +79,7 @@ def _preprocess_candidates(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {},
+    ensure_subspace: dict[str, int] | None = None,
 ) -> list[dict[str, int]]:
     """
     A fast but incomplete method for eliminating spurious attractor candidates.
@@ -97,6 +99,8 @@ def _preprocess_candidates(
     pick a single state from it and start again. Sam: I'll add a version of this
     later, once we can actually benchmark how it performs :)
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
 
     # First, build the symbolic encoding:
     variables: list[str] = []
