@@ -1,23 +1,26 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork
     from pyeda.boolalg.bdd import BinaryDecisionDiagram
 
-from nfvsmotifs.trappist_core import trappist
-from nfvsmotifs.space_utils import percolate_space, percolate_network
-from nfvsmotifs.state_utils import state_list_to_bdd, state_to_bdd
-from nfvsmotifs.drivers import find_single_node_LDOIs, find_single_drivers
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from pyeda.boolalg.expr import Not
 from pyeda.boolalg.bdd import expr2bdd
+from pyeda.boolalg.expr import Not
+
+from nfvsmotifs.drivers import find_single_drivers, find_single_node_LDOIs
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
+from nfvsmotifs.space_utils import percolate_network, percolate_space
+from nfvsmotifs.state_utils import state_list_to_bdd, state_to_bdd
+from nfvsmotifs.trappist_core import trappist
+
 
 def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]:
     """
     Takes a Boolean network and gets its self-negating time-reversal trap spaces.
     To find time-reversal trap spaces in a specific trap space,
-    percolated network should be given as input. 
+    percolated network should be given as input.
     """
     tr_trap_spaces = trappist(network, problem="max", reverse_time=True)
     self_neg_tr_trap_spaces: list[dict[str, int]] = []
@@ -28,11 +31,14 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
 
     return self_neg_tr_trap_spaces
 
-def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
-                                    network: BooleanNetwork,
-                                    ensure_subspace: dict[str, int],
-                                    use_single_node_drivers: bool = True, 
-                                    use_tr_trapspaces: bool = True) -> BinaryDecisionDiagram:
+
+def get_terminal_restriction_space(
+    stable_motifs: list[dict[str, int]],
+    network: BooleanNetwork,
+    ensure_subspace: dict[str, int],
+    use_single_node_drivers: bool = True,
+    use_tr_trapspaces: bool = True,
+) -> BinaryDecisionDiagram:
     """
     Find the terminal restriction space.
 
@@ -56,7 +62,9 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
 
             for stable_motif in stable_motifs:
                 # find delta
-                single_node_drivers = find_single_drivers(stable_motif, reduced_network, LDOIs=LDOIs)
+                single_node_drivers = find_single_drivers(
+                    stable_motif, reduced_network, LDOIs=LDOIs
+                )
                 if len(single_node_drivers) == 0:
                     continue
 
@@ -65,13 +73,18 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
 
                 for single_node_driver in single_node_drivers:
                     # ~R(X) includes the F(delta)
-                    expression = aeon_to_pyeda(reduced_network.get_update_function(single_node_driver[0]))
+                    expression = aeon_to_pyeda(
+                        reduced_network.get_update_function(single_node_driver[0])
+                    )
                     if single_node_driver[1] == 0:
                         expression = Not(expression)
                     result_bdd = result_bdd | expr2bdd(expression)
-                
+
                     # get ~delta
-                    not_delta: tuple[str, int] = (single_node_driver[0],1-single_node_driver[1]) 
+                    not_delta: tuple[str, int] = (
+                        single_node_driver[0],
+                        1 - single_node_driver[1],
+                    )
                     # ~R(X) includes ~LDOI(~delta)
                     result_bdd = result_bdd | ~state_to_bdd(LDOIs[not_delta])
 
@@ -82,5 +95,5 @@ def get_terminal_restriction_space (stable_motifs: list[dict[str, int]],
                 return ~result_bdd
             else:
                 result_bdd = result_bdd | state_list_to_bdd(self_neg_tr_trap_spaces)
-    
+
     return ~result_bdd
