@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from biodivine_aeon import BooleanNetwork
+
 from nfvsmotifs.space_utils import percolate_space
 
 
