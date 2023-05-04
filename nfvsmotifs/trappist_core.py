@@ -40,14 +40,14 @@ def trappist_async(
     if avoid_subspaces is None:
         avoid_subspaces = []
 
-    if type(network) == BooleanNetwork:
+    if isinstance(network, BooleanNetwork):
         bn = network
         petri_net = network_to_petrinet(network)
     else:
         bn = None
         petri_net = network
 
-    assert type(petri_net) == DiGraph
+    assert isinstance(petri_net, DiGraph)
 
     if bn is None:
         variables = extract_variable_names(petri_net)
@@ -74,7 +74,7 @@ def trappist_async(
 
     ctl.ground()
     result = ctl.solve(yield_=True)
-    if type(result) == SolveHandle:
+    if isinstance(result, SolveHandle):
         with result as iterator:
             for model in iterator:
                 if not on_solution(_clingo_model_to_space(model)):
@@ -224,7 +224,7 @@ def _create_clingo_constraints(
 
     free_places: list[str] = []
     for node, kind in petri_net.nodes(data="kind"):  # type: ignore # noqa
-        assert type(node) == str  # type: ignore[reportUnknownArgumentType] # noqa
+        assert isinstance(node, str)
         if kind == "place":
             if place_to_variable(node)[0] not in ensure_subspace:
                 free_places.append(node)
@@ -404,7 +404,7 @@ def compute_fixed_point_reduced_STG_async(
 
     ctl.ground([("base", [])])
     result = ctl.solve(yield_=True)
-    if type(result) == SolveHandle:
+    if isinstance(result, SolveHandle):
         with result as iterator:
             for model in iterator:
                 if not on_solution(_clingo_model_to_fixed_point(model)):

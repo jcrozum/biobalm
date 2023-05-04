@@ -132,11 +132,11 @@ def feedback_vertex_set(
 
     The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
-    if type(network) == BooleanNetwork:
-        network = network.graph()  # type: ignore
-    if type(network) == DiGraph:
+    if isinstance(network, BooleanNetwork):
+        network = network.graph()
+    if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
-    assert type(network) == RegulatoryGraph
+    assert isinstance(network, RegulatoryGraph)
     fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph)
     return [network.get_variable_name(x) for x in fvs]
 
@@ -168,11 +168,11 @@ def independent_cycles(
     every time). However, while I believe the sorting should be stable too, please treat the
     order of returned cycles with caution :)
     """
-    if type(network) == BooleanNetwork:
+    if isinstance(network, BooleanNetwork):
         network = network.graph()
 
     # this should never happen, but it's easy enough to convert
-    if type(network) == DiGraph:  # type: ignore
+    if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
 
     ic = network.independent_cycles(parity=parity, restriction=subgraph)
