@@ -5,6 +5,7 @@ reportMissingImports = true
 reportMissingTypeStubs = true
 reportUntypedFunctionDecorator = true
 reportUntypedClassDecorator = true
+typeCheckingMode = "strict"
 
 [tool.mypy]
 mypy_path = "stubs"

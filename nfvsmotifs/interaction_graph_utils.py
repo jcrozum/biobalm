@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from biodivine_aeon import VariableId
     from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable
     from pyeda.boolalg.expr import Expression
+    from typing import Any
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph  # type: ignore
@@ -83,7 +84,7 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     """
     rg = RegulatoryGraph(list(graph.nodes()))  # type: ignore
     for edge in graph.edges():  # type: ignore
-        edge_data = graph.get_edge_data(edge[0], edge[1])  # type: ignore
+        edge_data: dict[Any, Any] = graph.get_edge_data(edge[0], edge[1])  # type: ignore
         monotonicity = None
         if "sign" in edge_data:
             sign: str = edge_data["sign"]  # type: ignore
