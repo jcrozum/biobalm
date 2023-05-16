@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from biodivine_aeon import BooleanNetwork
+
 from nfvsmotifs.space_utils import percolate_space
 
 
@@ -24,13 +25,13 @@ def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str
     return LDOIs
 
 
-def find_single_drivers(target_subspace: dict[str, int],
-                        bn: BooleanNetwork,
-                        LDOIs: dict[tuple[str, int],
-                                    dict[str, int]] | None = None
-                        ) -> set[tuple[str, int]]:
+def find_single_drivers(
+    target_subspace: dict[str, int],
+    bn: BooleanNetwork,
+    LDOIs: dict[tuple[str, int], dict[str, int]] | None = None,
+) -> set[tuple[str, int]]:
     """
-    find all the single node drivers for a given target_subspace, 
+    find all the single node drivers for a given target_subspace,
     usually (but not necessarily) a maximal trapspace (stablemotif)
     """
     if LDOIs is None:

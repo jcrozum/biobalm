@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from functools import lru_cache
 
 """
@@ -6,23 +7,24 @@ from functools import lru_cache
 """
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from pyeda.boolalg.expr import Expression
 
 import pyeda.boolalg.expr as pyeda_expression
-
-from pyeda.boolalg.expr import Literal, Not, And, Or, Equal, Xor, Implies
 from pyeda.boolalg.bdd import BinaryDecisionDiagram, expr2bdd
-
+from pyeda.boolalg.expr import And, Equal, Implies, Literal, Not, Or, Xor
 
 PYEDA_TRUE: Expression = pyeda_expression.expr(1)
 PYEDA_FALSE: Expression = pyeda_expression.expr(0)
 
 
-def substitute_variables_in_expression(expression: Expression, items: dict[str, Expression]) -> Expression:
+def substitute_variables_in_expression(
+    expression: Expression, items: dict[str, Expression]
+) -> Expression:
     """
-        A substitution method which replaces all occurences of the variables specified in `items`
-        with the corresponding `Expression` objects.
+    A substitution method which replaces all occurences of the variables specified in `items`
+    with the corresponding `Expression` objects.
     """
     if expression == PYEDA_TRUE or expression == PYEDA_FALSE:
         # Keep constants.
@@ -46,20 +48,16 @@ def substitute_variables_in_expression(expression: Expression, items: dict[str, 
         inner = [substitute_variables_in_expression(expression.x, items)]
         return Not(inner[0])
     elif type(expression) == pyeda_expression.AndOp:
-        inner = [substitute_variables_in_expression(
-            x, items) for x in expression.xs]
+        inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return And(*inner)
     elif type(expression) == pyeda_expression.OrOp:
-        inner = [substitute_variables_in_expression(
-            x, items) for x in expression.xs]
+        inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Or(*inner)
     elif type(expression) == pyeda_expression.EqualOp:
-        inner = [substitute_variables_in_expression(
-            x, items) for x in expression.xs]
+        inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Equal(*inner)
     elif type(expression) == pyeda_expression.XorOp:
-        inner = [substitute_variables_in_expression(
-            x, items) for x in expression.xs]
+        inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Xor(*inner)
     elif type(expression) == pyeda_expression.ImpliesOp:
         p = substitute_variables_in_expression(expression.xs[0], items)
@@ -70,11 +68,11 @@ def substitute_variables_in_expression(expression: Expression, items: dict[str, 
 
 def pyeda_to_aeon(expression: Expression) -> str:
     """
-        Convert a PyEDA expression to a string representation that is valid in AEON.py 
-        (but also other formats, like .bnet).
+    Convert a PyEDA expression to a string representation that is valid in AEON.py
+    (but also other formats, like .bnet).
 
-        Note: Right now, I have not found a better way to do this. If you find something
-        simpler, go for it...
+    Note: Right now, I have not found a better way to do this. If you find something
+    simpler, go for it...
     """
 
     if expression == PYEDA_TRUE:
@@ -117,7 +115,7 @@ def pyeda_to_aeon(expression: Expression) -> str:
 @lru_cache(maxsize=None)
 def aeon_to_pyeda(expression: str) -> Expression:
     """
-        Convert a Boolean expression from AEON.py to PyEDA.
+    Convert a Boolean expression from AEON.py to PyEDA.
     """
     # AEON expressions are mostly compatible with PyEDA, except for
     # the negation operator and Boolean constants.
@@ -130,14 +128,14 @@ def aeon_to_pyeda(expression: str) -> Expression:
 @lru_cache(maxsize=None)
 def aeon_to_bdd(expression: str) -> BinaryDecisionDiagram:
     """
-        Convert a Boolean expression from AEON.py to PyEDA.
+    Convert a Boolean expression from AEON.py to PyEDA.
     """
     return expr2bdd(aeon_to_pyeda(expression))
 
 
 def expression_literals(expression: Expression) -> set[Literal]:
     """
-        Compute the set of all literals appearing in the given PyEDA expression.
+    Compute the set of all literals appearing in the given PyEDA expression.
     """
     result: set[Literal] = set()
     for sub_expression in expression.iter_dfs():

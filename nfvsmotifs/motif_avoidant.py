@@ -1,18 +1,26 @@
 from __future__ import annotations
-from copy import deepcopy
 
 import random
+from copy import deepcopy
 from functools import reduce
-from networkx import DiGraph # type: ignore
-from pyeda.boolalg.bdd import expr2bdd
-from pypint import InMemoryModel, Goal  # type:ignore
+from typing import TYPE_CHECKING
+
 from biodivine_aeon import BooleanNetwork
+from networkx import DiGraph  # type: ignore
+from pyeda.boolalg.bdd import expr2bdd
+from pypint import Goal, InMemoryModel  # type:ignore
 
 from nfvsmotifs.petri_net_translation import place_to_variable
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.state_utils import dnf_function_is_true, remove_state_from_dnf, state_to_bdd, state_list_to_bdd, function_eval, function_is_true
+from nfvsmotifs.state_utils import (
+    dnf_function_is_true,
+    function_eval,
+    function_is_true,
+    remove_state_from_dnf,
+    state_list_to_bdd,
+    state_to_bdd,
+)
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyeda.boolalg.bdd import BinaryDecisionDiagram
 
@@ -28,18 +36,20 @@ def detect_motif_avoidant_attractors(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {},
-    is_in_an_mts: bool = False
+    ensure_subspace: dict[str, int] | None = None,
+    is_in_an_mts: bool = False,
 ) -> list[dict[str, int]]:
     """
-        Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
-        Other method inputs:
-         - `network` and `petri_net` represent the model in which the property should be checked.
-         - `terminal_restriction_space` is a symbolic set of states which contains all motif avoidant 
-            attractors (i.e. if a candidate state can leave this set, the candidate cannot be an attractor).
-         - `max_iterations` specifies how much time should be spent on the "simpler" preprocessing
-            before applying a more complete method.
+    Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
+    Other method inputs:
+     - `network` and `petri_net` represent the model in which the property should be checked.
+     - `terminal_restriction_space` is a symbolic set of states which contains all motif avoidant
+        attractors (i.e. if a candidate state can leave this set, the candidate cannot be an attractor).
+     - `max_iterations` specifies how much time should be spent on the "simpler" preprocessing
+        before applying a more complete method.
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
 
     if len(candidates) == 0:
         return []
@@ -48,7 +58,12 @@ def detect_motif_avoidant_attractors(
         return candidates
 
     candidates = _preprocess_candidates(
-        network, candidates, terminal_restriction_space, max_iterations, ensure_subspace=ensure_subspace)
+        network,
+        candidates,
+        terminal_restriction_space,
+        max_iterations,
+        ensure_subspace=ensure_subspace,
+    )
 
     if len(candidates) == 0:
         return []
@@ -64,26 +79,28 @@ def _preprocess_candidates(
     candidates: list[dict[str, int]],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: dict[str, int] = {}
+    ensure_subspace: dict[str, int] | None = None,
 ) -> list[dict[str, int]]:
     """
-        A fast but incomplete method for eliminating spurious attractor candidates. 
+    A fast but incomplete method for eliminating spurious attractor candidates.
 
-        The idea is to build the symbolic encoding of the given `network`, and then
-        randomly simulate transitions for individual states, trying to reach a state
-        outside of the `terminal_restriction_space`.
+    The idea is to build the symbolic encoding of the given `network`, and then
+    randomly simulate transitions for individual states, trying to reach a state
+    outside of the `terminal_restriction_space`.
 
-        TODO (1): There are multiple places where we build the symbolic encoding, and it
-        will surely introduce extra overhead. We might want to just create the encoding
-        once and then pass it around.
+    TODO (1): There are multiple places where we build the symbolic encoding, and it
+    will surely introduce extra overhead. We might want to just create the encoding
+    once and then pass it around.
 
-        TODO (2): We could probably make this algorithm slighlty less random by doing
-        a limited version of symbolic reachability. I.e. instead of simulating just one
-        state transition in each step, compute the whole successor BDD and then test 
-        against that. Once the BDD becomes too large after several steps, we can just 
-        pick a single state from it and start again. Sam: I'll add a version of this
-        later, once we can actually benchmark how it performs :)
+    TODO (2): We could probably make this algorithm slighlty less random by doing
+    a limited version of symbolic reachability. I.e. instead of simulating just one
+    state transition in each step, compute the whole successor BDD and then test
+    against that. Once the BDD becomes too large after several steps, we can just
+    pick a single state from it and start again. Sam: I'll add a version of this
+    later, once we can actually benchmark how it performs :)
     """
+    if ensure_subspace is None:
+        ensure_subspace = {}
 
     # First, build the symbolic encoding:
     variables: list[str] = []
@@ -95,8 +112,9 @@ def _preprocess_candidates(
         variables.append(var_name)
         function_expression = network.get_update_function(varID)
         function_bdd: BinaryDecisionDiagram = expr2bdd(
-            aeon_to_pyeda(function_expression))
-        
+            aeon_to_pyeda(function_expression)
+        )
+
         update_functions[var_name] = function_bdd
 
     # symbolic_candidates = state_list_to_bdd(candidates)
@@ -153,7 +171,7 @@ def _filter_candidates(
     terminal_restriction_space: BinaryDecisionDiagram,
 ) -> list[dict[str, int]]:
     """
-        Filter candidate states using reachability procedure in Pint.
+    Filter candidate states using reachability procedure in Pint.
     """
 
     avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
@@ -166,7 +184,7 @@ def _filter_candidates(
         # is not an attractor, we will put it back.
         avoid_states = avoid_states & ~state_bdd
 
-        if _Pint_reachability(petri_net, state, avoid_states) == False:
+        if not _Pint_reachability(petri_net, state, avoid_states):
             avoid_states = avoid_states | state_bdd
             filtered_candidates.append(state)
 
@@ -176,18 +194,18 @@ def _filter_candidates(
 def _Pint_reachability(
     petri_net: DiGraph,
     initial_state: dict[str, int],
-    target_states: BinaryDecisionDiagram
+    target_states: BinaryDecisionDiagram,
 ) -> bool:
     """
-        Use Pint to check if a given `initial_state` can possibly reach some state
-        in the `target_states` BDD.
+    Use Pint to check if a given `initial_state` can possibly reach some state
+    in the `target_states` BDD.
 
-        TODO: Here, if the result of static analysis is inconclusive, Pint falls back to `mole`
-        model checker. However, in the future, we might also explore other methods, such as
-        petri net reduction or symbolic reachability.
+    TODO: Here, if the result of static analysis is inconclusive, Pint falls back to `mole`
+    model checker. However, in the future, we might also explore other methods, such as
+    petri net reduction or symbolic reachability.
     """
     if target_states.is_zero():
-        return False    # Cannot reach a stat in an empty set.
+        return False  # Cannot reach a stat in an empty set.
 
     # Build a Pint model through an automata network and copy
     # over the initial condition.
@@ -197,20 +215,19 @@ def _Pint_reachability(
 
     goal = _Pint_build_symbolic_goal(target_states)
 
-    return pint_model.reachability(goal=goal, fallback='mole')  # type: ignore
+    return pint_model.reachability(goal=goal, fallback="mole")  # type: ignore
 
 
 def _Pint_build_symbolic_goal(states: BinaryDecisionDiagram) -> Goal:
     """
-        A helper method which (very explicitly) converts a set of states
-        represented through a BDD into a Pint `Goal`.
+    A helper method which (very explicitly) converts a set of states
+    represented through a BDD into a Pint `Goal`.
     """
     assert not states.is_zero()
 
     goals: list[Goal] = []
     for clause in states.satisfy_all():  # type: ignore
-        goal_atoms = [f"{var}={level}" for var,
-                      level in clause.items()]  # type: ignore
+        goal_atoms = [f"{var}={level}" for var, level in clause.items()]  # type: ignore
         goals.append(Goal(",".join(goal_atoms)))
 
     return reduce(lambda a, b: a | b, goals)
@@ -218,11 +235,11 @@ def _Pint_build_symbolic_goal(states: BinaryDecisionDiagram) -> Goal:
 
 def petri_net_as_automata_network(petri_net: DiGraph) -> str:
     """
-        Takes a Petri net which was created by implicant encoding from a Boolean network,
-        and builds an automata network file (`.an`) compatible with the Pint tool.
+    Takes a Petri net which was created by implicant encoding from a Boolean network,
+    and builds an automata network file (`.an`) compatible with the Pint tool.
 
-        TODO: This is one of those things that would probably be better served by having
-        an "explicit" `PetriNetEncoding` class.
+    TODO: This is one of those things that would probably be better served by having
+    an "explicit" `PetriNetEncoding` class.
     """
     automata_network = ""
 
@@ -231,12 +248,12 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
     for place, kind in petri_net.nodes(data="kind"):  # type: ignore
         if kind != "place":
             continue
-        variable_set.add(place_to_variable(place)[0]) # pyright: ignore[reportUnknownArgumentType]
+        variable_set.add(place_to_variable(place)[0])  # type: ignore[reportUnknownArgumentType] # noqa
     variables = sorted(variable_set)
 
     # Declare all variables with 0/1 domains.
     for var in variables:
-        automata_network += f"\"{var}\" [0, 1]\n"
+        automata_network += f'"{var}" [0, 1]\n'
 
     for transition, kind in petri_net.nodes(data="kind"):  # type: ignore
         if kind != "transition":
@@ -247,23 +264,23 @@ def petri_net_as_automata_network(petri_net: DiGraph) -> str:
 
         # The value under modification is the only
         # value that is different between successors and predecessors.
-        source_place = next(iter(predecessors - successors)) # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
-        target_place = next(iter(successors - predecessors)) # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
+        source_place = next(iter(predecessors - successors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
+        target_place = next(iter(successors - predecessors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
 
-        (s_var, s_level) = place_to_variable(source_place) # pyright: ignore[reportUnknownArgumentType]
-        (t_var, t_level) = place_to_variable(target_place) # pyright: ignore[reportUnknownArgumentType]
+        (s_var, s_level) = place_to_variable(source_place)  # type: ignore[reportUnknownArgumentType] # noqa
+        (t_var, t_level) = place_to_variable(target_place)  # type: ignore[reportUnknownArgumentType] # noqa
         assert s_var == t_var
 
         # The remaining places represent the necessary conditions.
         # Here, we transform them into a text format.
-        conditions = sorted(predecessors.intersection(successors)) # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
-        conditions = [place_to_variable(p) for p in conditions] # pyright: ignore[reportUnknownVariableType,reportUnknownArgumentType]
-        conditions = [f"\"{var}\"={int(level)}" for var, level in conditions]
+        conditions = sorted(predecessors.intersection(successors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
+        conditions = [place_to_variable(p) for p in conditions]  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
+        conditions = [f'"{var}"={int(level)}' for var, level in conditions]
 
         # A pint rule consists of a variable name, value transition,
         # and a list of necessary conditions for the transition (if any).
         if len(conditions) == 0:
-            rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)}\n"
+            rule = f'"{s_var}" {int(s_level)} -> {int(t_level)}\n'
         else:
             rule = f"\"{s_var}\" {int(s_level)} -> {int(t_level)} when {' and '.join(conditions)}\n"
 
