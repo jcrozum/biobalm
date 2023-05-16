@@ -1,0 +1,59 @@
+targets, factors
+# 52 nodes
+# 124 interactions
+# taken from
+# Vega, M. R. (2014, May). Analyzing toys models of Arabidopsis & Drosphila using Z3 SMT-LIB. In Independent Component Analyses, Compressive Sampling, Wavelets, Neural Net, Biosystems, & Nanoengineering XII (Vol. 9118, p. 911813). International Society f| Optics & Photonics.
+
+wg1, (CIA1 & SLP1 & ! (CIR1)) | (wg1 & SLP1 & ! (CIR1)) | (wg1 & CIA1 & ! (CIR1))
+wg2, (CIA2 & SLP2 & ! (CIR2)) | (wg2 & SLP2 & ! (CIR2)) | (wg2 & CIA2 & ! (CIR2))
+wg3, (CIA3 & SLP3 & ! (CIR3)) | (wg3 & SLP3 & ! (CIR3)) | (wg3 & CIA3 & ! (CIR3))
+wg4, (CIA4 & SLP4 & ! (CIR4)) | (wg4 & SLP4 & ! (CIR4)) | (wg4 & CIA4 & ! (CIR4))
+WG1, (wg1)
+WG2, (wg2)
+WG3, (wg3)
+WG4, (wg4)
+en1, (WG2 & ! (SLP1))
+en2, (WG3 & ! (SLP2)) | (WG1 & ! (SLP2))
+en3, (WG4 & ! (SLP3)) | (WG2 & ! (SLP3))
+en4, (WG3 & ! (SLP4))
+EN1, (en1)
+EN2, (en2)
+EN3, (en3)
+EN4, (en4)
+hh1, (EN1 & ! (CIR1))
+hh2, (EN2 & ! (CIR2))
+hh3, (EN3 & ! (CIR3))
+hh4, (EN4 & ! (CIR4))
+HH1, (hh1)
+HH2, (hh2)
+HH3, (hh3)
+HH4, (hh4)
+ptc1, (CIA1 & ! (EN1) & ! (CIR1))
+ptc2, (CIA2 & ! (EN2) & ! (CIR2))
+ptc3, (CIA3 & ! (EN3) & ! (CIR3))
+ptc4, (CIA4 & ! (EN4) & ! (CIR4))
+PTC1, (PTC1 & ! (HH2)) | (ptc1)
+PTC2, (PTC2 & ! (HH1) & ! (HH3)) | (ptc2)
+PTC3, (PTC3 & ! (HH2) & ! (HH4)) | (ptc3)
+PTC4, (PTC4 & ! (HH3)) | (ptc4)
+ci1, (! (EN1))
+ci2, (! (EN2))
+ci3, (! (EN3))
+ci4, (! (EN4))
+CI1, (ci1)
+CI2, (ci2)
+CI3, (ci3)
+CI4, (ci4)
+CIA1, (CI1 & hh2) | (CI1 & HH2) | (CI1 & ! (PTC1))
+CIA2, (CI2 & hh3) | (CI2 & hh1) | (CI2 & HH3) | (CI2 & HH1) | (CI2 & ! (PTC2))
+CIA3, (CI3 & hh4) | (CI3 & hh2) | (CI3 & HH4) | (CI3 & HH2) | (CI3 & ! (PTC3))
+CIA4, (CI4 & hh3) | (CI4 & HH3) | (CI4 & ! (PTC4))
+CIR1, (CI1 & PTC1 & ! (HH2) & ! (hh2))
+CIR2, (CI2 & PTC2 & ! (HH1) & ! (HH3) & ! (hh1) & ! (hh3))
+CIR3, (CI3 & PTC3 & ! (HH2) & ! (HH4) & ! (hh2) & ! (hh4))
+CIR4, (CI4 & PTC4 & ! (HH3) & ! (hh3))
+# External
+SLP1, SLP1
+SLP2, SLP2
+SLP3, SLP3
+SLP4, SLP4

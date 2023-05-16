@@ -1,0 +1,75 @@
+# n = 69
+# max SCC = 51
+# Parity and time reversal elucidate both decision-making in empirical models and attractor scaling in critical Boolean networks
+
+targets, factors
+EGF, EGF
+FGF, FGF
+HGF, HGF
+Goosecoid, Goosecoid
+Hypoxia, Hypoxia
+IGF1, IGF1
+PDGF, PDGF
+CHD1L, CHD1L
+
+AKT,  ILK | PI3K
+Dest_compl,  (GSK3B & AXIN2 & Bcatenin_nuc) | (GSK3B & Dest_compl)
+AXIN2,  AXIN2 | TCF_LEF
+Bcatenin_memb,  Ecadherin & ! Bcatenin_nuc
+Bcatenin_nuc,  ! Dest_compl & ! Bcatenin_memb & (! SUFU | ! Ecadherin)
+BTrCP,  ! Csn
+CD44,  TCF_LEF
+CDC42,  TGFBR | CHD1L
+cfos,  ERK
+cMet,  HGF | CD44
+Csl,  NOTCH_ic
+Csn,  NFKB
+DELTA,  RAS
+DSH,  Frizzled
+Ecadherin,  Bcatenin_memb & (! SNAI1 | ! HEY1 | ! ZEB1 | ! ZEB2 | ! FOXC2 | ! TWIST1 | ! SNAI2)
+EGFR,  EGF
+EGR1,  cfos
+EMT,   ! Ecadherin
+ERK,  MEK
+FGFR,  FGF
+FOXC2,  Goosecoid | SNAI1 | TWIST1
+Frizzled,  Wnt
+FUS,  SMO
+GLI,  TCF_LEF | ! SUFU
+GSK3B,  ! DSH & ! AKT & (! Csn | ! ERK | ! Dest_compl)
+HEY1,  Csl | SMAD
+HIF1A,  Hypoxia
+IGF1R,  IGF1
+IKKA,  AKT
+ILK,  SMAD
+Jagged,  TCF_LEF | SMAD
+LIV1,  STAT
+LOXL23,  HIF1A
+MEK,  RAF | ! RKIP
+miR200,  ! SNAI1 & ! ZEB1 & ! ZEB2
+NFKB,  IKKA
+NOTCH,  DELTA | Jagged
+NOTCH_ic,  NOTCH
+PAK1,  CDC42
+Patched,  ! SHH
+PDGFR,  PDGF
+PI3K,  RAS
+RAF,  RAS
+RAS,  SOS_GRB2 | SRC | ! GSK3B | TCF_LEF
+RKIP,  ! ERK | ! SNAI1
+SHH,  SMAD | GLI
+SNAI2,  ERK | Bcatenin_nuc | SNAI2 | TWIST1
+SMAD,   (ERK | TGFBR) & (ZEB1 | ! ZEB2)
+SMO,  ! Patched
+SNAI1,  GLI | LOXL23 | SMAD | LIV1 | PAK1 | Csl | EGR1 | Goosecoid | ! BTrCP | ! GSK3B
+SOS_GRB2,  (PDGFR | cMet | TGFBR | FGFR | IGF1R | EGFR) & ! ERK
+SRC,  PDGFR | EGFR | FGFR | cMet | IGF1R
+STAT,  SRC
+SUFU,  ! FUS
+TCF_LEF,  Bcatenin_nuc
+TGFB,    Goosecoid | SNAI1 | TWIST1 | GLI
+TGFBR,  TGFB
+TWIST1,  NFKB | HIF1A | TCF_LEF | Goosecoid | SNAI1
+Wnt,  GLI
+ZEB1,  (HIF1A | SNAI1 | Goosecoid) & ! miR200
+ZEB2,  (HIF1A | SNAI1 | Goosecoid) & ! miR200

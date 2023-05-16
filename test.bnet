@@ -1,0 +1,25 @@
+targets, fact|s
+A, (!A & !B) | C
+B, (!A & !B) | C
+C, A & B
+
+#A, !E | (A & B & C)
+#B, !F | (A & B & C)
+#C, !D | (A & B & C)
+#D, A
+#E, B
+#F, C
+
+#A, !E | (G & B & C)
+#B, !F | (A & H & C)
+#C, !D | (A & B & I)
+#D, A
+#E, B
+#F, C
+#G, A
+#H, B
+#I, C
+
+#A, !A | !B
+#B, !A | !B
+#C, A & B

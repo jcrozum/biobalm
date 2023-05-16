@@ -97,14 +97,14 @@ def _preprocess_candidates(
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
-    print("Finish loading functions")
+    #print("Finish loading functions")
     if is_in_an_mts == False:
         #symbolic_candidates = state_list_to_bdd(candidates)
         symbolic_candidates = deepcopy(candidates)
         filtered_candidates = []
         i = 1
         for state in candidates:
-            print(f"Run outside mts - {i}")
+            #print(f"Run outside mts - {i}")
             i += 1
             #state_bdd = state_to_bdd(state)
 
@@ -150,7 +150,7 @@ def _preprocess_candidates(
     else:
         filtered_candidates = []
         for i in range(max_iterations):
-            print(f"Run inside mts - {i + 1}")
+            #print(f"Run inside mts - {i + 1}")
             random.shuffle(variables)
             #symbolic_candidates = state_list_to_bdd(candidates)
             symbolic_candidates = deepcopy(candidates)

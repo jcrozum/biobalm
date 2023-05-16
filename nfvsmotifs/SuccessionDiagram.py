@@ -29,7 +29,10 @@ class SuccessionDiagram():
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
         # Negative feedback vertex set.
-        self.nfvs = feedback_vertex_set(network, parity="negative")#find_minimum_NFVS(network)
+        self.nfvs = feedback_vertex_set(network, parity="negative")
+        #self.nfvs = find_minimum_NFVS(network)
+        print(f"|U-| = {len(self.nfvs)}")
+        #print(self.nfvs)
         # A directed acyclic graph representing the succession diagram.
         self.G = nx.DiGraph()
         # A dictionary used for uniqueness checks on the nodes of the succession diagram.
@@ -307,28 +310,64 @@ class SuccessionDiagram():
         # the space is a trap and this will remove the corresponding unnecessary
         # Petri net transitions.
         retained_set = node_space.copy()
-        for x in self.nfvs:
-            if x not in retained_set:
-                """Set all nodes to 0"""
-                #retained_set[x] = 0
-
-                """Set nodes to values based on the majority of satisfying values of functions"""
-                fx = self.network.get_update_function(x)
-                fx = aeon_to_pyeda(fx)
-                n_input = len(list(fx.support))
-                n_poss_sat = pow(2, n_input - 1)
-
-                n_sat = fx.satisfy_count()
-
-                if n_sat > n_poss_sat:
-                    retained_set[x] = 1
-                elif n_sat < n_poss_sat:
-                    retained_set[x] = 0
-                else:
-                    retained_set[x] = random.randint(0, 1)
-
 
         child_spaces = [self.node_space(child) for child in self.G.successors(node_id)]
+
+        # find the child space least common with NFVS
+        if (len(child_spaces) > 0):
+            least_common_child_space = child_spaces[0]
+            least_common_nodes = len(set(least_common_child_space) & set(self.nfvs))
+            for child_space in child_spaces:
+                common_nodes = len(set(child_space) & set(self.nfvs))
+                if (common_nodes < least_common_nodes):
+                    least_common_nodes = common_nodes
+                    least_common_child_space = child_space
+
+            for x in self.nfvs:
+                if x not in retained_set:
+                    if x in least_common_child_space:
+                        retained_set[x] = least_common_child_space[x]
+                    else:
+                        """Set nodes to values based on the majority of satisfying values of functions"""
+                        fx = self.network.get_update_function(x)
+                        fx = aeon_to_pyeda(fx)
+                        n_input = len(list(fx.support))
+                        n_poss_sat = pow(2, n_input - 1)
+
+                        n_sat = fx.satisfy_count()
+
+                        if n_sat > n_poss_sat:
+                            retained_set[x] = 1
+                        elif n_sat < n_poss_sat:
+                            retained_set[x] = 0
+                        else:
+                            #retained_set[x] = random.randint(0, 1)
+                            retained_set[x] = 0
+                            #retained_set[x] = 1
+        else:
+            for x in self.nfvs:
+                if x not in retained_set:
+                    """Set all nodes to 0"""
+                    #retained_set[x] = 0
+
+                    """Set nodes to values based on the majority of satisfying values of functions"""
+                    fx = self.network.get_update_function(x)
+                    fx = aeon_to_pyeda(fx)
+                    n_input = len(list(fx.support))
+                    n_poss_sat = pow(2, n_input - 1)
+
+                    n_sat = fx.satisfy_count()
+
+                    if n_sat > n_poss_sat:
+                        retained_set[x] = 1
+                    elif n_sat < n_poss_sat:
+                        retained_set[x] = 0
+                    else:
+                        #retained_set[x] = random.randint(0, 1)
+                        retained_set[x] = 0
+                        #retained_set[x] = 1
+
+                
 
         if len(retained_set) == self.network.num_vars() and len(child_spaces) == 0:
             # There is only a single attractor remaining here, 
