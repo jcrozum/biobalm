@@ -115,7 +115,11 @@ class SuccessionDiagram:
         return ((not strict) or node_id in self.expanded) and is_leaf
 
     def expand_node(
-        self, node_id: int, depth_limit: int | None = 0, node_limit: int | None = None
+        self,
+        node_id: int,
+        depth_limit: int | None = 0,
+        node_limit: int | None = None,
+        to_target: dict[str, int] | None = None,
     ) -> int:
         """
         Expand the given node.
@@ -142,13 +146,17 @@ class SuccessionDiagram:
         The `depth_limit` is relative to the provided `node_id`. I.e. this is
         not the "absolute" depth of the node in the diagram, but rather the
         distance from the initial `node_id`.
+
+        If `to_target` is specified, nodes that are not consistent with the
+        `to_target` subspace are not expanded further, and nodes that are
+        entirely contained within that subspace are also not expanded further.
         """
         bfs_queue = [(node_id, depth_limit)]
         visited: set[int] = set()
 
         total_expanded = 0
 
-        while len(bfs_queue) > 0:
+        while bfs_queue:
             node, depth = bfs_queue.pop(0)
 
             # Due to BFS, a node is always first visited with its maximal
@@ -181,7 +189,23 @@ class SuccessionDiagram:
                 new_depth = None if depth is None else (depth - 1)
                 for s in cast(list[int], self.G.successors(node)):  # type: ignore
                     if s not in visited:
-                        bfs_queue.append((s, new_depth))
+                        # if we are doing target expansion, we might not need to
+                        # add this node to the queue
+                        if to_target is None:
+                            is_consistent = True
+                            is_last_needed = False
+                        else:
+                            fixed_vars = cast(
+                                dict[str, int], self.G.nodes[s]["fixed_vars"]
+                            )
+                            is_consistent = not any(
+                                k in to_target and to_target[k] != v
+                                for k, v in fixed_vars.items()
+                            )
+                            is_last_needed = set(to_target) <= set(fixed_vars)
+
+                        if is_consistent and not is_last_needed:
+                            bfs_queue.append((s, new_depth))
 
         return total_expanded
 

@@ -1,10 +1,75 @@
 from __future__ import annotations
 
 from itertools import combinations
+from typing import cast
 
+import networkx as nx
 from biodivine_aeon import BooleanNetwork
 
 from nfvsmotifs.space_utils import percolate_space
+from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+
+
+def successions_to_target(
+    succession_diagram: SuccessionDiagram,
+    target: dict[str, int],
+    expand_diagram: bool = True,
+) -> list[list[dict[str, int]]]:
+    """Find lists of nested trap spaces (successions) that lead to the
+    specified target subspace.
+
+    Parameters
+    ----------
+    succession_diagram : SuccessionDiagram
+        The succession diagram from which successions will be extracted.
+    target : dict[str, int]
+        The target subspace.
+    expand_diagram: bool
+        Whether to ensure that the succession diagram is expanded enough to
+        capture all paths to the target (default: True).
+
+    Returns
+    -------
+    list[list[dict[str, int]]]
+        A list of successions, where each succession is a list of sequentially
+        nested trap spaces that specify the target.
+    """
+    successions: list[list[dict[str, int]]] = []
+
+    # expand the succession_diagram toward the target
+    if expand_diagram:
+        succession_diagram.expand_node(
+            succession_diagram.root(),
+            depth_limit=None,
+            node_limit=None,
+            to_target=target,
+        )
+
+    for s in cast(list[int], succession_diagram.G.nodes()):
+        fixed_vars = cast(dict[str, int], succession_diagram.G.nodes[s]["fixed_vars"])
+        is_consistent = not any(
+            k in target and target[k] != v for k, v in fixed_vars.items()
+        )
+        is_last_needed = set(target) <= set(fixed_vars)
+
+        if not is_consistent or not is_last_needed:
+            continue
+
+        for path in cast(
+            list[list[int]],
+            nx.all_simple_paths(  # type: ignore
+                succession_diagram.G,
+                source=succession_diagram.root(),
+                target=s,
+            ),
+        ):
+            succession = [
+                cast(dict[str, int], succession_diagram.G.edges[x, y]["motif"])
+                for x, y in zip(path[:-1], path[1:])
+            ]
+            successions.append(succession)
+
+    return successions
 
 
 def drivers_of_succession(
@@ -23,9 +88,9 @@ def drivers_of_succession(
     Returns
     -------
     list[list[dict[str, int]]]
-        A list of lists of internal driver sets, represented as state dictionaries.
-        Each list item corresponds to a list of drivers for the corresponding trap
-        space in the succession.
+        A list of lists of internal driver sets, represented as state
+        dictionaries. Each list item corresponds to a list of drivers for the
+        corresponding trap space in the succession.
     """
     control_strategies: list[list[dict[str, int]]] = []
     assume_fixed: dict[str, int] = {}
