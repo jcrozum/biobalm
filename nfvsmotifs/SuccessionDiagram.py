@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from typing import Set
     from biodivine_aeon import BooleanNetwork
 
-import networkx as nx  # type: ignore
+import networkx as nx
 
 from nfvsmotifs.interaction_graph_utils import feedback_vertex_set
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
@@ -36,10 +35,10 @@ class SuccessionDiagram:
         self.node_indices: dict[int, int] = {}
         # Set of diagram node IDs that have already been expanded (i.e. their
         # successors are already known).
-        self.expanded: Set[int] = set()
+        self.expanded: set[int] = set()
         # Set of diagram node IDs where attractor search has already been
         # performed.
-        self.attr_expanded: Set[int] = set()
+        self.attr_expanded: set[int] = set()
         # Maps node IDs to lists of attractor "seed" vertices. Note that even if
         # attractor search was performed, the node ID may not be present if no
         # attractors were found.
@@ -66,8 +65,8 @@ class SuccessionDiagram:
         Depth is counted from zero (root has depth zero).
         """
         d = 0
-        for node in self.G.nodes():  # type: ignore[reportUnknownVariableType] # noqa
-            d = max(d, self.node_depth(int(node)))  # type: ignore[reportUnknownArgumentType] # noqa
+        for node in cast(set[int], self.G.nodes()):
+            d = max(d, self.node_depth(int(node)))
         return d
 
     def node_depth(self, node_id: int, depth: int | None = None) -> int:
@@ -78,9 +77,11 @@ class SuccessionDiagram:
         If a smaller depth is provided, the larger value is retained.
         """
         if depth:
-            self.G.nodes[node_id]["depth"] = max(self.G.nodes[node_id]["depth"], depth)  # type: ignore[reportUnknownArgumentType] # noqa
+            self.G.nodes[node_id]["depth"] = max(
+                cast(int, self.G.nodes[node_id]["depth"]), depth
+            )
 
-        return self.G.nodes[node_id]["depth"]  # type: ignore[reportUnknownVariableType] # noqa
+        return cast(int, self.G.nodes[node_id]["depth"])
 
     def node_space(self, node_id: int) -> dict[str, int]:
         """
@@ -90,7 +91,7 @@ class SuccessionDiagram:
         `|node_space(child)| < |node_space(parent)| + |stable_motif(parent,
         child)|`.
         """
-        return self.G.nodes[node_id]["fixed_vars"]  # type: ignore[reportUnknownVariableType] # noqa
+        return cast(dict[str, int], self.G.nodes[node_id]["fixed_vars"])
 
     def stable_motif(self, parent_id: int, child_id: int) -> dict[str, int]:
         """
@@ -100,7 +101,7 @@ class SuccessionDiagram:
         This corresponds to the maximal trap space within the `parent_id` node
         that, after percolation, yields the `child_id` node.
         """
-        return self.G.edges[parent_id, child_id]["motif"]  # type: ignore[reportUnknownVariableType] # noqa
+        return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
 
     def is_minimal(self, node_id: int, strict: bool = True) -> bool:
         """
@@ -110,8 +111,8 @@ class SuccessionDiagram:
         You can set `strict = False` to check whether the node is a leaf node in
         general (i.e. it is either minimal, or not expanded).
         """
-        is_leaf: bool = self.G.out_degree(node_id) == 0  # type: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa
-        return ((not strict) or node_id in self.expanded) and is_leaf  # type: ignore[reportUnknownVariableType] # noqa
+        is_leaf = cast(int, self.G.out_degree(node_id)) == 0  # type: ignore
+        return ((not strict) or node_id in self.expanded) and is_leaf
 
     def expand_node(
         self, node_id: int, depth_limit: int | None = 0, node_limit: int | None = None
@@ -178,9 +179,9 @@ class SuccessionDiagram:
 
             if (depth is None) or (depth > 0):
                 new_depth = None if depth is None else (depth - 1)
-                for s in self.G.successors(node):  # type: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa
+                for s in cast(list[int], self.G.successors(node)):  # type: ignore
                     if s not in visited:
-                        bfs_queue.append((s, new_depth))  # type: ignore[reportUnknownArgumentType] # noqa
+                        bfs_queue.append((s, new_depth))
 
         return total_expanded
 
@@ -280,10 +281,10 @@ class SuccessionDiagram:
 
         if key not in self.node_indices:
             new_id = self.G.number_of_nodes()
-            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth)  # type: ignore[reportUnknownMemberType] # noqa
+            self.G.add_node(new_id, fixed_vars=fixed_vars, depth=depth)  # type: ignore
             self.node_indices[key] = new_id
             if parent_id is not None:
-                self.G.add_edge(parent_id, new_id, motif=stable_motif)  # type: ignore[reportUnknownMemberType] # noqa
+                self.G.add_edge(parent_id, new_id, motif=stable_motif)  # type: ignore
             return new_id
         else:
             existing_id = self.node_indices[key]
@@ -291,7 +292,7 @@ class SuccessionDiagram:
             if parent_id is not None:
                 # In theory, if you abuse this, you can create multiple edges,
                 # but this shouldn't happen with proper usage.
-                self.G.add_edge(parent_id, existing_id, motif=stable_motif)  # type: ignore[reportUnknownMemberType] # noqa
+                self.G.add_edge(parent_id, existing_id, motif=stable_motif)  # type: ignore
             return existing_id
 
     def expand_attractors(self, node_id: int) -> list[dict[str, int]]:
@@ -332,7 +333,8 @@ class SuccessionDiagram:
                 retained_set[x] = 0
 
         child_spaces = [
-            self.node_space(child) for child in self.G.successors(node_id)  # type: ignore
+            self.node_space(child)
+            for child in cast(list[int], self.G.successors(node_id))  # type: ignore
         ]
 
         if len(retained_set) == self.network.num_vars() and len(child_spaces) == 0:
