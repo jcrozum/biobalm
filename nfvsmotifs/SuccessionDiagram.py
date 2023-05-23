@@ -31,16 +31,18 @@ class SuccessionDiagram:
         )  # find_minimum_NFVS(network)
         # A directed acyclic graph representing the succession diagram.
         self.G = nx.DiGraph()
-        # A dictionary used for uniqueness checks on the nodes of the succession diagram.
-        # See `SuccessionDiagram.ensure_node` for details.
+        # A dictionary used for uniqueness checks on the nodes of the succession
+        # diagram. See `SuccessionDiagram.ensure_node` for details.
         self.node_indices: dict[int, int] = {}
-        # Set of diagram node IDs that have already been expanded (i.e. their successors
-        # are already known).
+        # Set of diagram node IDs that have already been expanded (i.e. their
+        # successors are already known).
         self.expanded: Set[int] = set()
-        # Set of diagram node IDs where attractor search has already been performed.
+        # Set of diagram node IDs where attractor search has already been
+        # performed.
         self.attr_expanded: Set[int] = set()
-        # Maps node IDs to lists of attractor "seed" vertices. Note that even if attractor
-        # search was performed, the node ID may not be present if no attractors were found.
+        # Maps node IDs to lists of attractor "seed" vertices. Note that even if
+        # attractor search was performed, the node ID may not be present if no
+        # attractors were found.
         self.attractors: dict[int, list[dict[str, int]]] = {}
 
         self.ensure_node(None, {})
@@ -70,7 +72,8 @@ class SuccessionDiagram:
 
     def node_depth(self, node_id: int, depth: int | None = None) -> int:
         """
-        Get/set the depth associated with the provided `node_id`. The depth can only increase.
+        Get/set the depth associated with the provided `node_id`. The depth can
+        only increase.
 
         If a smaller depth is provided, the larger value is retained.
         """
@@ -84,27 +87,28 @@ class SuccessionDiagram:
         Get the sub-space associated with the provided `node_id`.
 
         Note that this is the space *after* percolation. Hence it can hold that
-        `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
+        `|node_space(child)| < |node_space(parent)| + |stable_motif(parent,
+        child)|`.
         """
         return self.G.nodes[node_id]["fixed_vars"]  # type: ignore[reportUnknownVariableType] # noqa
 
     def stable_motif(self, parent_id: int, child_id: int) -> dict[str, int]:
         """
-        Return the "stable motif" associated with the specified parent-child edge, or `None` if the two
-        nodes are not related.
+        Return the "stable motif" associated with the specified parent-child
+        edge, or `None` if the two nodes are not related.
 
-        This corresponds to the maximal trap space within the `parent_id` node that, after percolation,
-        yields the `child_id` node.
+        This corresponds to the maximal trap space within the `parent_id` node
+        that, after percolation, yields the `child_id` node.
         """
         return self.G.edges[parent_id, child_id]["motif"]  # type: ignore[reportUnknownVariableType] # noqa
 
     def is_minimal(self, node_id: int, strict: bool = True) -> bool:
         """
-        True if the given `node_id` references a minimal trap space (i.e. the space is expanded
-        and has no smaller trap spaces).
+        True if the given `node_id` references a minimal trap space (i.e. the
+        space is expanded and has no smaller trap spaces).
 
-        You can set `strict = False` to check whether the node is a leaf node in general (i.e. it
-        is either minimal, or not expanded).
+        You can set `strict = False` to check whether the node is a leaf node in
+        general (i.e. it is either minimal, or not expanded).
         """
         is_leaf: bool = self.G.out_degree(node_id) == 0  # type: ignore[reportUnknownMemberType, reportUnknownVariableType] # noqa
         return ((not strict) or node_id in self.expanded) and is_leaf  # type: ignore[reportUnknownVariableType] # noqa
@@ -115,23 +119,28 @@ class SuccessionDiagram:
         """
         Expand the given node.
 
-        By default, the method only expands the given node. That is, if its children are unknown, they
-        are computed and nothing else happens. However, you can use `depth_limit` to instruct the method to
-        continue expanding the child nodes up to a certain depth and number of nodes (or to expand the whole
-        subgraph by setting the limits to `None`).
+        By default, the method only expands the given node. That is, if its
+        children are unknown, they are computed and nothing else happens.
+        However, you can use `depth_limit` to instruct the method to continue
+        expanding the child nodes up to a certain depth and number of nodes (or
+        to expand the whole subgraph by setting the limits to `None`).
 
-        If a recursive expansion is requested, the method will continue expanding until it visits an unexpanded
-        node (as long as the depth limit permits it). I.e. the method does not stop on expanded nodes.
-        This means you can start the expansion from an already expanded node and just increase the depth/size
-        limit to gradually grow the decision diagram (instead of always starting in the unexpanded leaf nodes).
+        If a recursive expansion is requested, the method will continue
+        expanding until it visits an unexpanded node (as long as the depth limit
+        permits it). I.e. the method does not stop on expanded nodes. This means
+        you can start the expansion from an already expanded node and just
+        increase the depth/size limit to gradually grow the decision diagram
+        (instead of always starting in the unexpanded leaf nodes).
 
-        The `node_limit` applies to the number of nodes that are expanded, i.e. the number of nodes for which
-        successors have been computed. The method also returns this number (i.e. number of actually expanded
-        nodes). Hence, when the result is smaller than the given `node_limit`, you know that the whole
-        sub-graph is fully computed.
+        The `node_limit` applies to the number of nodes that are expanded, i.e.
+        the number of nodes for which successors have been computed. The method
+        also returns this number (i.e. number of actually expanded nodes).
+        Hence, when the result is smaller than the given `node_limit`, you know
+        that the whole sub-graph is fully computed.
 
-        The `depth_limit` is relative to the provided `node_id`. I.e. this is not the "absolute" depth of the
-        node in the diagram, but rather the distance from the initial `node_id`.
+        The `depth_limit` is relative to the provided `node_id`. I.e. this is
+        not the "absolute" depth of the node in the diagram, but rather the
+        distance from the initial `node_id`.
         """
         bfs_queue = [(node_id, depth_limit)]
         visited: set[int] = set()
@@ -142,8 +151,8 @@ class SuccessionDiagram:
             node, depth = bfs_queue.pop(0)
 
             # Due to BFS, a node is always first visited with its maximal
-            # depth_limit, hence there is no need to re-explore nodes, even
-            # if they are visited again with a different depth limit.
+            # depth_limit, hence there is no need to re-explore nodes, even if
+            # they are visited again with a different depth limit.
             if node in visited:
                 continue
             visited.add(node)
@@ -164,8 +173,8 @@ class SuccessionDiagram:
                 if (node_limit is not None) and (total_expanded >= node_limit):
                     return total_expanded
 
-            # If the node has sufficient depth limit, we can
-            # explore its successors (as long as they are not visited).
+            # If the node has sufficient depth limit, we can explore its
+            # successors (as long as they are not visited).
 
             if (depth is None) or (depth > 0):
                 new_depth = None if depth is None else (depth - 1)
@@ -179,8 +188,8 @@ class SuccessionDiagram:
         """
         An internal method to expand a single node of the succession diagram.
 
-        This entails computing the maximal trap spaces within the node (stable motifs)
-        and creating a node for the result (if it does not exist yet).
+        This entails computing the maximal trap spaces within the node (stable
+        motifs) and creating a node for the result (if it does not exist yet).
 
         If the node is already expanded, the method does nothing.
         """
@@ -192,8 +201,8 @@ class SuccessionDiagram:
         current_space = self.node_space(node_id)
 
         if len(current_space) == self.network.num_vars():
-            # This node is a fixed-point. Trappist would just
-            # return this fixed-point again. No need to continue.
+            # This node is a fixed-point. Trappist would just return this
+            # fixed-point again. No need to continue.
             if DEBUG:
                 print(f"Found fixed-point: {current_space}.")
             return
@@ -219,50 +228,52 @@ class SuccessionDiagram:
             # TODO: use this for something or delete it
             child_id = self.ensure_node(node_id, sub_space)  # type: ignore[reportUnusedVariable] # noqa
 
-            # if DEBUG:
-            #    print(f"[{node_id}] Found child {child_id}: {sub_space} => {self.node_space(child_id)}")
+            # if DEBUG: print(f"[{node_id}] Found child {child_id}: {sub_space}
+            #    => {self.node_space(child_id)}")
 
-        # TODO: These are ideas for the "partial order reduction".
-        # print(f"Found {len(sub_spaces)} sub-spaces.")
-        # branch_on = sub_spaces[0]
-        # child_id = self.ensure_node(node_id, branch_on)
-        # print(f"[{node_id}] Found main child {child_id}: {len(branch_on)}")
+        # TODO: These are ideas for the "partial order reduction". print(f"Found
+        # {len(sub_spaces)} sub-spaces.") branch_on = sub_spaces[0] child_id =
+        # self.ensure_node(node_id, branch_on) print(f"[{node_id}] Found main
+        # child {child_id}: {len(branch_on)}")
 
-        # for sub_space in sub_spaces[1:]:
-        #    intersection = intersect(sub_space, branch_on)
-        #    if intersection is None:
-        #        child_id = self.ensure_node(node_id, sub_space)
-        #        print(f"[{node_id}] Found conflict child {child_id}: {len(sub_space)}")
+        # for sub_space in sub_spaces[1:]: intersection = intersect(sub_space,
+        #    branch_on) if intersection is None: child_id =
+        #    self.ensure_node(node_id, sub_space) print(f"[{node_id}] Found
+        #        conflict child {child_id}: {len(sub_space)}")
 
     def ensure_node(self, parent_id: int | None, stable_motif: dict[str, int]) -> int:
         """
-        Ensure that the provided node is present in this succession diagram as a child of the given `parent_id`.
-        The `stable_motif` is an "initial" trap space that is then percolated to compute the actual fixed
-        variables for this node.
+        Ensure that the provided node is present in this succession diagram as a
+        child of the given `parent_id`. The `stable_motif` is an "initial" trap
+        space that is then percolated to compute the actual fixed variables for
+        this node.
 
-        The method also ensures the depth of the node is at least `node_depth(parent_id) + 1`.
-        If the `parent_id` is not given, no edge is created and depth is considered to be zero
-        (i.e. the node is a new root).
+        The method also ensures the depth of the node is at least
+        `node_depth(parent_id) + 1`. If the `parent_id` is not given, no edge is
+        created and depth is considered to be zero (i.e. the node is a new
+        root).
 
-        Note that this logic ensures that the depth of every node is always larger than the depth of its
-        parents (this should help with rendering nice diagrams :)).
+        Note that this logic ensures that the depth of every node is always
+        larger than the depth of its parents (this should help with rendering
+        nice diagrams :)).
         """
 
         fixed_vars, _ = percolate_space(
             self.network, stable_motif, strict_percolation=False
         )
 
-        # Key is a binary encoding of the fixed_vars dictionary. Since Python has
-        # arbitrary-precision integers, this should work for any network and be
-        # reasonably fast (we are not doing any copies or string manipulation).
+        # Key is a binary encoding of the fixed_vars dictionary. Since Python
+        # has arbitrary-precision integers, this should work for any network and
+        # be reasonably fast (we are not doing any copies or string
+        # manipulation).
         key: int = 0
         for k, v in fixed_vars.items():
             var = self.network.find_variable(k)
             assert var
             var_index: int = var.as_index()
-            # Each variable is encoded as two bits, so the total length
-            # of the key is 2 * n and the offset of each variable is 2 * index.
-            # 00 - unknown; 10 - zero; 11 - one
+            # Each variable is encoded as two bits, so the total length of the
+            # key is 2 * n and the offset of each variable is 2 * index. 00 -
+            # unknown; 10 - zero; 11 - one
             key |= (v + 2) << (2 * var_index)
 
         depth = 0 if parent_id is None else (self.node_depth(parent_id) + 1)
@@ -285,11 +296,13 @@ class SuccessionDiagram:
 
     def expand_attractors(self, node_id: int) -> list[dict[str, int]]:
         """
-        Compute the list of attractor "seed" vertices associated with the given `node_id`.
-        If the attractors are already known, simply return the known result.
+        Compute the list of attractor "seed" vertices associated with the given
+        `node_id`. If the attractors are already known, simply return the known
+        result.
 
-        Note that (at the moment), this method only considers a single node. I.e. if does not return the
-        attractors of any successor nodes for the given `node_id`.
+        Note that (at the moment), this method only considers a single node.
+        I.e. if does not return the attractors of any successor nodes for the
+        given `node_id`.
         """
 
         if node_id in self.attr_expanded:
@@ -307,11 +320,11 @@ class SuccessionDiagram:
             self.attractors[node_id] = [node_space]
             return [node_space]
 
-        # Fix everything in the NFVS to zero, as long as
-        # it isn't already fixed by our `node_space`.
+        # Fix everything in the NFVS to zero, as long as it isn't already fixed
+        # by our `node_space`.
         #
-        # We add the whole node space to the retain set because we know
-        # the space is a trap and this will remove the corresponding unnecessary
+        # We add the whole node space to the retain set because we know the
+        # space is a trap and this will remove the corresponding unnecessary
         # Petri net transitions.
         retained_set = node_space.copy()
         for x in self.nfvs:
@@ -323,13 +336,12 @@ class SuccessionDiagram:
         ]
 
         if len(retained_set) == self.network.num_vars() and len(child_spaces) == 0:
-            # There is only a single attractor remaining here,
-            # and its "seed" is the retain set.
+            # There is only a single attractor remaining here, and its "seed" is
+            # the retain set.
             self.attractors[node_id] = [retained_set]
             return [retained_set]
 
-        # old code
-        # terminal_restriction_space = ~state_list_to_bdd(child_spaces)
+        # old code terminal_restriction_space = ~state_list_to_bdd(child_spaces)
 
         # new code that should be the same as before
         terminal_restriction_space = get_terminal_restriction_space(
@@ -339,27 +351,6 @@ class SuccessionDiagram:
             use_single_node_drivers=False,
             use_tr_trapspaces=False,
         )
-
-        # use single node drivers
-        # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
-        #                                                             self.network,
-        #                                                             ensure_subspace=node_space,
-        #                                                             use_single_node_drivers=True,
-        #                                                             use_tr_trapspaces=False)
-
-        # use time reversal trapspaces
-        # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
-        #                                                             self.network,
-        #                                                             ensure_subspace=node_space,
-        #                                                             use_single_node_drivers=False,
-        #                                                             use_tr_trapspaces=True)
-
-        # # use single node drivers and time reversal trapspaces
-        # terminal_restriction_space = get_terminal_restriction_space(child_spaces,
-        #                                                             self.network,
-        #                                                             ensure_subspace=node_space,
-        #                                                             use_single_node_drivers=True,
-        #                                                             use_tr_trapspaces=True)
 
         candidate_seeds = compute_fixed_point_reduced_STG(
             self.petri_net,
