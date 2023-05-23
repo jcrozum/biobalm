@@ -1,37 +1,46 @@
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, find_attractors # type: ignore
 import sys
 
+from biodivine_aeon import find_attractors  # type: ignore
+from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph  # type: ignore
+
+from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+
+
 def test_succession_diagram_structure():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         x1, x2
         x2, x1
         x3, !x3
-        """)
+        """
+    )
 
-    SD = SuccessionDiagram(bn)
-    SD.expand_node(SD.root(), depth_limit=None)
-    assert SD.G.number_of_nodes() == 3
-    assert SD.G.number_of_edges() == 2
-    assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 1
-    
-    bn = BooleanNetwork.from_bnet("""
+    succession_diagram = SuccessionDiagram(bn)
+    succession_diagram.expand_node(succession_diagram.root(), depth_limit=None)
+    assert succession_diagram.G.number_of_nodes() == 3
+    assert succession_diagram.G.number_of_edges() == 2  # type: ignore
+    assert max(d["depth"] for _, d in succession_diagram.G.nodes(data=True)) == 1  # type: ignore
+
+    bn = BooleanNetwork.from_bnet(
+        """
     a, b
     b, a
     c, a & c & d | b & !c | c & !d
     d, !a | d | c
-    """)
-    
-    SD = SuccessionDiagram(bn)
-    SD.expand_node(SD.root(), depth_limit=None)
-    assert SD.G.number_of_nodes() == 4
-    assert SD.G.number_of_edges() == 5
-    assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
-    
-    
+    """
+    )
+
+    succession_diagram = SuccessionDiagram(bn)
+    succession_diagram.expand_node(succession_diagram.root(), depth_limit=None)
+    assert succession_diagram.G.number_of_nodes() == 4
+    assert succession_diagram.G.number_of_edges() == 5  # type: ignore
+    assert max(d["depth"] for n, d in succession_diagram.G.nodes(data=True)) == 2  # type: ignore
+
+
 # TODO: add tests for a wider variety of networks
 
-def test_attractor_detection(network_file):
+
+def test_attractor_detection(network_file: str):
     # TODO: Once attractor detection is faster, we should increase this limit.
     # Right now, checking attractors in larger succession diagrams would often time out our CI.
     NODE_LIMIT = 100
@@ -42,9 +51,9 @@ def test_attractor_detection(network_file):
     # TODO: Remove these once method is fast enough.
     print(network_file)
     if network_file.endswith("146.bnet"):
-        # For this model, we can compute the 100 SD nodes, but it takes a very long time
-        # and the SD is larger, so we wouldn't get to attractor computation anyway.
-        NODE_LIMIT = 10
+        # For this model, we can compute the 100 succession_diagram nodes, but it takes a very long time
+        # and the succession_diagram is larger, so we wouldn't get to attractor computation anyway.
+        NODE_LIMIT = 10  # type: ignore
 
     bn = BooleanNetwork.from_file(network_file)
     bn = bn.infer_regulatory_graph()
@@ -54,23 +63,22 @@ def test_attractor_detection(network_file):
     sd = SuccessionDiagram(bn)
     expanded = sd.expand_node(sd.root(), depth_limit=1000, node_limit=NODE_LIMIT)
 
-    # SD must be fully expanded, otherwise we may miss some results.
-    # If SD is not fully expanded, we just skip this network.
+    # succession_diagram must be fully expanded, otherwise we may miss some results.
+    # If succession_diagram is not fully expanded, we just skip this network.
     if expanded >= NODE_LIMIT:
         return
-    
+
     print(expanded)
 
-    # TODO: Remove these once method is fast enough. 
+    # TODO: Remove these once method is fast enough.
     if network_file.endswith("075.bnet"):
         # It seems that with current NFVS, the clingo fixed-point part takes too long. There are
         # better NFVS-es that we could try, but we first need to make the NFVS algorithm deterministic.
         return
 
-
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
-    nfvs_attractors = []
+    nfvs_attractors: list[dict[str, int]] = []
     for i in range(sd.G.number_of_nodes()):
         attr = sd.expand_attractors(i)
         for a in attr:
@@ -80,25 +88,25 @@ def test_attractor_detection(network_file):
             nfvs_attractors += attr
 
     # Compute symbolic attractors using AEON.
-    symbolic_attractors = find_attractors(stg)
+    symbolic_attractors = find_attractors(stg)  # type: ignore
 
     # Check that every "seed" returned by SuccessionDiagram appears in
     # some symbolic attractor, and that every symbolic attractor contains
     # at most one such "seed" state.
     for seed in nfvs_attractors:
-        symbolic_seed = stg.fix_subspace({ k:bool(v) for k,v in seed.items() })
+        symbolic_seed = stg.fix_subspace({k: bool(v) for k, v in seed.items()})  # type: ignore
         found = None
-        
+
         # The "seed" state must have a symbolic attractor (and that
         # attractor mustn't have been removed yet).
-        for i in range(len(symbolic_attractors)):
-            if symbolic_seed.is_subset(symbolic_attractors[i]):
+        for i in range(len(symbolic_attractors)):  # type: ignore
+            if symbolic_seed.is_subset(symbolic_attractors[i]):  # type: ignore
                 found = i
         assert found is not None
 
-        symbolic_attractors.pop(found)
+        symbolic_attractors.pop(found)  # type: ignore
 
     print("Attractors:", len(nfvs_attractors))
 
     # All symbolic attractors must be covered by some seed at this point.
-    assert len(symbolic_attractors) == 0
+    assert len(symbolic_attractors) == 0  # type: ignore
