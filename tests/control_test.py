@@ -82,10 +82,11 @@ def test_basic_succession_finding():
     successions = successions_to_target(succession_diagram, target)
 
     successions_hashed = set(
-        frozenset(ts.items()) for succession in successions for ts in succession
+        tuple(frozenset(ts.items()) for ts in succession) for succession in successions
     )
     targets_hashed = set(
-        frozenset(ts.items()) for succession in target_successions for ts in succession
+        tuple(frozenset(ts.items()) for ts in succession)
+        for succession in target_successions
     )
 
     assert targets_hashed == successions_hashed
