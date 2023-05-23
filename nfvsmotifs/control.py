@@ -72,7 +72,9 @@ def find_internal_drivers(
                 continue
 
             driver_dict = {k: target_trap_space_inner[k] for k in driver_set}
-            ldoi, _ = percolate_space(bn, driver_dict | assume_fixed)
+            ldoi, _ = percolate_space(
+                bn, driver_dict | assume_fixed, strict_percolation=False
+            )
 
             if target_trap_space_inner.items() <= ldoi.items():
                 drivers.append(driver_dict)
