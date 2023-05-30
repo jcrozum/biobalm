@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
-    
+
 from nfvsmotifs.space_utils import is_subspace
 from nfvsmotifs.trappist_core import trappist
 
@@ -18,59 +18,48 @@ def expand_minimal_spaces(sd: SuccessionDiagram):
 
     root = sd.root()
 
-    seen = set()
-    seen.add(root)
+    seen = set([root])    
 
-    level_id = 0
-    current_level = [root]
-    next_level = []
+    stack: list[tuple[int, list[int] | None]] = [(root, None)]
 
-    while len(current_level) > 0:
-        remaining_traps = minimal_traps.copy()
-
-        # First, eliminate all trap spaces that are covered by an already expanded node.
-        for node in current_level:
-            if not sd.node_is_expanded(node):
-                continue
-
-            node_space = sd.node_space(node)
-            # Remove all traps that are subspaces of this expanded node.        
-            remaining_traps = [ t for t in remaining_traps if not is_subspace(t, node_space)]
-
-            # Also add all successors to the next level, we may need to explore these further.
-            for s in sorted(sd.node_successors(node)):
-                if s not in seen:
-                    seen.add(s)
-                    next_level.append(s)
-
-        # Now, do the same thing again, but this time actually expand nodes.
-        for node in current_level:
-            if sd.node_is_expanded(node):
-                continue    # Expanded nodes are already processed.
-
-            node_space = sd.node_space(node)
-            original = len(remaining_traps)
-            remaining_traps = [ t for t in remaining_traps if not is_subspace(t, node_space)]
-            updated = len(remaining_traps)
-
-            if updated == original:
-                # This node does not cover any new minimal trap spaces. It is thus safe to
-                # keep it as an unexpanded stub.
-                continue
-
+    while len(stack) > 0:
+        (node, successors) = stack.pop()
+        if successors is None:
             successors = sd.node_successors(node, compute=True)
-            successors = sorted(successors)
+            successors = sorted(successors, reverse=True) # For determinism!
+            # (reversed because we explore the list from the back)
 
-            # Add successors to the next level and to the seen set.
-            for s in successors:
-                if s not in seen:
-                    seen.add(s)
-                    next_level.append(s)
+        node_space = sd.node_space(node)
 
-        assert len(remaining_traps) == 0
+        # Remove all immediate successors that are already visited or those who
+        # do not cover any new minimal trap space.        
+        while len(successors) > 0:            
+            if successors[-1] in seen:
+                successors.pop()    
+                continue
+            if len([s for s in minimal_traps if is_subspace(s, node_space)]) == 0:
+                successors.pop()
+                continue
+            break
 
-        level_id += 1
-        current_level = next_level
-        next_level = []
+        # This node is done and we don't have to push anything onto the stack.
+        # In particular, it means that every minimal trap space which is a subset
+        # of this node is already in the succession diagram.
+        if len(successors) == 0:
+            if sd.node_is_minimal(node):
+                minimal_traps.remove(sd.node_space(node))
+            continue
 
+        # At this point, we know that `s` is not visited and it contains
+        # at least one minimal trap space that does not appear in the 
+        # succession diagram yet.
+
+        s = successors.pop()
+        seen.add(s)
+        # Push the node back with the remaining successors.
+        stack.append((node, successors))
+        # Push the successor onto the stack.
+        stack.append((s, None))
+
+    assert len(minimal_traps) == 0
     return True

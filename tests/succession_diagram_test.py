@@ -28,8 +28,66 @@ def test_succession_diagram_structure():
     assert SD.G.number_of_edges() == 5
     assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
     
+def test_expansion_depth_limit_bfs():
+    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+
+    sd = SuccessionDiagram(bn)
+    assert not sd.expand_bfs(bfs_level_limit=3)
+    assert sd.expand_bfs(bfs_level_limit=10)
+    assert len(sd) == 432
     
+def test_expansion_depth_limit_dfs():
+    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+
+    sd = SuccessionDiagram(bn)
+    assert not sd.expand_dfs(dfs_stack_limit=3)
+    assert sd.expand_dfs(dfs_stack_limit=10)
+    assert len(sd) == 432
+
+def test_expansion_size_limit_bfs():
+    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+
+    sd = SuccessionDiagram(bn)
+    assert not sd.expand_bfs(size_limit=200)
+    assert sd.expand_bfs(size_limit=500)
+    assert len(sd) == 432
+
+def test_expansion_size_limit_dfs():
+    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+
+    sd = SuccessionDiagram(bn)
+    assert not sd.expand_dfs(size_limit=200)
+    assert sd.expand_dfs(size_limit=500)
+    assert len(sd) == 432
+
 # TODO: add tests for a wider variety of networks
+
+def test_expansion_comparisons(network_file):
+    # Compare the succession diagrams for various expansion methods.
+    
+    NODE_LIMIT = 100
+    DEPTH_LIMIT = 10
+
+    sys.setrecursionlimit(150000)
+
+    bn = BooleanNetwork.from_file(network_file)
+    bn = bn.infer_regulatory_graph()
+    
+    sd_bfs = SuccessionDiagram(bn)
+    bfs_success = sd_bfs.expand_bfs(bfs_level_limit=DEPTH_LIMIT, size_limit=NODE_LIMIT)
+    sd_dfs = SuccessionDiagram(bn)
+    dfs_success = sd_dfs.expand_dfs(dfs_stack_limit=DEPTH_LIMIT, size_limit=NODE_LIMIT)
+
+    if not (bfs_success and dfs_success):
+        # SD is too large for this test.
+        return
+
+    sd_min = SuccessionDiagram(bn)
+    sd_min.expand_minimal_spaces()
+
+    assert sd_bfs.is_isomorphic(sd_dfs)
+    assert sd_min.is_subgraph(sd_bfs)
+    assert sd_min.is_subgraph(sd_dfs)
 
 def test_attractor_detection(network_file):
     # TODO: Once attractor detection is faster, we should increase this limit.

@@ -43,6 +43,7 @@ class SuccessionDiagram:
             * `SuccessionDiagram.depth()`: The depth (hight?) of the current succession diagram.
             * `SuccessionDiagram.node_ids() / .stub_ids() / .expanded_ids()`: Iterates over the 
             corresponding *node IDs* managed by this SD.
+            * `SuccessionDiagram.is_subgraph() / .is_isomorphic()`: Compares two succession diagrams.
         - Inspecting individual nodes:
             * `SuccessionDiagram.node_depth(id)`: The depth (length of a maximal path from the 
             root) of the given node.
