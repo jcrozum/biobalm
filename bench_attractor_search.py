@@ -3,6 +3,10 @@ from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 import sys
 import nfvsmotifs
 
+# A simple script to benchmark attractor detection using succession diagrams.
+# The script only has one argument: a path to the network file.
+# Currently, the script performs full succession diagram expansion.
+
 # Print progress and succession diagram size.
 nfvsmotifs.SuccessionDiagram.DEBUG = True
 
@@ -34,4 +38,4 @@ for i in range(sd.G.number_of_nodes()):
     if len(attr) > 0:
         nfvs_attractors += attr
 
-print("Attractor count:", len(nfvs_attractors))
+print("Attractors:", len(nfvs_attractors))

@@ -20,3 +20,4 @@ sd = SuccessionDiagram(bn)
 expanded = sd.expand_node(sd.root(), depth_limit=DEPTH_LIMIT, node_limit=NODE_LIMIT)
 
 print(f"Succession diagram size:", expanded)
+print(f"Minimal traps:", len(sd.find_all_minimal_nodes()))
