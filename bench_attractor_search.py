@@ -21,17 +21,17 @@ bn = bn.infer_regulatory_graph()
 
 # Compute the succession diagram.
 sd = SuccessionDiagram(bn)
-expanded = sd.expand_node(sd.root(), depth_limit=DEPTH_LIMIT, node_limit=NODE_LIMIT)
+fully_expanded = sd.expand_bfs(bfs_level_limit=DEPTH_LIMIT, size_limit=NODE_LIMIT)
 
-print("Succession diagram size:", expanded)
+print("Succession diagram size:", len(sd))
 
 # SD must be fully expanded, otherwise we may miss some results.
-assert expanded < NODE_LIMIT
+assert fully_expanded
 
 # Compute attractors in succession diagram nodes.
 nfvs_attractors = []
-for i in range(sd.G.number_of_nodes()):
-    attr = sd.expand_attractors(i)
+for i in sd.node_ids():
+    attr = sd.node_attractor_seeds(i, compute=True)
     for a in attr:
         # Just a simple sanity check.
         assert len(a) == bn.num_vars()
