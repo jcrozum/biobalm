@@ -1,5 +1,11 @@
+from __future__ import annotations
 
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+
+    
 from nfvsmotifs.space_utils import is_subspace
 from nfvsmotifs.trappist_core import trappist
 

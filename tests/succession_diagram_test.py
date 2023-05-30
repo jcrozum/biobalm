@@ -10,7 +10,7 @@ def test_succession_diagram_structure():
         """)
 
     SD = SuccessionDiagram(bn)
-    SD.expand_node(SD.root(), depth_limit=None)
+    SD.expand_bfs()
     assert SD.G.number_of_nodes() == 3
     assert SD.G.number_of_edges() == 2
     assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 1
@@ -23,7 +23,7 @@ def test_succession_diagram_structure():
     """)
     
     SD = SuccessionDiagram(bn)
-    SD.expand_node(SD.root(), depth_limit=None)
+    SD.expand_bfs()
     assert SD.G.number_of_nodes() == 4
     assert SD.G.number_of_edges() == 5
     assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
@@ -52,14 +52,12 @@ def test_attractor_detection(network_file):
 
     # Compute the succession diagram.
     sd = SuccessionDiagram(bn)
-    expanded = sd.expand_node(sd.root(), depth_limit=1000, node_limit=NODE_LIMIT)
+    fully_expanded = sd.expand_bfs(bfs_level_limit=1000, size_limit=NODE_LIMIT)
 
     # SD must be fully expanded, otherwise we may miss some results.
     # If SD is not fully expanded, we just skip this network.
-    if expanded >= NODE_LIMIT:
+    if not fully_expanded:
         return
-    
-    print(expanded)
 
     # TODO: Remove these once method is fast enough. 
     if network_file.endswith("075.bnet"):
@@ -72,7 +70,7 @@ def test_attractor_detection(network_file):
     # TODO: There will probably be a method that does this in one "go".
     nfvs_attractors = []
     for i in range(sd.G.number_of_nodes()):
-        attr = sd.expand_attractors(i)
+        attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
             # Just a simple sanity check.
             assert len(a) == bn.num_vars()

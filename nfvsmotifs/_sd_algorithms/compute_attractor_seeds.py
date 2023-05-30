@@ -1,5 +1,10 @@
+from __future__ import annotations
 
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
 from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG, trappist

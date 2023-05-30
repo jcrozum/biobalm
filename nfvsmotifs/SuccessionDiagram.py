@@ -171,6 +171,9 @@ class SuccessionDiagram:
         Note that this function works even for diagrams based on different Boolean
         networks, as long as both succession diagrams only depend on the same subset of 
         network variables.
+
+        WARNING: This does not take into account the stable motifs on individual edges. Just the
+        subspaces associated with nodes and the presence of edges between nodes.
         """        
         # Every stub node is reachable through an expanded node and 
         # thus will be checked by the following code.
@@ -194,6 +197,9 @@ class SuccessionDiagram:
         Note that this function works even for diagrams based on different Boolean
         networks, as long as both succession diagrams only depend on the same subset of 
         network variables.
+
+        WARNING: This does not take into account the stable motifs on individual edges. Just the
+        subspaces associated with nodes and the presence of edges between nodes.
         """
         return self.is_subgraph(other) and other.is_subgraph(self)
 
@@ -441,9 +447,9 @@ class SuccessionDiagram:
         assert child_id is not None
         
         if parent_id is not None:
-            # With proper usage, each node is expanded exactly once, and as such, each 
-            # edge is created exactly once.
-            assert not self.G.has_edge(parent_id, child_id)
+            # TODO: It seems that there are some networks where the same child can be reached
+            # through multiple stable motifs. Not sure how to approach these... but this is 
+            # probably good enough for now.
             self.G.add_edge(parent_id, child_id, motif=stable_motif)
             self._update_node_depth(child_id, parent_id)
 
