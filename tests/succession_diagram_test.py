@@ -1,33 +1,80 @@
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, find_attractors # type: ignore
 import sys
+import nfvsmotifs
+import unittest
 
-def test_succession_diagram_structure():
-    bn = BooleanNetwork.from_bnet("""
-        x1, x2
-        x2, x1
-        x3, !x3
+# This just ensures that the debug outputs are a part of the test output.
+nfvsmotifs.SuccessionDiagram.DEBUG = True
+
+class SDTest(unittest.TestCase):
+    def test_succession_diagram_structure(self):
+        bn = BooleanNetwork.from_bnet("""
+            x1, x2
+            x2, x1
+            x3, !x3
+            """)
+
+        SD = SuccessionDiagram(bn)
+        SD.expand_bfs()
+        assert SD.G.number_of_nodes() == 3
+        assert SD.G.number_of_edges() == 2
+        assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 1
+        assert SD.depth() == 1
+        assert max([SD.node_depth(i) for i in SD.node_ids()]) == SD.depth()
+        assert sum(1 for _ in SD.node_ids()) == len(SD)
+        assert sum(1 for _ in SD.expanded_ids()) == len(SD)
+        assert len(SD.minimal_trap_spaces()) == 2
+        assert SD.find_node({"x1": 1, "x2": 0}) is None
+        
+        SD_one = SD
+
+        bn = BooleanNetwork.from_bnet("""
+        a, b
+        b, a
+        c, a & c & d | b & !c | c & !d
+        d, !a | d | c
         """)
+        
+        SD = SuccessionDiagram(bn)
 
-    SD = SuccessionDiagram(bn)
-    SD.expand_bfs()
-    assert SD.G.number_of_nodes() == 3
-    assert SD.G.number_of_edges() == 2
-    assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 1
-    
-    bn = BooleanNetwork.from_bnet("""
-    a, b
-    b, a
-    c, a & c & d | b & !c | c & !d
-    d, !a | d | c
-    """)
-    
-    SD = SuccessionDiagram(bn)
-    SD.expand_bfs()
-    assert SD.G.number_of_nodes() == 4
-    assert SD.G.number_of_edges() == 5
-    assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
-    
+        # Initially, nothing is expanded so this should cause an error.
+        with self.assertRaises(KeyError):
+            SD.node_successors(SD.root())
+        
+        # Also, attractors are initially unknown too.
+        with self.assertRaises(KeyError):
+            SD.node_attractor_seeds(SD.root())
+
+        # Expand the root manually and check that iterators work correctly.
+        SD.node_successors(SD.root(), compute=True)
+        assert sum(1 for _ in SD.stub_ids()) == len(SD) - 1
+        assert sum(1 for _ in SD.expanded_ids()) == 1    
+
+        # Then expand the whole thing.
+        SD.expand_bfs()
+        assert SD.G.number_of_nodes() == 4
+        assert SD.G.number_of_edges() == 5
+        assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
+        assert SD.depth() == 2
+        assert max([SD.node_depth(i) for i in SD.node_ids()]) == SD.depth()
+        assert sum(1 for _ in SD.node_ids()) == len(SD)
+        assert sum(1 for _ in SD.expanded_ids()) == len(SD)
+        assert len(SD.minimal_trap_spaces()) == 2
+        assert SD.find_node({"a": 1, "b": 0}) is None
+
+        # The comparison functions should work even if the diagrams
+        # are not based on the same network.
+        assert not SD.is_subgraph(SD_one)
+        assert not SD_one.is_subgraph(SD)
+        assert not SD.is_isomorphic(SD_one)
+
+        SD_partial = SuccessionDiagram(bn)
+        SD_partial.node_successors(SD.root(), compute=True)
+
+        assert SD_partial.is_subgraph(SD)
+        assert not SD.is_subgraph(SD_partial)
+
 def test_expansion_depth_limit_bfs():
     bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
 
@@ -64,7 +111,7 @@ def test_expansion_size_limit_dfs():
 
 def test_expansion_comparisons(network_file):
     # Compare the succession diagrams for various expansion methods.
-    
+    nfvsmotifs.SuccessionDiagram.DEBUG = True
     NODE_LIMIT = 100
     DEPTH_LIMIT = 10
 

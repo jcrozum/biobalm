@@ -155,15 +155,20 @@ class SuccessionDiagram:
         Return the ID of the node matching the provided `node_space`, or `None` if no such
         node exists in this succession diagram.
         """
-        key = space_unique_key(node_space, self.network)
-        if key in self.node_indices:
-            i = self.node_indices[key]
-            # This assertion could be violated if a user gives a node space that is not based
-            # on the same network as this succession diagram.
-            assert node_space == self.node_space(i)
-            return i
-        else:
-            return None
+        try:
+            key = space_unique_key(node_space, self.network)
+            if key in self.node_indices:
+                i = self.node_indices[key]
+                # This assertion could be violated if a user gives a node space that is not based
+                # on the same network as this succession diagram.
+                assert node_space == self.node_space(i)
+                return i
+            else:
+                return None
+        except RuntimeError:
+            # If the user gives us a space that uses variables not used by this network, 
+            # we should get an error that we can catch and report that no such space exists here.
+            return None                    
 
     def is_subgraph(self, other: SuccessionDiagram) -> bool:
         """
@@ -183,7 +188,9 @@ class SuccessionDiagram:
             if other_i is None:
                 return False
             my_successors = self.node_successors(i)
-            other_successors = other.node_successors(other_i)
+            other_successors = []
+            if other.node_is_expanded(other_i):                
+                other_successors = other.node_successors(other_i)
 
             for my_s in my_successors:
                 other_s = other.find_node(self.node_space(my_s))
