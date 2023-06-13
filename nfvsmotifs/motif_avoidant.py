@@ -112,7 +112,7 @@ def _preprocess_candidates(
             continue
         var_name = network.get_variable_name(varID)
         variables.append(var_name)
-        function_expression = network.get_update_function(var) 
+        function_expression = network.get_update_function(varID) 
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 

@@ -338,8 +338,8 @@ class SuccessionDiagram:
                         retained_set[x] = least_common_child_space[x]
                     else:
                         """Set nodes to values based on the majority of satisfying values of functions"""
-                        fx = self.network.get_update_function(x)
-                        fx = aeon_to_pyeda(fx)
+                        aeon_fx = self.network.get_update_function(x)
+                        fx = aeon_to_pyeda(aeon_fx)
                         n_input = len(list(fx.support))
                         n_poss_sat = pow(2, n_input - 1)
 
@@ -360,8 +360,8 @@ class SuccessionDiagram:
                     #retained_set[x] = 0
 
                     """Set nodes to values based on the majority of satisfying values of functions"""
-                    fx = self.network.get_update_function(x)
-                    fx = aeon_to_pyeda(fx)
+                    aeon_fx = self.network.get_update_function(x)
+                    fx = aeon_to_pyeda(aeon_fx)
                     n_input = len(list(fx.support))
                     n_poss_sat = pow(2, n_input - 1)
 
