@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from biodivine_aeon import VariableId # type: ignore
+    from biodivine_aeon import VariableId
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable
+    from pyeda.boolalg.expr import Expression
+    from typing import Any
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
-from networkx import DiGraph # type: ignore
-
-from typing import List, Set
-from networkx.algorithms import bipartite # type: ignore
-
-from pyeda.boolalg.expr import expr # type: ignore
-from pyeda.boolalg.bdd import expr2bdd, bddvar # type: ignore
+from networkx import DiGraph  # type: ignore
+from networkx.algorithms import bipartite  # type: ignore
+from pyeda.boolalg.bdd import bddvar, expr2bdd
+from pyeda.boolalg.expr import expr
 
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 from nfvsmotifs.SignedGraph import SignedGraph
@@ -21,19 +22,20 @@ A python package for approximating minimum feedback vertex sets
 """
 from nfvsmotifs.FVSpython3 import FVS as FVS
 
+
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     """
-        Takes an arbitrary `BooleanNetwork` and extracts a signed interacion graph 
-        based on the *actual* dependencies of the network's update functions.
+    Takes an arbitrary `BooleanNetwork` and extracts a signed interacion graph
+    based on the *actual* dependencies of the network's update functions.
 
-        In particular, this eliminates things like unused variables and it will also
-        infer correct monotonicity of inputs. Importantly, this is performed using
-        BDDs, so it is not merely a syntactic transformation (but general BDD 
-        limitations apply).
+    In particular, this eliminates things like unused variables and it will also
+    infer correct monotonicity of inputs. Importantly, this is performed using
+    BDDs, so it is not merely a syntactic transformation (but general BDD
+    limitations apply).
 
-        In the resulting digraph, we use edge attribute `sign="+"` or `sign="-"`
-        to differentiate between positive and negative edges. An iteraction that
-        is not monotonic is represented as `sign="?"`.
+    In the resulting digraph, we use edge attribute `sign="+"` or `sign="-"`
+    to differentiate between positive and negative edges. An iteraction that
+    is not monotonic is represented as `sign="?"`.
     """
     # Since the model files can be incorrect, we have to infer the regulations
     # from the network functions directly. Note that this step uses BDDs, so in the
@@ -46,135 +48,148 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     ig = DiGraph()
 
     for var in rg.variables():
-        ig.add_node(rg.get_variable_name(var))
+        ig.add_node(rg.get_variable_name(var))  # type: ignore
 
     for reg in rg.regulations():
-        if not reg['observable']:
-            # In general, a fully specified network should only contain 
+        if not reg["observable"]:
+            # In general, a fully specified network should only contain
             # observable (i.e. essential) regulations.
-            raise Exception("Unreachable: You are using this on partially specified networks, aren't you?")
-        source = rg.get_variable_name(reg['source'])
-        target = rg.get_variable_name(reg['target'])
-        sign = "?"        
-        if 'monotonicity' in reg:
+            raise Exception(
+                "Unreachable: You are using this on partially specified networks, aren't you?"
+            )
+        source = rg.get_variable_name(reg["source"])
+        target = rg.get_variable_name(reg["target"])
+        sign = "?"
+        if "monotonicity" in reg:
             # Monotonic regulation---add only one edge.
-            if reg['monotonicity'] == 'activation':
+            if reg["monotonicity"] == "activation":
                 sign = "+"
-            elif reg['monotonicity'] == 'inhibition':
+            elif reg["monotonicity"] == "inhibition":
                 sign = "-"
             else:
-                raise Exception(f"Unreachable: unknown monotonicity {reg['monotonicity']}.")
-        ig.add_edge(source, target, sign=sign)
+                raise Exception(
+                    f"Unreachable: unknown monotonicity {reg['monotonicity']}."
+                )
+        ig.add_edge(source, target, sign=sign)  # type: ignore
     return ig
+
 
 def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     """
-        A helper method to transform between a "signed digraph" and AEON's `RegulatoryGraph`.
+    A helper method to transform between a "signed digraph" and AEON's `RegulatoryGraph`.
 
-        All nodes of the digraph should have string identifiers. Edges can be optionally 
-        annotated with a `sign` value `"+"`, `"-"` or `"?"` (however, `"?"` is treated the 
-        same as a missing `sign` annotation).
+    All nodes of the digraph should have string identifiers. Edges can be optionally
+    annotated with a `sign` value `"+"`, `"-"` or `"?"` (however, `"?"` is treated the
+    same as a missing `sign` annotation).
     """
-    rg = RegulatoryGraph(list(graph.nodes()))
-    for edge in graph.edges():
-        edge_data = graph.get_edge_data(edge[0], edge[1])
+    rg = RegulatoryGraph(list(graph.nodes()))  # type: ignore
+    for edge in graph.edges():  # type: ignore
+        edge_data: dict[Any, Any] = graph.get_edge_data(edge[0], edge[1])  # type: ignore
         monotonicity = None
-        if 'sign' in edge_data:
-            sign = edge_data['sign']
-            if sign == '+':
-                monotonicity = 'activation'
-            elif sign == '-':
-                monotonicity = 'inhibition'
-            elif sign != '?':
-                raise Exception(f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'")
-        rg.add_regulation({
-            'source': edge[0],
-            'target': edge[1],
-            'observable': True, # For now, observability is not in the graph.
-            'monotonicity': monotonicity
-        })
+        if "sign" in edge_data:
+            sign: str = edge_data["sign"]  # type: ignore
+            if sign == "+":
+                monotonicity = "activation"
+            elif sign == "-":
+                monotonicity = "inhibition"
+            elif sign != "?":
+                raise Exception(
+                    f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'"
+                )
+        rg.add_regulation(
+            {
+                "source": edge[0],
+                "target": edge[1],
+                "observable": True,  # For now, observability is not in the graph.
+                "monotonicity": monotonicity,
+            }
+        )
 
     return rg
 
 
 def feedback_vertex_set(
-    network: BooleanNetwork | RegulatoryGraph | DiGraph, 
-    parity: str | None = None, 
-    subgraph: list[str | VariableId] | None = None
+    network: BooleanNetwork | RegulatoryGraph | DiGraph,
+    parity: str | None = None,
+    subgraph: list[str | VariableId] | None = None,
 ) -> list[str]:
     """
-        Compute an approximately minimal feedback vertex set (FVS) of
-        a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
-        on its edges. The result is guaranteed to be a feedback vertex set, but it might not be minimal.
+    Compute an approximately minimal feedback vertex set (FVS) of
+    a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations
+    on its edges. The result is guaranteed to be a feedback vertex set, but it might not be minimal.
 
-        There are two optional parameters:
+    There are two optional parameters:
 
-         - `parity`: Can be either `positive` or 'negative'. If parity is specified, only cycles of the 
-            specified parity are considered (e.g. if `parity='negative'`, there can still be positive
-            cycles in the graph not covered by the returned feedback vertex set).
-         - `subgraph`: A list of network variables (either string names or AEON `VariableId` 
-            objects are fine). If given, the result is the FVS of the sub-graph induced by
-            these network nodes.
+     - `parity`: Can be either `positive` or 'negative'. If parity is specified, only cycles of the
+        specified parity are considered (e.g. if `parity='negative'`, there can still be positive
+        cycles in the graph not covered by the returned feedback vertex set).
+     - `subgraph`: A list of network variables (either string names or AEON `VariableId`
+        objects are fine). If given, the result is the FVS of the sub-graph induced by
+        these network nodes.
 
-        The result is a list of variable names representing the FVS. The variables are always sorted
-        based on the order in which they appear in the network (which is typically lexicographic, 
-        if the network is loaded from a file and not made "by hand").
+    The result is a list of variable names representing the FVS. The variables are always sorted
+    based on the order in which they appear in the network (which is typically lexicographic,
+    if the network is loaded from a file and not made "by hand").
 
-        The method should be deterministic (the same pseudo-optimal FVS is returned every time).
+    The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
-    if type(network) == BooleanNetwork:
+    if isinstance(network, BooleanNetwork):
         network = network.graph()
-    if type(network) == DiGraph:
+    if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
+    assert isinstance(network, RegulatoryGraph)
     fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph)
     return [network.get_variable_name(x) for x in fvs]
+
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
     parity: str | None = None,
-    subgraph: list[str | VariableId] | None = None
+    subgraph: list[str | VariableId] | None = None,
 ) -> list[list[str]]:
     """
-        Compute an approximately maximal set of independent cycles of
-        a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations 
-        on its edges. The result is guaranteed to be a set of independent cycles, but it may
-        not be maximal.
+    Compute an approximately maximal set of independent cycles of
+    a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations
+    on its edges. The result is guaranteed to be a set of independent cycles, but it may
+    not be maximal.
 
-        There are two optional parameters:
+    There are two optional parameters:
 
-         - `parity`: Can be either `positive` or `negative`. If parity is specified, only cycles of
-            the specified parity are considered (e.g. if `pairty='negative'`, there can still be positive
-            cycles in the graph which are not covered by this independent cycle set).
-         - `subgraph`: A list of network variables (either string names or AEON `VariableId` objects
-            are fine). If given, the result is restricted to the sub-graph induced by these network
-            nodes.
+     - `parity`: Can be either `positive` or `negative`. If parity is specified, only cycles of
+        the specified parity are considered (e.g. if `pairty='negative'`, there can still be positive
+        cycles in the graph which are not covered by this independent cycle set).
+     - `subgraph`: A list of network variables (either string names or AEON `VariableId` objects
+        are fine). If given, the result is restricted to the sub-graph induced by these network
+        nodes.
 
-        The result is a list of cycles, such that each cycle is a list of variable names in the order 
-        in which they appear on the cycle. The cycles are sorted by increasing length.
+    The result is a list of cycles, such that each cycle is a list of variable names in the order
+    in which they appear on the cycle. The cycles are sorted by increasing length.
 
-        In general, the method should be deterministic (the same pseudo-optimal cycles are returned
-        every time). However, while I believe the sorting should be stable too, please treat the 
-        order of returned cycles with caution :)
+    In general, the method should be deterministic (the same pseudo-optimal cycles are returned
+    every time). However, while I believe the sorting should be stable too, please treat the
+    order of returned cycles with caution :)
     """
-    if type(network) == BooleanNetwork:
+    if isinstance(network, BooleanNetwork):
         network = network.graph()
-    if type(network) == DiGraph:
+
+    # this should never happen, but it's easy enough to convert
+    if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
+
     ic = network.independent_cycles(parity=parity, restriction=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
 
 
 def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
-
     """
     BDD variables
     """
-    bdd_vars = {}
+    bdd_vars: dict[str, BDDVariable] = {}
 
     """
     BDDs of Boolean functions
     """
-    bdd_funs = {}
+    bdd_funs: dict[str, BinaryDecisionDiagram] = {}
 
     """
     Negative feedback vertex set
@@ -185,42 +200,39 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
     List of source nodes
     """
 
-    source_nodes = []
+    source_nodes: list[str] = []
 
     """
     Node to input nodes
     """
 
-    INx = {}
+    INx: dict[str, frozenset[Expression]] = {}
 
-    nodes = []
+    nodes: list[str] = []
 
     for variable in network.variables():
         var_name = network.get_variable_name(variable)
         function = network.get_update_function(variable)
-
+        assert function is not None
         nodes.append(var_name)
 
         if function.strip() == var_name:
             source_nodes.append(var_name)
 
-        fx = aeon_to_pyeda(function)
+        fx_ex = aeon_to_pyeda(function)
 
-        INx[var_name] = fx.support # list of nodes appearing in Boolean function fx
+        # list of nodes appearing in Boolean function fx
+        INx[var_name] = fx_ex.support
 
-        vx = bddvar(var_name)
-        fx = expr2bdd(expr(fx))
+        bdd_vars[var_name] = bddvar(var_name)
+        bdd_funs[var_name] = expr2bdd(expr(fx_ex))
 
-        bdd_vars[var_name] = vx
-        bdd_funs[var_name] = fx
-
-            
     """Build the unsigned and signed interaction graphs"""
     u_ig = DiGraph()
     s_ig = SignedGraph(nodes)
-    
+
     for x in nodes:
-        u_ig.add_node(x)
+        u_ig.add_node(x)  # type: ignore
 
         fx = bdd_funs[x]
 
@@ -228,7 +240,7 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
             is_actual_arc = False
 
             vy = bdd_vars[str(y)]
-            
+
             fx_res_vy_0 = fx.restrict({vy: 0})
             fx_res_vy_1 = fx.restrict({vy: 1})
 
@@ -245,21 +257,20 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
                 s_ig.set_edge(str(y), str(x), -1)
                 is_actual_arc = True
 
-            if is_actual_arc == True:
-                u_ig.add_edge(str(y), str(x))
-
+            if is_actual_arc:
+                u_ig.add_edge(str(y), str(x))  # type: ignore
 
     """First, find feedback vertex set"""
-    U = FVS.FVS(u_ig, randomseed=0)
+    U: list[str] = FVS.FVS(u_ig, randomseed=0)  # type: ignore
 
-    U = list(set(U) - set(source_nodes))
+    U = list(set(U) - set(source_nodes))  # type: ignore
 
     """Second, filter feedback vertex set to get an negative feedback vertex set"""
     U_neg = s_ig.get_self_negative_loops()
-    U_candidate = []
+    U_candidate: list[str] = []
 
     for v in U:
-        if not v in U_neg:
+        if v not in U_neg:
             U_candidate.append(v)
 
     for v in U_neg:
@@ -267,26 +278,25 @@ def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
 
     for v in source_nodes:
         s_ig.remove_vertex(v)
-    
+
     while not is_no_negative_cycle(s_ig):
         v = select_by_negative_degree(s_ig, U_candidate)
 
         if len(v) == 0:
             break
-    
+
         U_candidate.remove(v)
 
         U_neg.append(v)
-        
+
         s_ig.remove_vertex(v)
 
-    
     return U_neg
 
 
 def is_no_negative_cycle(s_ig: SignedGraph) -> bool:
     udGraph = s_ig.convert_to_undirected_graph()
-    return bipartite.is_bipartite(udGraph)
+    return bipartite.is_bipartite(udGraph)  # type: ignore
 
 
 def select_by_negative_degree(s_ig: SignedGraph, U_candidate: list[str]) -> str:

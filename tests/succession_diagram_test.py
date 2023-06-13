@@ -15,6 +15,19 @@ def test_succession_diagram_structure():
     assert SD.G.number_of_edges() == 2
     assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 1
     
+    bn = BooleanNetwork.from_bnet("""
+    a, b
+    b, a
+    c, a & c & d | b & !c | c & !d
+    d, !a | d | c
+    """)
+    
+    SD = SuccessionDiagram(bn)
+    SD.expand_node(SD.root(), depth_limit=None)
+    assert SD.G.number_of_nodes() == 4
+    assert SD.G.number_of_edges() == 5
+    assert max(d['depth'] for n,d in SD.G.nodes(data=True)) == 2
+    
     
 # TODO: add tests for a wider variety of networks
 

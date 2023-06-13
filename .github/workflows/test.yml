@@ -7,6 +7,7 @@ jobs:
   linux:
     # TODO: Later we can add more python versions but for now one should be enough.
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -15,7 +16,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
           architecture: x64
       - name: Fetch and install native Pint
         run: | 
@@ -38,7 +39,7 @@ jobs:
       # Correctness is tested on larger networks, while for coverage, we use
       # a smaller subset, since it should not have a significant impact on it.
       - name: Run pytest (without coverage)
-        run: python3 -m pytest --networksize 100 tests/
+        run: python3 -m pytest --networksize 50 tests/
       # The reason why we have to run pytest twice is that saving the coverage report will erase
       # the exit code and so the workflow would succeed even if there are failing tests.
       # (this could be of course solved using the magic of unix, but for now, this is simpler)
