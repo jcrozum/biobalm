@@ -115,6 +115,7 @@ def function_is_true(f: BinaryDecisionDiagram, state: dict[str, int]) -> bool:
 
     return function_restrict(f, state).is_one()
 
+
 def dnf_function_is_true(dnf: list[dict[str, int]], state: dict[str, int]) -> bool:
     """
     Returns `True` if the given DNF function evaluates to `1` for the given
@@ -127,6 +128,7 @@ def dnf_function_is_true(dnf: list[dict[str, int]], state: dict[str, int]) -> bo
         if conjunction.items() <= state.items():
             return True
     return False
+
 
 def remove_state_from_dnf(
     dnf: list[dict[str, int]], state: dict[str, int]
