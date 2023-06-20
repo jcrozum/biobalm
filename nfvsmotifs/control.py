@@ -77,11 +77,19 @@ class Intervention:
         return True
 
     def __repr__(self):
-        return f"Intervention({self.control}, {self.strategy}, {self.succession})"
+        return (
+            f"Intervention("
+            f"{self.control},"
+            f"{self.strategy},"
+            f"{self.succession},"
+            f"{self.successful})"
+        )
 
     def __str__(self):
         succession_string = (
-            "operating on\n" + "\n".join(map(str, self.succession)) + "\noverride\n"
+            f"Intervention is {'' if self.successful else 'UN'}SUCCESSFUL operating on\n"
+            + "\n".join(map(str, self.succession))
+            + "\noverride\n"
         )
         if self.strategy == "internal":
             return succession_string + " and \n".join(
@@ -130,7 +138,10 @@ def succession_control(
     Returns
     -------
     list[Intervention]
-        A list of control intervention objects.
+        A list of control intervention objects. Note that interventions may be
+        unsuccessful if `max_drivers_per_succession_node` is set too small, or
+        crucial nodes are included in `forbidden_drivers`. To test, examine the
+        `successful` property of the intervention.
     """
     interventions: list[Intervention] = []
 
