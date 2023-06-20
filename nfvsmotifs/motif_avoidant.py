@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 import random
 from copy import deepcopy
 from functools import reduce
@@ -116,38 +115,34 @@ def _preprocess_candidates(
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
-    #print("Finish loading functions")
-    if is_in_an_mts == False:
-        #symbolic_candidates = state_list_to_bdd(candidates)
-        symbolic_candidates = deepcopy(candidates)
-        filtered_candidates = []
-        i = 1
-        for state in candidates:
-            #print(f"Run outside mts - {i}")
-            i += 1
-            #state_bdd = state_to_bdd(state)
+    # A random generator initialized with a fixed seed. Ensures simulation
+    # is randomized but deterministic.
+    generator = random.Random(1234567890)
 
-            # Remove state from the symbolic set. If we can prove that is
+    if is_in_an_mts == False:
+        # Copy is sufficient because we won't be modifying the states within the set.
+        candidates_dnf = candidates.copy()
+        filtered_candidates = []
+        for state in candidates:                        
+            # Remove the state from the candidates. If we can prove that is
             # is not an attractor, we will put it back.
-            #symbolic_candidates = symbolic_candidates & ~state_bdd
-            symbolic_candidates = remove_state_from_dnf(symbolic_candidates, state)
+            candidates_dnf = remove_state_from_dnf(candidates_dnf, state)
 
             simulation = state.copy()   # A copy of the state that we can overwrite.
             is_valid_candidate = True
             for _ in range(max_iterations):
                 # Advance all variables by one step in random order.
-                random.shuffle(variables)
+                generator.shuffle(variables)
                 for var in variables:
                     step = function_eval(update_functions[var], simulation)
                     assert step is not None
                     simulation[var] = step
 
-                #if function_is_true(symbolic_candidates, simulation):
-                if dnf_function_is_true(symbolic_candidates, simulation):
+                if dnf_function_is_true(candidates_dnf, simulation):
                     # The state can reach some other state in the candidate
                     # set. This does not mean it cannot be an attractor, but
-                    # it means it is sufficient to keep considering the other
-                    # candidate.
+                    # it means it is sufficient to keep considering 
+                    # the remaining candidates.
                     is_valid_candidate = False
                     break
 
@@ -159,10 +154,9 @@ def _preprocess_candidates(
                     break
 
             if is_valid_candidate:
-                # If we cannot rule out the candidate, we can put it back
-                # into candidate set.
-                #symbolic_candidates = symbolic_candidates | state_bdd
-                symbolic_candidates.append(state)
+                # If we cannot rule out the candidate, we have to put it back
+                # into the candidate set.
+                candidates_dnf.append(state)
                 filtered_candidates.append(state)
         
         return filtered_candidates
@@ -208,7 +202,7 @@ def _filter_candidates(
     """
     Filter candidate states using reachability procedure in Pint.
     """
-    print("Run _filter_candidates")
+
     avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
     filtered_candidates: list[dict[str, int]] = []
 
