@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import combinations, product
 from typing import cast
 
-import networkx as nx
+import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 
 from nfvsmotifs.space_utils import percolate_space

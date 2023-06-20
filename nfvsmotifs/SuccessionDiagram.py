@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork
 
-import networkx as nx
+import networkx as nx  # type: ignore
 
 from nfvsmotifs.interaction_graph_utils import feedback_vertex_set
 from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
