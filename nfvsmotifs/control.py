@@ -21,9 +21,26 @@ class Intervention:
     def __init__(
         self, control: list[ControlType], strategy: str, succession: SuccessionType
     ):
-        self.control = control
-        self.strategy = strategy
-        self.succession = succession
+        self._control = control
+        self._strategy = strategy
+        self._succession = succession
+        self._successful = not any(not c for c in control)
+
+    @property
+    def control(self):
+        return self._control
+
+    @property
+    def strategy(self):
+        return self._strategy
+
+    @property
+    def succession(self):
+        return self._succession
+
+    @property
+    def successful(self):
+        return self._successful
 
     def is_equivalent(self, other: Intervention) -> bool:
         if self.strategy != other.strategy:

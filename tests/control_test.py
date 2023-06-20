@@ -197,3 +197,104 @@ def test_all_succession_control():
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
         assert intervention in true_interventions
+
+
+def test_forbidden_drivers():
+    bn = BooleanNetwork.from_bnet(
+        """
+    A, B & C
+    B, A & C
+    C, A & B
+    """
+    )
+    target = {"A": 1, "B": 1, "C": 1}
+
+    # Test with no forbidden drivers first
+    true_controls = [[[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]]
+    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+
+    true_interventions = [
+        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
+    ]
+
+    interventions = succession_control(bn, target)
+
+    assert len(interventions) == len(true_interventions)
+    for intervention in interventions:
+        assert intervention in true_interventions
+        assert intervention.successful
+
+    # Test with forbidden driver; case with solution
+    forbidden_drivers = set("A")
+
+    true_controls = [[[{"B": 1, "C": 1}]]]
+    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+
+    true_interventions = [
+        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
+    ]
+
+    interventions = succession_control(bn, target, forbidden_drivers=forbidden_drivers)
+
+    assert len(interventions) == len(true_interventions)
+    for intervention in interventions:
+        assert intervention in true_interventions
+        assert intervention.successful
+
+    # Test with forbidden driver; case without solution
+    forbidden_drivers = set(("A", "B"))
+
+    true_controls = [[[]]]  # type: ignore
+    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+
+    true_interventions = [
+        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
+    ]
+
+    interventions = succession_control(bn, target, forbidden_drivers=forbidden_drivers)
+
+    assert len(interventions) == len(true_interventions)
+    for intervention in interventions:
+        assert intervention in true_interventions
+        assert not intervention.successful
+
+
+def test_size_restriction():
+    bn = BooleanNetwork.from_bnet(
+        """
+    A, B & C
+    B, A & C
+    C, A & B
+    """
+    )
+    target = {"A": 1, "B": 1, "C": 1}
+
+    # Test with no restrictions
+    true_controls = [[[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]]
+    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+
+    true_interventions = [
+        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
+    ]
+
+    interventions = succession_control(bn, target)
+
+    assert len(interventions) == len(true_interventions)
+    for intervention in interventions:
+        assert intervention in true_interventions
+        assert intervention.successful
+
+    # Test with size restriction; no solution exists
+    true_controls = [[[]]]  # type: ignore
+    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+
+    true_interventions = [
+        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
+    ]
+
+    interventions = succession_control(bn, target, max_drivers_per_succession_node=1)
+
+    assert len(interventions) == len(true_interventions)
+    for intervention in interventions:
+        assert intervention in true_interventions
+        assert not intervention.successful
