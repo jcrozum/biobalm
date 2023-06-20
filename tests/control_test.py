@@ -251,7 +251,14 @@ def test_forbidden_drivers():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
     ]
 
+    # do not show failed solution (default)
     interventions = succession_control(bn, target, forbidden_drivers=forbidden_drivers)
+    assert len(interventions) == 0
+
+    # show failed solution
+    interventions = succession_control(
+        bn, target, forbidden_drivers=forbidden_drivers, successful_only=False
+    )
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -292,9 +299,18 @@ def test_size_restriction():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
     ]
 
-    interventions = succession_control(bn, target, max_drivers_per_succession_node=1)
+    # show the failed solution
+    interventions = succession_control(
+        bn, target, max_drivers_per_succession_node=1, successful_only=False
+    )
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
         assert intervention in true_interventions
         assert not intervention.successful
+
+    # do not show the failed solution (default)
+    interventions = succession_control(
+        bn, target, max_drivers_per_succession_node=1, successful_only=True
+    )
+    assert len(interventions) == 0

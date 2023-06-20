@@ -112,6 +112,7 @@ def succession_control(
     succession_diagram: SuccessionDiagram | None = None,
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
+    successful_only: bool = True,
 ) -> list[Intervention]:
     """_summary_
 
@@ -134,14 +135,17 @@ def succession_control(
     forbidden_drivers: set[str] | None
         A set of forbidden drivers that will not be overridden for control. If
         `None`, then all nodes are candidates for control.
+    successful_only: bool
+        Whether to only return successful interventions (default: `True`).
 
     Returns
     -------
     list[Intervention]
-        A list of control intervention objects. Note that interventions may be
-        unsuccessful if `max_drivers_per_succession_node` is set too small, or
-        crucial nodes are included in `forbidden_drivers`. To test, examine the
-        `successful` property of the intervention.
+        A list of control intervention objects. Note that when `successful_only`
+        is `False`, returned interventions may be unsuccessful if
+        `max_drivers_per_succession_node` is set too small, or crucial nodes are
+        included in `forbidden_drivers`. To test, examine the `successful`
+        property of the intervention.
     """
     interventions: list[Intervention] = []
 
@@ -160,7 +164,10 @@ def succession_control(
             max_drivers_per_succession_node=max_drivers_per_succession_node,
             forbidden_drivers=forbidden_drivers,
         )
-        interventions.append(Intervention(controls, strategy, succession))
+        intervention = Intervention(controls, strategy, succession)
+
+        if not successful_only or intervention.successful:
+            interventions.append(intervention)
 
     return interventions
 
