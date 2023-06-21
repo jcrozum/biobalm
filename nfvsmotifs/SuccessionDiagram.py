@@ -25,9 +25,9 @@ DEBUG = False
 class SuccessionDiagram:
     """
     `SuccessionDiagram` (SD) is a directed acyclic graph representing the structure of trap spaces 
-    induced by a particular `BooleanNetwork`. The root of the graph is the whole state space. 
-    The leaf nodes are individual minimal trap spaces. Each path from the root to a leaf represents 
-    a succession of gradually more restrictive trap spaces.
+    induced by a particular `BooleanNetwork`. The root of the graph is the whole state space (after
+    percolation of constant values). The leaf nodes are individual minimal trap spaces. Each path 
+    from the root to a leaf represents a succession of gradually more restrictive trap spaces.
 
     There are several additional "features" implemented by `SuccessionDiagram` that allow us to
     implement more advanced (and efficient) algorithms:
@@ -35,7 +35,7 @@ class SuccessionDiagram:
         meaning none of its child nodes are known. A stub can be then *expanded* into a full node
         by computing the *stable motifs* for the associated trap space.
         - Each node can be annotated with *attractor seed states*, i.e. states that are known to
-        appear in all network attractors within that space.        
+        cover all network attractors within that space.        
 
     Overview of the `SuccessionDiagram` API:
         - Introspection of the whole diagram:
@@ -58,8 +58,8 @@ class SuccessionDiagram:
             * `SuccessionDiagram.node_attractor_seeds(id, compute=True/False)`: The list of 
             "attractor seed states" associated with the given node (if these are not known yet,
             they can be computed).
-            * `SuccessionDiagram.edge_stable_motif(id, id)`: Obtain the stable motif which causes
-            the edge between two nodes.
+            * `SuccessionDiagram.edge_stable_motif(id, id)`: Obtain the stable motif which enables
+            the edge between the two nodes.
         - There are several "expand procedures" that can explore a larger part of the SD at once,
         typically with a specific goal in mind:
             * `SuccessionDiagram.expand_bfs() / .expand_dfs()`: Expands the whole SD up to a certain
@@ -67,7 +67,7 @@ class SuccessionDiagram:
             * `SuccessionDiagram.expand_minimal_traps()`: Expands the SD such that each minimal trap
             space is reachable by at least one path from the root.
 
-    *Other internal implementation nodes:* 
+    *Other internal implementation notes:* 
     
     *The node IDs are assumed to be a continuous range of integers. If this breaks at any point, 
     please make sure to check the correctness of the new implementation thoroughly.*
@@ -270,8 +270,9 @@ class SuccessionDiagram:
         depending on the `compute` flag.
 
         Note that you can compute attractor seeds for stub nodes, but (a) these attractors are not
-        guaranteed to be unique (i.e. you can "discover" the same attractor in multiple stub nodes),
-        and (b) this data is erase if the stub node is expanded later on.
+        guaranteed to be unique (i.e. you can "discover" the same attractor in multiple stub nodes,
+        if the stub nodes intersect), and (b) this data is erased if the stub node is expanded 
+        later on.
         """
         node = self.G.nodes[node_id]
 
@@ -334,7 +335,7 @@ class SuccessionDiagram:
 
         The only major difference is the `dfs_stack_limit` which restricts the size of the DFS stack.
         Nodes that would appear "deeper" in the stack than this limit are left unexpanded. Note that 
-        this stack size is technically *some* distance from the initial node, but not necessarily
+        this stack size is technically *some* form of distance from the initial node, but not necessarily
         the minimal distance.
         """
         return expand_dfs(self, node_id, dfs_stack_limit, size_limit)
@@ -356,7 +357,7 @@ class SuccessionDiagram:
 
     def _update_node_depth(self, node_id: int, parent_id: int):
         """
-        An internal method that Updates the depth of a node based on a specific parent node. 
+        An internal method that updates the depth of a node based on a specific parent node. 
         This assumes that there is an edge from `parent` to `node_id`.
 
         Note that the depth can only increase.
@@ -402,7 +403,7 @@ class SuccessionDiagram:
             ensure_subspace=current_space,
         )
 
-        # Sort the spaces based on a unique key in case trappist is not always deterministic.
+        # Sort the spaces based on a unique key in case trappist is not always sorted deterministically.
         sub_spaces = sorted(sub_spaces, key=lambda space: space_unique_key(space, self.network))
 
         if len(sub_spaces) == 0:
