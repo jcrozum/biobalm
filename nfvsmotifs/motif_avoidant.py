@@ -164,16 +164,12 @@ def _preprocess_candidates(
     else:
         filtered_candidates = []
         for i in range(max_iterations):
-            #print(f"Run inside mts - {i + 1}")
-            random.shuffle(variables)
-            #symbolic_candidates = state_list_to_bdd(candidates)
-            symbolic_candidates = deepcopy(candidates)
+            generator.shuffle(variables)                        
+            candidates_dnf = candidates.copy()
             filtered_candidates = []
 
             for state in candidates:
-                #state_bdd = state_to_bdd(state)
-                #symbolic_candidates = symbolic_candidates & ~state_bdd
-                symbolic_candidates = remove_state_from_dnf(symbolic_candidates, state)
+                candidates_dnf = remove_state_from_dnf(candidates_dnf, state)
 
                 simulation = state.copy()
                 for var in variables:
@@ -181,17 +177,14 @@ def _preprocess_candidates(
                     assert step is not None
                     simulation[var] = step
 
-                #if not function_is_true(symbolic_candidates, simulation):
-                if not dnf_function_is_true(symbolic_candidates, simulation):
-                    #symbolic_candidates = symbolic_candidates | state_bdd
-                    #symbolic_candidates = symbolic_candidates | state_to_bdd(simulation)
-                    symbolic_candidates.append(simulation)
+                if not dnf_function_is_true(candidates_dnf, simulation):
+                    candidates_dnf.append(simulation)
                     filtered_candidates.append(simulation)
 
             if len(filtered_candidates) <= 1:
                 break
 
-            candidates = deepcopy(filtered_candidates)
+            candidates = filtered_candidates
 
         return filtered_candidates
 
