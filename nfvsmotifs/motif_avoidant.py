@@ -120,6 +120,11 @@ def _preprocess_candidates(
     # is randomized but deterministic.
     generator = random.Random(1234567890)
 
+    # Use stochastic simulation to prune the set of candidate states.
+    # We use different simulation approach depending on whether this space
+    # is a minimal trap or not. In previous work, this was shown to work
+    # well, but in the future we need to better document the resoning
+    # behind these two algorithms.
     if is_in_an_mts == False:
         # Copy is sufficient because we won't be modifying the states within the set.
         candidates_dnf = candidates.copy()
