@@ -13,6 +13,7 @@ from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
 from nfvsmotifs.petri_net_translation import network_to_petrinet
 from nfvsmotifs.space_utils import percolate_space
 from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
+from nfvsmotifs.pyeda_utils import aeon_to_pyeda
 from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG, trappist
 
 # Enables helpful "progress" messages.
@@ -306,21 +307,55 @@ class SuccessionDiagram:
             # This node is a fixed-point.
             self.attractors[node_id] = [node_space]
             return [node_space]
-
-        # Fix everything in the NFVS to zero, as long as
-        # it isn't already fixed by our `node_space`.
-        #
-        # We add the whole node space to the retain set because we know
-        # the space is a trap and this will remove the corresponding unnecessary
-        # Petri net transitions.
-        retained_set = node_space.copy()
-        for x in self.nfvs:
-            if x not in retained_set:
-                retained_set[x] = 0
-
+        
         child_spaces = [
             self.node_space(child) for child in self.G.successors(node_id)  # type: ignore
         ]
+        
+        # Initially, the retained set only contains the fixed values from the 
+        # current node space (this elimiantes unnecessary Petri net transitions
+        # for values which we already proved are constant).
+        # 
+        # In the following code, we then extend the retained set based on the model's NFVS
+        # and the current child spaces. 
+        retained_set = node_space.copy()
+
+    
+        # First, if there are any child spaces present, we extend the retained set with the 
+        # values from the one that has the least amount of fixed variables shared with the NFVS.
+        if len(child_spaces) > 0:
+            # Find the child space that has the fewest nodes in common with the NFVS:
+            least_common_child_space = child_spaces[0]
+            least_common_nodes = len(set(least_common_child_space) & set(self.nfvs))
+            for child_space in child_spaces:
+                common_nodes = len(set(child_space) & set(self.nfvs))
+                if common_nodes < least_common_nodes:
+                    least_common_nodes = common_nodes
+                    least_common_child_space = child_space
+
+            for x in least_common_child_space:
+                if (x not in retained_set) and (x in self.nfvs):
+                    retained_set[x] = least_common_child_space[x]
+        
+        # Then, set the remaining NFVS variables based on the majority output value in the update 
+        # function of the relevant variable.
+        for x in self.nfvs:
+            if x in retained_set:
+                continue
+
+            aeon_fx = self.network.get_update_function(x)
+            pyeda_fx = aeon_to_pyeda(aeon_fx)
+            input_count = len(list(pyeda_fx.support))
+
+            half_count = pow(2, input_count - 1)
+            sat_count = pyeda_fx.satisfy_count()
+            
+            if sat_count > half_count:
+                retained_set[x] = 1
+            else:
+                retained_set[x] = 0
+
+                
 
         if len(retained_set) == self.network.num_vars() and len(child_spaces) == 0:
             # There is only a single attractor remaining here,
@@ -384,6 +419,7 @@ class SuccessionDiagram:
                 candidate_seeds,
                 terminal_restriction_space,
                 max_iterations=1000,
+                is_in_an_mts=len(child_spaces) == 0,
             )
 
         if len(attractors) > 0:

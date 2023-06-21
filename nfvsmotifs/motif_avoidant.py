@@ -63,6 +63,7 @@ def detect_motif_avoidant_attractors(
         terminal_restriction_space,
         max_iterations,
         ensure_subspace=ensure_subspace,
+        is_in_an_mts=is_in_an_mts
     )
 
     if len(candidates) == 0:
@@ -80,6 +81,7 @@ def _preprocess_candidates(
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
     ensure_subspace: dict[str, int] | None = None,
+    is_in_an_mts: bool = False
 ) -> list[dict[str, int]]:
     """
     A fast but incomplete method for eliminating spurious attractor candidates.
@@ -110,60 +112,86 @@ def _preprocess_candidates(
             continue
         var_name = network.get_variable_name(varID)
         variables.append(var_name)
-        function_expression = network.get_update_function(varID)
-        function_bdd: BinaryDecisionDiagram = expr2bdd(
-            aeon_to_pyeda(function_expression)
-        )
-
+        function_expression = network.get_update_function(varID) 
+        function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
-    # symbolic_candidates = state_list_to_bdd(candidates)
-    symbolic_candidates = deepcopy(candidates)
-    filtered_candidates: list[dict[str, int]] = []
-    for state in candidates:
-        # state_bdd = state_to_bdd(state)
+    # A random generator initialized with a fixed seed. Ensures simulation
+    # is randomized but deterministic.
+    generator = random.Random(1234567890)
 
-        # Remove state from the symbolic set. If we can prove that is
-        # is not an attractor, we will put it back.
-        # symbolic_candidates = symbolic_candidates & ~state_bdd
-        symbolic_candidates = remove_state_from_dnf(symbolic_candidates, state)
+    # Use stochastic simulation to prune the set of candidate states.
+    # We use different simulation approach depending on whether this space
+    # is a minimal trap or not. In previous work, this was shown to work
+    # well, but in the future we need to better document the resoning
+    # behind these two algorithms.
+    if is_in_an_mts == False:
+        # Copy is sufficient because we won't be modifying the states within the set.
+        candidates_dnf = candidates.copy()
+        filtered_candidates = []
+        for state in candidates:                        
+            # Remove the state from the candidates. If we can prove that is
+            # is not an attractor, we will put it back.
+            candidates_dnf = remove_state_from_dnf(candidates_dnf, state)
 
-        # A copy of the state that we can overwrite.
-        simulation = state.copy()
-        is_valid_candidate = True
-        for _ in range(max_iterations):
-            # Advance all variables by one step in random order.
-            random.shuffle(variables)
-            for var in variables:
-                step = function_eval(update_functions[var], simulation)
-                assert step is not None
-                simulation[var] = step
+            simulation = state.copy()   # A copy of the state that we can overwrite.
+            is_valid_candidate = True
+            for _ in range(max_iterations):
+                # Advance all variables by one step in random order.
+                generator.shuffle(variables)
+                for var in variables:
+                    step = function_eval(update_functions[var], simulation)
+                    assert step is not None
+                    simulation[var] = step
 
-            # if function_is_true(symbolic_candidates, simulation):
-            if dnf_function_is_true(symbolic_candidates, simulation):
-                # The state can reach some other state in the candidate
-                # set. This does not mean it cannot be an attractor, but
-                # it means it is sufficient to keep considering the other
-                # candidate.
-                is_valid_candidate = False
+                if dnf_function_is_true(candidates_dnf, simulation):
+                    # The state can reach some other state in the candidate
+                    # set. This does not mean it cannot be an attractor, but
+                    # it means it is sufficient to keep considering 
+                    # the remaining candidates.
+                    is_valid_candidate = False
+                    break
+
+                if not function_is_true(terminal_restriction_space, simulation):
+                    # The state can reach some other state outside of the
+                    # terminal restriction space, which means it cannot be
+                    # a motif avoidant attractor in this subspace.
+                    is_valid_candidate = False
+                    break
+
+            if is_valid_candidate:
+                # If we cannot rule out the candidate, we have to put it back
+                # into the candidate set.
+                candidates_dnf.append(state)
+                filtered_candidates.append(state)
+        
+        return filtered_candidates
+    else:
+        filtered_candidates = []
+        for i in range(max_iterations):
+            generator.shuffle(variables)                        
+            candidates_dnf = candidates.copy()
+            filtered_candidates = []
+
+            for state in candidates:
+                candidates_dnf = remove_state_from_dnf(candidates_dnf, state)
+
+                simulation = state.copy()
+                for var in variables:
+                    step = function_eval(update_functions[var], simulation)
+                    assert step is not None
+                    simulation[var] = step
+
+                if not dnf_function_is_true(candidates_dnf, simulation):
+                    candidates_dnf.append(simulation)
+                    filtered_candidates.append(simulation)
+
+            if len(filtered_candidates) <= 1:
                 break
 
-            if not function_is_true(terminal_restriction_space, simulation):
-                # The state can reach some other state outside of the
-                # terminal restriction space, which means it cannot be
-                # a motif avoidant attractor in this subspace.
-                is_valid_candidate = False
-                break
+            candidates = filtered_candidates
 
-        if is_valid_candidate:
-            # If we cannot rule out the candidate, we can put it back
-            # into candidate set.
-            # symbolic_candidates = symbolic_candidates | state_bdd
-            symbolic_candidates.append(state)
-            filtered_candidates.append(state)
-
-    return filtered_candidates
-
+        return filtered_candidates
 
 def _filter_candidates(
     petri_net: DiGraph,
