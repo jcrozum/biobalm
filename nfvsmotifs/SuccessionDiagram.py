@@ -419,6 +419,7 @@ class SuccessionDiagram:
                 candidate_seeds,
                 terminal_restriction_space,
                 max_iterations=1000,
+                is_in_an_mts=len(child_spaces) == 0,
             )
 
         if len(attractors) > 0:

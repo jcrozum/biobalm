@@ -63,6 +63,7 @@ def detect_motif_avoidant_attractors(
         terminal_restriction_space,
         max_iterations,
         ensure_subspace=ensure_subspace,
+        is_in_an_mts=is_in_an_mts
     )
 
     if len(candidates) == 0:
