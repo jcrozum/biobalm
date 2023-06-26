@@ -18,6 +18,7 @@ from nfvsmotifs._sd_algorithms.expand_dfs import expand_dfs
 from nfvsmotifs._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from nfvsmotifs._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from nfvsmotifs._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
+from nfvsmotifs._sd_algorithms.expand_to_target import expand_to_target
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -369,6 +370,17 @@ class SuccessionDiagram:
         than necessary.
         """
         expand_attractor_seeds(self)
+
+    def exapnd_to_target(self, target: dict[str, int]):
+        """
+        Expands the succession diagram using BFS in such a way that only nodes which intersect
+        `target` but are not fully contained in it are expanded. 
+        
+        This is used for example in control, as it ensures that all possible branches of the 
+        succession diagram relevant for a particular "target subspace" are expanded as much 
+        as necessary, but not more.
+        """
+        expand_to_target(self, target)
 
     def _update_node_depth(self, node_id: int, parent_id: int):
         """

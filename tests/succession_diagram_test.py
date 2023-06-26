@@ -136,6 +136,25 @@ def test_expansion_comparisons(network_file):
     assert sd_min.is_subgraph(sd_bfs)
     assert sd_min.is_subgraph(sd_dfs)
 
+    sd_attr = SuccessionDiagram(bn)
+    sd_attr.expand_attractor_seeds()
+
+    assert sd_min.is_subgraph(sd_attr)
+    assert sd_attr.is_subgraph(sd_bfs)
+
+    # This will go through the minimal trap spaces of this network
+    # and try to only expand towards this minimum trap space as a target.
+    # This should always create a SD with exactly one minimal trap space,
+    # as the rest 
+    for min_trap in sd_bfs.minimal_trap_spaces():
+        space = sd_bfs.node_space(min_trap)
+
+        sd_target = SuccessionDiagram(bn)
+        sd_target.exapnd_to_target(space)
+
+        assert sd_target.is_subgraph(sd_bfs)
+        assert len(sd_target.minimal_trap_spaces()) == 1
+
 def test_attractor_detection(network_file):
     # TODO: Once attractor detection is faster, we should increase this limit.
     # Right now, checking attractors in larger succession diagrams would often time out our CI.
