@@ -130,14 +130,14 @@ def test_expansion_comparisons(network_file):
         return
 
     sd_min = SuccessionDiagram(bn)
-    sd_min.expand_minimal_spaces()
+    assert sd_min.expand_minimal_spaces(size_limit=NODE_LIMIT)
 
     assert sd_bfs.is_isomorphic(sd_dfs)
     assert sd_min.is_subgraph(sd_bfs)
     assert sd_min.is_subgraph(sd_dfs)
 
     sd_attr = SuccessionDiagram(bn)
-    sd_attr.expand_attractor_seeds()
+    assert sd_attr.expand_attractor_seeds(size_limit=NODE_LIMIT)
 
     assert sd_min.is_subgraph(sd_attr)
     assert sd_attr.is_subgraph(sd_bfs)
@@ -150,7 +150,7 @@ def test_expansion_comparisons(network_file):
         space = sd_bfs.node_space(min_trap)
 
         sd_target = SuccessionDiagram(bn)
-        sd_target.exapnd_to_target(space)
+        assert sd_target.expand_to_target(space, size_limit=NODE_LIMIT)
 
         assert sd_target.is_subgraph(sd_bfs)
         assert len(sd_target.minimal_trap_spaces()) == 1
@@ -193,7 +193,83 @@ def test_attractor_detection(network_file):
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
     nfvs_attractors = []
-    for i in range(sd.G.number_of_nodes()):
+    for i in sd.node_ids():
+        attr = sd.node_attractor_seeds(i, compute=True)
+        for a in attr:
+            # Just a simple sanity check.
+            assert len(a) == bn.num_vars()
+        if len(attr) > 0:
+            nfvs_attractors += attr
+
+    # Compute symbolic attractors using AEON.
+    symbolic_attractors = find_attractors(stg)
+
+    # Check that every "seed" returned by SuccessionDiagram appears in
+    # some symbolic attractor, and that every symbolic attractor contains
+    # at most one such "seed" state.
+    for seed in nfvs_attractors:
+        symbolic_seed = stg.fix_subspace({ k:bool(v) for k,v in seed.items() })
+        found = None
+        
+        # The "seed" state must have a symbolic attractor (and that
+        # attractor mustn't have been removed yet).
+        for i in range(len(symbolic_attractors)):
+            if symbolic_seed.is_subset(symbolic_attractors[i]):
+                found = i
+        assert found is not None
+
+        symbolic_attractors.pop(found)
+
+    print("Attractors:", len(nfvs_attractors))
+
+    # All symbolic attractors must be covered by some seed at this point.
+    assert len(symbolic_attractors) == 0
+
+def test_attractor_expansion(network_file):
+    # This test is similar to the "test attractor detection" function above,
+    # but it will perform only a partial expansion of the succession diagram,
+    # which is hopefully faster.
+
+    # TODO: Once attractor detection is faster, we should increase this limit.
+    # Right now, checking attractors in larger succession diagrams would often time out our CI.
+    NODE_LIMIT = 100
+
+    # This is unfortunately necessary for PyEDA Boolean expression parser (for now).
+    sys.setrecursionlimit(150000)
+
+    # TODO: Remove these once method is fast enough.
+    print(network_file)
+    if network_file.endswith("146.bnet"):
+        # For this model, we can compute the 100 SD nodes, but it takes a very long time
+        # and the SD is larger, so we wouldn't get to attractor computation anyway.
+        NODE_LIMIT = 10
+
+    bn = BooleanNetwork.from_file(network_file)
+    bn = bn.infer_regulatory_graph()
+    stg = SymbolicAsyncGraph(bn)
+
+    # Compute the succession diagram.
+    sd = SuccessionDiagram(bn)
+    fully_expanded = sd.expand_attractor_seeds(size_limit=NODE_LIMIT)
+
+    # SD must be fully expanded, otherwise we may miss some results.
+    # If SD is not fully expanded, we just skip this network.
+    if not fully_expanded:
+        return
+
+    # TODO: Remove these once method is fast enough. 
+    if network_file.endswith("075.bnet"):
+        # It seems that with current NFVS, the clingo fixed-point part takes too long. There are
+        # better NFVS-es that we could try, but we first need to make the NFVS algorithm deterministic.
+        return
+
+
+    # Compute attractors in diagram nodes.
+    # TODO: There will probably be a method that does this in one "go".
+    nfvs_attractors = []
+    # This is an important change compared to the original test: Here, we only
+    # care about expanded nodes, everything else is ignored.
+    for i in sd.expanded_ids():
         attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
             # Just a simple sanity check.

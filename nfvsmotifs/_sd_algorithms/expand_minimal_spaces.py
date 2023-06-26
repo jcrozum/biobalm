@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 from nfvsmotifs.space_utils import is_subspace
 from nfvsmotifs.trappist_core import trappist
 
-def expand_minimal_spaces(sd: SuccessionDiagram):
+def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) -> bool:
     """
     See `SuccessionDiagram.expand_minimal_spaces` for documentation.
     """
@@ -25,6 +25,11 @@ def expand_minimal_spaces(sd: SuccessionDiagram):
     while len(stack) > 0:
         (node, successors) = stack.pop()
         if successors is None:
+            # Only allow successor computation if size limit hasn't been exceeded.
+            if (size_limit is not None) and (len(sd) >= size_limit):
+                # Size limit reached.
+                return False
+                
             successors = sd.node_successors(node, compute=True)
             successors = sorted(successors, reverse=True) # For determinism!
             # (reversed because we explore the list from the back)

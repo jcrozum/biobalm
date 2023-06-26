@@ -10,7 +10,7 @@ from nfvsmotifs.motif_avoidant import make_retained_set
 from nfvsmotifs.space_utils import intersect
 import nfvsmotifs
 
-def expand_attractor_seeds(sd: SuccessionDiagram):
+def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None):
     """
     See `SuccessionDiagram.expand_attractor_seeds` for documentation.
     """
@@ -19,7 +19,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram):
     # This reduces the amount of work performed in this algorithm, because for every attractor
     # in a minimal trap space, we already have the closest trap space, now we just need to
     # do the same for (potential) motif-avoidant attractors.
-    sd.expand_minimal_spaces()
+    sd.expand_minimal_spaces(size_limit)
 
     if nfvsmotifs.SuccessionDiagram.DEBUG:
         print("Minimal trap space expansion finished. Proceeding to attractor expansion.")
@@ -31,6 +31,11 @@ def expand_attractor_seeds(sd: SuccessionDiagram):
     while len(stack) > 0:
         (node, successors) = stack.pop()
         if successors is None:
+            # Only allow successor computation if size limit hasn't been exceeded.
+            if (size_limit is not None) and (len(sd) >= size_limit):
+                # Size limit reached.
+                return False
+
             successors = sd.node_successors(node, compute=True)
             successors = sorted(successors, reverse=True) # For determinism!
             # (reversed because we explore the list from the back)
@@ -96,3 +101,4 @@ def expand_attractor_seeds(sd: SuccessionDiagram):
         # Push the successor onto the stack.
         stack.append((s, None))
             
+    return True

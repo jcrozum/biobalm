@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from nfvsmotifs.space_utils import is_subspace, intersect
 
-def expand_to_target(sd: SuccessionDiagram, target: dict[str, int]):
+def expand_to_target(sd: SuccessionDiagram, target: dict[str, int], size_limit: int | None = None):
     """
     See `SuccessionDiagram.exapnd_to_target` for documentation.
     """
@@ -32,6 +32,11 @@ def expand_to_target(sd: SuccessionDiagram, target: dict[str, int]):
                 # If `node_space` is a subspace of `target`, it is relevant but expanding
                 # it will not add any new information, we can thus also keep it unexpanded.
                 continue
+
+            # Check if the size limit has been exceeded already.
+            if (size_limit is not None) and (len(sd) >= size_limit):
+                # Size limit reached.
+                return False
 
             # Compute successors if necessary.
             successors = sd.node_successors(node, compute=True)

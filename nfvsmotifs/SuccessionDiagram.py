@@ -342,7 +342,7 @@ class SuccessionDiagram:
         """
         return expand_dfs(self, node_id, dfs_stack_limit, size_limit)
 
-    def expand_minimal_spaces(self):
+    def expand_minimal_spaces(self, size_limit: int | None = None) -> bool:
         """
         Expands the succession diagram in a way that guarantees every minimal trap space to be reachable 
         from the root node, but otherwise (greedily) avoids unnecesary expansion of nodes whenever possible.
@@ -355,9 +355,9 @@ class SuccessionDiagram:
         expanded initially. In such case, the procedure still tries to avoid expanding unnecessary nodes,
         which means existing expanded nodes can be prioritised over the "canonical" ones.
         """
-        expand_minimal_spaces(self)
+        return expand_minimal_spaces(self, size_limit)
 
-    def expand_attractor_seeds(self):
+    def expand_attractor_seeds(self, size_limit: int | None = None) -> bool:
         """
         Expands the succession diagram such that for every asynchronous attractor, there is
         at least one expanded trap space which is the minimal trap space containing this attractor.
@@ -369,9 +369,9 @@ class SuccessionDiagram:
         that some nodes are expanded spuriously and the succession diagram is thus larger 
         than necessary.
         """
-        expand_attractor_seeds(self)
+        return expand_attractor_seeds(self, size_limit)
 
-    def exapnd_to_target(self, target: dict[str, int]):
+    def expand_to_target(self, target: dict[str, int], size_limit: int | None = None) -> bool:
         """
         Expands the succession diagram using BFS in such a way that only nodes which intersect
         `target` but are not fully contained in it are expanded. 
@@ -380,7 +380,7 @@ class SuccessionDiagram:
         succession diagram relevant for a particular "target subspace" are expanded as much 
         as necessary, but not more.
         """
-        expand_to_target(self, target)
+        return expand_to_target(self, target, size_limit)
 
     def _update_node_depth(self, node_id: int, parent_id: int):
         """
