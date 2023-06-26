@@ -17,6 +17,7 @@ from nfvsmotifs._sd_algorithms.expand_bfs import expand_bfs
 from nfvsmotifs._sd_algorithms.expand_dfs import expand_dfs
 from nfvsmotifs._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from nfvsmotifs._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
+from nfvsmotifs._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -354,6 +355,20 @@ class SuccessionDiagram:
         which means existing expanded nodes can be prioritised over the "canonical" ones.
         """
         expand_minimal_spaces(self)
+
+    def expand_attractor_seeds(self):
+        """
+        Expands the succession diagram such that for every asynchronous attractor, there is
+        at least one expanded trap space which is the minimal trap space containing this attractor.
+        In other words, the procedure expands the succession diagram as little as possible, but 
+        ensures that every attractor is "as easy to identify" as possible.
+
+        After this procedure, it is sufficient to search for attractors in expanded nodes.
+        Note that this method does not perform exact attractor identification. It is possible
+        that some nodes are expanded spuriously and the succession diagram is thus larger 
+        than necessary.
+        """
+        expand_attractor_seeds(self)
 
     def _update_node_depth(self, node_id: int, parent_id: int):
         """

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
-from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors
+from nfvsmotifs.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
 from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
 from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG, trappist
 
@@ -39,10 +39,7 @@ def compute_attractor_seeds(
     # We add the whole node space to the retain set because we know
     # the space is a trap and this will remove the corresponding unnecessary
     # Petri net transitions.
-    retained_set = node_space.copy()
-    for x in sd.nfvs:
-        if x not in retained_set:
-            retained_set[x] = 0
+    retained_set = make_retained_set(sd.network, sd.nfvs, node_space, child_spaces)
         
     if len(retained_set) == sd.network.num_vars() and len(child_spaces) == 0:
         # There is only a single attractor remaining here,
