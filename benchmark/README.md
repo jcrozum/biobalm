@@ -10,7 +10,8 @@ Each row of such table contains the network name, runtime of the whole script, a
 ## Install `nfvsmotifs`
 
 The benchmark scripts assume `nfvsmotifs` is installed as a package. 
-To do this, go to the repository root and run `pip install .`.
+To do this, go to the repository root and run `pip install .` 
+(this step reqires at least `pip` version `23`).
 
 ## Example
 
