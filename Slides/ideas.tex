@@ -1451,6 +1451,105 @@ Your suggestions?
 
 \end{frame}
 
+\begin{frame}
+	\frametitle{New direction: network reduction}
+	
+	\only<1>{New preprint for enumerating attractors in asynchronous BNs based on reduction\footnote{Tonello, E., \& Paulevé, L. (2023). Attractor identification in asynchronous Boolean dynamics with network reduction. arXiv preprint arXiv:2305.01327.}.
+	
+	\hspace{0.8cm}
+	
+	\begin{block}{}
+		Let \(\mathcal{A}\) be an \red{ABN} and \(w\) be its \blue{non-auto-regulated node}. Let \(\mathcal{A}^w\) be the ABN obtained by removing \(w\) from \(\mathcal{A}\) and replacing \(w\) by its Boolean function in all Boolean functions of its inputs. Then if \(att\) is an attractor of \(\mathcal{A}\), then there exists at least \blue{one attractor for \(\mathcal{A}^w\) in \(\pi^w(att)\)} and for each \(x \in \pi^w(att)\) contained in an attractor of \(\mathcal{A}^w\), \blue{\(\gamma^w(x) \in att\)}.
+	\end{block}
+	}
+	\only<1>{
+		\(\pi^w \colon \{0, 1\}^n \mapsto \{0, 1\}^{n - 1}\) is the \red{projection} on \(V \setminus \{w\}\).
+		
+		\hspace{0.8cm}
+		
+		\(\gamma^w \colon \{0, 1\}^{n- 1} \mapsto \{0, 1\}^{n}\) is the \red{mapping} where \(\gamma^w(x^w) = (x^w, f_w(x^w))\).
+		
+		\hspace{0.8cm}
+		
+		\blue{Can be used to efficiently enumerating all attractors of the original ABN.}
+	}
+
+	\only<2>{
+		Some \red{issues}:
+		\begin{itemize}
+			\item \(\mathcal{A}^w\) may have \red{motif-avoidant} attractors, whereas \(\mathcal{A}\) have no ones. See the case of \(h\) in Figure 1 of the paper.
+			\item \(\mathcal{A}^w\) may have \red{non-univocal} attractors, whereas \(\mathcal{A}\) may have no ones. See the case of \(g\) in Figure 1 of the paper.
+			\item \(\mathcal{A}^w\) has \blue{less nodes} than \(\mathcal{A}\) but its Boolean functions may be \red{much more complex}.
+			\begin{itemize}
+				\item The minimum NFVS of \(\mathcal{A}^w\) may be \red{larger} than that of \(\mathcal{A}\).
+				\item Reduce the efficiency of trappist because the \red{density} of \(\mathcal{A}^w\) may be much larger than that of \(\mathcal{A}\).
+				\item For AEON, if there are \red{many dependencies}, the BDDs will also have many internal dependencies which \red{increase size}.
+			\end{itemize}
+		\end{itemize}
+	}
+
+	\only<3>{
+		The new method is \blue{very efficient} for real-world models, but \red{not} for N-K models. Why?
+		\begin{itemize}
+			\item By applying the \blue{mediator-node reduction} to the set of real-world models, we found that the reduced models are \blue{very easy} to analyze and their number of attractors is \blue{equal} to that of the original models.
+			\item In addition, real-world models are \blue{quite sparse}, leading to the Boolean functions of the reduced models are not very complex.
+			\item This is not the case for N-K models.
+		\end{itemize}
+	}
+
+	\only<4>{
+		What we can explore in this direction?
+		\small
+		\begin{itemize}
+			\item Of course, we can get a \blue{much smaller} candidate set for nfvs-motifs by computing attractors of the reduced model. If lucky, we can \blue{avoid} some bottlenecks of nfvs-motifs, for example, a minimal trap space \(m\) has too many free variables.
+			\item Try to handle the problems of introducing \red{motif-avoidant} and \red{non-univocal} attractors to the reduced model.
+			\item Heuristics for stop conditions and the order of removed nodes (based on not only the number of nodes but also the function complexity). I guess it might be related to \blue{FVS or NFVS}.
+			\item Investigate how does the reduction change the structure of the succession diagram. For example, I guess \(\mathcal{A}^w\) might have a deeper SD than \(\mathcal{A}\) has.
+			\item In case we must check reachability, how the reduction can help the \red{reachability analysis} more efficient?
+			\item Investigate how the reduction can help the \red{control algorithms}.
+			\item \red{Theoretical findings}
+		\end{itemize}
+	}
+
+	\only<5>{
+		\begin{block}{Conjecture}
+			Let \(\mathcal{A}\) be an \red{ABN} and \(w\) be its \blue{mediator node}. Let \(\mathcal{A}^w\) be the ABN obtained by removing \(w\) from \(\mathcal{A}\) and replacing \(w\) by its Boolean function in all Boolean functions of its inputs. Then the set of attractors of \(\mathcal{A}^w\) \blue{one-to-one corresponds} to that of \(\mathcal{A}\).
+		\end{block}
+		\(w\) is a mediator node if \red{\(in(w) \cap out(w) \neq \emptyset\)}.
+		
+		\hspace{0cm}
+		
+		The case \blue{\(in(w) \cap out(w) \neq \emptyset \land \vert in(w)\vert = \vert out(w)\vert = 1\)} has been proven in\footnote{Saadatpour, A., Albert, R.,\& Reluga, T. C. (2013). A reduction method for Boolean network models proven to conserve attractors. SIAM Journal on Applied Dynamical Systems, 12(4), 1997-2011.}
+		
+		\hspace{0cm}
+		
+		Not sure whether the conjecture has been proven?
+	}
+
+	\only<6>{
+		\begin{block}{Conjecture}
+			Let \(\mathcal{A}\) be an \red{ABN} and \(w\) be its \blue{non-auto-regulated node}. Let \(\mathcal{A}^w\) be the ABN obtained by removing \(w\) from \(\mathcal{A}\) and replacing \(w\) by its Boolean function in all Boolean functions of its inputs. Then if \(m\) is a minimal trap space of \(\mathcal{A}\), then \(\pi^w(m)\) is also a minimal trap space of \(\mathcal{A}^w\).
+		\end{block}
+		
+		\hspace{0cm}
+		
+		More generally, we can investigate the relations regarding trap spaces (minimal/maximal) between the reduced model and the original one.
+	}
+
+	\only<7>{
+		I and Sam have discussed about this new direction. We also have some \blue{promising preliminary ideas}.
+		
+		\hspace{0cm}
+		
+		We propose us to consider this direction \red{after} finishing our first paper.
+		
+		\hspace{0cm}
+		
+		What do you think?
+	}
+	
+\end{frame}
+
 \section*{}
 \begin{frame}
   \begin{center}

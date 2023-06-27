@@ -480,6 +480,7 @@ class SuccessionDiagram:
         else:
             child_id = self.node_indices[key]
 
+
         assert child_id is not None
         
         if parent_id is not None:
