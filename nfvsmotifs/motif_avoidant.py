@@ -39,7 +39,14 @@ def make_retained_set(
     """
     Calculate the retained set.
 
-    TODO: Explain what is a retained set.
+    The retained set is technically a space-like object that describes the variables which have 
+    to be fixed in order for the network to lose any complex attractors. However, note that this 
+    really means changing the update functions. I.e. this is not a trap space that only contains
+    fixed-points, but a description of how the network must be modified to remove complex 
+    attractors.
+
+    Finally, the construction guarantees that any complex attractor of the old network will
+    manifest as at least one fixed-point in the new network.
     """
 
     if child_spaces is None:

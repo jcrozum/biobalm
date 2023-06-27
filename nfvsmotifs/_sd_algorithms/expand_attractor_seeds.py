@@ -83,8 +83,6 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 successors.pop()
                 continue
 
-            print(len(successor_seeds))
-
             if nfvsmotifs.SuccessionDiagram.DEBUG:
                 print(f"[{node}] Found successor with new attractor candidate seeds. Expand node {successors[-1]}.")
 
@@ -92,6 +90,8 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
 
         if len(successors) == 0:
             # Everything is done for this `node` and we can continue to the next one.
+            if nfvsmotifs.SuccessionDiagram.DEBUG:
+                print(f"[{node}] Finished node attractor expansion.")
             continue
 
         s = successors.pop()

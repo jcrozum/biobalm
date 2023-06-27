@@ -16,13 +16,16 @@ bn = bn.infer_regulatory_graph()
 
 # Compute the succession diagram.
 sd = SuccessionDiagram(bn)
-fully_expanded = sd.expand_attractor_seeds(size_limit=NODE_LIMIT)
+fully_expanded = sd.expand_minimal_spaces(size_limit=NODE_LIMIT)
 assert fully_expanded
 
 attractor_count = 0
 motif_avoidant_count = 0
 
-for node in sd.expanded_ids():
+# Note that this can contain some motif-avoidant attractors
+# multiple times. But we haven't seen motif-avoidant attractors
+# in real-world networks so far...
+for node in sd.node_ids():
     attr = sd.node_attractor_seeds(node, compute=True)
     attractor_count += len(attr)
     if not sd.node_is_minimal(node):
