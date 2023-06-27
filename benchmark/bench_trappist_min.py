@@ -23,3 +23,6 @@ def count_all(x):
 trappist_async(bn, on_solution=count_all, problem="min")
 
 print("Minimal traps:", COUNT)
+
+print("traps")
+print(f"{COUNT}")
