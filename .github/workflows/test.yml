@@ -4,10 +4,30 @@ on:
   pull_request:
 
 jobs:
-  linux:
+  # First, check if the types/formatting is correct.
+  types:
     # TODO: Later we can add more python versions but for now one should be enough.
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          architecture: x64
+      - name: Install repo dependencies
+        run: pip install -r requirements.txt
+      - name: Install mypy
+        run: pip install mypy
+      - name: Run mypy check
+        run: mypy nfvsmotifs
+  # Then do a "small" test run with code coverage.
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: types
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,23 +50,43 @@ jobs:
           (cd ./mole-140428 && pwd >> $GITHUB_PATH)
       - name: Install repo dependencies
         run: pip install -r requirements.txt
-      - name: Install mypy
-        run: pip install mypy
-      - name: Run mypy check
-        run: mypy nfvsmotifs
       - name: Install pytest
         run: pip install pytest pytest-cov      
-      # Correctness is tested on larger networks, while for coverage, we use
-      # a smaller subset, since it should not have a significant impact on it.
-      - name: Run pytest (without coverage)
-        run: python3 -m pytest --networksize 50 tests/
-      # The reason why we have to run pytest twice is that saving the coverage report will erase
-      # the exit code and so the workflow would succeed even if there are failing tests.
-      # (this could be of course solved using the magic of unix, but for now, this is simpler)
-      - name: Run pytest again with coverage
+      - name: Run pytest with coverage
         run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nfvsmotifs tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
+  # Then do a full test for correctness using larger networks.
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [types, coverage]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install clingo
+        run: sudo apt-get -y install gringo
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          architecture: x64
+      - name: Fetch and install native Pint
+        run: | 
+          wget https://github.com/pauleve/pint/releases/download//2019-05-24/pint_2019-05-24_amd64.deb
+          sudo apt install ./pint_2019-05-24_amd64.deb
+      - name: Fetch and install Mole
+        run: | 
+          wget http://www.lsv.fr/~schwoon/tools/mole/mole-140428.tar.gz
+          tar -xvf mole-140428.tar.gz
+          (cd ./mole-140428 && make)
+          (cd ./mole-140428 && pwd >> $GITHUB_PATH)
+      - name: Install repo dependencies
+        run: pip install -r requirements.txt
+      - name: Install pytest
+        run: pip install pytest
+      - name: Run pytest (without coverage)
+        run: python3 -m pytest --networksize 50 tests/
