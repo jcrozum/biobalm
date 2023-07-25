@@ -5,7 +5,6 @@ from copy import deepcopy
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph  # type: ignore
 from pyeda.boolalg.bdd import expr2bdd
 from pypint import Goal, InMemoryModel  # type:ignore
@@ -23,12 +22,80 @@ from nfvsmotifs.state_utils import (
 
 if TYPE_CHECKING:
     from pyeda.boolalg.bdd import BinaryDecisionDiagram
+    from biodivine_aeon import BooleanNetwork
 
 
 """
     A module responsible for detecting motif-avoidant attractors within terminal restriction space.
 """
 
+
+def make_retained_set(
+    network: BooleanNetwork,
+    nfvs: list[str],
+    space: dict[str, int],
+    child_spaces: list[dict[str, int]] | None = None,
+) -> dict[str, int]:
+    """
+    Calculate the retained set.
+
+    The retained set is technically a space-like object that describes the variables which have 
+    to be fixed in order for the network to lose any complex attractors. However, note that this 
+    really means changing the update functions. I.e. this is not a trap space that only contains
+    fixed-points, but a description of how the network must be modified to remove complex 
+    attractors.
+
+    Finally, the construction guarantees that any complex attractor of the old network will
+    manifest as at least one fixed-point in the new network.
+    """
+
+    if child_spaces is None:
+        child_spaces = []
+
+    # Initially, the retained set only contains the fixed values from the 
+    # current node space (this elimiantes unnecessary Petri net transitions
+    # for values which we already proved are constant).
+    # 
+    # In the following code, we then extend the retained set based on the model's NFVS
+    # and the current child spaces. 
+    retained_set = space.copy()
+
+    
+    # First, if there are any child spaces present, we extend the retained set with the 
+    # values from the one that has the least amount of fixed variables shared with the NFVS.
+    if len(child_spaces) > 0:
+        # Find the child space that has the fewest nodes in common with the NFVS:
+        least_common_child_space = child_spaces[0]
+        least_common_nodes = len(set(least_common_child_space) & set(nfvs))
+        for child_space in child_spaces:
+            common_nodes = len(set(child_space) & set(nfvs))
+            if common_nodes < least_common_nodes:
+                least_common_nodes = common_nodes
+                least_common_child_space = child_space
+
+        for x in least_common_child_space:
+            if (x not in retained_set) and (x in nfvs):
+                retained_set[x] = least_common_child_space[x]
+        
+    # Then, set the remaining NFVS variables based on the majority output value in the update 
+    # function of the relevant variable.
+    for x in nfvs:
+        if x in retained_set:
+            continue
+
+        aeon_fx = network.get_update_function(x)
+        pyeda_fx = aeon_to_pyeda(aeon_fx)
+        input_count = len(list(pyeda_fx.support))
+
+        half_count = pow(2, input_count - 1)
+        sat_count = pyeda_fx.satisfy_count()
+        
+        if sat_count > half_count:
+            retained_set[x] = 1
+        else:
+            retained_set[x] = 0
+
+    return retained_set
 
 def detect_motif_avoidant_attractors(
     network: BooleanNetwork,

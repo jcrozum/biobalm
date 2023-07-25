@@ -90,20 +90,21 @@ if __name__ == "__main__":
 			lines = f.read().splitlines()
 			# Try to parse runtime statistics.
 			# Time stats are three lines from the end.
-			if len(lines) >= 3:
+			if len(lines) >= 4:
 				time_line = lines[-3]
+				result_line = lines[-4]
 				if RE_TIME.match(time_line) and is_success:
 					# Success, we found time!
 					time = str(RE_TIME.match(time_line).group(1))
 					print("Success. Elapsed: ", time)
-					TIMES.write(name + ", " + time + "\n")
+					TIMES.write(f"{name}, {time}, {result_line}\n")
 					AGGREGATION_LIST.append(float(time))
 				else:
 					# Fail: output exists but does not have
 					# correct time format.
 					print("Fail. Last line of output:")
 					print(lines[-1])
-					TIMES.write(name + ", " + "fail" + "\n")	
+					TIMES.write(f"{name}, FAIL, {lines[-1]}\n")	
 			elif len(lines) > 0:
 				# Fail: There is some output, but not enough
 				# for a successful process.

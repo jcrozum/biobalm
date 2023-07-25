@@ -17,6 +17,10 @@ bn = bn.infer_regulatory_graph()
 
 # Compute the succession diagram.
 sd = SuccessionDiagram(bn)
-expanded = sd.expand_node(sd.root(), depth_limit=DEPTH_LIMIT, node_limit=NODE_LIMIT)
+sd.expand_minimal_spaces()
 
-print(f"Succession diagram size:", expanded)
+print(f"Succession diagram size:", len(sd))
+print(f"Minimal traps:", len(sd.minimal_trap_spaces()))
+
+print("size, expanded, minimal")
+print(f"{len(sd)}, {len(list(sd.expanded_ids()))}, {len(sd.minimal_trap_spaces())}")

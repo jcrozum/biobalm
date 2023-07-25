@@ -274,3 +274,31 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
         sub_spaces.append(sub_space)
 
     return sub_spaces
+
+def space_unique_key(space: dict[str, int], network: BooleanNetwork) -> int:
+    """
+    Computes an integer which is a unique representation of the provided `space` 
+    (with respect to the given `network`).
+
+    This integer key can be used instead of the original `space` in places where 
+    dictionaries are not allowed, such as a key within a larger dictionary, or 
+    a sorting key.
+
+    Note that when used for sorting, this key essentially implements a particular 
+    form of lexicographic ordering on spaces. This is always a total ordering
+    (there is no ambiguity).
+    """
+
+    # Key is a binary encoding of the space dictionary. Since Python has
+    # arbitrary-precision integers, this should work for any network and be
+    # reasonably fast (we are not doing any copies or string manipulation).
+    key: int = 0
+    for k, v in space.items():
+        var = network.find_variable(k)
+        assert var
+        var_index: int = var.as_index()
+        # Each variable is encoded as two bits, so the total length
+        # of the key is 2 * n and the offset of each variable is 2 * index.
+        # 00 - unknown; 10 - zero; 11 - one
+        key |= (v + 2) << (2 * var_index)
+    return key

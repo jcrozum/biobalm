@@ -93,3 +93,12 @@ def test_expression_to_spaces():
     assert {'d': 0, 'a': 1} in spaces
     assert {'d': 0, 'c': 1} in spaces
     assert {'a': 1, 'c': 0} not in spaces
+
+def test_space_unique_key():
+    bn = BooleanNetwork.from_bnet("""
+        a, c & b
+        b, !a
+        c, c
+    """)
+    assert space_unique_key({"a": 1}, bn) == space_unique_key({"a": 1}, bn)
+    assert space_unique_key({"a": 1}, bn) != space_unique_key({"b": 1}, bn)
