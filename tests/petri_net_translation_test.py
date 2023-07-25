@@ -1,7 +1,14 @@
-from nfvsmotifs.petri_net_translation import sanitize_network_names, network_to_petrinet, extract_variable_names
-from biodivine_aeon import RegulatoryGraph, BooleanNetwork # type: ignore
-from networkx import DiGraph, is_isomorphic # type: ignore
+# type: ignore
 import pytest
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph  # type: ignore
+from networkx import DiGraph, is_isomorphic  # type: ignore
+
+from nfvsmotifs.petri_net_translation import (
+    extract_variable_names,
+    network_to_petrinet,
+    sanitize_network_names,
+)
+
 
 def test_sanitization():
     rg = RegulatoryGraph([r"a_45[x]", r"b12{z}", "c[", "c]"])
@@ -22,22 +29,26 @@ def test_sanitization():
     assert bn.get_variable_name(c1) == "c_"
     assert bn.get_variable_name(c2) == "c__id4"
 
+
 def test_sanitization_failing():
     rg = RegulatoryGraph(["x_", "x_id2", "x["])
     bn = BooleanNetwork(rg)
     try:
         bn = sanitize_network_names(bn)
         pytest.fail("This network should not be sanitizeable.")
-    except:
+    except:  # noqa: E722
         pass
 
+
 def test_translation():
-    # A very very simple network for which we know how the 
+    # A very very simple network for which we know how the
     # translation should look like.
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         A, !A & B
         B, !B & !A
-    """)
+    """
+    )
 
     expected = DiGraph()
     expected.add_node("b0_A", kind="place")
@@ -56,7 +67,7 @@ def test_translation():
     expected.add_node("tr_A_down_1", kind="transition")
     expected.add_edge("b1_A", "tr_A_down_1")
     expected.add_edge("tr_A_down_1", "b0_A")
-    
+
     # B goes up if B=0 and A=0.
     expected.add_node("tr_B_up_1", kind="transition")
     expected.add_edge("b0_B", "tr_B_up_1")

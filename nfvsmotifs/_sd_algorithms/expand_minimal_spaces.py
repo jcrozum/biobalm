@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
-
 from nfvsmotifs.space_utils import is_subspace
 from nfvsmotifs.trappist_core import trappist
+
 
 def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) -> bool:
     """
@@ -18,7 +18,7 @@ def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) 
 
     root = sd.root()
 
-    seen = set([root])    
+    seen = set([root])
 
     stack: list[tuple[int, list[int] | None]] = [(root, None)]
 
@@ -29,18 +29,18 @@ def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) 
             if (size_limit is not None) and (len(sd) >= size_limit):
                 # Size limit reached.
                 return False
-                
+
             successors = sd.node_successors(node, compute=True)
-            successors = sorted(successors, reverse=True) # For determinism!
+            successors = sorted(successors, reverse=True)  # For determinism!
             # (reversed because we explore the list from the back)
 
         node_space = sd.node_space(node)
 
         # Remove all immediate successors that are already visited or those who
-        # do not cover any new minimal trap space.        
-        while len(successors) > 0:            
+        # do not cover any new minimal trap space.
+        while len(successors) > 0:
             if successors[-1] in seen:
-                successors.pop()    
+                successors.pop()
                 continue
             if len([s for s in minimal_traps if is_subspace(s, node_space)]) == 0:
                 successors.pop()
@@ -56,7 +56,7 @@ def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) 
             continue
 
         # At this point, we know that `s` is not visited and it contains
-        # at least one minimal trap space that does not appear in the 
+        # at least one minimal trap space that does not appear in the
         # succession diagram yet.
 
         s = successors.pop()

@@ -31,9 +31,9 @@ def trappist_async(
     avoid_subspaces: list[dict[str, int]] | None = None,
 ):
     """
-    The same as the `trappist` method, but instead of returning a list of spaces as a result, the
-    spaces are returned to the supplied `on_solution` callback. You can stop the enumeration by
-    returning `False` from this callback.
+    The same as the `trappist` method, but instead of returning a list of spaces
+    as a result, the spaces are returned to the supplied `on_solution` callback.
+    You can stop the enumeration by returning `False` from this callback.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -91,21 +91,26 @@ def trappist(
     avoid_subspaces: list[dict[str, int]] | None = None,
 ) -> list[dict[str, int]]:
     """
-    Solve the given `problem` for the given `network` using the Trappist algorithm, internally relying on the
-    Python bindings of the `clingo` ASP solver.
+    Solve the given `problem` for the given `network` using the Trappist
+    algorithm, internally relying on the Python bindings of the `clingo` ASP
+    solver.
 
     Arguments:
-        - `network`: Can be either a `BooleanNetwork`, or a Petri net (`DiGraph`) compatible with the encoding
-        in `petri_net_translation` module. The behaviour is undefined for other `DiGraph` instances.
-        - `problem`: `min` minimum trap spaces; `max` maximum trap spaces; `fix` fixed points. Default: `min`.
-        - `reverse_time`: If `True`, a time-reversed network should be considered. Default: `False`.
-        - `solution_limit`: If given, the result is limited to the given number of solutions. Default: `None`.
+        - `network`: Can be either a `BooleanNetwork`, or a Petri net
+          (`DiGraph`) compatible with the encoding
+        in `petri_net_translation` module. The behaviour is undefined for other
+        `DiGraph` instances. - `problem`: `min` minimum trap spaces; `max`
+        maximum trap spaces; `fix` fixed points. Default: `min`. -
+        `reverse_time`: If `True`, a time-reversed network should be considered.
+        Default: `False`. - `solution_limit`: If given, the result is limited to
+        the given number of solutions. Default: `None`.
 
-    The result is a list of spaces represented as dictionaries. If you want to avoid enumerating all solutions
-    explicitly as one list, you can use `trappist_async` which has a similar API but can yield solutions
-    one by one.
+    The result is a list of spaces represented as dictionaries. If you want to
+    avoid enumerating all solutions explicitly as one list, you can use
+    `trappist_async` which has a similar API but can yield solutions one by one.
 
-    Finally, recall that the supplied network must have its names sanitized (see `petri_net_translation` module).
+    Finally, recall that the supplied network must have its names sanitized (see
+    `petri_net_translation` module).
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -159,24 +164,29 @@ def _create_clingo_constraints(
     optimize_source_variables: list[str] | None = None,
 ) -> Control:
     """
-    Translate the given Petri net (represented as a `DiGraph`; see also `petri_net_translation`
-    module for details) into a logic program that solves the given problem type. This logic
-    program is then added to the `Control` object provided by `clingo`.
+    Translate the given Petri net (represented as a `DiGraph`; see also
+    `petri_net_translation` module for details) into a logic program that solves
+    the given problem type. This logic program is then added to the `Control`
+    object provided by `clingo`.
 
-     - The `problem` arugment specifies one of the three problem types: `min` (minimum trap spaces),
-     `max` (maximum trap spaces) and `fix` (fixed-points).
-     - If `reverse_time` is true, the problem is solved for a time-reversed problem.
-     - Argument `ensure_subspace` is a space in which all results must be included.
-     - Argument `avoid_subspaces` is a list of spaces that must be avoided by all solutions.
-     - Argument `optimize_source_variables` designates variables for which a `*` solution should be
-     disregarded when computing maximum trap spaces.
+     - The `problem` arugment specifies one of the three problem types: `min`
+       (minimum trap spaces),
+     `max` (maximum trap spaces) and `fix` (fixed-points). - If `reverse_time`
+     is true, the problem is solved for a time-reversed problem. - Argument
+     `ensure_subspace` is a space in which all results must be included. -
+     Argument `avoid_subspaces` is a list of spaces that must be avoided by all
+     solutions. - Argument `optimize_source_variables` designates variables for
+     which a `*` solution should be disregarded when computing maximum trap
+     spaces.
 
-     Finally, note that when `ensure_subspace` or `avoid_subspaces` is included, the result is
-     maximal/minimal within the resulting space of solutions, not globally. For example, if specify
-     some `ensure_subspace` and `problem=max`, then the result is maximal *within* that subspace,
-     not globally. Furthermore, the result can still be a *superspace* of the `avoid_subspaces`
-     argument. For example, if you specify that you want to avoid a particular fixed-point,
-     a globally non-minimal trap space that contains this fixed-point can be still included.
+     Finally, note that when `ensure_subspace` or `avoid_subspaces` is included,
+     the result is maximal/minimal within the resulting space of solutions, not
+     globally. For example, if specify some `ensure_subspace` and `problem=max`,
+     then the result is maximal *within* that subspace, not globally.
+     Furthermore, the result can still be a *superspace* of the
+     `avoid_subspaces` argument. For example, if you specify that you want to
+     avoid a particular fixed-point, a globally non-minimal trap space that
+     contains this fixed-point can be still included.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -284,8 +294,9 @@ def _clingo_model_to_fixed_point(model: Model) -> dict[str, int]:
         # but just in case.
         assert variable not in space
 
-        # Note that this is opposite to the case of trap spaces. If "positive" symbol
-        # appears in the solution, we fix the value to "1". Otherwise, we fix the value to "0".
+        # Note that this is opposite to the case of trap spaces. If "positive"
+        # symbol appears in the solution, we fix the value to "1". Otherwise, we
+        # fix the value to "0".
 
         space[variable] = 1 if is_positive else 0
 
@@ -420,14 +431,14 @@ def compute_fixed_point_reduced_STG(
     solution_limit: int | None = None,
 ) -> list[dict[str, int]]:
     """
-    This method computes the fixed points of the given Petri-net-encoded Boolean network.
-    This makes it possible to modify the Petri net instead of re-encoding the BN repeatedly
-    for multiple subsequnet queries.
+    This method computes the fixed points of the given Petri-net-encoded Boolean
+    network. This makes it possible to modify the Petri net instead of
+    re-encoding the BN repeatedly for multiple subsequnet queries.
 
-    The arguments `ensure_subspace`, `avoid_subspaces`, and `solution_limit` work exactly
-    the same way as in the `trappist` method. Meanwhile, the `retained_set` argument is
-    applied as  a restriction on the transitions of the Petri net, forcing given variables
-    to retain the specified values.
+    The arguments `ensure_subspace`, `avoid_subspaces`, and `solution_limit`
+    work exactly the same way as in the `trappist` method. Meanwhile, the
+    `retained_set` argument is applied as  a restriction on the transitions of
+    the Petri net, forcing given variables to retain the specified values.
     """
 
     results: list[dict[str, int]] = []
