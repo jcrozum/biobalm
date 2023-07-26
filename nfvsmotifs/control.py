@@ -6,7 +6,7 @@ from typing import cast
 import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 
-from nfvsmotifs.space_utils import percolate_space
+from nfvsmotifs.space_utils import is_subspace, percolate_space
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
 SuccessionType = list[dict[str, int]]  # sequence of stable motifs
@@ -204,14 +204,9 @@ def successions_to_target(
             target=target,
         )
 
-    for s in cast(list[int], succession_diagram.G.nodes()):
-        fixed_vars = cast(dict[str, int], succession_diagram.G.nodes[s]["space"])
-        is_consistent = not any(
-            k in target and target[k] != v for k, v in fixed_vars.items()
-        )
-        is_last_needed = set(target) <= set(fixed_vars)
-
-        if not is_consistent or not is_last_needed:
+    for s in succession_diagram.node_ids():
+        fixed_vars = succession_diagram.node_space(s)
+        if not is_subspace(fixed_vars, target):
             continue
 
         for path in cast(
@@ -223,7 +218,7 @@ def successions_to_target(
             ),
         ):
             succession = [
-                cast(dict[str, int], succession_diagram.G.edges[x, y]["motif"])
+                succession_diagram.edge_stable_motif(x, y)
                 for x, y in zip(path[:-1], path[1:])
             ]
             successions.append(succession)
