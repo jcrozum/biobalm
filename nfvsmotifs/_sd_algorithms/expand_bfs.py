@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
+
 def expand_bfs(
-    sd: SuccessionDiagram, 
-    node_id: int | None = None, 
-    bfs_level_limit: int | None = None, 
-    size_limit: int | None = None
+    sd: SuccessionDiagram,
+    node_id: int | None = None,
+    bfs_level_limit: int | None = None,
+    size_limit: int | None = None,
 ) -> bool:
     """
     See `SuccessionDiagram.expand_bfs` for documentation.
@@ -18,12 +19,12 @@ def expand_bfs(
     if node_id is None:
         node_id = sd.root()
 
-    seen = set()
+    seen: set[int] = set()
     seen.add(node_id)
 
     level_id = 0
     current_level = [node_id]
-    next_level = []
+    next_level: list[int] = []
 
     while len(current_level) > 0:
         for node in current_level:
@@ -42,9 +43,9 @@ def expand_bfs(
                 if s not in seen:
                     seen.add(s)
                     next_level.append(s)
-        
+
         # The level is explored. Check if this exceeds the level limit.
-        if  (bfs_level_limit is not None) and (level_id >= bfs_level_limit):
+        if (bfs_level_limit is not None) and (level_id >= bfs_level_limit):
             # Level limit reached.
             return False
 

@@ -1,33 +1,43 @@
-import os
-from biodivine_aeon import BooleanNetwork # type:ignore
-from networkx import DiGraph # type:ignore
-from nfvsmotifs.interaction_graph_utils import infer_signed_interaction_graph, feedback_vertex_set, independent_cycles, find_minimum_NFVS
+from biodivine_aeon import BooleanNetwork  # type:ignore
+from networkx import DiGraph  # type:ignore
+
+from nfvsmotifs.interaction_graph_utils import (
+    feedback_vertex_set,
+    find_minimum_NFVS,
+    independent_cycles,
+    infer_signed_interaction_graph,
+)
+
 
 def test_ig_inference():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         # Just a normal function.
         b, a | !b
         # Contradiciton on `a` - the regulation should not appear in the result
         # Also, non-monotonic dependence on b and c.
         a, (a & !a) | (b <=> c)
         c, c
-    """)
+    """
+    )
     ig = infer_signed_interaction_graph(bn)
 
-    edges = { edge:ig.get_edge_data(edge[0], edge[1])['sign'] for edge in ig.edges }
-    assert len(edges) == 5
-    assert edges[('a', 'b')] == "+"
-    assert edges[('b', 'b')] == "-"
-    assert edges[('b', 'a')] == "?"
-    assert edges[('c', 'a')] == "?"
-    assert edges[('c', 'c')] == "+"
-    assert ('a', 'a') not in edges
+    edges = {edge: ig.get_edge_data(edge[0], edge[1])["sign"] for edge in ig.edges}  # type: ignore
+    assert len(edges) == 5  # type: ignore
+    assert edges[("a", "b")] == "+"
+    assert edges[("b", "b")] == "-"
+    assert edges[("b", "a")] == "?"
+    assert edges[("c", "a")] == "?"
+    assert edges[("c", "c")] == "+"
+    assert ("a", "a") not in edges
 
-# There should be a negative cycle between b_1 and b_2, 
+
+# There should be a negative cycle between b_1 and b_2,
 # a positive cycle between d_1 and d_2, and a negative cycle
 # between d_1, d_2, and d_3. Other nodes are not on cycles
 # except for e, which has a positive self-loop.
-CYCLES_BN = BooleanNetwork.from_aeon("""
+CYCLES_BN = BooleanNetwork.from_aeon(
+    """
             a -> c
             b_1 -> b_2
             b_2 -| b_1
@@ -39,28 +49,32 @@ CYCLES_BN = BooleanNetwork.from_aeon("""
             d_2 -> d_1
             d_1 -> d_2
             e -> e
-    """)
+    """
+)
 
 CYCLES_DIGRAPH = DiGraph()
-CYCLES_DIGRAPH.add_nodes_from(["a", "b_1", "b_2", "c", "d_1", "d_2", "d_3", "e"])
-CYCLES_DIGRAPH.add_edges_from([
-    ("a", "c", {'sign': '+'}),
-    ("b_1", "b_2", {'sign': '+'}),
-    ("b_2", "b_1", {'sign': '-'}),
-    ("b_2", "c", {'sign': '+'}),
-    ("c", "d_2", {'sign': '+'}),
-    ("c", "e", {'sign': '+'}),
-    ("d_1", "d_3", {'sign': '+'}),
-    ("d_3", "d_2", {'sign': '-'}),
-    ("d_2", "d_1", {'sign': '+'}),
-    ("d_1", "d_2", {'sign': '+'}),
-    ("e", "e", {'sign': '+'}),
-])
+CYCLES_DIGRAPH.add_nodes_from(["a", "b_1", "b_2", "c", "d_1", "d_2", "d_3", "e"])  # type: ignore
+CYCLES_DIGRAPH.add_edges_from(  # type: ignore
+    [
+        ("a", "c", {"sign": "+"}),
+        ("b_1", "b_2", {"sign": "+"}),
+        ("b_2", "b_1", {"sign": "-"}),
+        ("b_2", "c", {"sign": "+"}),
+        ("c", "d_2", {"sign": "+"}),
+        ("c", "e", {"sign": "+"}),
+        ("d_1", "d_3", {"sign": "+"}),
+        ("d_3", "d_2", {"sign": "-"}),
+        ("d_2", "d_1", {"sign": "+"}),
+        ("d_1", "d_2", {"sign": "+"}),
+        ("e", "e", {"sign": "+"}),
+    ]
+)
+
 
 def test_fvs():
     fvs = feedback_vertex_set(CYCLES_BN)
-    nfvs = feedback_vertex_set(CYCLES_BN, parity='negative')
-    pfvs = feedback_vertex_set(CYCLES_BN, parity='positive')
+    nfvs = feedback_vertex_set(CYCLES_BN, parity="negative")
+    pfvs = feedback_vertex_set(CYCLES_BN, parity="positive")
 
     assert len(fvs) == 3
     assert len(nfvs) == 2
@@ -81,29 +95,34 @@ def test_fvs():
     assert ("b_1" in fvs) or ("b_2" in fvs)
     assert ("b_1" in nfvs) or ("b_2" in nfvs)
     assert ("b_1" not in pfvs) and ("b_2" not in pfvs)
-    
+
     # With "d_*", its a bit more complicated:
     # "d_1" or "d_2" must be in fvs and also pfvs, but in nfvs, "d_3"
     # is also sufficient as the "d_1 --- d_2" cycle is positive.
     assert ("d_1" in fvs) or ("d_2" in fvs)
     assert ("d_1" in nfvs) or ("d_2" in nfvs) or ("d_3" in nfvs)
     assert ("d_1" in pfvs) or ("d_2" in pfvs)
-    
+
     # Check that the `DiGraph` results are the same as `BooleanNetwork` results.
     dg_fvs = feedback_vertex_set(CYCLES_DIGRAPH)
-    dg_nfvs = feedback_vertex_set(CYCLES_DIGRAPH, parity='negative')
-    dg_pfvs = feedback_vertex_set(CYCLES_DIGRAPH, parity='positive')
+    dg_nfvs = feedback_vertex_set(CYCLES_DIGRAPH, parity="negative")
+    dg_pfvs = feedback_vertex_set(CYCLES_DIGRAPH, parity="positive")
 
     assert fvs == dg_fvs
     assert nfvs == dg_nfvs
     assert pfvs == dg_pfvs
 
+
 def test_subgraph_fvs():
-    # We only keep the two cycles consisting of "d_*". The "b_*" cycle 
+    # We only keep the two cycles consisting of "d_*". The "b_*" cycle
     # and "e" self-loop are not considered.
     fvs = feedback_vertex_set(CYCLES_BN, subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
-    pfvs = feedback_vertex_set(CYCLES_BN, parity='positive', subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
-    nfvs = feedback_vertex_set(CYCLES_BN, parity='negative', subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
+    pfvs = feedback_vertex_set(
+        CYCLES_BN, parity="positive", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
+    )
+    nfvs = feedback_vertex_set(
+        CYCLES_BN, parity="negative", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
+    )
 
     assert len(fvs) == 1
     assert len(pfvs) == 1
@@ -112,15 +131,16 @@ def test_subgraph_fvs():
     assert ("d_1" in nfvs) or ("d_2" in nfvs) or ("d_3" in nfvs)
     assert ("d_1" in pfvs) or ("d_2" in pfvs)
 
+
 def test_ic():
     ic = independent_cycles(CYCLES_BN)
-    n_ic = independent_cycles(CYCLES_BN, parity='negative')
-    p_ic = independent_cycles(CYCLES_BN, parity='positive')
+    n_ic = independent_cycles(CYCLES_BN, parity="negative")
+    p_ic = independent_cycles(CYCLES_BN, parity="positive")
 
     assert len(ic) == 3
     assert len(n_ic) == 2
     assert len(p_ic) == 2
-            
+
     # e is the shortes positive (and overall) cycle, so should be first
     assert ic[0] == ["e"]
     assert p_ic[0] == ["e"]
@@ -139,12 +159,12 @@ def test_ic():
     assert set(ic[1]) == set(["d_1", "d_2"]) or set(ic[2]) == set(["d_1", "d_2"])
 
     # Check that the `DiGraph` results are the same as `BooleanNetwork` results.
-    # Note that these are not necessarily entirely equivalent, as the DiGraph 
-    # seems to store the nodes/edges in a hashmap, resulting in 
+    # Note that these are not necessarily entirely equivalent, as the DiGraph
+    # seems to store the nodes/edges in a hashmap, resulting in
     # not-quite-deterministic ordering and possibly different results (I think?).
-    dg_ic = independent_cycles(CYCLES_DIGRAPH)
-    dg_n_ic = independent_cycles(CYCLES_DIGRAPH, parity='negative')
-    dg_p_ic = independent_cycles(CYCLES_DIGRAPH, parity='positive')
+    dg_ic = independent_cycles(CYCLES_DIGRAPH)  # type: ignore
+    dg_n_ic = independent_cycles(CYCLES_DIGRAPH, parity="negative")  # type: ignore
+    dg_p_ic = independent_cycles(CYCLES_DIGRAPH, parity="positive")  # type: ignore
 
     print(ic)
     print(dg_ic)
@@ -155,11 +175,15 @@ def test_ic():
 
 
 def test_subgraph_ic():
-    # We only keep the two cycles consisting of "d_*". The "b_*" cycle 
+    # We only keep the two cycles consisting of "d_*". The "b_*" cycle
     # and "e" self-loop are not considered.
     ic = independent_cycles(CYCLES_BN, subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
-    p_ic = independent_cycles(CYCLES_BN, parity='positive', subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
-    n_ic = independent_cycles(CYCLES_BN, parity='negative', subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
+    p_ic = independent_cycles(
+        CYCLES_BN, parity="positive", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
+    )
+    n_ic = independent_cycles(
+        CYCLES_BN, parity="negative", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
+    )
 
     assert len(ic) == 1
     assert len(p_ic) == 1
@@ -174,7 +198,8 @@ def test_fvs_accuracy_CASCADE3():
     Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the CASCADE3 model <https://doi.org/10.3389/fmolb.2020.502573>.
     Note that the result of mtsNFVS is not deterministic.
     """
-    bn_real = BooleanNetwork.from_bnet("""
+    bn_real = BooleanNetwork.from_bnet(
+        """
         ABL1, (ATM & !RB1)
         ACVR1, BMPR2
         ADAM17, ERK_f
@@ -351,23 +376,25 @@ def test_fvs_accuracy_CASCADE3():
         YAP_TAZ, (!BTRC & (!CSNK1_f & !LATS_f))
         mTORC1_c, (!AKT1S1 & ((!RHEB & RSK_f) | RHEB))
         mTORC2_c, ((!PIK3CA & (!S6K_f & TSC_f)) | (PIK3CA & !S6K_f))
-    """)
+    """
+    )
 
     nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
 
-    assert len(nfvs_mtsNFVS) <= 19 # the result of mtsNFVS is 19
+    assert len(nfvs_mtsNFVS) <= 19  # the result of mtsNFVS is 19
 
     for _i in range(10):
         nfvs = find_minimum_NFVS(bn_real)
         assert nfvs == nfvs_mtsNFVS
-    
+
 
 def test_fvs_accuracy_SIPC():
     """
     Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the SIPC model <https://doi.org/10.7554/eLife.72626>.
     Note that the result of mtsNFVS is not deterministic.
     """
-    bn_real = BooleanNetwork.from_bnet("""
+    bn_real = BooleanNetwork.from_bnet(
+        """
         AKT, ((!HSPs&(PIP3&!PTCH1))|(HSPs&!PTCH1))
         AMPK, ((!AMP_ATP&(!ATM&(!ATR&(!EGFR&(!FGFR3&HIF1)))))|((!AMP_ATP&(!ATM&(ATR&(!EGFR&!FGFR3))))|((!AMP_ATP&(ATM&(!EGFR&!FGFR3)))|(AMP_ATP&(!EGFR&!FGFR3)))))
         AMP_ATP, !Nutrients
@@ -484,13 +511,13 @@ def test_fvs_accuracy_SIPC():
         p53, ((!Acidosis&(!BCL2&(!CHK1_2&(!HIF1&(!HSPs&(!MDM2&(!p14ARF&p38)))))))|((!Acidosis&(!BCL2&(!CHK1_2&(!HIF1&(!HSPs&(!MDM2&p14ARF))))))|((!Acidosis&(!BCL2&(!CHK1_2&(HIF1&(!HSPs&!MDM2)))))|((!Acidosis&(!BCL2&(CHK1_2&(!HSPs&!MDM2))))|(Acidosis&(!BCL2&(!HSPs&!MDM2)))))))
         p70S6kab, ((!mTORC2&PDK1)|mTORC2)
         p90RSK, ((!ERK&PDK1)|ERK)
-    """)
+    """
+    )
 
     nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
 
-    assert len(nfvs_mtsNFVS) <= 13 # the result of mtsNFVS is 13
-    
+    assert len(nfvs_mtsNFVS) <= 13  # the result of mtsNFVS is 13
+
     for _i in range(10):
         nfvs = find_minimum_NFVS(bn_real)
         assert nfvs == nfvs_mtsNFVS
-

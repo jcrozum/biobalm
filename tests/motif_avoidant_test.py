@@ -1,18 +1,24 @@
-from biodivine_aeon import BooleanNetwork # type:ignore
-from nfvsmotifs.motif_avoidant import _preprocess_candidates, _filter_candidates, _Pint_reachability
-from nfvsmotifs.state_utils import state_list_to_bdd
+from biodivine_aeon import BooleanNetwork  # type:ignore
+
+from nfvsmotifs.motif_avoidant import _filter_candidates  # type: ignore
+from nfvsmotifs.motif_avoidant import _Pint_reachability  # type: ignore
+from nfvsmotifs.motif_avoidant import _preprocess_candidates  # type: ignore
 from nfvsmotifs.petri_net_translation import network_to_petrinet
+from nfvsmotifs.state_utils import state_list_to_bdd
+
 
 def test_preprocessing_ssf_not_optimal():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
-    """)
-    
-    s0 = {'x1': 0, 'x2': 0}
-    s1 = {'x1': 0, 'x2': 1}
-    s2 = {'x1': 1, 'x2': 0}
-    s3 = {'x1': 1, 'x2': 1}
+    """
+    )
+
+    s0 = {"x1": 0, "x2": 0}
+    s1 = {"x1": 0, "x2": 1}
+    s2 = {"x1": 1, "x2": 0}
+    # s3 = {"x1": 1, "x2": 1}
 
     """
         This BN has one minimal trap space: 11.
@@ -29,32 +35,38 @@ def test_preprocessing_ssf_not_optimal():
         If b_1 = 1 and b_2 = 1, then F = [01, 10].
     """
 
-    # F = {00}
-    F = [s0]
-    F = _preprocess_candidates(bn, F, terminal_restriction_space, 1000)
-    assert len(F) == 1
+    # candidates_F = {00}
+    candidates_F = [s0]
+    candidates_F = _preprocess_candidates(
+        bn, candidates_F, terminal_restriction_space, 1000
+    )
+    assert len(candidates_F) == 1
 
-    # F = {01, 10}
-    F = [s1, s2]
-    F = _preprocess_candidates(bn, F, terminal_restriction_space, 1000)
-    assert len(F) == 1
-    
+    # candidates_F = {01, 10}
+    candidates_F = [s1, s2]
+    candidates_F = _preprocess_candidates(
+        bn, candidates_F, terminal_restriction_space, 1000
+    )
+    assert len(candidates_F) == 1
+
 
 def test_preprocessing_ssf_optimal():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         A, !B
         B, !A
         C, A | B
-    """)
-    
-    s0 = {'A': 0, 'B': 0, 'C': 0}
-    s1 = {'A': 0, 'B': 0, 'C': 1}
-    s2 = {'A': 0, 'B': 1, 'C': 0}
-    s3 = {'A': 0, 'B': 1, 'C': 1}
-    s4 = {'A': 1, 'B': 0, 'C': 0}
-    s5 = {'A': 1, 'B': 0, 'C': 1}
-    s6 = {'A': 1, 'B': 1, 'C': 0}
-    s7 = {'A': 1, 'B': 1, 'C': 1}
+    """
+    )
+
+    s0 = {"A": 0, "B": 0, "C": 0}
+    # s1 = {"A": 0, "B": 0, "C": 1}
+    s2 = {"A": 0, "B": 1, "C": 0}
+    # s3 = {"A": 0, "B": 1, "C": 1}
+    s4 = {"A": 1, "B": 0, "C": 0}
+    # s5 = {"A": 1, "B": 0, "C": 1}
+    # s6 = {"A": 1, "B": 1, "C": 0}
+    s7 = {"A": 1, "B": 1, "C": 1}
 
     """
         This BN has two minimal trap spaces: 101 + 011.
@@ -70,58 +82,64 @@ def test_preprocessing_ssf_optimal():
         Then F = [000].
     """
 
-    F = [s0]
-    F = _preprocess_candidates(bn, F, terminal_restriction_space, 1000)
-    assert len(F) == 0
+    candidates_F = [s0]
+    candidates_F = _preprocess_candidates(
+        bn, candidates_F, terminal_restriction_space, 1000
+    )
+    assert len(candidates_F) == 0
 
 
 def test_ABNReach_current_version():
-    bn = BooleanNetwork.from_bnet("""    
+    bn = BooleanNetwork.from_bnet(
+        """
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
         x3, x3 | !x3
-    """)
-    
-    s0 = {'x1': 0, 'x2': 0, 'x3': 1}
-    s1 = {'x1': 0, 'x2': 1, 'x3': 1}
-    s2 = {'x1': 1, 'x2': 0, 'x3': 1}
-    s3 = {'x1': 1, 'x2': 1, 'x3': 1}
+    """
+    )
+
+    s0 = {"x1": 0, "x2": 0, "x3": 1}
+    s1 = {"x1": 0, "x2": 1, "x3": 1}
+    # s2 = {"x1": 1, "x2": 0, "x3": 1}
+    s3 = {"x1": 1, "x2": 1, "x3": 1}
 
     petri_net = network_to_petrinet(bn)
 
     joint_target_set = state_list_to_bdd([s3])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
-    assert is_reachable == False # 00 does not reach 11, Pint cannot determinem but Mole can
+    assert (
+        is_reachable is False
+    )  # 00 does not reach 11, Pint cannot determinem but Mole can
 
     joint_target_set = state_list_to_bdd([s0])
     is_reachable = _Pint_reachability(petri_net, s3, joint_target_set)
-    assert is_reachable == False # 11 does not reach 00
+    assert is_reachable is False  # 11 does not reach 00
 
     joint_target_set = state_list_to_bdd([s1])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
-    assert is_reachable == True # 00 reaches 01
+    assert is_reachable is True  # 00 reaches 01
 
     joint_target_set = state_list_to_bdd([s1, s3])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
-    assert is_reachable == True # 00 reaches 01
+    assert is_reachable is True  # 00 reaches 01
 
 
 def test_FilteringProcess():
-    bn = BooleanNetwork.from_bnet("""
+    bn = BooleanNetwork.from_bnet(
+        """
         x1, (x1 & x2) | (!x1 & !x2)
         x2, (x1 & x2) | (!x1 & !x2)
-    """)
-    
-    s0 = {'x1': 0, 'x2': 0}
-    s1 = {'x1': 0, 'x2': 1}
-    s2 = {'x1': 1, 'x2': 0}
-    s3 = {'x1': 1, 'x2': 1}
+    """
+    )
+
+    s0 = {"x1": 0, "x2": 0}
+    s1 = {"x1": 0, "x2": 1}
+    s2 = {"x1": 1, "x2": 0}
+    # s3 = {"x1": 1, "x2": 1}
 
     terminal_res_space = state_list_to_bdd([s0, s1, s2])
     petri_net = network_to_petrinet(bn)
 
-    F = [s1, s2] # Candidate set after finishing preprocessing
+    F = [s1, s2]  # Candidate set after finishing preprocessing
     list_motif_avoidant_atts = _filter_candidates(petri_net, F, terminal_res_space)
-    assert len(list_motif_avoidant_atts) == 1 # a motif-avoidant attractor {00, 01, 10}
-
-
+    assert len(list_motif_avoidant_atts) == 1  # a motif-avoidant attractor {00, 01, 10}

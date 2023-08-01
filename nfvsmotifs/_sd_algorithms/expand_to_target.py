@@ -5,9 +5,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
-from nfvsmotifs.space_utils import is_subspace, intersect
+from nfvsmotifs.space_utils import intersect, is_subspace
 
-def expand_to_target(sd: SuccessionDiagram, target: dict[str, int], size_limit: int | None = None):
+
+def expand_to_target(
+    sd: SuccessionDiagram, target: dict[str, int], size_limit: int | None = None
+):
     """
     See `SuccessionDiagram.exapnd_to_target` for documentation.
     """
@@ -17,7 +20,7 @@ def expand_to_target(sd: SuccessionDiagram, target: dict[str, int], size_limit: 
 
     level_id = 0
     current_level = [root]
-    next_level = []
+    next_level: list[int] = []
 
     while len(current_level) > 0:
         for node in current_level:
@@ -45,7 +48,6 @@ def expand_to_target(sd: SuccessionDiagram, target: dict[str, int], size_limit: 
 
             # Add successors to the next level and to the seen set.
             for s in successors:
-
                 if s not in seen:
                     seen.add(s)
                     next_level.append(s)

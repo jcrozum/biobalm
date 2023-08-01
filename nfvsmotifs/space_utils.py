@@ -275,16 +275,17 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
 
     return sub_spaces
 
+
 def space_unique_key(space: dict[str, int], network: BooleanNetwork) -> int:
     """
-    Computes an integer which is a unique representation of the provided `space` 
+    Computes an integer which is a unique representation of the provided `space`
     (with respect to the given `network`).
 
-    This integer key can be used instead of the original `space` in places where 
-    dictionaries are not allowed, such as a key within a larger dictionary, or 
+    This integer key can be used instead of the original `space` in places where
+    dictionaries are not allowed, such as a key within a larger dictionary, or
     a sorting key.
 
-    Note that when used for sorting, this key essentially implements a particular 
+    Note that when used for sorting, this key essentially implements a particular
     form of lexicographic ordering on spaces. This is always a total ordering
     (there is no ambiguity).
     """

@@ -1,14 +1,15 @@
 import subprocess
 
+
 def test_clingo():
     """
-        This just verifies that we have clingo installed in a way that
-        Trappist needs.
+    This just verifies that we have clingo installed in a way that
+    Trappist needs.
     """
     result = subprocess.run(
         [
             "clingo",
-            "--version",            
+            "--version",
         ],
         capture_output=False,
         text=True,

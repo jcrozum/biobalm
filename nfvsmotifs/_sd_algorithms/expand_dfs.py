@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
 
+
 def expand_dfs(
     sd: SuccessionDiagram,
     node_id: int | None = None,
@@ -18,7 +19,7 @@ def expand_dfs(
     if node_id is None:
         node_id = sd.root()
 
-    seen = set()
+    seen: set[int] = set()
     seen.add(node_id)
 
     stack: list[tuple[int, list[int] | None]] = [(node_id, None)]
@@ -32,9 +33,9 @@ def expand_dfs(
             if (size_limit is not None) and (len(sd) >= size_limit):
                 # Size limit reached.
                 return False
-            
+
             successors = sd.node_successors(node, compute=True)
-            successors = sorted(successors, reverse=True) # For determinism!
+            successors = sorted(successors, reverse=True)  # For determinism!
             # (reversed because we explore the list from the back)
 
         # Remove all immediate successors that are already visited.
@@ -48,7 +49,7 @@ def expand_dfs(
         if (dfs_stack_limit is not None) and (len(stack) >= dfs_stack_limit):
             # We cannot push any successor nodes because it would exceed
             # the stack limit. As such, we can just continue with the next
-            # item on the stack. however, we must remember that we skipped 
+            # item on the stack. however, we must remember that we skipped
             # some nodes and the result is thus incomplete.
             result_is_complete = False
             continue
@@ -58,6 +59,6 @@ def expand_dfs(
         # Push the node back with the remaining successors.
         stack.append((node, successors))
         # Push the successor onto the stack.
-        stack.append((s, None))        
+        stack.append((s, None))
 
     return result_is_complete

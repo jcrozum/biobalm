@@ -4,8 +4,8 @@ dependencies = [
     'biodivine_aeon ==0.2.0a4',
     'clingo ==5.6.2',
     'networkx==2.8.8',
-    'pyeda==0.28.0', # requires that the python-dev package for your python version is also installed, e.g. python3.11-dev
-    'pypint==1.6.2'
+    'pyeda==0.28.0',            # requires that the python-dev package for your python version is also installed, e.g. python3.11-dev
+    'pypint==1.6.2',
 ]
 dynamic = ["version"]
 
@@ -31,3 +31,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 line_length = 88
 profile = "black"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--networksize=10"

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import random
-from copy import deepcopy
 from functools import reduce
 from typing import TYPE_CHECKING
 
@@ -21,8 +20,8 @@ from nfvsmotifs.state_utils import (
 )
 
 if TYPE_CHECKING:
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram
     from biodivine_aeon import BooleanNetwork
+    from pyeda.boolalg.bdd import BinaryDecisionDiagram
 
 
 """
@@ -39,30 +38,31 @@ def make_retained_set(
     """
     Calculate the retained set.
 
-    The retained set is technically a space-like object that describes the variables which have 
-    to be fixed in order for the network to lose any complex attractors. However, note that this 
-    really means changing the update functions. I.e. this is not a trap space that only contains
-    fixed-points, but a description of how the network must be modified to remove complex 
+    The retained set is technically a space-like object that describes the
+    variables which have to be fixed in order for the network to lose any
+    complex attractors. However, note that this really means changing the update
+    functions. I.e. this is not a trap space that only contains fixed-points,
+    but a description of how the network must be modified to remove complex
     attractors.
 
-    Finally, the construction guarantees that any complex attractor of the old network will
-    manifest as at least one fixed-point in the new network.
+    Finally, the construction guarantees that any complex attractor of the old
+    network will manifest as at least one fixed-point in the new network.
     """
 
     if child_spaces is None:
         child_spaces = []
 
-    # Initially, the retained set only contains the fixed values from the 
-    # current node space (this elimiantes unnecessary Petri net transitions
-    # for values which we already proved are constant).
-    # 
-    # In the following code, we then extend the retained set based on the model's NFVS
-    # and the current child spaces. 
+    # Initially, the retained set only contains the fixed values from the
+    # current node space (this elimiantes unnecessary Petri net transitions for
+    # values which we already proved are constant).
+    #
+    # In the following code, we then extend the retained set based on the
+    # model's NFVS and the current child spaces.
     retained_set = space.copy()
 
-    
-    # First, if there are any child spaces present, we extend the retained set with the 
-    # values from the one that has the least amount of fixed variables shared with the NFVS.
+    # First, if there are any child spaces present, we extend the retained set
+    # with the values from the one that has the least amount of fixed variables
+    # shared with the NFVS.
     if len(child_spaces) > 0:
         # Find the child space that has the fewest nodes in common with the NFVS:
         least_common_child_space = child_spaces[0]
@@ -76,9 +76,9 @@ def make_retained_set(
         for x in least_common_child_space:
             if (x not in retained_set) and (x in nfvs):
                 retained_set[x] = least_common_child_space[x]
-        
-    # Then, set the remaining NFVS variables based on the majority output value in the update 
-    # function of the relevant variable.
+
+    # Then, set the remaining NFVS variables based on the majority output value
+    # in the update function of the relevant variable.
     for x in nfvs:
         if x in retained_set:
             continue
@@ -88,14 +88,15 @@ def make_retained_set(
         input_count = len(list(pyeda_fx.support))
 
         half_count = pow(2, input_count - 1)
-        sat_count = pyeda_fx.satisfy_count()
-        
+        sat_count = pyeda_fx.satisfy_count()  # type: ignore
+
         if sat_count > half_count:
             retained_set[x] = 1
         else:
             retained_set[x] = 0
 
     return retained_set
+
 
 def detect_motif_avoidant_attractors(
     network: BooleanNetwork,
@@ -107,12 +108,16 @@ def detect_motif_avoidant_attractors(
     is_in_an_mts: bool = False,
 ) -> list[dict[str, int]]:
     """
-    Compute a sub-list of `candidates` which correspond to motif-avoidant attractors.
-    Other method inputs:
-     - `network` and `petri_net` represent the model in which the property should be checked.
-     - `terminal_restriction_space` is a symbolic set of states which contains all motif avoidant
-        attractors (i.e. if a candidate state can leave this set, the candidate cannot be an attractor).
-     - `max_iterations` specifies how much time should be spent on the "simpler" preprocessing
+    Compute a sub-list of `candidates` which correspond to motif-avoidant
+    attractors. Other method inputs:
+     - `network` and `petri_net` represent the model in which the property
+       should be checked.
+     - `terminal_restriction_space` is a symbolic set of states which contains
+       all motif avoidant
+        attractors (i.e. if a candidate state can leave this set, the candidate
+        cannot be an attractor).
+     - `max_iterations` specifies how much time should be spent on the "simpler"
+       preprocessing
         before applying a more complete method.
     """
     if ensure_subspace is None:
@@ -130,7 +135,7 @@ def detect_motif_avoidant_attractors(
         terminal_restriction_space,
         max_iterations,
         ensure_subspace=ensure_subspace,
-        is_in_an_mts=is_in_an_mts
+        is_in_an_mts=is_in_an_mts,
     )
 
     if len(candidates) == 0:
@@ -148,7 +153,7 @@ def _preprocess_candidates(
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
     ensure_subspace: dict[str, int] | None = None,
-    is_in_an_mts: bool = False
+    is_in_an_mts: bool = False,
 ) -> list[dict[str, int]]:
     """
     A fast but incomplete method for eliminating spurious attractor candidates.
@@ -179,7 +184,7 @@ def _preprocess_candidates(
             continue
         var_name = network.get_variable_name(varID)
         variables.append(var_name)
-        function_expression = network.get_update_function(varID) 
+        function_expression = network.get_update_function(varID)
         function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
         update_functions[var_name] = function_bdd
 
@@ -192,16 +197,16 @@ def _preprocess_candidates(
     # is a minimal trap or not. In previous work, this was shown to work
     # well, but in the future we need to better document the resoning
     # behind these two algorithms.
-    if is_in_an_mts == False:
+    if not is_in_an_mts:
         # Copy is sufficient because we won't be modifying the states within the set.
         candidates_dnf = candidates.copy()
-        filtered_candidates = []
-        for state in candidates:                        
+        filtered_candidates: list[dict[str, int]] = []
+        for state in candidates:
             # Remove the state from the candidates. If we can prove that is
             # is not an attractor, we will put it back.
             candidates_dnf = remove_state_from_dnf(candidates_dnf, state)
 
-            simulation = state.copy()   # A copy of the state that we can overwrite.
+            simulation = state.copy()  # A copy of the state that we can overwrite.
             is_valid_candidate = True
             for _ in range(max_iterations):
                 # Advance all variables by one step in random order.
@@ -214,7 +219,7 @@ def _preprocess_candidates(
                 if dnf_function_is_true(candidates_dnf, simulation):
                     # The state can reach some other state in the candidate
                     # set. This does not mean it cannot be an attractor, but
-                    # it means it is sufficient to keep considering 
+                    # it means it is sufficient to keep considering
                     # the remaining candidates.
                     is_valid_candidate = False
                     break
@@ -231,12 +236,12 @@ def _preprocess_candidates(
                 # into the candidate set.
                 candidates_dnf.append(state)
                 filtered_candidates.append(state)
-        
+
         return filtered_candidates
     else:
         filtered_candidates = []
-        for i in range(max_iterations):
-            generator.shuffle(variables)                        
+        for _ in range(max_iterations):
+            generator.shuffle(variables)
             candidates_dnf = candidates.copy()
             filtered_candidates = []
 
@@ -259,6 +264,7 @@ def _preprocess_candidates(
             candidates = filtered_candidates
 
         return filtered_candidates
+
 
 def _filter_candidates(
     petri_net: DiGraph,
