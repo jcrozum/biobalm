@@ -84,7 +84,9 @@ def generate_ncf_rule(G:nx.DiGraph, node:int, bias:float = 0.5, seed:int = 0) ->
         G = Graph
         node = Node to generate rule for
         rng = Random number generator
-        bias = Probability that the function output is 1 when the positive regulator has value 1
+        bias = Probability that the function input is sufficient (or sufficient inhibitor)
+               of the output at each canalyzing depth. Also determines the ratio of 1 for
+               constant nodes. 
     output:
         String of nested canalyzing function for given node
     """
