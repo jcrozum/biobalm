@@ -1,5 +1,5 @@
 import sys
-sys.path.append(".")
+sys.path.append("..")
 
 from biodivine_aeon import BooleanNetwork
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
