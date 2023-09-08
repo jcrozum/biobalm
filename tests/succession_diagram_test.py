@@ -110,7 +110,7 @@ class SuccessionDiagramTest(unittest.TestCase):
 
 
 def test_expansion_depth_limit_bfs():
-    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+    bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/033.bnet")
 
     sd = SuccessionDiagram(bn)
     assert not sd.expand_bfs(bfs_level_limit=3)
@@ -119,7 +119,7 @@ def test_expansion_depth_limit_bfs():
 
 
 def test_expansion_depth_limit_dfs():
-    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+    bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/033.bnet")
 
     sd = SuccessionDiagram(bn)
     assert not sd.expand_dfs(dfs_stack_limit=3)
@@ -128,7 +128,7 @@ def test_expansion_depth_limit_dfs():
 
 
 def test_expansion_size_limit_bfs():
-    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+    bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/033.bnet")
 
     sd = SuccessionDiagram(bn)
     assert not sd.expand_bfs(size_limit=200)
@@ -137,7 +137,7 @@ def test_expansion_size_limit_bfs():
 
 
 def test_expansion_size_limit_dfs():
-    bn = BooleanNetwork.from_file("bbm-bnet-inputs-true/033.bnet")
+    bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/033.bnet")
 
     sd = SuccessionDiagram(bn)
     assert not sd.expand_dfs(size_limit=200)
