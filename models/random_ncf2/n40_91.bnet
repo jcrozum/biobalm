@@ -1,0 +1,41 @@
+targets, factors
+n25, n15
+n16, n21 | (n16 & (n25 & (n33)))
+n11, true
+n18, n10 & (n11)
+n35, n28 & (n29 | (n3))
+n24, n35 & (!n30 & (!n4))
+n39, true
+n10, n5 | (n1 & (n39 & (n12)))
+n23, true
+n37, n17 | (n8 & (!n23 | (n20)))
+n22, n7 | (n38 & (n18 & (n14)))
+n38, n22
+n28, n30 & (n9)
+n36, true
+n30, !n36
+n1, n37
+n27, n24
+n3, n17
+n7, !n2
+n34, true
+n31, n34 & (n17 | (n10))
+n6, n31
+n29, n6
+n32, true
+n15, n32
+n2, n17
+n21, n30
+n5, n13 & (n27)
+n33, true
+n19, n0 & (n39)
+n26, n19
+n8, true
+n0, n26
+n12, true
+n4, true
+n20, n15
+n14, true
+n13, true
+n9, true
+n17, true

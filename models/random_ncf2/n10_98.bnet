@@ -1,0 +1,11 @@
+targets, factors
+n8, n2 | (n7 | (!n4))
+n1, n8 & (n7)
+n2, n0 | (!n3 & (n2))
+n0, !n2 | (n7)
+n3, n1 & (n7)
+n4, !n2 & (n4 | (n5 | (!n9)))
+n9, n4 | (!n6 & (n7))
+n6, false
+n5, false
+n7, false
