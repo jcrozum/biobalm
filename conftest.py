@@ -25,11 +25,11 @@ def pytest_generate_tests(metafunc):
     if "network_file" in metafunc.fixturenames:
         size = int(metafunc.config.getoption("networksize"))
         models = []
-        for model in os.listdir("./bbm-bnet-inputs-true"):
+        for model in os.listdir("./models/bbm-bnet-inputs-true"):
             if not model.endswith(".bnet"):
                 # Just in case there are some other files there.
                 continue
-            path = f"./bbm-bnet-inputs-true/{model}"
+            path = f"./models/bbm-bnet-inputs-true/{model}"
             bn = BooleanNetwork.from_file(path)
             if bn.num_vars() > size:
                 continue
