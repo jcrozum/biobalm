@@ -77,7 +77,7 @@ def add_negative_edges(G:nx.DiGraph, pNeg:float = 0.25, seed:int = 0):
             G.edges()[E]['negative'] = False
 
 
-def generate_ncf_rule(G:nx.DiGraph, node:int, bias:float = 0.5, seed:int = 0) -> str:
+def generate_ncf_rule(G:nx.DiGraph, node:str, bias:float = 0.5, seed:int = 0) -> str:
     """
     Function to write a nested canalyzing function for a node as a read-once function (RoF)
     inputs:
@@ -102,7 +102,7 @@ def generate_ncf_rule(G:nx.DiGraph, node:int, bias:float = 0.5, seed:int = 0) ->
             val = 1
         return node + ", " + str(val)
     order = list(rng.choice(inputs, n, replace = False))
-    funct = str(node)+", "
+    funct = node + ", "
     for i in range(len(order)):
         rand = rng.random()
         if(rand < bias):
@@ -115,6 +115,6 @@ def generate_ncf_rule(G:nx.DiGraph, node:int, bias:float = 0.5, seed:int = 0) ->
                 funct += "!" + str(order[i]) + " | ("
             else:
                 funct += str(order[i]) + " & ("
-    funct = funct[:-5].rstrip()
+    funct = funct[:-3].rstrip()
     funct += ")"*(len(inputs)-1)
     return funct
