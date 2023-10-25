@@ -1,3 +1,4 @@
+model_name,n,sdsize,sddepth,att,maa,mintrap
 n10_12.bnet,10,3,1,2,0,2
 n10_17.bnet,10,2,1,1,0,1
 n10_15.bnet,10,3,1,2,0,2

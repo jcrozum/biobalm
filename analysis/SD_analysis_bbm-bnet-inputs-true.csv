@@ -1,3 +1,4 @@
+model_name,n,sdsize,sddepth,att,maa,mintrap
 001.bnet,321,1,0,1,0,1
 007.bnet,5,3,1,2,0,2
 008.bnet,28,5,2,3,0,3
