@@ -1,5 +1,5 @@
 import sys
-sys.path.append(".")
+sys.path.append("..")
 
 from biodivine_aeon import BooleanNetwork
 from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
@@ -21,7 +21,7 @@ bn = bn.infer_regulatory_graph()
 
 # Compute the succession diagram.
 sd = SuccessionDiagram(bn)
-fully_expanded = expand_source_SCCs(sd)
+fully_expanded = expand_source_SCCs(sd, check_maa=False)
 assert fully_expanded
 
 print(f"Succession diagram size:", len(sd))
