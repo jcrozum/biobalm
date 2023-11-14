@@ -127,7 +127,9 @@ def expand_source_SCCs(sd: SuccessionDiagram,
         assert sd.G.nodes[node_id]["expanded"] == False # expand nodes from here
         assert sd.G.nodes[node_id]["attractors"] == None # check attractors from here
 
-        expander(sd, node_id)
+        # restore this once we allow all expansion algorithms to expand from a node
+        # expander(sd, node_id) 
+        sd.expand_bfs(node_id)
 
     return True
 
