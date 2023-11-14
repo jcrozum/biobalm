@@ -61,7 +61,7 @@ def test_find_scc_sd():
 A, B
 B, A | A &  C"""
 
-    scc_sd, _ = find_scc_sd(bnet, ["A", "B"], check_maa=True)
+    scc_sd, _ = find_scc_sd(bnet, ["A", "B"], expander=SuccessionDiagram.expand_bfs, check_maa=True)
 
     assert scc_sd.G.nodes[0]["space"] == {}
     assert scc_sd.G.nodes[1]["space"] == {"A":0, "B":0}
@@ -326,5 +326,5 @@ def test_attractor_search():
 test_find_source_nodes()
 test_perc_and_remove_constants_from_bn()
 test_find_scc_sd()
-# test_expansion()
+test_expansion()
 test_attractor_search()

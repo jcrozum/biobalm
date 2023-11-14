@@ -13,7 +13,9 @@ from nfvsmotifs.petri_net_translation import extract_variable_names, network_to_
 
 DEBUG = False
 
-def expand_source_SCCs(sd: SuccessionDiagram, check_maa:bool=True) -> bool:
+def expand_source_SCCs(sd: SuccessionDiagram,
+                       expander=SuccessionDiagram.expand_bfs,
+                       check_maa:bool=True) -> bool:
     """
     1. percolate
     2. find source nodes, fix combinations and then percolate
@@ -92,7 +94,7 @@ def expand_source_SCCs(sd: SuccessionDiagram, check_maa:bool=True) -> bool:
             next_branches:list[int] = []
             while len(source_scc_list) > 0:
                 source_scc = source_scc_list.pop(0)
-                scc_sd, exist_maa = find_scc_sd(clean_bnet, source_scc, check_maa)
+                scc_sd, exist_maa = find_scc_sd(clean_bnet, source_scc, expander, check_maa)
 
                 if exist_maa: # we check for maa, and it exists
                     continue
@@ -125,7 +127,7 @@ def expand_source_SCCs(sd: SuccessionDiagram, check_maa:bool=True) -> bool:
         assert sd.G.nodes[node_id]["expanded"] == False # expand nodes from here
         assert sd.G.nodes[node_id]["attractors"] == None # check attractors from here
 
-        sd.expand_bfs(node_id)
+        expander(sd, node_id)
 
     return True
 
@@ -228,7 +230,8 @@ def find_source_SCCs(bn:BooleanNetwork) -> list[list[str]]:
     return sorted(source_scc_list)
 
 
-def find_scc_sd(bnet:str, source_scc:list[str], check_maa:bool) -> tuple[SuccessionDiagram, bool]:
+def find_scc_sd(bnet:str, source_scc:list[str],
+                expander, check_maa:bool) -> tuple[SuccessionDiagram, bool]:
     """
     TODO: better way that does not use bnet but rather bn directly or petri_net directly
     to find the scc_sd would be useful.
@@ -268,7 +271,7 @@ def find_scc_sd(bnet:str, source_scc:list[str], check_maa:bool) -> tuple[Success
 
     # Compute the succession diagram.
     scc_sd = SuccessionDiagram(scc_bn)
-    fully_expanded = scc_sd.expand_bfs()
+    fully_expanded = expander(scc_sd)
     assert fully_expanded
 
     exist_maa = False
