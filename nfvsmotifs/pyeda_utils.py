@@ -29,14 +29,14 @@ def substitute_variables_in_expression(
     if expression == PYEDA_TRUE or expression == PYEDA_FALSE:
         # Keep constants.
         return expression
-    if type(expression) == pyeda_expression.Variable:
+    if type(expression) is pyeda_expression.Variable:
         # Positive literals are resolved through `items` if possible.
         key = str(expression)
         if key in items:
             return items[key]
         else:
             return expression
-    if type(expression) == pyeda_expression.Complement:
+    if type(expression) is pyeda_expression.Complement:
         # Complement is just a negative literal.
         key = str(expression.inputs[0])
         if key in items:
@@ -44,22 +44,22 @@ def substitute_variables_in_expression(
         else:
             return expression
 
-    if type(expression) == pyeda_expression.NotOp:
+    if type(expression) is pyeda_expression.NotOp:
         inner = [substitute_variables_in_expression(expression.x, items)]
         return Not(inner[0])
-    elif type(expression) == pyeda_expression.AndOp:
+    elif type(expression) is pyeda_expression.AndOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return And(*inner)
-    elif type(expression) == pyeda_expression.OrOp:
+    elif type(expression) is pyeda_expression.OrOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Or(*inner)
-    elif type(expression) == pyeda_expression.EqualOp:
+    elif type(expression) is pyeda_expression.EqualOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Equal(*inner)
-    elif type(expression) == pyeda_expression.XorOp:
+    elif type(expression) is pyeda_expression.XorOp:
         inner = [substitute_variables_in_expression(x, items) for x in expression.xs]
         return Xor(*inner)
-    elif type(expression) == pyeda_expression.ImpliesOp:
+    elif type(expression) is pyeda_expression.ImpliesOp:
         p = substitute_variables_in_expression(expression.xs[0], items)
         q = substitute_variables_in_expression(expression.xs[1], items)
         return Implies(p, q)
@@ -79,33 +79,33 @@ def pyeda_to_aeon(expression: Expression) -> str:
         return "true"
     if expression == PYEDA_FALSE:
         return "false"
-    if type(expression) == pyeda_expression.Variable:
+    if type(expression) is pyeda_expression.Variable:
         return str(expression)
-    if type(expression) == pyeda_expression.Complement:
+    if type(expression) is pyeda_expression.Complement:
         return f"!{str(expression.inputs[0])}"
-    if type(expression) == pyeda_expression.NotOp:
+    if type(expression) is pyeda_expression.NotOp:
         return f"!{pyeda_to_aeon(expression.x)}"
-    if type(expression) == pyeda_expression.AndOp:
+    if type(expression) is pyeda_expression.AndOp:
         if len(expression.xs) == 0:
             return "true"
         inner = " & ".join([pyeda_to_aeon(x) for x in expression.xs])
         return f"({inner})"
-    if type(expression) == pyeda_expression.OrOp:
+    if type(expression) is pyeda_expression.OrOp:
         if len(expression.xs) == 0:
             return "false"
         inner = " | ".join([pyeda_to_aeon(x) for x in expression.xs])
         return f"({inner})"
-    if type(expression) == pyeda_expression.EqualOp:
+    if type(expression) is pyeda_expression.EqualOp:
         if len(expression.xs) == 0:
             return "true"
         inner = " <=> ".join([pyeda_to_aeon(x) for x in expression.xs])
         return f"({inner})"
-    if type(expression) == pyeda_expression.XorOp:
+    if type(expression) is pyeda_expression.XorOp:
         if len(expression.xs) == 0:
             return "false"
         inner = " ^ ".join([pyeda_to_aeon(x) for x in expression.xs])
         return f"({inner})"
-    if type(expression) == pyeda_expression.ImpliesOp:
+    if type(expression) is pyeda_expression.ImpliesOp:
         p = pyeda_to_aeon(expression.xs[0])
         q = pyeda_to_aeon(expression.xs[1])
         return f"({p} => {q})"
