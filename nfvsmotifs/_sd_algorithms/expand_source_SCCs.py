@@ -271,8 +271,8 @@ def find_scc_sd(
     # get rules for only the source SCC
     scc_bnet = "targets,factors\n"
     for line in bnet.split("\n"):
-        for node in source_scc:
-            if line.startswith(node + ","):
+        for node_name in source_scc:
+            if line.startswith(node_name + ","):
                 scc_bnet += line + "\n"
 
     scc_bn = BooleanNetwork.from_bnet(scc_bnet)
@@ -375,7 +375,7 @@ def attach_scc_sd(
 
         scc_child_ids = cast(list[int], list(scc_sd.G.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
-            scc_sub_space: dict[str, int] = {}
+            scc_sub_space = {}
             scc_sub_space.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
             scc_sub_space.update(
                 cast(dict[str, int], scc_sd.G.nodes[scc_child_id]["space"])
