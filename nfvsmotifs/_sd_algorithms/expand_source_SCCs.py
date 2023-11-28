@@ -310,12 +310,14 @@ def find_scc_sd(
         ):  # ignore source SCCs with motif avoidant attractors
             exist_maa = True
 
-    # delete the implicit parameters from the node subspaces
-    # unfortunately the edges still carry the implicit parameters,
-    # but they are not used for the full sd anyways
+    # delete the implicit parameters from the node subspaces and the edge motifs
     for node_id in scc_sd.node_ids():
         for implicit in implicit_parameters:
             cast(dict[str, int], scc_sd.G.nodes[node_id]["space"]).pop(implicit, None)
+
+    for x, y in scc_sd.G.edges:
+        for implicit in implicit_parameters:
+            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)        
 
     return scc_sd, exist_maa
 
@@ -353,11 +355,10 @@ def attach_scc_sd(
         else:
             parent_id = size_before_attach + scc_parent_id - 1
 
-        scc_sub_space: dict[str, int] = {}
-        scc_sub_space.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
-        scc_sub_space.update(cast(dict[str, int], scc_sd.G.nodes[scc_node_id]["space"]))
+        motif = scc_sd.edge_stable_motif(scc_parent_id,scc_node_id)
+        motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
-        child_id = sd._ensure_node(parent_id, scc_sub_space)  # type: ignore
+        child_id = sd._ensure_node(parent_id, motif)  # type: ignore
         if check_maa:
             sd.G.nodes[parent_id][
                 "attractors"
@@ -375,13 +376,10 @@ def attach_scc_sd(
 
         scc_child_ids = cast(list[int], list(scc_sd.G.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
-            scc_sub_space = {}
-            scc_sub_space.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
-            scc_sub_space.update(
-                cast(dict[str, int], scc_sd.G.nodes[scc_child_id]["space"])
-            )
+            motif = scc_sd.edge_stable_motif(scc_node_id,scc_child_id)
+            motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
-            child_id = sd._ensure_node(parent_id, scc_sub_space)  # type: ignore
+            child_id = sd._ensure_node(parent_id, motif)  # type: ignore
             assert child_id == size_before_attach + scc_child_id - 1
 
         # if the node had any child node, consider it expanded.
