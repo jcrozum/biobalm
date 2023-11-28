@@ -2,7 +2,7 @@
 
 ```
 # 1h - timeout
-# ../bbm-bnet-inputs-true - folder with networks
+# ../models/bbm-bnet-inputs-true - folder with networks
 # SD_analysis.py - benchmark script
 python3 ../benchmark/run_bench.py 1h ../models/bbm-bnet-inputs-true SD_analysis.py
 ```
