@@ -16,8 +16,8 @@ LOG_LOCATION = "SD_analysis_size_" + sys.argv[1].split("/")[-2] + ".csv"
 # Print progress and succession diagram size.
 nfvsmotifs.SuccessionDiagram.DEBUG = True # type: ignore
 
-NODE_LIMIT = 1_000
-DEPTH_LIMIT = 100
+NODE_LIMIT = 1_000_000
+DEPTH_LIMIT = 10_000
 
 # This is unfortunately necessary for PyEDA Boolean expression parser (for now).
 sys.setrecursionlimit(150000)
