@@ -114,6 +114,7 @@ def percolate_space(
 
     fixed = {var: space[var] for var in space}
     bdds: dict[str, BinaryDecisionDiagram] = {}
+    bdd_inputs = {}
     conflicts: dict[str, int] = {}
     done = False
     while not done:
@@ -124,21 +125,30 @@ def percolate_space(
             if var_name not in bdds:
                 bdds[var_name] = aeon_to_bdd(network.get_update_function(var))
 
-            if (
-                bdds[var_name].is_zero() or bdds[var_name].is_one()
-            ) and strict_percolation:
-                continue
+            is_zero = bdds[var_name].is_zero()
+            is_one = bdds[var_name].is_one()
+            if is_one or is_zero:
+                if strict_percolation:
+                    continue
 
-            bdds[var_name] = function_restrict(bdds[var_name], fixed)
-            if bdds[var_name].is_one():
-                r = 1
-            elif bdds[var_name].is_zero():
-                r = 0
+                r = 1 if is_one else 0
             else:
-                r = -1
-                continue
+                if var_name not in bdd_inputs:
+                    bdd_inputs[var_name] = set(map(str, bdds[var_name].inputs))  # type: ignore
+                point = {x: fixed[x] for x in bdd_inputs[var_name] if x in fixed}  # type: ignore
+                if point:
+                    bdds[var_name] = function_restrict(bdds[var_name], point)  # type: ignore
+                    bdd_inputs[var_name] -= set(point)  # type: ignore
 
-            assert r in (0, 1)
+                if bdds[var_name].is_one():
+                    r = 1
+                elif bdds[var_name].is_zero():
+                    r = 0
+                else:
+                    r = -1
+                    continue
+
+            # assert r in (0, 1)
             if var_name not in fixed:
                 fixed[var_name] = r
                 result[var_name] = r

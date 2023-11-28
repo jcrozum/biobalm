@@ -315,9 +315,9 @@ def find_scc_sd(
         for implicit in implicit_parameters:
             cast(dict[str, int], scc_sd.G.nodes[node_id]["space"]).pop(implicit, None)
 
-    for x, y in scc_sd.G.edges:
+    for x, y in cast(Iterable[tuple[int, int]], scc_sd.G.edges):
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)        
+            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)
 
     return scc_sd, exist_maa
 
@@ -355,7 +355,7 @@ def attach_scc_sd(
         else:
             parent_id = size_before_attach + scc_parent_id - 1
 
-        motif = scc_sd.edge_stable_motif(scc_parent_id,scc_node_id)
+        motif = scc_sd.edge_stable_motif(scc_parent_id, scc_node_id)
         motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
         child_id = sd._ensure_node(parent_id, motif)  # type: ignore
@@ -376,7 +376,7 @@ def attach_scc_sd(
 
         scc_child_ids = cast(list[int], list(scc_sd.G.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
-            motif = scc_sd.edge_stable_motif(scc_node_id,scc_child_id)
+            motif = scc_sd.edge_stable_motif(scc_node_id, scc_child_id)
             motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
             child_id = sd._ensure_node(parent_id, motif)  # type: ignore
