@@ -27,7 +27,7 @@ def test_find_source_nodes():
 
     assert source_nodes == ["source"]
 
-    perc_space, _ = percolate_space(bn, {}, strict_percolation=False)
+    perc_space = percolate_space(bn, {}, strict_percolation=False)
     perc_bn = percolate_network(bn, perc_space)
 
     source_nodes = find_source_nodes(perc_bn)
@@ -364,11 +364,13 @@ def test_isomorph():
     sd_scc = SuccessionDiagram(bn)
     expand_source_SCCs(sd_scc)
 
-    assert [sd_bfs.node_space(id) for id in sd_bfs.node_ids()] == [sd_scc.node_space(id) for id in sd_scc.node_ids()]
+    assert [sd_bfs.node_space(id) for id in sd_bfs.node_ids()] == [
+        sd_scc.node_space(id) for id in sd_scc.node_ids()
+    ]
 
     assert sd_scc.is_isomorphic(sd_bfs)
 
     edge_motifs_bfs = set(str(sorted(sd_bfs.edge_stable_motif(x, y).items())) for (x, y) in sd_bfs.G.edges)  # type: ignore
     edge_motifs_scc = set(str(sorted(sd_scc.edge_stable_motif(x, y).items())) for (x, y) in sd_scc.G.edges)  # type: ignore
-    
+
     assert edge_motifs_bfs == edge_motifs_scc

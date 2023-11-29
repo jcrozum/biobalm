@@ -504,7 +504,7 @@ class SuccessionDiagram:
         considered to be zero (i.e. the node is the root).
         """
 
-        fixed_vars, _ = percolate_space(
+        fixed_vars = percolate_space(
             self.network, stable_motif, strict_percolation=False
         )
 

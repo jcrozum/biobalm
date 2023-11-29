@@ -56,7 +56,7 @@ def expand_source_SCCs(
     final_level: list[int] = []  # from here there are no more source SCCs
 
     # percolate constant nodes
-    perc_space, _ = percolate_space(sd.network, {}, strict_percolation=False)
+    perc_space = percolate_space(sd.network, {}, strict_percolation=False)
     sd.G.nodes[root]["space"] = perc_space
 
     # find source nodes
@@ -193,7 +193,7 @@ def perc_and_remove_constants_from_bn(
     For now getting the percolated bnet is useful, as it is used for find_scc_sd()
     """
 
-    perc_space, _ = percolate_space(bn, space, strict_percolation=False)
+    perc_space = percolate_space(bn, space, strict_percolation=False)
     perc_bn = percolate_network(bn, perc_space)
 
     perc_bnet = perc_bn.to_bnet()
