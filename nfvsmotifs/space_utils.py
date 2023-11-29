@@ -115,13 +115,13 @@ def percolate_space(
     bdds: dict[str, BinaryDecisionDiagram] = {}
     bdd_inputs = {}
     var_name_dict = {network.get_variable_name(var): var for var in network.variables()}
-    deletion_list = list(result)
+    deletion_list: list[str] = list(result)
 
     done = False
     while not done:
         for k in deletion_list:
             del var_name_dict[k]
-        deletion_list: list[str] = []
+        deletion_list = []
         done = True
         for var_name, var in var_name_dict.items():
             if var_name in result:
