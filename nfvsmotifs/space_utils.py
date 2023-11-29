@@ -114,12 +114,16 @@ def percolate_space(
     fixed_bddvars = {bddvar_cache(k): v for k, v in fixed.items()}
     bdds: dict[str, BinaryDecisionDiagram] = {}
     bdd_inputs = {}
-    var_name_dict = {var: network.get_variable_name(var) for var in network.variables()}
+    var_name_dict = {network.get_variable_name(var): var for var in network.variables()}
+    deletion_list = list(result)
 
     done = False
     while not done:
+        for k in deletion_list:
+            del var_name_dict[k]
+        deletion_list: list[str] = []
         done = True
-        for var, var_name in var_name_dict.items():
+        for var_name, var in var_name_dict.items():
             if var_name in result:
                 continue
             if var_name not in bdds:
@@ -153,6 +157,7 @@ def percolate_space(
                 fixed[var_name] = r
                 fixed_bddvars[bddvar_cache(var_name)] = r
                 result[var_name] = r
+                deletion_list.append(var_name)
                 done = False
             elif fixed[var_name] == r and var_name not in result:
                 result[var_name] = r
