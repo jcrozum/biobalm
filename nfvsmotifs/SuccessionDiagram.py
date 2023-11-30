@@ -315,7 +315,9 @@ class SuccessionDiagram:
 
         return attractors
 
-    def edge_stable_motif(self, parent_id: int, child_id: int) -> dict[str, int]:
+    def edge_stable_motif(
+        self, parent_id: int, child_id: int, reduced: bool = False
+    ) -> dict[str, int]:
         """
         Return the *stable motif* associated with the specified parent-child
         edge.
@@ -323,7 +325,18 @@ class SuccessionDiagram:
         This corresponds to the maximal trap space within the `parent_id` node
         that, after percolation, yields the `child_id` node.
         """
-        return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
+
+        if reduced:
+            return cast(
+                dict[str, int],
+                {
+                    k: v
+                    for k, v in self.G.edges[parent_id, child_id]["motif"].items()  # type: ignore
+                    if k not in self.node_space(parent_id)
+                },
+            )
+        else:
+            return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
 
     def expand_bfs(
         self,
