@@ -320,10 +320,13 @@ class SuccessionDiagram:
     ) -> dict[str, int]:
         """
         Return the *stable motif* associated with the specified parent-child
-        edge.
-
-        This corresponds to the maximal trap space within the `parent_id` node
-        that, after percolation, yields the `child_id` node.
+        edge. If `reduced` is set to `False` (default), the unpercolated stable
+        motif trap space corresponding to the child node is returned; this
+        includes the nodes that are fixed in the percolated trap space of the
+        parent node. If `reduced` is set to `True`, the nodes fixed in the
+        parent are removed (and thus the reduced stable motif is not a trap
+        space of the original network, but is a maximal trap space in the
+        network reduced by the parent node).
         """
 
         if reduced:

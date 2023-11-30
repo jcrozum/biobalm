@@ -261,17 +261,11 @@ def drivers_of_succession(
     """
     control_strategies: list[ControlType] = []
     assume_fixed: dict[str, int] = {}
-    prev = {}
     for ts in succession:
-        motif = {k: v for k, v in ts.items() if k not in prev}
-        if motif != ts:
-            raise ValueError(
-                f"reduced trap space {ts} does not have the same nodes as the motif {motif}"
-            )
         control_strategies.append(
             find_drivers(
                 bn,
-                motif,
+                ts,
                 strategy=strategy,
                 assume_fixed=assume_fixed,
                 max_drivers_per_succession_node=max_drivers_per_succession_node,
@@ -280,7 +274,6 @@ def drivers_of_succession(
         )
         ldoi = percolate_space(bn, ts | assume_fixed, strict_percolation=False)
         assume_fixed.update(ldoi)
-        prev = ts
 
     return control_strategies
 
