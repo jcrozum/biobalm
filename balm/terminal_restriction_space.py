@@ -9,11 +9,11 @@ if TYPE_CHECKING:
 from pyeda.boolalg.bdd import expr2bdd
 from pyeda.boolalg.expr import Not
 
-from nfvsmotifs.drivers import find_single_drivers, find_single_node_LDOIs
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.space_utils import percolate_network, percolation_conflicts
-from nfvsmotifs.state_utils import state_list_to_bdd, state_to_bdd
-from nfvsmotifs.trappist_core import trappist
+from balm.drivers import find_single_drivers, find_single_node_LDOIs
+from balm.pyeda_utils import aeon_to_pyeda
+from balm.space_utils import percolate_network, percolation_conflicts
+from balm.state_utils import state_list_to_bdd, state_to_bdd
+from balm.trappist_core import trappist
 
 
 def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]:

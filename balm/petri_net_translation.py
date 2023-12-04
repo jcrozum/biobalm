@@ -28,7 +28,7 @@ import re
 from networkx import DiGraph  # type: ignore
 from pyeda.boolalg.bdd import bddvar, expr2bdd
 
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
+from balm.pyeda_utils import aeon_to_pyeda
 
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):

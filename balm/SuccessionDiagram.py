@@ -8,16 +8,16 @@ if TYPE_CHECKING:
 
 import networkx as nx  # type: ignore
 
-from nfvsmotifs._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
-from nfvsmotifs._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
-from nfvsmotifs._sd_algorithms.expand_bfs import expand_bfs
-from nfvsmotifs._sd_algorithms.expand_dfs import expand_dfs
-from nfvsmotifs._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
-from nfvsmotifs._sd_algorithms.expand_to_target import expand_to_target
-from nfvsmotifs.interaction_graph_utils import feedback_vertex_set
-from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.space_utils import percolate_space, space_unique_key
-from nfvsmotifs.trappist_core import trappist
+from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
+from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
+from balm._sd_algorithms.expand_bfs import expand_bfs
+from balm._sd_algorithms.expand_dfs import expand_dfs
+from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
+from balm._sd_algorithms.expand_to_target import expand_to_target
+from balm.interaction_graph_utils import feedback_vertex_set
+from balm.petri_net_translation import network_to_petrinet
+from balm.space_utils import percolate_space, space_unique_key
+from balm.trappist_core import trappist
 
 # Enables helpful "progress" messages.
 DEBUG = False

@@ -14,7 +14,7 @@ from biodivine_aeon import BooleanNetwork
 from clingo import Control, SolveHandle
 from networkx import DiGraph  # type: ignore
 
-from nfvsmotifs.petri_net_translation import (
+from balm.petri_net_translation import (
     extract_variable_names,
     network_to_petrinet,
     place_to_variable,

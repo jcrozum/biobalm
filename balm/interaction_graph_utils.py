@@ -14,13 +14,13 @@ from networkx.algorithms import bipartite  # type: ignore
 from pyeda.boolalg.bdd import bddvar, expr2bdd
 from pyeda.boolalg.expr import expr
 
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.SignedGraph import SignedGraph
+from balm.pyeda_utils import aeon_to_pyeda
+from balm.SignedGraph import SignedGraph
 
 """
 A python package for approximating minimum feedback vertex sets
 """
-from nfvsmotifs.FVSpython3 import FVS as FVS
+from balm.FVSpython3 import FVS as FVS
 
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:

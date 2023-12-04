@@ -3,7 +3,7 @@ from typing import cast
 from biodivine_aeon import BooleanNetwork  # type: ignore
 from pyeda.boolalg.expr import Expression, expr
 
-from nfvsmotifs.space_utils import (
+from balm.space_utils import (
     expression_to_space_list,
     is_subspace,
     is_syntactic_trap_space,

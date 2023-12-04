@@ -1,5 +1,5 @@
 [project]
-name = "nfvsmotifs"
+name = "balm"
 dependencies = [
     'biodivine_aeon ==0.2.0a4',
     'clingo ==5.6.2',
@@ -11,10 +11,10 @@ dynamic = ["version"]
 
 
 [tool.setuptools]
-packages = ['nfvsmotifs', 'nfvsmotifs.FVSpython3', 'nfvsmotifs._sd_algorithms']
+packages = ['balm', 'balm.FVSpython3', 'balm._sd_algorithms']
 
 [tool.pyright]
-include = ["nfvsmotifs", "tests"]
+include = ["balm", "tests"]
 stubPath = "stubs"
 reportMissingImports = true
 reportMissingTypeStubs = true

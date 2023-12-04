@@ -1,13 +1,13 @@
 from biodivine_aeon import BooleanNetwork
 
-from nfvsmotifs._sd_algorithms.expand_source_SCCs import (
+from balm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
     find_scc_sd,
     find_source_nodes,
     perc_and_remove_constants_from_bn,
 )
-from nfvsmotifs.space_utils import percolate_network, percolate_space
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.space_utils import percolate_network, percolate_space
+from balm.SuccessionDiagram import SuccessionDiagram
 
 
 def test_find_source_nodes():
