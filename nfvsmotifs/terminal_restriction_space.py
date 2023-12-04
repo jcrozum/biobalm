@@ -11,7 +11,7 @@ from pyeda.boolalg.expr import Not
 
 from nfvsmotifs.drivers import find_single_drivers, find_single_node_LDOIs
 from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.space_utils import percolate_network, percolate_space
+from nfvsmotifs.space_utils import percolate_network, percolation_conflicts
 from nfvsmotifs.state_utils import state_list_to_bdd, state_to_bdd
 from nfvsmotifs.trappist_core import trappist
 
@@ -25,7 +25,7 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
     tr_trap_spaces = trappist(network, problem="max", reverse_time=True)
     self_neg_tr_trap_spaces: list[dict[str, int]] = []
     for tr_trap_space in tr_trap_spaces:
-        _, conflicts = percolate_space(network, tr_trap_space)
+        conflicts = percolation_conflicts(network, tr_trap_space)
         if conflicts:
             self_neg_tr_trap_spaces.append(tr_trap_space)
 

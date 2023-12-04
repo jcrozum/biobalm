@@ -218,7 +218,7 @@ def successions_to_target(
             ),
         ):
             succession = [
-                succession_diagram.edge_stable_motif(x, y)
+                succession_diagram.edge_stable_motif(x, y, reduced=True)
                 for x, y in zip(path[:-1], path[1:])
             ]
             successions.append(succession)
@@ -272,7 +272,7 @@ def drivers_of_succession(
                 forbidden_drivers=forbidden_drivers,
             )
         )
-        ldoi, _ = percolate_space(bn, ts | assume_fixed, strict_percolation=False)
+        ldoi = percolate_space(bn, ts | assume_fixed, strict_percolation=False)
         assume_fixed.update(ldoi)
 
     return control_strategies
@@ -344,7 +344,7 @@ def find_drivers(
 
             if strategy == "internal":
                 driver_dict = {k: target_trap_space_inner[k] for k in driver_set}
-                ldoi, _ = percolate_space(
+                ldoi = percolate_space(
                     bn, driver_dict | assume_fixed, strict_percolation=False
                 )
                 if target_trap_space.items() <= ldoi.items():
@@ -354,7 +354,7 @@ def find_drivers(
                     driver_dict = {
                         driver: value for driver, value in zip(driver_set, vals)
                     }
-                    ldoi, _ = percolate_space(
+                    ldoi = percolate_space(
                         bn, driver_dict | assume_fixed, strict_percolation=False
                     )
                     if target_trap_space.items() <= ldoi.items():
