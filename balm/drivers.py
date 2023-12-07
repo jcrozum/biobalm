@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from biodivine_aeon import BooleanNetwork
 
-from nfvsmotifs.space_utils import percolate_space
+from balm.space_utils import percolate_space
 
 
 def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str, int]]:
@@ -20,7 +20,7 @@ def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str
         for i in range(2):
             fix = (name, i)
             space = {name: i}
-            LDOIs[fix] = percolate_space(bn, space)[0]
+            LDOIs[fix] = percolate_space(bn, space)
 
     return LDOIs
 

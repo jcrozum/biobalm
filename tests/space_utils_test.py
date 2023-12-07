@@ -3,7 +3,7 @@ from typing import cast
 from biodivine_aeon import BooleanNetwork  # type: ignore
 from pyeda.boolalg.expr import Expression, expr
 
-from nfvsmotifs.space_utils import (
+from balm.space_utils import (
     expression_to_space_list,
     is_subspace,
     is_syntactic_trap_space,
@@ -39,11 +39,11 @@ def test_space_percolation():
     """
     )
 
-    assert {"a": 0, "b": 0, "c": 0} == percolate_space(bn, {"a": 0})[0]
-    assert {} == percolate_space(bn, {"a": 0})[1]
+    assert {"a": 0, "b": 0, "c": 0} == percolate_space(bn, {"a": 0})
+    # assert {} == percolate_space(bn, {"a": 0})[1]
     assert is_syntactic_trap_space(bn, {"a": 0, "b": 0, "c": 0})
-    assert {"a": 1, "b": 1, "c": 1} == percolate_space(bn, {"a": 1})[0]
-    assert {} == percolate_space(bn, {"a": 1})[1]
+    assert {"a": 1, "b": 1, "c": 1} == percolate_space(bn, {"a": 1})
+    # assert {} == percolate_space(bn, {"a": 1})[1]
     assert is_syntactic_trap_space(bn, {"a": 1, "b": 1, "c": 1})
 
     bn = BooleanNetwork.from_bnet(
@@ -56,13 +56,13 @@ def test_space_percolation():
 
     assert {"a": 0, "b": 0, "c": 0} == percolate_space(
         bn, {"a": 0, "b": 0, "c": 0}, strict_percolation=False
-    )[0]
+    )
     assert {"a": 0, "c": 0} == percolate_space(
         bn, {"a": 0, "b": 0, "c": 0}, strict_percolation=True
-    )[0]
+    )
 
     # The conflict is on b. The rest is fine.
-    assert {"b": 1} == percolate_space(bn, {"a": 0, "b": 0, "c": 0})[1]
+    # assert {"b": 1} == percolate_space(bn, {"a": 0, "b": 0, "c": 0})[1]
     assert not is_syntactic_trap_space(bn, {"a": 0})
     assert is_syntactic_trap_space(bn, {})
 
@@ -74,7 +74,7 @@ def test_space_percolation():
     d, !a | d
     """
     )
-    assert {"b": 1, "c": 1} == percolate_space(bn, {"a": 1})[0]
+    assert {"b": 1, "c": 1} == percolate_space(bn, {"a": 1})
 
 
 def test_constant_percolation():
@@ -86,10 +86,10 @@ def test_constant_percolation():
     """
     )
 
-    assert {"a": 1, "c": 1} == percolate_space(bn, {}, strict_percolation=False)[0]
-    assert {"a": 1} == percolate_space(bn, {"a": 0}, strict_percolation=False)[1]
-    assert {} == percolate_space(bn, {}, strict_percolation=True)[0]
-    assert {} == percolate_space(bn, {"a": 0}, strict_percolation=True)[1]
+    assert {"a": 1, "c": 1} == percolate_space(bn, {}, strict_percolation=False)
+    # assert {"a": 1} == percolate_space(bn, {"a": 0}, strict_percolation=False)[1]
+    assert {} == percolate_space(bn, {}, strict_percolation=True)
+    # assert {} == percolate_space(bn, {"a": 0}, strict_percolation=True)[1]
 
 
 def test_network_percolation():
@@ -101,13 +101,13 @@ def test_network_percolation():
     """
     )
 
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0})[0])
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0})[0])
+    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0}))
+    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0}))
     assert "false" == percolated_bn.get_update_function("c")
     assert "false" == percolated_bn.get_update_function("a")
     assert "true" == percolated_bn.get_update_function("b")
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1})[0])
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1})[0])
+    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1}))
+    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1}))
     assert "true" == percolated_bn.get_update_function("c")
     assert "b" == percolated_bn.get_update_function("a")
     assert "!a" == percolated_bn.get_update_function("b")

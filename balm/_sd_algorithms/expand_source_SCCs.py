@@ -6,10 +6,10 @@ import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph
 
-from nfvsmotifs.interaction_graph_utils import infer_signed_interaction_graph
-from nfvsmotifs.petri_net_translation import extract_variable_names, network_to_petrinet
-from nfvsmotifs.space_utils import percolate_network, percolate_space
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.interaction_graph_utils import infer_signed_interaction_graph
+from balm.petri_net_translation import extract_variable_names, network_to_petrinet
+from balm.space_utils import percolate_network, percolate_space
+from balm.SuccessionDiagram import SuccessionDiagram
 
 sys.path.append(".")
 
@@ -56,7 +56,7 @@ def expand_source_SCCs(
     final_level: list[int] = []  # from here there are no more source SCCs
 
     # percolate constant nodes
-    perc_space, _ = percolate_space(sd.network, {}, strict_percolation=False)
+    perc_space = percolate_space(sd.network, {}, strict_percolation=False)
     sd.G.nodes[root]["space"] = perc_space
 
     # find source nodes
@@ -193,7 +193,7 @@ def perc_and_remove_constants_from_bn(
     For now getting the percolated bnet is useful, as it is used for find_scc_sd()
     """
 
-    perc_space, _ = percolate_space(bn, space, strict_percolation=False)
+    perc_space = percolate_space(bn, space, strict_percolation=False)
     perc_bn = percolate_network(bn, perc_space)
 
     perc_bnet = perc_bn.to_bnet()
@@ -315,9 +315,9 @@ def find_scc_sd(
         for implicit in implicit_parameters:
             cast(dict[str, int], scc_sd.G.nodes[node_id]["space"]).pop(implicit, None)
 
-    for x, y in scc_sd.G.edges:
+    for x, y in cast(Iterable[tuple[int, int]], scc_sd.G.edges):
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)        
+            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)
 
     return scc_sd, exist_maa
 
@@ -355,7 +355,7 @@ def attach_scc_sd(
         else:
             parent_id = size_before_attach + scc_parent_id - 1
 
-        motif = scc_sd.edge_stable_motif(scc_parent_id,scc_node_id)
+        motif = scc_sd.edge_stable_motif(scc_parent_id, scc_node_id)
         motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
         child_id = sd._ensure_node(parent_id, motif)  # type: ignore
@@ -376,7 +376,7 @@ def attach_scc_sd(
 
         scc_child_ids = cast(list[int], list(scc_sd.G.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
-            motif = scc_sd.edge_stable_motif(scc_node_id,scc_child_id)
+            motif = scc_sd.edge_stable_motif(scc_node_id, scc_child_id)
             motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
 
             child_id = sd._ensure_node(parent_id, motif)  # type: ignore

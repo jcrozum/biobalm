@@ -8,16 +8,16 @@ if TYPE_CHECKING:
 
 import networkx as nx  # type: ignore
 
-from nfvsmotifs._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
-from nfvsmotifs._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
-from nfvsmotifs._sd_algorithms.expand_bfs import expand_bfs
-from nfvsmotifs._sd_algorithms.expand_dfs import expand_dfs
-from nfvsmotifs._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
-from nfvsmotifs._sd_algorithms.expand_to_target import expand_to_target
-from nfvsmotifs.interaction_graph_utils import feedback_vertex_set
-from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.space_utils import percolate_space, space_unique_key
-from nfvsmotifs.trappist_core import trappist
+from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
+from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
+from balm._sd_algorithms.expand_bfs import expand_bfs
+from balm._sd_algorithms.expand_dfs import expand_dfs
+from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
+from balm._sd_algorithms.expand_to_target import expand_to_target
+from balm.interaction_graph_utils import feedback_vertex_set
+from balm.petri_net_translation import network_to_petrinet
+from balm.space_utils import percolate_space, space_unique_key
+from balm.trappist_core import trappist
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -315,15 +315,31 @@ class SuccessionDiagram:
 
         return attractors
 
-    def edge_stable_motif(self, parent_id: int, child_id: int) -> dict[str, int]:
+    def edge_stable_motif(
+        self, parent_id: int, child_id: int, reduced: bool = False
+    ) -> dict[str, int]:
         """
         Return the *stable motif* associated with the specified parent-child
-        edge.
-
-        This corresponds to the maximal trap space within the `parent_id` node
-        that, after percolation, yields the `child_id` node.
+        edge. If `reduced` is set to `False` (default), the unpercolated stable
+        motif trap space corresponding to the child node is returned; this
+        includes the nodes that are fixed in the percolated trap space of the
+        parent node. If `reduced` is set to `True`, the nodes fixed in the
+        parent are removed (and thus the reduced stable motif is not a trap
+        space of the original network, but is a maximal trap space in the
+        network reduced by the parent node).
         """
-        return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
+
+        if reduced:
+            return cast(
+                dict[str, int],
+                {
+                    k: v
+                    for k, v in self.G.edges[parent_id, child_id]["motif"].items()  # type: ignore
+                    if k not in self.node_space(parent_id)
+                },
+            )
+        else:
+            return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
 
     def expand_bfs(
         self,
@@ -504,7 +520,7 @@ class SuccessionDiagram:
         considered to be zero (i.e. the node is the root).
         """
 
-        fixed_vars, _ = percolate_space(
+        fixed_vars = percolate_space(
             self.network, stable_motif, strict_percolation=False
         )
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nfvsmotifs.state_utils import function_restrict
+from balm.state_utils import bddvar_cache, function_restrict
 
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from pyeda.boolalg.expr import Complement, Literal, Variable
 
-from nfvsmotifs.pyeda_utils import (
+from balm.pyeda_utils import (
     PYEDA_FALSE,
     PYEDA_TRUE,
     aeon_to_bdd,
@@ -81,30 +81,28 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
 
 
 def percolate_space(
-    network: BooleanNetwork, space: dict[str, int], strict_percolation: bool = True
-) -> tuple[dict[str, int], dict[str, int]]:
+    network: BooleanNetwork,
+    space: dict[str, int],
+    strict_percolation: bool = True,
+) -> dict[str, int]:
     """
-    Takes a Boolean network and a space (partial assignment of `0`/`1`
-    to the network variables). It then percolates the values in the given
-    `space` to the remaining network variables based on the update functions
-    of the given `network`.
+    Takes a Boolean network and a space (partial assignment of `0`/`1` to the
+    network variables). It then percolates the values in the given `space` to
+    the remaining network variables based on the update functions of the given
+    `network`.
 
-    If the argument is a trap space, then the result is a subspace of
-    the argument and is also a trap space.
+    If the argument is a trap space, then the result is a subspace of the
+    argument and is also a trap space.
 
-    However, when the argument is a general space, the percolation can
-    actually lead "outside" of the original space. In such case, the original
-    fixed value is *not* modified and the conflict will remain in the
-    resulting space.
+    However, when the argument is a general space, the percolation can actually
+    lead "outside" of the original space. In such case, the original fixed value
+    is *not* modified and the conflict will remain in the resulting space.
 
-    We then return these percolated values for the conflicting variables
-    as a second member of the result tuple.
-
-    If `strict_percolation` is used, only variables that become fixed as a result
-    of fixing the space are considered (e.g., nodes with constant update functions
-    are not propagated). Furthermore, the variables in `space` are only returned
-    if the value of their update funciton becomes fixed as a result of percolating
-    the fixed node values specified by `space`.
+    If `strict_percolation` is used, only variables that become fixed as a
+    result of fixing the space are considered (e.g., nodes with constant update
+    functions are not propagated). Furthermore, the variables in `space` are
+    only returned if the value of their update funciton becomes fixed as a
+    result of percolating the fixed node values specified by `space`.
     """
 
     if strict_percolation:
@@ -113,62 +111,84 @@ def percolate_space(
         result = {var: space[var] for var in space}
 
     fixed = {var: space[var] for var in space}
+    fixed_bddvars = {bddvar_cache(k): v for k, v in fixed.items()}
     bdds: dict[str, BinaryDecisionDiagram] = {}
-    conflicts: dict[str, int] = {}
+    bdd_inputs = {}
+    var_name_dict = {network.get_variable_name(var): var for var in network.variables()}
+    deletion_list: list[str] = list(result)
+
     done = False
     while not done:
+        for k in deletion_list:
+            del var_name_dict[k]
+        deletion_list = []
         done = True
-        for var in network.variables():
-            var_name = network.get_variable_name(var)
-
+        for var_name, var in var_name_dict.items():
+            if var_name in result:
+                continue
             if var_name not in bdds:
                 bdds[var_name] = aeon_to_bdd(network.get_update_function(var))
 
-            if (
-                bdds[var_name].is_zero() or bdds[var_name].is_one()
-            ) and strict_percolation:
-                continue
-
-            bdds[var_name] = function_restrict(bdds[var_name], fixed)
             if bdds[var_name].is_one():
+                if strict_percolation:
+                    continue
                 r = 1
             elif bdds[var_name].is_zero():
+                if strict_percolation:
+                    continue
                 r = 0
             else:
-                r = -1
-                continue
+                if var_name not in bdd_inputs:
+                    bdd_inputs[var_name] = set(bdds[var_name].inputs)  # type: ignore
+                point = {x: fixed_bddvars[x] for x in bdd_inputs[var_name] if x in fixed_bddvars}  # type: ignore
+                if point:
+                    bdds[var_name] = bdds[var_name].restrict(point)  # type: ignore
+                    bdd_inputs[var_name] -= set(point)  # type: ignore
 
-            assert r in (0, 1)
+                if bdds[var_name].is_one():
+                    r = 1
+                elif bdds[var_name].is_zero():
+                    r = 0
+                else:
+                    r = -1
+                    continue
+
             if var_name not in fixed:
                 fixed[var_name] = r
+                fixed_bddvars[bddvar_cache(var_name)] = r
                 result[var_name] = r
+                deletion_list.append(var_name)
                 done = False
             elif fixed[var_name] == r and var_name not in result:
                 result[var_name] = r
-            elif fixed[var_name] != r:
-                conflicts[var_name] = r
 
-            # # This is the old expression version
-            # expression = aeon_to_pyeda(network.get_update_function(var))
+    return result
 
-            # # If the var is already constant, it doesn't count.
-            # if (expression == PYEDA_TRUE or expression == PYEDA_FALSE) and strict_percolation:
-            #     continue
 
-            # expression = percolate_pyeda_expression(expression, fixed)
-            # if expression == PYEDA_TRUE or expression == PYEDA_FALSE:
-            #     if var_name not in fixed:
-            #         # Fortunately, PyEDA resolves true as '1' and false as '0',
-            #         # so we can use a direct conversion.
-            #         fixed[var_name] = int(expression)
-            #         result[var_name] = int(expression)
-            #         done = False
-            #     if var_name in fixed and fixed[var_name] == int(expression) and var_name not in result:
-            #         result[var_name] = int(expression)
-            #     if var_name in fixed and fixed[var_name] != int(expression):
-            #         conflicts[var_name] = int(expression)
+def percolation_conflicts(
+    network: BooleanNetwork,
+    space: dict[str, int],
+    strict_percolation: bool = True,
+) -> set[str]:
+    """
+    Returns a set of variable names that are in conflict with the percolation of
+    the given space (see `percolate_space`).
+    """
+    conflicts: set[str] = set()
 
-    return (result, conflicts)
+    perc_space = percolate_space(network, space, strict_percolation)
+
+    for var, value in space.items():
+        function_restricted = function_restrict(
+            aeon_to_bdd(network.get_update_function(var)), perc_space
+        )
+
+        if function_restricted.is_one() and value == 0:
+            conflicts.add(var)
+        elif function_restricted.is_zero() and value == 1:
+            conflicts.add(var)
+
+    return conflicts
 
 
 def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwork:
