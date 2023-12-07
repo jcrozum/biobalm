@@ -1,7 +1,7 @@
 from biodivine_aeon import BooleanNetwork  # type:ignore
 from networkx import DiGraph  # type:ignore
 
-from nfvsmotifs.interaction_graph_utils import (
+from balm.interaction_graph_utils import (
     feedback_vertex_set,
     find_minimum_NFVS,
     independent_cycles,

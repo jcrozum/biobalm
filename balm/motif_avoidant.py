@@ -8,9 +8,9 @@ from networkx import DiGraph  # type: ignore
 from pyeda.boolalg.bdd import expr2bdd
 from pypint import Goal, InMemoryModel  # type:ignore
 
-from nfvsmotifs.petri_net_translation import place_to_variable
-from nfvsmotifs.pyeda_utils import aeon_to_pyeda
-from nfvsmotifs.state_utils import (
+from balm.petri_net_translation import place_to_variable
+from balm.pyeda_utils import aeon_to_pyeda
+from balm.state_utils import (
     dnf_function_is_true,
     function_eval,
     function_is_true,

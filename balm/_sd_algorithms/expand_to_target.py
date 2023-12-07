@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+    from balm.SuccessionDiagram import SuccessionDiagram
 
-from nfvsmotifs.space_utils import intersect, is_subspace
+from balm.space_utils import intersect, is_subspace
 
 
 def expand_to_target(

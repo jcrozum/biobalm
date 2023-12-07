@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+    from balm.SuccessionDiagram import SuccessionDiagram
 
-from nfvsmotifs.space_utils import is_subspace
-from nfvsmotifs.trappist_core import trappist
+from balm.space_utils import is_subspace
+from balm.trappist_core import trappist
 
 
 def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) -> bool:

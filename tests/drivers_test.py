@@ -1,8 +1,4 @@
-from nfvsmotifs.drivers import (
-    BooleanNetwork,
-    find_single_drivers,
-    find_single_node_LDOIs,
-)
+from balm.drivers import BooleanNetwork, find_single_drivers, find_single_node_LDOIs
 
 
 def test_find_single_node_LDOIs():

@@ -1,10 +1,10 @@
 from biodivine_aeon import BooleanNetwork  # type:ignore
 
-from nfvsmotifs.motif_avoidant import _filter_candidates  # type: ignore
-from nfvsmotifs.motif_avoidant import _Pint_reachability  # type: ignore
-from nfvsmotifs.motif_avoidant import _preprocess_candidates  # type: ignore
-from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.state_utils import state_list_to_bdd
+from balm.motif_avoidant import _filter_candidates  # type: ignore
+from balm.motif_avoidant import _Pint_reachability  # type: ignore
+from balm.motif_avoidant import _preprocess_candidates  # type: ignore
+from balm.petri_net_translation import network_to_petrinet
+from balm.state_utils import state_list_to_bdd
 
 
 def test_preprocessing_ssf_not_optimal():

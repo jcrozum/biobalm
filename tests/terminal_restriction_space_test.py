@@ -1,11 +1,11 @@
 from biodivine_aeon import BooleanNetwork  # type: ignore
 
-from nfvsmotifs.terminal_restriction_space import (
+from balm.terminal_restriction_space import (
     get_self_neg_tr_trap_spaces,
     get_terminal_restriction_space,
     state_list_to_bdd,
 )
-from nfvsmotifs.trappist_core import trappist
+from balm.trappist_core import trappist
 
 
 def test_tr_trap_spaces():

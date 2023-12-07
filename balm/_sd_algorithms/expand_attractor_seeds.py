@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+    from balm.SuccessionDiagram import SuccessionDiagram
 
-import nfvsmotifs
-import nfvsmotifs.SuccessionDiagram
-from nfvsmotifs.motif_avoidant import make_retained_set
-from nfvsmotifs.space_utils import intersect
-from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG
+import balm
+import balm.SuccessionDiagram
+from balm.motif_avoidant import make_retained_set
+from balm.space_utils import intersect
+from balm.trappist_core import compute_fixed_point_reduced_STG
 
 
 def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None):
@@ -24,7 +24,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
     # motif-avoidant attractors.
     sd.expand_minimal_spaces(size_limit)
 
-    if nfvsmotifs.SuccessionDiagram.DEBUG:
+    if balm.SuccessionDiagram.DEBUG:
         print(
             "Minimal trap space expansion finished. Proceeding to attractor expansion."
         )
@@ -92,7 +92,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 successors.pop()
                 continue
 
-            if nfvsmotifs.SuccessionDiagram.DEBUG:
+            if balm.SuccessionDiagram.DEBUG:
                 print(
                     f"[{node}] Found successor with new attractor candidate seeds. Expand node {successors[-1]}."
                 )
@@ -101,7 +101,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
 
         if len(successors) == 0:
             # Everything is done for this `node` and we can continue to the next one.
-            if nfvsmotifs.SuccessionDiagram.DEBUG:
+            if balm.SuccessionDiagram.DEBUG:
                 print(f"[{node}] Finished node attractor expansion.")
             continue
 

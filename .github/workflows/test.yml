@@ -22,7 +22,7 @@ jobs:
       - name: Install mypy
         run: pip install mypy
       - name: Run mypy check
-        run: mypy nfvsmotifs
+        run: mypy balm
   # Then do a "small" test run with code coverage.
   coverage:
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
       - name: Install pytest
         run: pip install pytest pytest-cov      
       - name: Run pytest with coverage
-        run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nfvsmotifs tests/ | tee pytest-coverage.txt
+        run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=balm tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:

@@ -1,13 +1,13 @@
 from biodivine_aeon import BooleanNetwork
 
-from nfvsmotifs.control import (
+from balm.control import (
     Intervention,
     controls_are_equal,
     drivers_of_succession,
     succession_control,
     successions_to_target,
 )
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.SuccessionDiagram import SuccessionDiagram
 
 
 def test_intervention_equality_and_equivalence():

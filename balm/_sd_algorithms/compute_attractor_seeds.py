@@ -3,16 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+    from balm.SuccessionDiagram import SuccessionDiagram
 
-import nfvsmotifs
-import nfvsmotifs.SuccessionDiagram
-from nfvsmotifs.motif_avoidant import (
-    detect_motif_avoidant_attractors,
-    make_retained_set,
-)
-from nfvsmotifs.terminal_restriction_space import get_terminal_restriction_space
-from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG
+import balm
+import balm.SuccessionDiagram
+from balm.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
+from balm.terminal_restriction_space import get_terminal_restriction_space
+from balm.trappist_core import compute_fixed_point_reduced_STG
 
 
 def compute_attractor_seeds(
@@ -28,7 +25,7 @@ def compute_attractor_seeds(
     subspaces of the child nodes.
     """
 
-    if nfvsmotifs.SuccessionDiagram.DEBUG:
+    if balm.SuccessionDiagram.DEBUG:
         print(f"[{node_id}] Start computing attractor seeds.")
 
     node_space = sd.node_space(node_id)
@@ -71,7 +68,7 @@ def compute_attractor_seeds(
         avoid_subspaces=child_spaces,
     )
 
-    if nfvsmotifs.SuccessionDiagram.DEBUG:
+    if balm.SuccessionDiagram.DEBUG:
         print(f"[{node_id}] Found {len(candidate_seeds)} seed candidates.")
 
     if len(candidate_seeds) == 1 and len(child_spaces) == 0:

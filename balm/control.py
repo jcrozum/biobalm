@@ -6,8 +6,8 @@ from typing import cast
 import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 
-from nfvsmotifs.space_utils import is_subspace, percolate_space
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.space_utils import is_subspace, percolate_space
+from balm.SuccessionDiagram import SuccessionDiagram
 
 SuccessionType = list[dict[str, int]]  # sequence of stable motifs
 ControlType = list[dict[str, int]]  # ways of locking in an individual stable motif

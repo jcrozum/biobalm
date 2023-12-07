@@ -7,10 +7,10 @@ from biodivine_aeon import (  # type: ignore
     SymbolicAsyncGraph,
 )
 
-from nfvsmotifs.aeon_utils import remove_static_constraints
-from nfvsmotifs.petri_net_translation import network_to_petrinet
-from nfvsmotifs.space_utils import is_syntactic_trap_space
-from nfvsmotifs.trappist_core import compute_fixed_point_reduced_STG, trappist
+from balm.aeon_utils import remove_static_constraints
+from balm.petri_net_translation import network_to_petrinet
+from balm.space_utils import is_syntactic_trap_space
+from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
 
 # TODO: Right now, this is necessary to correctly parse some of the larger models
 # using PyEDA. In the future, we should ideally use a parser that does not have this problem.

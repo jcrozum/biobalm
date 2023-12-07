@@ -6,10 +6,10 @@ import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph
 
-from nfvsmotifs.interaction_graph_utils import infer_signed_interaction_graph
-from nfvsmotifs.petri_net_translation import extract_variable_names, network_to_petrinet
-from nfvsmotifs.space_utils import percolate_network, percolate_space
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.interaction_graph_utils import infer_signed_interaction_graph
+from balm.petri_net_translation import extract_variable_names, network_to_petrinet
+from balm.space_utils import percolate_network, percolate_space
+from balm.SuccessionDiagram import SuccessionDiagram
 
 sys.path.append(".")
 

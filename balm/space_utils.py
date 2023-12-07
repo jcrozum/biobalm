@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nfvsmotifs.state_utils import bddvar_cache, function_restrict
+from balm.state_utils import bddvar_cache, function_restrict
 
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from pyeda.boolalg.expr import Complement, Literal, Variable
 
-from nfvsmotifs.pyeda_utils import (
+from balm.pyeda_utils import (
     PYEDA_FALSE,
     PYEDA_TRUE,
     aeon_to_bdd,
