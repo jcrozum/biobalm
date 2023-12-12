@@ -4,15 +4,16 @@ from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from typing import Iterator
-    from biodivine_aeon import BooleanNetwork
 
 import networkx as nx  # type: ignore
+from biodivine_aeon import BooleanNetwork
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
 from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
+from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
 from balm.interaction_graph_utils import feedback_vertex_set
 from balm.petri_net_translation import network_to_petrinet
@@ -115,6 +116,75 @@ class SuccessionDiagram:
         Returns the number of nodes in this `SuccessionDiagram`.
         """
         return self.G.number_of_nodes()
+
+    @staticmethod
+    def from_aeon(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.aeon` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_aeon(model))
+
+    @staticmethod
+    def from_bnet(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of a `.bnet` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_bnet(model))
+
+    @staticmethod
+    def from_sbml(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.sbml` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_sbml(model))
+
+    @staticmethod
+    def from_file(path: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the given file path. The format is automatically inferred from
+        the file extension.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_file(path))
+
+    def expanded_attractor_seeds(self) -> list[list[dict[str, int]]]:
+        return [self.node_attractor_seeds(id) for id in self.expanded_ids()]
+
+    def summary(self) -> str:
+        """
+        Return a summary of the succession diagram.
+        """
+        var_ordering = sorted(
+            [self.network.get_variable_name(v) for v in self.network.variables()]
+        )
+        report_string = (
+            f"Succession Diagram with {len(self)} nodes.\n"
+            f"State order: {', '.join(var_ordering)}\n\n"
+            "Attractors in diagram:\n\n"
+        )
+        for node in self.node_ids():
+            try:
+                attrs = self.node_attractor_seeds(node, compute=False)
+            except KeyError:
+                continue
+
+            space = self.node_space(node)
+
+            if self.node_is_minimal(node):
+                space_str_prefix = "minimal trap space "
+            else:
+                space_str_prefix = "motif avoidance in "
+            space_str = ""
+            for var in var_ordering:
+                if var in space:
+                    space_str += str(space[var])
+                else:
+                    space_str += "*"
+            report_string += f"{space_str_prefix}{space_str}\n"
+            for attr in attrs:
+                attr_str = "".join(str(v) for _, v in sorted(attr.items()))
+                report_string += "." * len(space_str_prefix) + f"{attr_str}\n"
+            report_string += "\n"
+        return report_string
 
     def root(self) -> int:
         """
@@ -340,6 +410,20 @@ class SuccessionDiagram:
             )
         else:
             return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
+
+    def build(self):
+        """
+        Expand the succession diagram and search for attractors using default methods.
+        """
+        self.expand_scc()
+        for node_id in self.node_ids():
+            self.node_attractor_seeds(node_id, compute=True)
+
+    def expand_scc(self, find_motif_avoidant_attractors: bool = True) -> bool:
+        """
+        Expand the succession diagram using the source SCC method.
+        """
+        return expand_source_SCCs(self, check_maa=find_motif_avoidant_attractors)
 
     def expand_bfs(
         self,
