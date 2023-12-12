@@ -1,29 +1,33 @@
+from __future__ import annotations
+
 import itertools as it
 import sys
-from typing import Callable, Iterable, cast
+from typing import TYPE_CHECKING, Callable, Iterable, cast
 
 import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph
 
+import balm.SuccessionDiagram
+from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm.interaction_graph_utils import infer_signed_interaction_graph
 from balm.petri_net_translation import extract_variable_names, network_to_petrinet
 from balm.space_utils import percolate_network, percolate_space
-from balm.SuccessionDiagram import SuccessionDiagram
+
+if TYPE_CHECKING:
+    expander_function_type = Callable[
+        [balm.SuccessionDiagram.SuccessionDiagram, int | None, int | None, int | None],
+        bool,
+    ]
 
 sys.path.append(".")
 
 DEBUG = False
 
-expander_function_type = Callable[
-    [SuccessionDiagram, int | None, int | None, int | None],
-    bool,
-]
-
 
 def expand_source_SCCs(
-    sd: SuccessionDiagram,
-    expander: expander_function_type = SuccessionDiagram.expand_bfs,
+    sd: balm.SuccessionDiagram.SuccessionDiagram,
+    expander: expander_function_type = expand_bfs,
     check_maa: bool = True,
 ) -> bool:
     """
@@ -252,7 +256,7 @@ def find_source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
 
 def find_scc_sd(
     bnet: str, source_scc: list[str], expander: expander_function_type, check_maa: bool
-) -> tuple[SuccessionDiagram, bool]:
+) -> tuple[balm.SuccessionDiagram.SuccessionDiagram, bool]:
     """
     TODO: better way that does not use bnet but rather bn directly or petri_net directly
     to find the scc_sd would be useful.
@@ -291,7 +295,7 @@ def find_scc_sd(
     scc_bn = scc_bn.infer_regulatory_graph()
 
     # Compute the succession diagram.
-    scc_sd = SuccessionDiagram(scc_bn)
+    scc_sd = balm.SuccessionDiagram.SuccessionDiagram(scc_bn)
     fully_expanded = expander(scc_sd)  # type: ignore
     assert fully_expanded
 
@@ -323,7 +327,10 @@ def find_scc_sd(
 
 
 def attach_scc_sd(
-    sd: SuccessionDiagram, scc_sd: SuccessionDiagram, branch: int, check_maa: bool
+    sd: balm.SuccessionDiagram.SuccessionDiagram,
+    scc_sd: balm.SuccessionDiagram.SuccessionDiagram,
+    branch: int,
+    check_maa: bool,
 ) -> list[int]:
     """
     Attach scc_sd to the given branch point of the sd.
