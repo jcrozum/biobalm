@@ -24,9 +24,9 @@ class SuccessionDiagramTest(unittest.TestCase):
 
         succession_diagram = SuccessionDiagram(bn)
         succession_diagram.expand_bfs()
-        assert succession_diagram.G.number_of_nodes() == 3
-        assert succession_diagram.G.number_of_edges() == 2  # type: ignore
-        assert max(d["depth"] for _, d in succession_diagram.G.nodes(data=True)) == 1  # type: ignore
+        assert succession_diagram.dag.number_of_nodes() == 3
+        assert succession_diagram.dag.number_of_edges() == 2  # type: ignore
+        assert max(d["depth"] for _, d in succession_diagram.dag.nodes(data=True)) == 1  # type: ignore
         assert succession_diagram.depth() == 1
         assert (
             max(
@@ -74,9 +74,9 @@ class SuccessionDiagramTest(unittest.TestCase):
 
         # Then expand the whole thing.
         succession_diagram.expand_bfs()
-        assert succession_diagram.G.number_of_nodes() == 4
-        assert succession_diagram.G.number_of_edges() == 5  # type: ignore
-        assert max(d["depth"] for _, d in succession_diagram.G.nodes(data=True)) == 2  # type: ignore
+        assert succession_diagram.dag.number_of_nodes() == 4
+        assert succession_diagram.dag.number_of_edges() == 5  # type: ignore
+        assert max(d["depth"] for _, d in succession_diagram.dag.nodes(data=True)) == 2  # type: ignore
         assert succession_diagram.depth() == 2
         assert (
             max(
