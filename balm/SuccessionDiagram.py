@@ -126,7 +126,7 @@ class SuccessionDiagram:
     ):
         self.network = BooleanNetwork.from_aeon(str(state["network rules"]))
         self.petri_net = cast(nx.DiGraph, state["petri net"])
-        self.nfvs = state["nfvs"]
+        self.nfvs = cast(list[str], state["nfvs"])
         self.G = cast(nx.DiGraph, state["G"])  # type: ignore
         self.node_indices = cast(dict[str, int], state["node_indices"])  # type: ignore
 
