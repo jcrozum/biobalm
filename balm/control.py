@@ -212,7 +212,7 @@ def successions_to_target(
         for path in cast(
             list[list[int]],
             nx.all_simple_paths(  # type: ignore
-                succession_diagram.G,
+                succession_diagram.dag,
                 source=succession_diagram.root(),
                 target=s,
             ),
