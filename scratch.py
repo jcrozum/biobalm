@@ -1,6 +1,5 @@
 # type: ignore
-
-# import pickle
+import pickle
 
 from balm.SuccessionDiagram import SuccessionDiagram
 
@@ -12,3 +11,9 @@ C, A & B"""
 sd = SuccessionDiagram.from_bnet(rules)
 sd.build()
 print(sd.summary())
+
+pickle.dump(sd, open("sd.pickle", "wb"))
+
+sd2 = pickle.load(open("sd.pickle", "rb"))
+
+print(sd2.summary())
