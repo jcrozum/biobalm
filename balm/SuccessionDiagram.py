@@ -111,6 +111,25 @@ class SuccessionDiagram:
         # Create an un-expanded root node.
         self._ensure_node(None, {})
 
+    def __getstate__(self) -> dict[str, str | nx.DiGraph | list[str] | dict[int, int]]:
+        state = {
+            "network rules": self.network.to_aeon(),
+            "petri net": self.petri_net,
+            "nfvs": self.nfvs,
+            "G": self.G,
+            "node_indices": self.node_indices,
+        }
+        return state
+
+    def __setstate__(
+        self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
+    ):
+        self.network = BooleanNetwork.from_aeon(str(state["network rules"]))
+        self.petri_net = cast(nx.DiGraph, state["petri net"])
+        self.nfvs = state["nfvs"]
+        self.G = cast(nx.DiGraph, state["G"])  # type: ignore
+        self.node_indices = cast(dict[str, int], state["node_indices"])  # type: ignore
+
     def __len__(self) -> int:
         """
         Returns the number of nodes in this `SuccessionDiagram`.
@@ -157,7 +176,7 @@ class SuccessionDiagram:
             [self.network.get_variable_name(v) for v in self.network.variables()]
         )
         report_string = (
-            f"Succession Diagram with {len(self)} nodes.\n"
+            f"Succession Diagram with {len(self)} nodes and depth {self.depth()}.\n"
             f"State order: {', '.join(var_ordering)}\n\n"
             "Attractors in diagram:\n\n"
         )
