@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from pyeda.boolalg.expr import Complement
-from pyeda.boolalg.expr import Literal as PyedaPyedaLiteral
+from pyeda.boolalg.expr import Literal as PyedaLiteral
 from pyeda.boolalg.expr import Variable
 
 from balm.pyeda_utils import (
@@ -279,7 +279,7 @@ def expression_to_space_list(expression: Expression) -> list[space_type]:
         # Since we know this is a DNF clause, it can only be
         # a literal, or a conjunction of literals.
         # TODO: investigate the types here more closely... something strange is going on
-        literals = [clause] if isinstance(clause, PyedaPyedaLiteral) else clause.xs  # type: ignore # noqa
+        literals = [clause] if isinstance(clause, PyedaLiteral) else clause.xs  # type: ignore # noqa
         for literal in literals:  # type: ignore
             var = str(literal.inputs[0])  # type: ignore
             if isinstance(literal, Variable):
