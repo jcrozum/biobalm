@@ -18,7 +18,7 @@ from balm.state_utils import (
     state_list_to_bdd,
     state_to_bdd,
 )
-from balm.types import space_type
+from balm.types import BooleanSpace
 
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork
@@ -33,9 +33,9 @@ if TYPE_CHECKING:
 def make_retained_set(
     network: BooleanNetwork,
     nfvs: list[str],
-    space: space_type,
-    child_spaces: list[space_type] | None = None,
-) -> space_type:
+    space: BooleanSpace,
+    child_spaces: list[BooleanSpace] | None = None,
+) -> BooleanSpace:
     """
     Calculate the retained set.
 
@@ -102,12 +102,12 @@ def make_retained_set(
 def detect_motif_avoidant_attractors(
     network: BooleanNetwork,
     petri_net: DiGraph,
-    candidates: list[space_type],
+    candidates: list[BooleanSpace],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: space_type | None = None,
+    ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
-) -> list[space_type]:
+) -> list[BooleanSpace]:
     """
     Compute a sub-list of `candidates` which correspond to motif-avoidant
     attractors. Other method inputs:
@@ -150,12 +150,12 @@ def detect_motif_avoidant_attractors(
 
 def _preprocess_candidates(
     network: BooleanNetwork,
-    candidates: list[space_type],
+    candidates: list[BooleanSpace],
     terminal_restriction_space: BinaryDecisionDiagram,
     max_iterations: int,
-    ensure_subspace: space_type | None = None,
+    ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
-) -> list[space_type]:
+) -> list[BooleanSpace]:
     """
     A fast but incomplete method for eliminating spurious attractor candidates.
 
@@ -201,7 +201,7 @@ def _preprocess_candidates(
     if not is_in_an_mts:
         # Copy is sufficient because we won't be modifying the states within the set.
         candidates_dnf = candidates.copy()
-        filtered_candidates: list[space_type] = []
+        filtered_candidates: list[BooleanSpace] = []
         for state in candidates:
             # Remove the state from the candidates. If we can prove that is
             # is not an attractor, we will put it back.
@@ -269,15 +269,15 @@ def _preprocess_candidates(
 
 def _filter_candidates(
     petri_net: DiGraph,
-    candidates: list[space_type],
+    candidates: list[BooleanSpace],
     terminal_restriction_space: BinaryDecisionDiagram,
-) -> list[space_type]:
+) -> list[BooleanSpace]:
     """
     Filter candidate states using reachability procedure in Pint.
     """
 
     avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
-    filtered_candidates: list[space_type] = []
+    filtered_candidates: list[BooleanSpace] = []
 
     for state in candidates:
         state_bdd = state_to_bdd(state)
@@ -295,7 +295,7 @@ def _filter_candidates(
 
 def _Pint_reachability(
     petri_net: DiGraph,
-    initial_state: space_type,
+    initial_state: BooleanSpace,
     target_states: BinaryDecisionDiagram,
 ) -> bool:
     """

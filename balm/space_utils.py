@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyeda.boolalg.bdd import BinaryDecisionDiagram
     from pyeda.boolalg.expr import Expression
-    from balm.types import space_type
+    from balm.types import BooleanSpace
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from pyeda.boolalg.expr import Complement
@@ -31,12 +31,12 @@ from balm.pyeda_utils import (
 )
 
 
-def intersect(x: space_type, y: space_type) -> space_type | None:
+def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
     """
     Compute the space which is the intersection of two spaces, or `None` if the spaces
     don't intersect.
     """
-    result: space_type = {}
+    result: BooleanSpace = {}
     for k, v in x.items():
         result[k] = v
     for k, v in y.items():
@@ -46,7 +46,7 @@ def intersect(x: space_type, y: space_type) -> space_type | None:
     return result
 
 
-def is_subspace(x: space_type, y: space_type) -> bool:
+def is_subspace(x: BooleanSpace, y: BooleanSpace) -> bool:
     """
     Checks if `x` is a subspace of `y`.
     """
@@ -58,7 +58,7 @@ def is_subspace(x: space_type, y: space_type) -> bool:
     return True
 
 
-def is_syntactic_trap_space(bn: BooleanNetwork, space: space_type) -> bool:
+def is_syntactic_trap_space(bn: BooleanNetwork, space: BooleanSpace) -> bool:
     """
     Uses percolation to check if the given `space` is a trap space in the given `BooleanNetwork`.
 
@@ -85,9 +85,9 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: space_type) -> bool:
 
 def percolate_space(
     network: BooleanNetwork,
-    space: space_type,
+    space: BooleanSpace,
     strict_percolation: bool = True,
-) -> space_type:
+) -> BooleanSpace:
     """
     Takes a Boolean network and a space (partial assignment of `0`/`1` to the
     network variables). It then percolates the values in the given `space` to
@@ -109,11 +109,11 @@ def percolate_space(
     """
 
     if strict_percolation:
-        result: space_type = {}
+        result: BooleanSpace = {}
     else:
         result = {var: space[var] for var in space}
 
-    fixed: space_type = {var: space[var] for var in space}
+    fixed: BooleanSpace = {var: space[var] for var in space}
     fixed_bddvars = {bddvar_cache(k): v for k, v in fixed.items()}
     bdds: dict[str, BinaryDecisionDiagram] = {}
     bdd_inputs = {}
@@ -169,7 +169,7 @@ def percolate_space(
 
 def percolation_conflicts(
     network: BooleanNetwork,
-    space: space_type,
+    space: BooleanSpace,
     strict_percolation: bool = True,
 ) -> set[str]:
     """
@@ -193,7 +193,7 @@ def percolation_conflicts(
     return conflicts
 
 
-def percolate_network(bn: BooleanNetwork, space: space_type) -> BooleanNetwork:
+def percolate_network(bn: BooleanNetwork, space: BooleanSpace) -> BooleanNetwork:
     """
     Takes an AEON.py Boolean network and a space (partial assignment of
     network variables to `0`/`1`). It then produces a new network with
@@ -243,7 +243,9 @@ def percolate_network(bn: BooleanNetwork, space: space_type) -> BooleanNetwork:
     return new_bn
 
 
-def percolate_pyeda_expression(expression: Expression, space: space_type) -> Expression:
+def percolate_pyeda_expression(
+    expression: Expression, space: BooleanSpace
+) -> Expression:
     """
     Takes a PyEDA expression and a subspace (dictionary assigning `1`/`0` to
     a subset of variables). Returns a simplified expression that is valid
@@ -256,7 +258,7 @@ def percolate_pyeda_expression(expression: Expression, space: space_type) -> Exp
     return expression.simplify()
 
 
-def expression_to_space_list(expression: Expression) -> list[space_type]:
+def expression_to_space_list(expression: Expression) -> list[BooleanSpace]:
     """
     Convert a PyEDA expression to a list of subspaces whose union represents
     an equivalent set of network states.
@@ -270,11 +272,11 @@ def expression_to_space_list(expression: Expression) -> list[space_type]:
     #  (or at least in some sense canonical) DNF. In the future, we might
     #  want to either enforce this explicitly or relax this requirement.
 
-    sub_spaces: list[space_type] = []
+    sub_spaces: list[BooleanSpace] = []
     expression_dnf = expression.to_dnf()
 
     for clause in expression_dnf.xs:  # type: ignore
-        sub_space: space_type = {}
+        sub_space: BooleanSpace = {}
 
         # Since we know this is a DNF clause, it can only be
         # a literal, or a conjunction of literals.
@@ -296,7 +298,7 @@ def expression_to_space_list(expression: Expression) -> list[space_type]:
     return sub_spaces
 
 
-def space_unique_key(space: space_type, network: BooleanNetwork) -> int:
+def space_unique_key(space: BooleanSpace, network: BooleanNetwork) -> int:
     """
     Computes an integer which is a unique representation of the provided `space`
     (with respect to the given `network`).

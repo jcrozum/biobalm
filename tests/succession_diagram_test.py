@@ -7,7 +7,7 @@ from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph  # type: ignore
 import balm
 import balm.SuccessionDiagram
 from balm.SuccessionDiagram import SuccessionDiagram
-from balm.types import space_type
+from balm.types import BooleanSpace
 
 # This just ensures that the debug outputs are a part of the test output.
 balm.SuccessionDiagram.DEBUG = True
@@ -235,7 +235,7 @@ def test_attractor_detection(network_file: str):
 
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
-    nfvs_attractors: list[space_type] = []
+    nfvs_attractors: list[BooleanSpace] = []
     for i in sd.node_ids():
         attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
@@ -312,7 +312,7 @@ def test_attractor_expansion(network_file: str):
 
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
-    nfvs_attractors: list[space_type] = []
+    nfvs_attractors: list[BooleanSpace] = []
     # This is an important change compared to the original test: Here, we only
     # care about expanded nodes, everything else is ignored.
     for i in sd.expanded_ids():

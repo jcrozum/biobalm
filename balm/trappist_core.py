@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Callable
     from clingo import Model
-    from balm.types import space_type
+    from balm.types import BooleanSpace
 
 from biodivine_aeon import BooleanNetwork
 from clingo import Control, SolveHandle
@@ -25,11 +25,11 @@ from balm.petri_net_translation import (
 
 def trappist_async(
     network: BooleanNetwork | DiGraph,
-    on_solution: Callable[[space_type], bool],
+    on_solution: Callable[[BooleanSpace], bool],
     problem: str = "min",
     reverse_time: bool = False,
-    ensure_subspace: space_type | None = None,
-    avoid_subspaces: list[space_type] | None = None,
+    ensure_subspace: BooleanSpace | None = None,
+    avoid_subspaces: list[BooleanSpace] | None = None,
 ):
     """
     The same as the `trappist` method, but instead of returning a list of spaces
@@ -88,9 +88,9 @@ def trappist(
     problem: str = "min",
     reverse_time: bool = False,
     solution_limit: int | None = None,
-    ensure_subspace: space_type | None = None,
-    avoid_subspaces: list[space_type] | None = None,
-) -> list[space_type]:
+    ensure_subspace: BooleanSpace | None = None,
+    avoid_subspaces: list[BooleanSpace] | None = None,
+) -> list[BooleanSpace]:
     """
     Solve the given `problem` for the given `network` using the Trappist
     algorithm, internally relying on the Python bindings of the `clingo` ASP
@@ -118,9 +118,9 @@ def trappist(
     if avoid_subspaces is None:
         avoid_subspaces = []
 
-    results: list[space_type] = []
+    results: list[BooleanSpace] = []
 
-    def save_result(x: space_type) -> bool:
+    def save_result(x: BooleanSpace) -> bool:
         results.append(x)
         if solution_limit is None:
             return True
@@ -139,8 +139,8 @@ def trappist(
     return results
 
 
-def _clingo_model_to_space(model: Model) -> space_type:
-    space: space_type = {}
+def _clingo_model_to_space(model: Model) -> BooleanSpace:
+    space: BooleanSpace = {}
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
         (variable, is_positive) = place_to_variable(atom_str)
@@ -160,8 +160,8 @@ def _create_clingo_constraints(
     petri_net: DiGraph,
     problem: str = "min",
     reverse_time: bool = False,
-    ensure_subspace: space_type | None = None,
-    avoid_subspaces: list[space_type] | None = None,
+    ensure_subspace: BooleanSpace | None = None,
+    avoid_subspaces: list[BooleanSpace] | None = None,
     optimize_source_variables: list[str] | None = None,
 ) -> Control:
     """
@@ -276,7 +276,7 @@ def _create_clingo_constraints(
     return ctl
 
 
-def _clingo_model_to_fixed_point(model: Model) -> space_type:
+def _clingo_model_to_fixed_point(model: Model) -> BooleanSpace:
     """
     Convert a clingo `Model` to a subspace representing a single fixed point.
     That is, the space should have all model variables fixed.
@@ -285,7 +285,7 @@ def _clingo_model_to_fixed_point(model: Model) -> space_type:
     produces "positive" models (i.e. the space is represented by positive atoms
     present in the model).
     """
-    space: space_type = {}
+    space: BooleanSpace = {}
 
     for atom in model.symbols(atoms=True):
         atom_str = str(atom)
@@ -307,8 +307,8 @@ def _clingo_model_to_fixed_point(model: Model) -> space_type:
 def _create_clingo_fixed_point_constraints(
     variables: list[str],
     petri_net: DiGraph,
-    ensure_subspace: space_type | None = None,
-    avoid_subspaces: list[space_type] | None = None,
+    ensure_subspace: BooleanSpace | None = None,
+    avoid_subspaces: list[BooleanSpace] | None = None,
 ) -> Control:
     """
     Generate the ASP characterizing all deadlocks of the Petri net (equivalently all
@@ -375,10 +375,10 @@ def _create_clingo_fixed_point_constraints(
 
 def compute_fixed_point_reduced_STG_async(
     petri_net: DiGraph,
-    retained_set: space_type,
-    on_solution: Callable[[space_type], bool],
-    ensure_subspace: space_type | None = None,
-    avoid_subspaces: list[space_type] | None = None,
+    retained_set: BooleanSpace,
+    on_solution: Callable[[BooleanSpace], bool],
+    ensure_subspace: BooleanSpace | None = None,
+    avoid_subspaces: list[BooleanSpace] | None = None,
 ):
     """
     The same as the `compute_fixed_point_reduced_STG`, but instead of returning a
@@ -426,11 +426,11 @@ def compute_fixed_point_reduced_STG_async(
 
 def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
-    retained_set: space_type,
-    ensure_subspace: space_type = {},
-    avoid_subspaces: list[space_type] = [],
+    retained_set: BooleanSpace,
+    ensure_subspace: BooleanSpace = {},
+    avoid_subspaces: list[BooleanSpace] = [],
     solution_limit: int | None = None,
-) -> list[space_type]:
+) -> list[BooleanSpace]:
     """
     This method computes the fixed points of the given Petri-net-encoded Boolean
     network. This makes it possible to modify the Petri net instead of
@@ -442,9 +442,9 @@ def compute_fixed_point_reduced_STG(
     the Petri net, forcing given variables to retain the specified values.
     """
 
-    results: list[space_type] = []
+    results: list[BooleanSpace] = []
 
-    def save_result(x: space_type) -> bool:
+    def save_result(x: BooleanSpace) -> bool:
         results.append(x)
         if solution_limit is None:
             return True
