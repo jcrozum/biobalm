@@ -6,7 +6,7 @@ from balm.terminal_restriction_space import (
     state_list_to_bdd,
 )
 from balm.trappist_core import trappist
-from balm.types import space_type
+from balm.types import BooleanSpace
 
 
 def test_tr_trap_spaces():
@@ -36,7 +36,7 @@ def test_get_terminal_restriction_space():
     C, A & B
     """
     )
-    stable_motifs: list[space_type] = [{"A": 1, "B": 1, "C": 1}]
+    stable_motifs: list[BooleanSpace] = [{"A": 1, "B": 1, "C": 1}]
 
     trs = get_terminal_restriction_space(
         stable_motifs,
@@ -62,7 +62,7 @@ def test_get_terminal_restriction_space2():
     F, B
     """
     )
-    stable_motifs: list[space_type] = [{"A": 1, "B": 0, "C": 1}]
+    stable_motifs: list[BooleanSpace] = [{"A": 1, "B": 0, "C": 1}]
 
     trs = get_terminal_restriction_space(
         stable_motifs,

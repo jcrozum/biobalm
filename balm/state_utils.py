@@ -14,10 +14,10 @@ from pyeda.boolalg.bdd import BDDONE, BDDZERO, bddvar  # type:ignore
 if TYPE_CHECKING:
     from pyeda.boolalg.bdd import BDDVariable, BinaryDecisionDiagram
 
-from balm.types import space_type
+from balm.types import BooleanSpace
 
 
-def _state_dict_to_bdd_valuation(state: space_type) -> dict[BDDVariable, int]:
+def _state_dict_to_bdd_valuation(state: BooleanSpace) -> dict[BDDVariable, int]:
     """
     Convert state variables in a dictionary to their BDD counterparts.
     """
@@ -48,7 +48,7 @@ def state_to_bdd_cacheable(state: frozenset[tuple[str, int]]) -> BinaryDecisionD
     return state_bdd
 
 
-def state_to_bdd(state: space_type, usecache: bool = True) -> BinaryDecisionDiagram:
+def state_to_bdd(state: BooleanSpace, usecache: bool = True) -> BinaryDecisionDiagram:
     """
     Convert a state variables to a BDD encoding the state singleton.
     """
@@ -68,7 +68,7 @@ def state_to_bdd(state: space_type, usecache: bool = True) -> BinaryDecisionDiag
     return state_bdd
 
 
-def state_list_to_bdd(states: list[space_type]) -> BinaryDecisionDiagram:
+def state_list_to_bdd(states: list[BooleanSpace]) -> BinaryDecisionDiagram:
     """
     Convert a list of state dictionaries to a BDD representation.
     """
@@ -80,7 +80,7 @@ def state_list_to_bdd(states: list[space_type]) -> BinaryDecisionDiagram:
 
 
 def function_restrict(
-    f: BinaryDecisionDiagram, state: space_type
+    f: BinaryDecisionDiagram, state: BooleanSpace
 ) -> BinaryDecisionDiagram:
     """
     Restrict the validity of the given BDD function to valuations which
@@ -90,7 +90,9 @@ def function_restrict(
     return f.restrict(bdd_state)
 
 
-def function_eval(f: BinaryDecisionDiagram, state: space_type) -> Literal[0, 1] | None:
+def function_eval(
+    f: BinaryDecisionDiagram, state: BooleanSpace
+) -> Literal[0, 1] | None:
     """
     Evaluate a BDD function in the given state to an integer value. If the state is incomplete
     (i.e. it is a space), the function may not evaluate to an exact integer. In such case,
@@ -107,7 +109,7 @@ def function_eval(f: BinaryDecisionDiagram, state: space_type) -> Literal[0, 1] 
     return None
 
 
-def function_is_true(f: BinaryDecisionDiagram, state: space_type) -> bool:
+def function_is_true(f: BinaryDecisionDiagram, state: BooleanSpace) -> bool:
     """
     Returns `True` if the given BDD function evaluates to `1` for the given
     state (or space).
@@ -118,7 +120,7 @@ def function_is_true(f: BinaryDecisionDiagram, state: space_type) -> bool:
     return function_restrict(f, state).is_one()
 
 
-def dnf_function_is_true(dnf: list[space_type], state: space_type) -> bool:
+def dnf_function_is_true(dnf: list[BooleanSpace], state: BooleanSpace) -> bool:
     """
     Returns `True` if the given DNF function evaluates to `1` for the given
     state (or space).
@@ -132,11 +134,13 @@ def dnf_function_is_true(dnf: list[space_type], state: space_type) -> bool:
     return False
 
 
-def remove_state_from_dnf(dnf: list[space_type], state: space_type) -> list[space_type]:
+def remove_state_from_dnf(
+    dnf: list[BooleanSpace], state: BooleanSpace
+) -> list[BooleanSpace]:
     """
     Removes all conjunctions that are True in the state
     """
-    modified_dnf: list[space_type] = []
+    modified_dnf: list[BooleanSpace] = []
     for conjunction in dnf:
         if conjunction.items() <= state.items():
             pass

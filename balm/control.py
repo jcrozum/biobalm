@@ -8,16 +8,19 @@ from biodivine_aeon import BooleanNetwork
 
 from balm.space_utils import is_subspace, percolate_space
 from balm.SuccessionDiagram import SuccessionDiagram
-from balm.types import ControlType, SuccessionType, space_type
+from balm.types import BooleanSpace, ControlOverrides, SubspaceSuccession
 
 
-def controls_are_equal(a: ControlType, b: ControlType) -> bool:
+def controls_are_equal(a: ControlOverrides, b: ControlOverrides) -> bool:
     return set(frozenset(x.items()) for x in a) == set(frozenset(x.items()) for x in b)
 
 
 class Intervention:
     def __init__(
-        self, control: list[ControlType], strategy: str, succession: SuccessionType
+        self,
+        control: list[ControlOverrides],
+        strategy: str,
+        succession: SubspaceSuccession,
     ):
         self._control = control
         self._strategy = strategy
@@ -105,7 +108,7 @@ class Intervention:
 
 def succession_control(
     bn: BooleanNetwork,
-    target: space_type,
+    target: BooleanSpace,
     strategy: str = "internal",
     succession_diagram: SuccessionDiagram | None = None,
     max_drivers_per_succession_node: int | None = None,
@@ -118,7 +121,7 @@ def succession_control(
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    target : space_type
+    target : BooleanSpace
         The target subspace.
     strategy : str, optional
         The searching strategy to use to look for driver nodes. Options are
@@ -172,9 +175,9 @@ def succession_control(
 
 def successions_to_target(
     succession_diagram: SuccessionDiagram,
-    target: space_type,
+    target: BooleanSpace,
     expand_diagram: bool = True,
-) -> list[SuccessionType]:
+) -> list[SubspaceSuccession]:
     """Find lists of nested trap spaces (successions) that lead to the
     specified target subspace.
 
@@ -182,7 +185,7 @@ def successions_to_target(
     ----------
     succession_diagram : SuccessionDiagram
         The succession diagram from which successions will be extracted.
-    target : space_type
+    target : BooleanSpace
         The target subspace.
     expand_diagram: bool
         Whether to ensure that the succession diagram is expanded enough to
@@ -190,11 +193,11 @@ def successions_to_target(
 
     Returns
     -------
-    list[SuccessionType]
+    list[SubspaceSuccession]
         A list of successions, where each succession is a list of sequentially
         nested trap spaces that specify the target.
     """
-    successions: list[SuccessionType] = []
+    successions: list[SubspaceSuccession] = []
 
     # expand the succession_diagram toward the target
     if expand_diagram:
@@ -226,18 +229,18 @@ def successions_to_target(
 
 def drivers_of_succession(
     bn: BooleanNetwork,
-    succession: list[space_type],
+    succession: list[BooleanSpace],
     strategy: str = "internal",
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
-) -> list[ControlType]:
+) -> list[ControlOverrides]:
     """Find driver nodes of a list of sequentially nested trap spaces
 
     Parameters
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    succession : list[space_type]
+    succession : list[BooleanSpace]
         A list of sequentially nested trap spaces that specify the target.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
@@ -252,13 +255,13 @@ def drivers_of_succession(
 
     Returns
     -------
-    list[ControlType]
+    list[ControlOverrides]
         A list of controls. Each control is a list of lists of driver sets,
         represented as state dictionaries. Each list item corresponds to a list
         of drivers for the corresponding trap space in the succession.
     """
-    control_strategies: list[ControlType] = []
-    assume_fixed: space_type = {}
+    control_strategies: list[ControlOverrides] = []
+    assume_fixed: BooleanSpace = {}
     for ts in succession:
         control_strategies.append(
             find_drivers(
@@ -278,19 +281,19 @@ def drivers_of_succession(
 
 def find_drivers(
     bn: BooleanNetwork,
-    target_trap_space: space_type,
+    target_trap_space: BooleanSpace,
     strategy: str = "internal",
-    assume_fixed: space_type | None = None,
+    assume_fixed: BooleanSpace | None = None,
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
-) -> ControlType:
+) -> ControlOverrides:
     """Finds drives of a given target trap space
 
     Parameters
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    target_trap_space : space_type
+    target_trap_space : BooleanSpace
         The trap space we want to find drivers for.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
@@ -307,7 +310,7 @@ def find_drivers(
 
     Returns
     -------
-    ControlType
+    ControlOverrides
         A list of internal driver sets, represented as state dictionaries. If
         empty, then no drivers are found. This can happen if
         `max_drivers_per_succession_node` is not `None`, or if all controls
@@ -334,14 +337,14 @@ def find_drivers(
     if max_drivers_per_succession_node is None:
         max_drivers_per_succession_node = len(target_trap_space_inner)
 
-    drivers: ControlType = []
+    drivers: ControlOverrides = []
     for driver_set_size in range(max_drivers_per_succession_node + 1):
         for driver_set in combinations(driver_pool, driver_set_size):
             if any(set(d) <= set(driver_set) for d in drivers):
                 continue
 
             if strategy == "internal":
-                driver_dict: space_type = {
+                driver_dict: BooleanSpace = {
                     k: cast(Literal[0, 1], target_trap_space_inner[k])
                     for k in driver_set
                 }

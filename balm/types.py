@@ -1,5 +1,7 @@
-from typing import Literal
+from typing import Literal, TypeAlias
 
-space_type = dict[str, Literal[0, 1]]
-SuccessionType = list[space_type]  # sequence of stable motifs
-ControlType = list[space_type]  # ways of locking in an individual stable motif
+BooleanSpace: TypeAlias = dict[str, Literal[0, 1]]
+SubspaceSuccession: TypeAlias = list[BooleanSpace]  # sequence of stable motifs
+ControlOverrides: TypeAlias = list[
+    BooleanSpace
+]  # ways of locking in an individual stable motif
