@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 from itertools import combinations, product
-from typing import cast
+from typing import Literal, cast
 
 import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 
 from balm.space_utils import is_subspace, percolate_space
 from balm.SuccessionDiagram import SuccessionDiagram
-
-SuccessionType = list[dict[str, int]]  # sequence of stable motifs
-ControlType = list[dict[str, int]]  # ways of locking in an individual stable motif
+from balm.types import ControlType, SuccessionType, space_type
 
 
 def controls_are_equal(a: ControlType, b: ControlType) -> bool:
@@ -107,7 +105,7 @@ class Intervention:
 
 def succession_control(
     bn: BooleanNetwork,
-    target: dict[str, int],
+    target: space_type,
     strategy: str = "internal",
     succession_diagram: SuccessionDiagram | None = None,
     max_drivers_per_succession_node: int | None = None,
@@ -120,7 +118,7 @@ def succession_control(
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    target : dict[str, int]
+    target : space_type
         The target subspace.
     strategy : str, optional
         The searching strategy to use to look for driver nodes. Options are
@@ -174,7 +172,7 @@ def succession_control(
 
 def successions_to_target(
     succession_diagram: SuccessionDiagram,
-    target: dict[str, int],
+    target: space_type,
     expand_diagram: bool = True,
 ) -> list[SuccessionType]:
     """Find lists of nested trap spaces (successions) that lead to the
@@ -184,7 +182,7 @@ def successions_to_target(
     ----------
     succession_diagram : SuccessionDiagram
         The succession diagram from which successions will be extracted.
-    target : dict[str, int]
+    target : space_type
         The target subspace.
     expand_diagram: bool
         Whether to ensure that the succession diagram is expanded enough to
@@ -228,7 +226,7 @@ def successions_to_target(
 
 def drivers_of_succession(
     bn: BooleanNetwork,
-    succession: list[dict[str, int]],
+    succession: list[space_type],
     strategy: str = "internal",
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
@@ -239,7 +237,7 @@ def drivers_of_succession(
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    succession : list[dict[str, int]]
+    succession : list[space_type]
         A list of sequentially nested trap spaces that specify the target.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
@@ -260,7 +258,7 @@ def drivers_of_succession(
         of drivers for the corresponding trap space in the succession.
     """
     control_strategies: list[ControlType] = []
-    assume_fixed: dict[str, int] = {}
+    assume_fixed: space_type = {}
     for ts in succession:
         control_strategies.append(
             find_drivers(
@@ -280,9 +278,9 @@ def drivers_of_succession(
 
 def find_drivers(
     bn: BooleanNetwork,
-    target_trap_space: dict[str, int],
+    target_trap_space: space_type,
     strategy: str = "internal",
-    assume_fixed: dict[str, int] | None = None,
+    assume_fixed: space_type | None = None,
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
 ) -> ControlType:
@@ -292,7 +290,7 @@ def find_drivers(
     ----------
     bn : BooleanNetwork
         The network to analyze, which contains the Boolean update functions.
-    target_trap_space : dict[str, int]
+    target_trap_space : space_type
         The trap space we want to find drivers for.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
@@ -343,7 +341,10 @@ def find_drivers(
                 continue
 
             if strategy == "internal":
-                driver_dict = {k: target_trap_space_inner[k] for k in driver_set}
+                driver_dict: space_type = {
+                    k: cast(Literal[0, 1], target_trap_space_inner[k])
+                    for k in driver_set
+                }
                 ldoi = percolate_space(
                     bn, driver_dict | assume_fixed, strict_percolation=False
                 )
@@ -352,7 +353,8 @@ def find_drivers(
             elif strategy == "all":
                 for vals in product([0, 1], repeat=driver_set_size):
                     driver_dict = {
-                        driver: value for driver, value in zip(driver_set, vals)
+                        driver: cast(Literal[0, 1], value)
+                        for driver, value in zip(driver_set, vals)
                     }
                     ldoi = percolate_space(
                         bn, driver_dict | assume_fixed, strict_percolation=False

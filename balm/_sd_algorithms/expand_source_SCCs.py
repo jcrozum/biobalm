@@ -13,6 +13,7 @@ from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm.interaction_graph_utils import infer_signed_interaction_graph
 from balm.petri_net_translation import extract_variable_names, network_to_petrinet
 from balm.space_utils import percolate_network, percolate_space
+from balm.types import space_type
 
 if TYPE_CHECKING:
     expander_function_type = Callable[
@@ -71,7 +72,7 @@ def expand_source_SCCs(
     if len(source_nodes) != 0:
         bin_values_iter = it.product(range(2), repeat=len(source_nodes))
         for bin_values in bin_values_iter:
-            source_comb = dict(zip(source_nodes, bin_values))
+            source_comb = cast(space_type, dict(zip(source_nodes, bin_values)))
 
             sub_space = source_comb
             sub_space.update(perc_space)
@@ -89,7 +90,7 @@ def expand_source_SCCs(
 
         # each level consists of one round of fixing all source SCCs
         for node_id in current_level:
-            sub_space = cast(dict[str, int], sd.dag.nodes[node_id]["space"])
+            sub_space = cast(space_type, sd.dag.nodes[node_id]["space"])
 
             # find source SCCs
             clean_bnet, clean_bn = perc_and_remove_constants_from_bn(perc_bn, sub_space)
@@ -183,7 +184,7 @@ def find_source_nodes(network: BooleanNetwork | DiGraph) -> list[str]:
 
 
 def perc_and_remove_constants_from_bn(
-    bn: BooleanNetwork, space: dict[str, int]
+    bn: BooleanNetwork, space: space_type
 ) -> tuple[str, BooleanNetwork]:
     """
     Take a BooleanNetwork and percolate given space.
@@ -317,11 +318,11 @@ def find_scc_sd(
     # delete the implicit parameters from the node subspaces and the edge motifs
     for node_id in scc_sd.node_ids():
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.dag.nodes[node_id]["space"]).pop(implicit, None)
+            cast(space_type, scc_sd.dag.nodes[node_id]["space"]).pop(implicit, None)
 
     for x, y in cast(Iterable[tuple[int, int]], scc_sd.dag.edges):
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.dag.edges[x, y]["motif"]).pop(implicit, None)
+            cast(space_type, scc_sd.dag.edges[x, y]["motif"]).pop(implicit, None)
 
     return scc_sd, exist_maa
 
@@ -363,7 +364,7 @@ def attach_scc_sd(
             parent_id = size_before_attach + scc_parent_id - 1
 
         motif = scc_sd.edge_stable_motif(scc_parent_id, scc_node_id)
-        motif.update(cast(dict[str, int], sd.dag.nodes[branch]["space"]))
+        motif.update(cast(space_type, sd.dag.nodes[branch]["space"]))
 
         child_id = sd._ensure_node(parent_id, motif)  # type: ignore
         if check_maa:
@@ -384,7 +385,7 @@ def attach_scc_sd(
         scc_child_ids = cast(list[int], list(scc_sd.dag.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
             motif = scc_sd.edge_stable_motif(scc_node_id, scc_child_id)
-            motif.update(cast(dict[str, int], sd.dag.nodes[branch]["space"]))
+            motif.update(cast(space_type, sd.dag.nodes[branch]["space"]))
 
             child_id = sd._ensure_node(parent_id, motif)  # type: ignore
             assert child_id == size_before_attach + scc_child_id - 1

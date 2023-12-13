@@ -6,10 +6,11 @@ if TYPE_CHECKING:
     from balm.SuccessionDiagram import SuccessionDiagram
 
 from balm.space_utils import intersect, is_subspace
+from balm.types import space_type
 
 
 def expand_to_target(
-    sd: SuccessionDiagram, target: dict[str, int], size_limit: int | None = None
+    sd: SuccessionDiagram, target: space_type, size_limit: int | None = None
 ):
     """
     See `SuccessionDiagram.exapnd_to_target` for documentation.

@@ -10,12 +10,13 @@ import balm.SuccessionDiagram
 from balm.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
 from balm.terminal_restriction_space import get_terminal_restriction_space
 from balm.trappist_core import compute_fixed_point_reduced_STG
+from balm.types import space_type
 
 
 def compute_attractor_seeds(
     sd: SuccessionDiagram,
     node_id: int,
-) -> list[dict[str, int]]:
+) -> list[space_type]:
     """
     Compute the list of vertices such that each attractor within the subspace of
     the given `node_id` is covered by exactly one vertex.
