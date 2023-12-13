@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork
@@ -14,16 +14,17 @@ from balm.pyeda_utils import aeon_to_pyeda
 from balm.space_utils import percolate_network, percolation_conflicts
 from balm.state_utils import state_list_to_bdd, state_to_bdd
 from balm.trappist_core import trappist
+from balm.types import space_type
 
 
-def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]:
+def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[space_type]:
     """
     Takes a Boolean network and gets its self-negating time-reversal trap spaces.
     To find time-reversal trap spaces in a specific trap space,
     percolated network should be given as input.
     """
     tr_trap_spaces = trappist(network, problem="max", reverse_time=True)
-    self_neg_tr_trap_spaces: list[dict[str, int]] = []
+    self_neg_tr_trap_spaces: list[space_type] = []
     for tr_trap_space in tr_trap_spaces:
         conflicts = percolation_conflicts(network, tr_trap_space)
         if conflicts:
@@ -33,9 +34,9 @@ def get_self_neg_tr_trap_spaces(network: BooleanNetwork) -> list[dict[str, int]]
 
 
 def get_terminal_restriction_space(
-    stable_motifs: list[dict[str, int]],
+    stable_motifs: list[space_type],
     network: BooleanNetwork,
-    ensure_subspace: dict[str, int],
+    ensure_subspace: space_type,
     use_single_node_drivers: bool = True,
     use_tr_trapspaces: bool = True,
 ) -> BinaryDecisionDiagram:
@@ -69,7 +70,9 @@ def get_terminal_restriction_space(
                     continue
 
                 # ~R(X) includes delta
-                result_bdd = result_bdd | state_to_bdd(dict(single_node_drivers))
+                result_bdd = result_bdd | state_to_bdd(
+                    cast(space_type, dict(single_node_drivers))
+                )
 
                 for single_node_driver in single_node_drivers:
                     # ~R(X) includes the F(delta)

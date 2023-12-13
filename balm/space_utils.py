@@ -12,11 +12,14 @@ from balm.state_utils import bddvar_cache, function_restrict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pyeda.boolalg.expr import Expression
     from pyeda.boolalg.bdd import BinaryDecisionDiagram
+    from pyeda.boolalg.expr import Expression
+    from balm.types import space_type
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
-from pyeda.boolalg.expr import Complement, Literal, Variable
+from pyeda.boolalg.expr import Complement
+from pyeda.boolalg.expr import Literal as PyedaPyedaLiteral
+from pyeda.boolalg.expr import Variable
 
 from balm.pyeda_utils import (
     PYEDA_FALSE,
@@ -28,12 +31,12 @@ from balm.pyeda_utils import (
 )
 
 
-def intersect(x: dict[str, int], y: dict[str, int]) -> dict[str, int] | None:
+def intersect(x: space_type, y: space_type) -> space_type | None:
     """
     Compute the space which is the intersection of two spaces, or `None` if the spaces
     don't intersect.
     """
-    result: dict[str, int] = {}
+    result: space_type = {}
     for k, v in x.items():
         result[k] = v
     for k, v in y.items():
@@ -43,7 +46,7 @@ def intersect(x: dict[str, int], y: dict[str, int]) -> dict[str, int] | None:
     return result
 
 
-def is_subspace(x: dict[str, int], y: dict[str, int]) -> bool:
+def is_subspace(x: space_type, y: space_type) -> bool:
     """
     Checks if `x` is a subspace of `y`.
     """
@@ -55,7 +58,7 @@ def is_subspace(x: dict[str, int], y: dict[str, int]) -> bool:
     return True
 
 
-def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
+def is_syntactic_trap_space(bn: BooleanNetwork, space: space_type) -> bool:
     """
     Uses percolation to check if the given `space` is a trap space in the given `BooleanNetwork`.
 
@@ -82,9 +85,9 @@ def is_syntactic_trap_space(bn: BooleanNetwork, space: dict[str, int]) -> bool:
 
 def percolate_space(
     network: BooleanNetwork,
-    space: dict[str, int],
+    space: space_type,
     strict_percolation: bool = True,
-) -> dict[str, int]:
+) -> space_type:
     """
     Takes a Boolean network and a space (partial assignment of `0`/`1` to the
     network variables). It then percolates the values in the given `space` to
@@ -106,11 +109,11 @@ def percolate_space(
     """
 
     if strict_percolation:
-        result: dict[str, int] = {}
+        result: space_type = {}
     else:
         result = {var: space[var] for var in space}
 
-    fixed = {var: space[var] for var in space}
+    fixed: space_type = {var: space[var] for var in space}
     fixed_bddvars = {bddvar_cache(k): v for k, v in fixed.items()}
     bdds: dict[str, BinaryDecisionDiagram] = {}
     bdd_inputs = {}
@@ -150,24 +153,23 @@ def percolate_space(
                 elif bdds[var_name].is_zero():
                     r = 0
                 else:
-                    r = -1
                     continue
 
             if var_name not in fixed:
-                fixed[var_name] = r
-                fixed_bddvars[bddvar_cache(var_name)] = r
-                result[var_name] = r
+                fixed[var_name] = r  # type: ignore # (mypy bug? mypy cannot see that r is 0 or 1, but pylance can)
+                fixed_bddvars[bddvar_cache(var_name)] = r  # type: ignore
+                result[var_name] = r  # type: ignore
                 deletion_list.append(var_name)
                 done = False
             elif fixed[var_name] == r and var_name not in result:
-                result[var_name] = r
+                result[var_name] = r  # type: ignore
 
     return result
 
 
 def percolation_conflicts(
     network: BooleanNetwork,
-    space: dict[str, int],
+    space: space_type,
     strict_percolation: bool = True,
 ) -> set[str]:
     """
@@ -191,7 +193,7 @@ def percolation_conflicts(
     return conflicts
 
 
-def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwork:
+def percolate_network(bn: BooleanNetwork, space: space_type) -> BooleanNetwork:
     """
     Takes an AEON.py Boolean network and a space (partial assignment of
     network variables to `0`/`1`). It then produces a new network with
@@ -241,9 +243,7 @@ def percolate_network(bn: BooleanNetwork, space: dict[str, int]) -> BooleanNetwo
     return new_bn
 
 
-def percolate_pyeda_expression(
-    expression: Expression, space: dict[str, int]
-) -> Expression:
+def percolate_pyeda_expression(expression: Expression, space: space_type) -> Expression:
     """
     Takes a PyEDA expression and a subspace (dictionary assigning `1`/`0` to
     a subset of variables). Returns a simplified expression that is valid
@@ -256,7 +256,7 @@ def percolate_pyeda_expression(
     return expression.simplify()
 
 
-def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
+def expression_to_space_list(expression: Expression) -> list[space_type]:
     """
     Convert a PyEDA expression to a list of subspaces whose union represents
     an equivalent set of network states.
@@ -270,16 +270,16 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
     #  (or at least in some sense canonical) DNF. In the future, we might
     #  want to either enforce this explicitly or relax this requirement.
 
-    sub_spaces: list[dict[str, int]] = []
+    sub_spaces: list[space_type] = []
     expression_dnf = expression.to_dnf()
 
     for clause in expression_dnf.xs:  # type: ignore
-        sub_space: dict[str, int] = {}
+        sub_space: space_type = {}
 
         # Since we know this is a DNF clause, it can only be
         # a literal, or a conjunction of literals.
         # TODO: investigate the types here more closely... something strange is going on
-        literals = [clause] if isinstance(clause, Literal) else clause.xs  # type: ignore # noqa
+        literals = [clause] if isinstance(clause, PyedaPyedaLiteral) else clause.xs  # type: ignore # noqa
         for literal in literals:  # type: ignore
             var = str(literal.inputs[0])  # type: ignore
             if isinstance(literal, Variable):
@@ -296,7 +296,7 @@ def expression_to_space_list(expression: Expression) -> list[dict[str, int]]:
     return sub_spaces
 
 
-def space_unique_key(space: dict[str, int], network: BooleanNetwork) -> int:
+def space_unique_key(space: space_type, network: BooleanNetwork) -> int:
     """
     Computes an integer which is a unique representation of the provided `space`
     (with respect to the given `network`).
