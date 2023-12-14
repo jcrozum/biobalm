@@ -5,6 +5,7 @@ from balm.motif_avoidant import _Pint_reachability  # type: ignore
 from balm.motif_avoidant import _preprocess_candidates  # type: ignore
 from balm.petri_net_translation import network_to_petrinet
 from balm.state_utils import state_list_to_bdd
+from balm.types import BooleanSpace
 
 
 def test_preprocessing_ssf_not_optimal():
@@ -15,9 +16,9 @@ def test_preprocessing_ssf_not_optimal():
     """
     )
 
-    s0 = {"x1": 0, "x2": 0}
-    s1 = {"x1": 0, "x2": 1}
-    s2 = {"x1": 1, "x2": 0}
+    s0: BooleanSpace = {"x1": 0, "x2": 0}
+    s1: BooleanSpace = {"x1": 0, "x2": 1}
+    s2: BooleanSpace = {"x1": 1, "x2": 0}
     # s3 = {"x1": 1, "x2": 1}
 
     """
@@ -59,14 +60,14 @@ def test_preprocessing_ssf_optimal():
     """
     )
 
-    s0 = {"A": 0, "B": 0, "C": 0}
+    s0: BooleanSpace = {"A": 0, "B": 0, "C": 0}
     # s1 = {"A": 0, "B": 0, "C": 1}
-    s2 = {"A": 0, "B": 1, "C": 0}
-    # s3 = {"A": 0, "B": 1, "C": 1}
-    s4 = {"A": 1, "B": 0, "C": 0}
-    # s5 = {"A": 1, "B": 0, "C": 1}
-    # s6 = {"A": 1, "B": 1, "C": 0}
-    s7 = {"A": 1, "B": 1, "C": 1}
+    s2: BooleanSpace = {"A": 0, "B": 1, "C": 0}
+    # s3: BooleanSpace = {"A": 0, "B": 1, "C": 1}
+    s4: BooleanSpace = {"A": 1, "B": 0, "C": 0}
+    # s5: BooleanSpace = {"A": 1, "B": 0, "C": 1}
+    # s6: BooleanSpace = {"A": 1, "B": 1, "C": 0}
+    s7: BooleanSpace = {"A": 1, "B": 1, "C": 1}
 
     """
         This BN has two minimal trap spaces: 101 + 011.
@@ -98,10 +99,10 @@ def test_ABNReach_current_version():
     """
     )
 
-    s0 = {"x1": 0, "x2": 0, "x3": 1}
-    s1 = {"x1": 0, "x2": 1, "x3": 1}
-    # s2 = {"x1": 1, "x2": 0, "x3": 1}
-    s3 = {"x1": 1, "x2": 1, "x3": 1}
+    s0: BooleanSpace = {"x1": 0, "x2": 0, "x3": 1}
+    s1: BooleanSpace = {"x1": 0, "x2": 1, "x3": 1}
+    # s2: BooleanSpace = {"x1": 1, "x2": 0, "x3": 1}
+    s3: BooleanSpace = {"x1": 1, "x2": 1, "x3": 1}
 
     petri_net = network_to_petrinet(bn)
 
@@ -132,9 +133,9 @@ def test_FilteringProcess():
     """
     )
 
-    s0 = {"x1": 0, "x2": 0}
-    s1 = {"x1": 0, "x2": 1}
-    s2 = {"x1": 1, "x2": 0}
+    s0: BooleanSpace = {"x1": 0, "x2": 0}
+    s1: BooleanSpace = {"x1": 0, "x2": 1}
+    s2: BooleanSpace = {"x1": 1, "x2": 0}
     # s3 = {"x1": 1, "x2": 1}
 
     terminal_res_space = state_list_to_bdd([s0, s1, s2])

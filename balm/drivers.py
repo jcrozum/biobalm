@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+from typing import Literal, cast
+
 from biodivine_aeon import BooleanNetwork
 
 from balm.space_utils import percolate_space
+from balm.types import BooleanSpace
 
 
-def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str, int]]:
+def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], BooleanSpace]:
     """
     finds LDOIs of every single node state
     TODO: take an initial set of LDOIs (e.g., of the original system) as an argument for speed-up
     """
-    LDOIs: dict[tuple[str, int], dict[str, int]] = {}
+    LDOIs: dict[tuple[str, int], BooleanSpace] = {}
     for var in bn.variables():
         name = bn.get_variable_name(var)
         function = bn.get_update_function(var)
@@ -19,16 +22,16 @@ def find_single_node_LDOIs(bn: BooleanNetwork) -> dict[tuple[str, int], dict[str
             continue
         for i in range(2):
             fix = (name, i)
-            space = {name: i}
+            space: BooleanSpace = {name: cast(Literal[0, 1], i)}
             LDOIs[fix] = percolate_space(bn, space)
 
     return LDOIs
 
 
 def find_single_drivers(
-    target_subspace: dict[str, int],
+    target_subspace: BooleanSpace,
     bn: BooleanNetwork,
-    LDOIs: dict[tuple[str, int], dict[str, int]] | None = None,
+    LDOIs: dict[tuple[str, int], BooleanSpace] | None = None,
 ) -> set[tuple[str, int]]:
     """
     find all the single node drivers for a given target_subspace,

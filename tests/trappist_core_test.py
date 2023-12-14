@@ -4,10 +4,10 @@ import sys
 from biodivine_aeon import (  # type: ignore
     BooleanNetwork,
     FixedPoints,
+    RegulatoryGraph,
     SymbolicAsyncGraph,
 )
 
-from balm.aeon_utils import remove_static_constraints
 from balm.petri_net_translation import network_to_petrinet
 from balm.space_utils import is_syntactic_trap_space
 from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
@@ -17,9 +17,38 @@ from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
 sys.setrecursionlimit(100_000)
 
 
+def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:
+    """
+    A method that removes all information about regulation monotonicity and
+    essentiality from the given `BooleanNetwork`.
+
+    This is mostly done to allow handling of randomly generated or otherwise
+    machine pre-processed files that can contain subtle logical redundancies
+    that AEON would otherwise detect as warnings.
+    """
+    rg = RegulatoryGraph(
+        [network.get_variable_name(var) for var in network.variables()]
+    )
+    for reg in network.graph().regulations():
+        rg.add_regulation(
+            {
+                "source": network.get_variable_name(reg["source"]),
+                "target": network.get_variable_name(reg["target"]),
+                "observable": False,
+            }
+        )
+
+    bn = BooleanNetwork(rg)
+    for var in network.variables():
+        bn.set_update_function(
+            network.get_variable_name(var), network.get_update_function(var)
+        )
+
+    return bn
+
+
 def test_network_minimum_traps(network_file):
-    bn = BooleanNetwork.from_file(network_file)
-    bn = remove_static_constraints(bn)
+    bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
     stg = SymbolicAsyncGraph(bn)
 
     min_max_traps = trappist(bn, problem="min") + trappist(bn, problem="max")
@@ -48,8 +77,7 @@ def test_network_minimum_traps(network_file):
 def test_network_fixed_points(network_file):
     # Verify that the fixed-points of the test models are the same
     # as when computing using BDDs.
-    bn = BooleanNetwork.from_file(network_file)
-    bn = remove_static_constraints(bn)
+    bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
     stg = SymbolicAsyncGraph(bn)
 
     symbolic_fixed_points = FixedPoints.symbolic(stg)

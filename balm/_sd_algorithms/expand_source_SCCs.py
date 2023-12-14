@@ -1,29 +1,34 @@
+from __future__ import annotations
+
 import itertools as it
 import sys
-from typing import Callable, Iterable, cast
+from typing import TYPE_CHECKING, Callable, Iterable, cast
 
 import networkx as nx  # type: ignore
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph
 
+import balm.SuccessionDiagram
+from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm.interaction_graph_utils import infer_signed_interaction_graph
 from balm.petri_net_translation import extract_variable_names, network_to_petrinet
 from balm.space_utils import percolate_network, percolate_space
-from balm.SuccessionDiagram import SuccessionDiagram
+from balm.types import BooleanSpace
+
+if TYPE_CHECKING:
+    expander_function_type = Callable[
+        [balm.SuccessionDiagram.SuccessionDiagram, int | None, int | None, int | None],
+        bool,
+    ]
 
 sys.path.append(".")
 
 DEBUG = False
 
-expander_function_type = Callable[
-    [SuccessionDiagram, int | None, int | None, int | None],
-    bool,
-]
-
 
 def expand_source_SCCs(
-    sd: SuccessionDiagram,
-    expander: expander_function_type = SuccessionDiagram.expand_bfs,
+    sd: balm.SuccessionDiagram.SuccessionDiagram,
+    expander: expander_function_type = expand_bfs,
     check_maa: bool = True,
 ) -> bool:
     """
@@ -57,7 +62,7 @@ def expand_source_SCCs(
 
     # percolate constant nodes
     perc_space = percolate_space(sd.network, {}, strict_percolation=False)
-    sd.G.nodes[root]["space"] = perc_space
+    sd.dag.nodes[root]["space"] = perc_space
 
     # find source nodes
     perc_bn = percolate_network(sd.network, perc_space)
@@ -67,15 +72,15 @@ def expand_source_SCCs(
     if len(source_nodes) != 0:
         bin_values_iter = it.product(range(2), repeat=len(source_nodes))
         for bin_values in bin_values_iter:
-            source_comb = dict(zip(source_nodes, bin_values))
+            source_comb = cast(BooleanSpace, dict(zip(source_nodes, bin_values)))
 
             sub_space = source_comb
             sub_space.update(perc_space)
 
             next_level.append(sd._ensure_node(root, sub_space))  # type: ignore
 
-        sd.G.nodes[root]["expanded"] = True
-        sd.G.nodes[root]["attractors"] = []  # no need to look for attractors here
+        sd.dag.nodes[root]["expanded"] = True
+        sd.dag.nodes[root]["attractors"] = []  # no need to look for attractors here
         current_level = next_level
         next_level = []
 
@@ -85,7 +90,7 @@ def expand_source_SCCs(
 
         # each level consists of one round of fixing all source SCCs
         for node_id in current_level:
-            sub_space = cast(dict[str, int], sd.G.nodes[node_id]["space"])
+            sub_space = cast(BooleanSpace, sd.dag.nodes[node_id]["space"])
 
             # find source SCCs
             clean_bnet, clean_bn = perc_and_remove_constants_from_bn(perc_bn, sub_space)
@@ -137,8 +142,8 @@ def expand_source_SCCs(
         print(f"{final_level=}")
     for node_id in final_level:
         # These assertions should be unnecessary, but just to be sure.
-        assert not sd.G.nodes[node_id]["expanded"]  # expand nodes from here
-        assert sd.G.nodes[node_id]["attractors"] is None  # check attractors from here
+        assert not sd.dag.nodes[node_id]["expanded"]  # expand nodes from here
+        assert sd.dag.nodes[node_id]["attractors"] is None  # check attractors from here
 
         # restore this once we allow all expansion algorithms to expand from a node
         # expander(sd, node_id)
@@ -179,7 +184,7 @@ def find_source_nodes(network: BooleanNetwork | DiGraph) -> list[str]:
 
 
 def perc_and_remove_constants_from_bn(
-    bn: BooleanNetwork, space: dict[str, int]
+    bn: BooleanNetwork, space: BooleanSpace
 ) -> tuple[str, BooleanNetwork]:
     """
     Take a BooleanNetwork and percolate given space.
@@ -252,7 +257,7 @@ def find_source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
 
 def find_scc_sd(
     bnet: str, source_scc: list[str], expander: expander_function_type, check_maa: bool
-) -> tuple[SuccessionDiagram, bool]:
+) -> tuple[balm.SuccessionDiagram.SuccessionDiagram, bool]:
     """
     TODO: better way that does not use bnet but rather bn directly or petri_net directly
     to find the scc_sd would be useful.
@@ -291,7 +296,7 @@ def find_scc_sd(
     scc_bn = scc_bn.infer_regulatory_graph()
 
     # Compute the succession diagram.
-    scc_sd = SuccessionDiagram(scc_bn)
+    scc_sd = balm.SuccessionDiagram.SuccessionDiagram(scc_bn)
     fully_expanded = expander(scc_sd)  # type: ignore
     assert fully_expanded
 
@@ -313,17 +318,20 @@ def find_scc_sd(
     # delete the implicit parameters from the node subspaces and the edge motifs
     for node_id in scc_sd.node_ids():
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.G.nodes[node_id]["space"]).pop(implicit, None)
+            cast(BooleanSpace, scc_sd.dag.nodes[node_id]["space"]).pop(implicit, None)
 
-    for x, y in cast(Iterable[tuple[int, int]], scc_sd.G.edges):
+    for x, y in cast(Iterable[tuple[int, int]], scc_sd.dag.edges):
         for implicit in implicit_parameters:
-            cast(dict[str, int], scc_sd.G.edges[x, y]["motif"]).pop(implicit, None)
+            cast(BooleanSpace, scc_sd.dag.edges[x, y]["motif"]).pop(implicit, None)
 
     return scc_sd, exist_maa
 
 
 def attach_scc_sd(
-    sd: SuccessionDiagram, scc_sd: SuccessionDiagram, branch: int, check_maa: bool
+    sd: balm.SuccessionDiagram.SuccessionDiagram,
+    scc_sd: balm.SuccessionDiagram.SuccessionDiagram,
+    branch: int,
+    check_maa: bool,
 ) -> list[int]:
     """
     Attach scc_sd to the given branch point of the sd.
@@ -339,14 +347,14 @@ def attach_scc_sd(
         return [branch]
 
     next_branches: list[int] = []
-    size_before_attach = sd.G.number_of_nodes()
+    size_before_attach = sd.dag.number_of_nodes()
     # first add all the nodes using their first parent
     for scc_node_id in scc_sd.node_ids():
         if scc_node_id == 0:  # no need to add the root of scc_sd
             continue
 
         scc_parent_id = cast(
-            int, list(scc_sd.G.predecessors(scc_node_id))[0]  # type: ignore
+            int, list(scc_sd.dag.predecessors(scc_node_id))[0]  # type: ignore
         )  # get the first parent
         assert scc_parent_id < scc_node_id
 
@@ -356,11 +364,11 @@ def attach_scc_sd(
             parent_id = size_before_attach + scc_parent_id - 1
 
         motif = scc_sd.edge_stable_motif(scc_parent_id, scc_node_id)
-        motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
+        motif.update(cast(BooleanSpace, sd.dag.nodes[branch]["space"]))
 
         child_id = sd._ensure_node(parent_id, motif)  # type: ignore
         if check_maa:
-            sd.G.nodes[parent_id][
+            sd.dag.nodes[parent_id][
                 "attractors"
             ] = []  # no need to check for attractors in these nodes
 
@@ -374,16 +382,16 @@ def attach_scc_sd(
         else:
             parent_id = size_before_attach + scc_node_id - 1
 
-        scc_child_ids = cast(list[int], list(scc_sd.G.successors(scc_node_id)))  # type: ignore
+        scc_child_ids = cast(list[int], list(scc_sd.dag.successors(scc_node_id)))  # type: ignore
         for scc_child_id in scc_child_ids:
             motif = scc_sd.edge_stable_motif(scc_node_id, scc_child_id)
-            motif.update(cast(dict[str, int], sd.G.nodes[branch]["space"]))
+            motif.update(cast(BooleanSpace, sd.dag.nodes[branch]["space"]))
 
             child_id = sd._ensure_node(parent_id, motif)  # type: ignore
             assert child_id == size_before_attach + scc_child_id - 1
 
         # if the node had any child node, consider it expanded.
         if len(scc_child_ids) > 0:
-            sd.G.nodes[parent_id]["expanded"] = True
+            sd.dag.nodes[parent_id]["expanded"] = True
 
     return next_branches

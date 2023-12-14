@@ -7,6 +7,7 @@ from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph  # type: ignore
 import balm
 import balm.SuccessionDiagram
 from balm.SuccessionDiagram import SuccessionDiagram
+from balm.types import BooleanSpace
 
 # This just ensures that the debug outputs are a part of the test output.
 balm.SuccessionDiagram.DEBUG = True
@@ -24,9 +25,9 @@ class SuccessionDiagramTest(unittest.TestCase):
 
         succession_diagram = SuccessionDiagram(bn)
         succession_diagram.expand_bfs()
-        assert succession_diagram.G.number_of_nodes() == 3
-        assert succession_diagram.G.number_of_edges() == 2  # type: ignore
-        assert max(d["depth"] for _, d in succession_diagram.G.nodes(data=True)) == 1  # type: ignore
+        assert succession_diagram.dag.number_of_nodes() == 3
+        assert succession_diagram.dag.number_of_edges() == 2  # type: ignore
+        assert max(d["depth"] for _, d in succession_diagram.dag.nodes(data=True)) == 1  # type: ignore
         assert succession_diagram.depth() == 1
         assert (
             max(
@@ -74,9 +75,9 @@ class SuccessionDiagramTest(unittest.TestCase):
 
         # Then expand the whole thing.
         succession_diagram.expand_bfs()
-        assert succession_diagram.G.number_of_nodes() == 4
-        assert succession_diagram.G.number_of_edges() == 5  # type: ignore
-        assert max(d["depth"] for _, d in succession_diagram.G.nodes(data=True)) == 2  # type: ignore
+        assert succession_diagram.dag.number_of_nodes() == 4
+        assert succession_diagram.dag.number_of_edges() == 5  # type: ignore
+        assert max(d["depth"] for _, d in succession_diagram.dag.nodes(data=True)) == 2  # type: ignore
         assert succession_diagram.depth() == 2
         assert (
             max(
@@ -234,7 +235,7 @@ def test_attractor_detection(network_file: str):
 
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
-    nfvs_attractors: list[dict[str, int]] = []
+    nfvs_attractors: list[BooleanSpace] = []
     for i in sd.node_ids():
         attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
@@ -311,7 +312,7 @@ def test_attractor_expansion(network_file: str):
 
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
-    nfvs_attractors: list[dict[str, int]] = []
+    nfvs_attractors: list[BooleanSpace] = []
     # This is an important change compared to the original test: Here, we only
     # care about expanded nodes, everything else is ignored.
     for i in sd.expanded_ids():

@@ -3,7 +3,6 @@ from networkx import DiGraph  # type:ignore
 
 from balm.interaction_graph_utils import (
     feedback_vertex_set,
-    find_minimum_NFVS,
     independent_cycles,
     infer_signed_interaction_graph,
 )
@@ -193,7 +192,7 @@ def test_subgraph_ic():
     assert set(n_ic[0]) == set(["d_1", "d_2", "d_3"])
 
 
-def test_fvs_accuracy_CASCADE3():
+def test_fvs_determinism_CASCADE3():
     """
     Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the CASCADE3 model <https://doi.org/10.3389/fmolb.2020.502573>.
     Note that the result of mtsNFVS is not deterministic.
@@ -379,16 +378,14 @@ def test_fvs_accuracy_CASCADE3():
     """
     )
 
-    nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
-
-    assert len(nfvs_mtsNFVS) <= 19  # the result of mtsNFVS is 19
+    nfvs_mtsNFVS = feedback_vertex_set(bn_real, "negative")
 
     for _i in range(10):
-        nfvs = find_minimum_NFVS(bn_real)
+        nfvs = feedback_vertex_set(bn_real, "negative")
         assert nfvs == nfvs_mtsNFVS
 
 
-def test_fvs_accuracy_SIPC():
+def test_fvs_determinism_SIPC():
     """
     Compare results of AEON and mtsNFVS on computing an negative feedback vertex set of the SIPC model <https://doi.org/10.7554/eLife.72626>.
     Note that the result of mtsNFVS is not deterministic.
@@ -514,10 +511,8 @@ def test_fvs_accuracy_SIPC():
     """
     )
 
-    nfvs_mtsNFVS = find_minimum_NFVS(bn_real)
-
-    assert len(nfvs_mtsNFVS) <= 13  # the result of mtsNFVS is 13
+    nfvs_mtsNFVS = feedback_vertex_set(bn_real, "negative")
 
     for _i in range(10):
-        nfvs = find_minimum_NFVS(bn_real)
+        nfvs = feedback_vertex_set(bn_real, "negative")
         assert nfvs == nfvs_mtsNFVS

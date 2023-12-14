@@ -4,20 +4,22 @@ from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from typing import Iterator
-    from biodivine_aeon import BooleanNetwork
 
 import networkx as nx  # type: ignore
+from biodivine_aeon import BooleanNetwork
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
 from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
+from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
 from balm.interaction_graph_utils import feedback_vertex_set
 from balm.petri_net_translation import network_to_petrinet
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
+from balm.types import BooleanSpace
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -92,6 +94,14 @@ class SuccessionDiagram:
 
     """
 
+    __slots__ = (
+        "network",
+        "petri_net",
+        "nfvs",
+        "dag",
+        "node_indices",
+    )
+
     def __init__(self, network: BooleanNetwork):
         # Original Boolean network.
         self.network = network
@@ -102,7 +112,7 @@ class SuccessionDiagram:
             network, parity="negative"
         )  # find_minimum_NFVS(network)
         # A directed acyclic graph representing the succession diagram.
-        self.G = nx.DiGraph()
+        self.dag = nx.DiGraph()
         # A dictionary used for uniqueness checks on the nodes of the succession
         # diagram. See `SuccessionDiagram.ensure_node` for details.
         self.node_indices: dict[int, int] = {}
@@ -110,11 +120,99 @@ class SuccessionDiagram:
         # Create an un-expanded root node.
         self._ensure_node(None, {})
 
+    def __getstate__(self) -> dict[str, str | nx.DiGraph | list[str] | dict[int, int]]:
+        state = {
+            "network rules": self.network.to_aeon(),
+            "petri net": self.petri_net,
+            "nfvs": self.nfvs,
+            "G": self.dag,
+            "node_indices": self.node_indices,
+        }
+        return state
+
+    def __setstate__(
+        self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
+    ):
+        self.network = BooleanNetwork.from_aeon(str(state["network rules"]))
+        self.petri_net = cast(nx.DiGraph, state["petri net"])
+        self.nfvs = cast(list[str], state["nfvs"])
+        self.dag = cast(nx.DiGraph, state["G"])  # type: ignore
+        self.node_indices = cast(BooleanSpace, state["node_indices"])  # type: ignore
+
     def __len__(self) -> int:
         """
         Returns the number of nodes in this `SuccessionDiagram`.
         """
-        return self.G.number_of_nodes()
+        return self.dag.number_of_nodes()
+
+    @staticmethod
+    def from_aeon(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.aeon` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_aeon(model))
+
+    @staticmethod
+    def from_bnet(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of a `.bnet` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_bnet(model))
+
+    @staticmethod
+    def from_sbml(model: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.sbml` model.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_sbml(model))
+
+    @staticmethod
+    def from_file(path: str) -> SuccessionDiagram:
+        """
+        Read a `BooleanNetwork` from the given file path. The format is automatically inferred from
+        the file extension.
+        """
+        return SuccessionDiagram(BooleanNetwork.from_file(path))
+
+    def expanded_attractor_seeds(self) -> list[list[BooleanSpace]]:
+        return [self.node_attractor_seeds(id) for id in self.expanded_ids()]
+
+    def summary(self) -> str:
+        """
+        Return a summary of the succession diagram.
+        """
+        var_ordering = sorted(
+            [self.network.get_variable_name(v) for v in self.network.variables()]
+        )
+        report_string = (
+            f"Succession Diagram with {len(self)} nodes and depth {self.depth()}.\n"
+            f"State order: {', '.join(var_ordering)}\n\n"
+            "Attractors in diagram:\n\n"
+        )
+        for node in self.node_ids():
+            try:
+                attrs = self.node_attractor_seeds(node, compute=False)
+            except KeyError:
+                continue
+
+            space = self.node_space(node)
+
+            if self.node_is_minimal(node):
+                space_str_prefix = "minimal trap space "
+            else:
+                space_str_prefix = "motif avoidance in "
+            space_str = ""
+            for var in var_ordering:
+                if var in space:
+                    space_str += str(space[var])
+                else:
+                    space_str += "*"
+            report_string += f"{space_str_prefix}{space_str}\n"
+            for attr in attrs:
+                attr_str = "".join(str(v) for _, v in sorted(attr.items()))
+                report_string += "." * len(space_str_prefix) + f"{attr_str}\n"
+            report_string += "\n"
+        return report_string
 
     def root(self) -> int:
         """
@@ -129,7 +227,7 @@ class SuccessionDiagram:
         Depth is counted from zero (root has depth zero).
         """
         d = 0
-        for node in cast(set[int], self.G.nodes()):
+        for node in cast(set[int], self.dag.nodes()):
             d = max(d, self.node_depth(int(node)))
         return d
 
@@ -165,7 +263,7 @@ class SuccessionDiagram:
         """
         return [i for i in self.expanded_ids() if self.node_is_minimal(i)]
 
-    def find_node(self, node_space: dict[str, int]) -> int | None:
+    def find_node(self, node_space: BooleanSpace) -> int | None:
         """
         Return the ID of the node matching the provided `node_space`, or `None`
         if no such node exists in this succession diagram.
@@ -236,30 +334,30 @@ class SuccessionDiagram:
         Get the depth associated with the provided `node_id`. The depth is counted
         as the longest path from the root node to the given node.
         """
-        return cast(int, self.G.nodes[node_id]["depth"])
+        return cast(int, self.dag.nodes[node_id]["depth"])
 
-    def node_space(self, node_id: int) -> dict[str, int]:
+    def node_space(self, node_id: int) -> BooleanSpace:
         """
         Get the sub-space associated with the provided `node_id`.
 
         Note that this is the space *after* percolation. Hence it can hold that
         `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
         """
-        return cast(dict[str, int], self.G.nodes[node_id]["space"])
+        return cast(BooleanSpace, self.dag.nodes[node_id]["space"])
 
     def node_is_expanded(self, node_id: int) -> bool:
         """
         True if the successors of the given node are already computed.
         """
-        return cast(bool, self.G.nodes[node_id]["expanded"])
+        return cast(bool, self.dag.nodes[node_id]["expanded"])
 
     def node_is_minimal(self, node_id: int) -> bool:
         """
         True if the node is expanded and it has no successors, i.e. it is a
         minimal trap space.
         """
-        is_leaf: bool = self.G.out_degree(node_id) == 0  # type: ignore
-        return is_leaf and self.G.nodes[node_id]["expanded"]  # type: ignore
+        is_leaf: bool = self.dag.out_degree(node_id) == 0  # type: ignore
+        return is_leaf and self.dag.nodes[node_id]["expanded"]  # type: ignore
 
     def node_successors(self, node_id: int, compute: bool = False) -> list[int]:
         """
@@ -280,17 +378,17 @@ class SuccessionDiagram:
         data but is not expanded, this data will be deleted as it is no longer
         up to date.
         """
-        node = cast(dict[str, Any], self.G.nodes[node_id])
+        node = cast(dict[str, Any], self.dag.nodes[node_id])
         if not node["expanded"] and not compute:
             raise KeyError(f"Node {node_id} is not expanded.")
         if not node["expanded"]:
             self._expand_one_node(node_id)
 
-        return list(self.G.successors(node_id))  # type: ignore
+        return list(self.dag.successors(node_id))  # type: ignore
 
     def node_attractor_seeds(
         self, node_id: int, compute: bool = False
-    ) -> list[dict[str, int]]:
+    ) -> list[BooleanSpace]:
         """
         Return the list of attractor seed states corresponding to the given
         `node_id`. Similar to `node_successors`, the method either computes the
@@ -302,9 +400,9 @@ class SuccessionDiagram:
         same attractor in multiple stub nodes, if the stub nodes intersect), and
         (b) this data is erased if the stub node is expanded later on.
         """
-        node = cast(dict[str, Any], self.G.nodes[node_id])
+        node = cast(dict[str, Any], self.dag.nodes[node_id])
 
-        attractors = cast(list[dict[str, int]] | None, node["attractors"])
+        attractors = cast(list[BooleanSpace] | None, node["attractors"])
 
         if attractors is None and not compute:
             raise KeyError(f"Attractor data not computed for node {node_id}.")
@@ -317,7 +415,7 @@ class SuccessionDiagram:
 
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
-    ) -> dict[str, int]:
+    ) -> BooleanSpace:
         """
         Return the *stable motif* associated with the specified parent-child
         edge. If `reduced` is set to `False` (default), the unpercolated stable
@@ -331,15 +429,29 @@ class SuccessionDiagram:
 
         if reduced:
             return cast(
-                dict[str, int],
+                BooleanSpace,
                 {
                     k: v
-                    for k, v in self.G.edges[parent_id, child_id]["motif"].items()  # type: ignore
+                    for k, v in self.dag.edges[parent_id, child_id]["motif"].items()  # type: ignore
                     if k not in self.node_space(parent_id)
                 },
             )
         else:
-            return cast(dict[str, int], self.G.edges[parent_id, child_id]["motif"])
+            return cast(BooleanSpace, self.dag.edges[parent_id, child_id]["motif"])
+
+    def build(self):
+        """
+        Expand the succession diagram and search for attractors using default methods.
+        """
+        self.expand_scc()
+        for node_id in self.node_ids():
+            self.node_attractor_seeds(node_id, compute=True)
+
+    def expand_scc(self, find_motif_avoidant_attractors: bool = True) -> bool:
+        """
+        Expand the succession diagram using the source SCC method.
+        """
+        return expand_source_SCCs(self, check_maa=find_motif_avoidant_attractors)
 
     def expand_bfs(
         self,
@@ -426,7 +538,7 @@ class SuccessionDiagram:
         return expand_attractor_seeds(self, size_limit)
 
     def expand_to_target(
-        self, target: dict[str, int], size_limit: int | None = None
+        self, target: BooleanSpace, size_limit: int | None = None
     ) -> bool:
         """
         Expands the succession diagram using BFS in such a way that only nodes
@@ -446,10 +558,10 @@ class SuccessionDiagram:
 
         Note that the depth can only increase.
         """
-        assert self.G.edges[parent_id, node_id] is not None
-        parent_depth = cast(int, self.G.nodes[parent_id]["depth"])
-        current_depth = cast(int, self.G.nodes[node_id]["depth"])
-        self.G.nodes[node_id]["depth"] = max(current_depth, parent_depth + 1)
+        assert self.dag.edges[parent_id, node_id] is not None
+        parent_depth = cast(int, self.dag.nodes[parent_id]["depth"])
+        current_depth = cast(int, self.dag.nodes[node_id]["depth"])
+        self.dag.nodes[node_id]["depth"] = max(current_depth, parent_depth + 1)
 
     def _expand_one_node(self, node_id: int):
         """
@@ -463,7 +575,7 @@ class SuccessionDiagram:
         If there are already some attractor data for this node (stub nodes can
         have associated attractor data), this data is erased.
         """
-        node = cast(dict[str, Any], self.G.nodes[node_id])
+        node = cast(dict[str, Any], self.dag.nodes[node_id])
         if node["expanded"]:
             return
 
@@ -507,7 +619,7 @@ class SuccessionDiagram:
             if DEBUG:
                 print(f"[{node_id}] Created edge into node {child_id}.")
 
-    def _ensure_node(self, parent_id: int | None, stable_motif: dict[str, int]) -> int:
+    def _ensure_node(self, parent_id: int | None, stable_motif: BooleanSpace) -> int:
         """
         Internal method that ensures the provided node is present in this
         succession diagram as a child of the given `parent_id`.
@@ -528,8 +640,8 @@ class SuccessionDiagram:
 
         child_id = None
         if key not in self.node_indices:
-            child_id = self.G.number_of_nodes()
-            self.G.add_node(  # type: ignore
+            child_id = self.dag.number_of_nodes()
+            self.dag.add_node(  # type: ignore
                 child_id,
                 id=child_id,  # In case we ever need it within the "node data" dictionary.
                 space=fixed_vars,
@@ -547,7 +659,7 @@ class SuccessionDiagram:
             # TODO: It seems that there are some networks where the same child
             # can be reached through multiple stable motifs. Not sure how to
             # approach these... but this is probably good enough for now.
-            self.G.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+            self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
             self._update_node_depth(child_id, parent_id)
 
         return child_id

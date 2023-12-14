@@ -8,6 +8,7 @@ from balm.control import (
     successions_to_target,
 )
 from balm.SuccessionDiagram import SuccessionDiagram
+from balm.types import BooleanSpace
 
 
 def test_intervention_equality_and_equivalence():
@@ -41,13 +42,17 @@ def test_basic_succession_control():
     E, false
     """
     )
-    target_succession = [
+    target_succession: list[BooleanSpace] = [
         {"S": 0},
         {"A": 0, "B": 0},
         {"C": 1, "D": 1},
     ]
 
-    cs = [[{"S": 0}], [{"A": 0}, {"B": 0}], [{"C": 1}, {"D": 1}]]
+    cs: list[list[BooleanSpace]] = [
+        [{"S": 0}],
+        [{"A": 0}, {"B": 0}],
+        [{"C": 1}, {"D": 1}],
+    ]
 
     drivers = drivers_of_succession(bn, target_succession)
     assert all([controls_are_equal(a, b) for a, b in zip(cs, drivers)])
@@ -99,7 +104,7 @@ def test_basic_succession_finding():
             {"A": 0, "B": 0},
         ],
     ]
-    target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+    target: BooleanSpace = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
     succession_diagram = SuccessionDiagram(bn)
 
     successions = successions_to_target(succession_diagram, target)
@@ -126,14 +131,14 @@ def test_internal_succession_control():
     E, false
     """
     )
-    target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+    target: BooleanSpace = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
 
-    true_controls = [
+    true_controls: list[list[list[BooleanSpace]]] = [
         [[{"S": 0}], [{"A": 0}, {"B": 0}], [{"C": 1}, {"D": 1}]],
         [[{"S": 0}], [{"C": 1}, {"D": 1}], [{"A": 0}, {"B": 0}]],
     ]
 
-    true_successions = [
+    true_successions: list[list[BooleanSpace]] = [
         [
             {"S": 0},
             {"A": 0, "B": 0},
@@ -168,14 +173,14 @@ def test_all_succession_control():
     E, false
     """
     )
-    target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+    target: BooleanSpace = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
 
-    true_controls = [
+    true_controls: list[list[list[BooleanSpace]]] = [
         [[{"S": 0}], [{"A": 0}, {"B": 0}], [{"C": 1}, {"D": 1}]],
         [[{"S": 0}], [{"A": 1}, {"B": 1}, {"C": 1}, {"D": 1}], [{"A": 0}, {"B": 0}]],
     ]
 
-    true_successions = [
+    true_successions: list[list[BooleanSpace]] = [
         [
             {"S": 0},
             {"A": 0, "B": 0},
@@ -207,11 +212,13 @@ def test_forbidden_drivers():
     C, A & B
     """
     )
-    target = {"A": 1, "B": 1, "C": 1}
+    target: BooleanSpace = {"A": 1, "B": 1, "C": 1}
 
     # Test with no forbidden drivers first
-    true_controls = [[[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]]
-    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+    true_controls: list[list[list[BooleanSpace]]] = [
+        [[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]
+    ]
+    true_successions: list[list[BooleanSpace]] = [[{"A": 1, "B": 1, "C": 1}]]
 
     true_interventions = [
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
@@ -274,11 +281,13 @@ def test_size_restriction():
     C, A & B
     """
     )
-    target = {"A": 1, "B": 1, "C": 1}
+    target: BooleanSpace = {"A": 1, "B": 1, "C": 1}
 
     # Test with no restrictions
-    true_controls = [[[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]]
-    true_successions = [[{"A": 1, "B": 1, "C": 1}]]
+    true_controls: list[list[list[BooleanSpace]]] = [
+        [[{"A": 1, "B": 1}, {"A": 1, "C": 1}, {"B": 1, "C": 1}]]
+    ]
+    true_successions: list[list[BooleanSpace]] = [[{"A": 1, "B": 1, "C": 1}]]
 
     true_interventions = [
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
