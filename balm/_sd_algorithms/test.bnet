@@ -1,9 +1,0 @@
-targets,factors
-constant1_1, (constant1_1 | !constant1_1)
-constant1_0, (constant1_0 & !constant1_0)
-constant2_1, true
-constant2_0, false
-source, source
-oscillator, !oscillator
-source_after_perc, source_after_perc & constant1_1
-after_perc_0, after_perc_0 & constant1_0
