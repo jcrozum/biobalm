@@ -1,0 +1,6 @@
+targets, factors
+n0, true
+n1, false
+n2, (!n1 & n4) | (n1 & !n4)
+n3, (!n4 & n3)
+n4, (n1 & !n4) | (n1 & n4)
