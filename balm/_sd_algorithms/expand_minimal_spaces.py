@@ -21,9 +21,9 @@ def expand_minimal_spaces(
     if node_id is None:
         node_id = sd.root()
 
-    node = cast(dict[str, Any], sd.dag.nodes[node_id])
+    start_node = cast(dict[str, Any], sd.dag.nodes[node_id])
     
-    current_space = node["space"]
+    current_space = start_node["space"]
 
     minimal_traps = trappist(sd.petri_net, problem="min",
                              ensure_subspace=current_space)
