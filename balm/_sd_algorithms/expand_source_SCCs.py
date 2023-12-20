@@ -146,8 +146,8 @@ def expand_source_SCCs(
         assert sd.dag.nodes[node_id]["attractors"] is None  # check attractors from here
 
         # restore this once we allow all expansion algorithms to expand from a node
-        # expander(sd, node_id)
-        sd.expand_bfs(node_id)
+        expander(sd, node_id)
+        # sd.expand_bfs(node_id)
 
     return True
 
