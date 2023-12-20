@@ -21,7 +21,7 @@ bn = bn.infer_regulatory_graph()
 
 # Compute the succession diagram.
 sd = SuccessionDiagram(bn)
-fully_expanded = expand_source_SCCs(sd)
+fully_expanded = expand_source_SCCs(sd, SuccessionDiagram.expand_attractor_seeds)
 assert fully_expanded
 
 attractor_count = 0
