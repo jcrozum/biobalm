@@ -154,3 +154,8 @@ mole-*
 
 # Ignore benchmark runs.
 _run_*
+
+# Temporary files to ignore.
+bbm-bnet-inputs-random/
+random_nk2_large/
+analysis/topology_analysis.py
