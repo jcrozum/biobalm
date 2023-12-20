@@ -12,7 +12,9 @@ from balm.space_utils import intersect
 from balm.trappist_core import compute_fixed_point_reduced_STG
 
 
-def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None):
+def expand_attractor_seeds(sd: SuccessionDiagram,
+                           node_id: int | None = None,
+                           size_limit: int | None = None):
     """
     See `SuccessionDiagram.expand_attractor_seeds` for documentation.
     """
@@ -22,16 +24,21 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
     # because for every attractor in a minimal trap space, we already have the
     # closest trap space, now we just need to do the same for (potential)
     # motif-avoidant attractors.
-    sd.expand_minimal_spaces(size_limit)
+
+    if node_id is None:
+        node_id = sd.root()
+
+    sd.expand_minimal_spaces(node_id, size_limit)
 
     if balm.SuccessionDiagram.DEBUG:
         print(
             "Minimal trap space expansion finished. Proceeding to attractor expansion."
         )
 
-    root = sd.root()
-    seen = set([root])
-    stack: list[tuple[int, list[int] | None]] = [(root, None)]
+    seen: set[int] = set()
+    seen.add(node_id)
+
+    stack: list[tuple[int, list[int] | None]] = [(node_id, None)]
 
     while len(stack) > 0:
         (node, successors) = stack.pop()

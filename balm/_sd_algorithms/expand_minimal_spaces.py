@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from balm.SuccessionDiagram import SuccessionDiagram
@@ -9,18 +9,29 @@ from balm.space_utils import is_subspace
 from balm.trappist_core import trappist
 
 
-def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) -> bool:
+def expand_minimal_spaces(
+    sd: SuccessionDiagram,
+    node_id: int | None = None,
+    size_limit: int | None = None
+) -> bool:
     """
     See `SuccessionDiagram.expand_minimal_spaces` for documentation.
     """
 
-    minimal_traps = trappist(sd.petri_net, problem="min")
+    if node_id is None:
+        node_id = sd.root()
 
-    root = sd.root()
+    node = cast(dict[str, Any], sd.dag.nodes[node_id])
+    
+    current_space = node["space"]
 
-    seen = set([root])
+    minimal_traps = trappist(sd.petri_net, problem="min",
+                             ensure_subspace=current_space)
 
-    stack: list[tuple[int, list[int] | None]] = [(root, None)]
+    seen: set[int] = set()
+    seen.add(node_id)
+
+    stack: list[tuple[int, list[int] | None]] = [(node_id, None)]
 
     while len(stack) > 0:
         (node, successors) = stack.pop()

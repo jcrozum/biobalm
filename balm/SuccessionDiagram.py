@@ -504,7 +504,11 @@ class SuccessionDiagram:
         """
         return expand_dfs(self, node_id, dfs_stack_limit, size_limit)
 
-    def expand_minimal_spaces(self, size_limit: int | None = None) -> bool:
+    def expand_minimal_spaces(
+        self,
+        node_id: int | None = None,
+        size_limit: int | None = None
+    ) -> bool:
         """
         Expands the succession diagram in a way that guarantees every minimal
         trap space to be reachable from the root node, but otherwise (greedily)
@@ -520,9 +524,13 @@ class SuccessionDiagram:
         procedure still tries to avoid expanding unnecessary nodes, which means
         existing expanded nodes can be prioritised over the "canonical" ones.
         """
-        return expand_minimal_spaces(self, size_limit)
+        return expand_minimal_spaces(self, node_id, size_limit)
 
-    def expand_attractor_seeds(self, size_limit: int | None = None) -> bool:
+    def expand_attractor_seeds(
+        self,
+        node_id: int | None = None,
+        size_limit: int | None = None
+    ) -> bool:
         """
         Expands the succession diagram such that for every asynchronous
         attractor, there is at least one expanded trap space which is the
@@ -535,7 +543,7 @@ class SuccessionDiagram:
         identification. It is possible that some nodes are expanded spuriously
         and the succession diagram is thus larger than necessary.
         """
-        return expand_attractor_seeds(self, size_limit)
+        return expand_attractor_seeds(self, node_id, size_limit)
 
     def expand_to_target(
         self, target: BooleanSpace, size_limit: int | None = None
