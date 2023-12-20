@@ -5,17 +5,17 @@ Optimized for finding the attractors
 import sys
 sys.path.append("..")
 
-import nfvsmotifs
+import balm
 
 from biodivine_aeon import BooleanNetwork
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from nfvsmotifs._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from balm.SuccessionDiagram import SuccessionDiagram
+from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 
 
 LOG_LOCATION = "SD_analysis_att_" + sys.argv[1].split("/")[-2] + ".csv"
 
 # Print progress and succession diagram size.
-nfvsmotifs.SuccessionDiagram.DEBUG = True # type: ignore
+balm.SuccessionDiagram.DEBUG = True # type: ignore
 
 # This is unfortunately necessary for PyEDA Boolean expression parser (for now).
 sys.setrecursionlimit(150000)

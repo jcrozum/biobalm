@@ -5,16 +5,16 @@ Finds everything, but is slow.
 import sys
 sys.path.append("..")
 
-import nfvsmotifs
+import balm
 
 from biodivine_aeon import BooleanNetwork
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.SuccessionDiagram import SuccessionDiagram
 
 
 LOG_LOCATION = "SD_analysis_" + sys.argv[1].split("/")[-2] + ".csv"
 
 # Print progress and succession diagram size.
-nfvsmotifs.SuccessionDiagram.DEBUG = True # type: ignore
+balm.SuccessionDiagram.DEBUG = True # type: ignore
 
 NODE_LIMIT = 1_000_000
 DEPTH_LIMIT = 10_000
