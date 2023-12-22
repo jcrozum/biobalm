@@ -1,0 +1,136 @@
+targets, factors
+# Unlocking Mitochondrial Dysfunction-Associated Senescence (MiDAS) with NAD+ – a Boolean Model of Mitochondrial Dynamics and Cell Cycle Control
+
+GF, GF | GF_High
+GF_High, GF_High
+ROS_Ext, ROS_Ext
+Glucose, Glucose
+Pyruvate_Ext, Pyruvate_Ext
+RTK, (GF_High | GF) & !CAD
+Shc, RTK & GF_High
+Grb2, RTK & Shc
+SOS, Grb2
+Ras, Grb2 & SOS
+RAF, Ras & !Casp3
+MEK, RAF
+ERK, MEK & !BIK
+mTORC2, (PIP3 | !S6K) & !Casp2
+PI3K, RTK | Ras
+PIP3, PI3K | PI3K_H
+PDK1, PI3K & PIP3
+AKT_B, (PDK1 | mTORC2) & PIP3 & !Casp3
+p110_H, (FoxO3 & !Nedd4L) | (p110_H & (FoxO3 | !Nedd4L))
+PI3K_H, p110_H & PI3K & RTK & Ras
+AKT_H, AKT_B & p110_H & PI3K_H & PIP3 & PDK1 & mTORC2 & Ras
+FoxO3, (!(AKT_H & (ERK | AKT_B | Plk1 | Plk1_H | p53)) & !(Plk1 & Plk1_H & ERK)) | ((AMPK | SIRT3) & !(AKT_H & (Plk1 | Plk1_H | p53)))
+PLCgamma, RTK & Grb2 & p110_H & PI3K_H & PIP3
+IP3, PLCgamma
+Ca2p, IP3
+Nedd4L, Ca2p & IP3
+FoxO1, !(AKT_H | Plk1 | p53) | (AMPK & SIRT3 & !(AKT_B & p53))
+MnSOD, FoxO1 | FoxO3 | FoxM1 | (ERK & !p27Kip1) | SIRT3
+p21_mRNA, (FoxO1 & FoxO3) | ((FoxO1 | FoxO3) & !Myc) | p53
+TSC2, AMPK | MP_Low | !AKT_H | !(AKT_B | ERK)
+PRAS40, !AKT_H & !(AKT_B & mTORC1)
+DAG, PLCgamma
+Rheb, DAG & !TSC2
+mTORC1, ((!AMPK & !PRAS40 & Rheb) | (E2F1 & (!AMPK | ERK)) | (CyclinB & Cdk1 & GSK3)) & !Casp3
+S6K, mTORC1 & !(CyclinB & Cdk1) & !Casp3
+eIF4E, mTORC1 & !Casp3
+GSK3, (!AKT_H | U_Kinetochores) & (SIRT3 | !AKT_B | !(S6K & ERK))
+Autophagy, (FoxO1 | FoxO3) & AMPK & !mTORC1 & !BIM & (mROS | cROS | cROS_H)
+IKKa, AKT_H
+NF_kB, IKKa & !FoxO3 & !p53
+Glycolysis, (Glucose & AKT_B & NADp_c) | Glycolysis_H
+Glycolysis_H, (HIF1 | Myc) & Glycolysis & Glucose & NADp_c & ERK & !p53
+NADp_c, !Glycolysis_H | Fermentation | NADp_m
+Pyruvate, Glycolysis | Glycolysis_H | Pyruvate_Ext
+HIF1, mTORC1 & eIF4E & S6K & (ERK | !(GSK3 & FoxO3)) & !p53
+Fermentation, ERK & ((Glycolysis_H & Pyruvate) | Pyruvate_Ext)
+TCA_cycle, Pyruvate & (NADp_m | !MP_Low) & !(Unfused & mROS) & !cROS_H
+MFN1_2, (PGC1 | E2F1) & !(MP_Low & PINK1 & Mitophagy_High) & !Drp1
+Hyperfused_OM, MFN1_2 & !(Unfused | Drp1 | (PINK1 & Mitophagy_High))
+Hyperfused_IMOM, Hyperfused_OM & MFN1_2 & !(MP_Low | Unfused | Drp1)
+MP_High, TCA_cycle & Hyperfused_IMOM & !(MP_Low | Unfused | mROS | cROS | cROS_H | ROS_Ext)
+MP_Low, BAX | BAK | cROS_H | (!MP_High & ((!TCA_cycle & NADp_m) | (Unfused & mROS) | (Hyperfused_OM & !Mitophagy_High & mROS & !(MnSOD & SIRT3)) | (MP_Low & mROS & !(Mitophagy_High | PGC1))))
+ATP_Low, !MP_Low | (Glycolysis & Fermentation) | (Autophagy & PGC1)
+ATP, ATP_Low & ((!MP_Low) | (Glycolysis_H & Fermentation))
+ATP_H, ATP & ((!MP_Low & MP_High & Hyperfused_IMOM) | (Glycolysis_H & Fermentation & Pyruvate_Ext))
+AMPK, !(ATP_H | MP_High) & (!ATP | mROS | cROS | cROS_H)
+PGC1, AMPK
+SIRT3, NADp_m & (PGC1 | (Hyperfused_IMOM & !MP_Low))
+PINK1, MP_Low & (NF_kB | FoxO1 | FoxO3)
+Mitophagy_High, (PINK1 | Drp1) & !Hyperfused_OM & (AMPK | MP_Low) & (FoxO3 | FoxO1 | !mTORC1) & !Casp8
+Drp1, (BIK & (BAK | BAX)) | (!p53 & ((CyclinB & Cdk1 & !Cdh1) | (AMPK & !MFN1_2) | (MP_Low & PINK1 & Mitophagy_High)))
+Unfused, !Hyperfused_OM & ((Drp1 & !(MFN1_2 & Mitophagy_High)) | BAK | BAX)
+mROS, cROS_H | (Unfused & (!(MnSOD | SIRT3) | MP_Low | BAK | BAX)) | (MP_Low & !(PGC1 & (Mitophagy_High | MnSOD | SIRT3))) | (Hyperfused_OM & ((MP_High | mROS) & !(MnSOD & SIRT3)))
+NADp_m, (!(TCA_cycle & MP_Low) & (MP_High | (NADp_c & !mROS))) | (Pyruvate_Ext & NADp_c)
+p21, p21_mRNA & !CyclinE & !Casp3
+pRB, (p27Kip1 | !CyclinE) & !(CyclinD1 | CyclinA | Casp3)
+p27Kip1, !CyclinD1 & ((!CyclinE & FoxO3 & FoxO1) | (!CyclinA & (FoxO3 | FoxO1)) | !(CyclinE | CyclinA) | AMPK) & (!(Cdk1 & CyclinB) | AMPK) & !Casp3
+Myc, !p53 & ((ERK & (eIF4E | !GSK3)) | (E2F1 & !pRB & (eIF4E | ERK | !GSK3)))
+CyclinD1, !(ATR | ATM | p21_H | (p21 & p53)) & ((!p21 & ((!GSK3 & eIF4E & (Myc | E2F1)) | (Myc & CyclinD1) | (Myc & E2F1) | (E2F1 & CyclinD1))) | ((!pRB & E2F1) & ((Myc & CyclinD1) | (Myc & (!GSK3 | eIF4E)) | (CyclinD1 & (!GSK3 | eIF4E)))))
+E2F1, (Myc | E2F1) & !(pRB | CyclinA | CAD)
+CyclinE, (ATP_H | CyclinE) & ATP & E2F1 & Pre_RC & Cdc6 & !(p21_H | pRB | p27Kip1 | CHK1 | CHK2 | Casp3)
+ORC, E2F1 | (Pre_RC & Cdt1 & Cdc6)
+Cdc6, !(f4N_DNA & CyclinA) & (((E2F1 & ORC) & !Plk1 & !CyclinA) | (Pre_RC & ORC & Cdc6 & Cdt1)) & !Casp3
+Cdt1, !geminin & ORC & Cdc6 & !(CyclinE & CyclinA & Cdc25A) & ((Pre_RC & (E2F1 | Myc)) | (E2F1 & (Myc | !pRB)))
+Pre_RC, ORC & Cdc6 & Cdt1 & !(Replication & f4N_DNA)
+geminin, E2F1 & !(pAPC & Cdc20) & !Cdh1
+CyclinA_mRNA, ((E2F1 & (!pRB | Myc)) | FoxM1) & !(p53_4 | CAD)
+Emi1, (E2F1 | !pRB | !p21) & !(Plk1 & CyclinB & Cdk1 & (U_Kinetochores | A_Kinetochores))
+FoxM1, (Myc & CyclinE) | (CyclinA & Cdc25A & Cdc25B) | (Plk1 & CyclinB & Cdk1)
+Cdc25A, ((FoxM1 & E2F1 & !pRB) | (!Cdh1 & (FoxM1 | (E2F1 & !pRB)))) & (!(GSK3 | CHK1 | CHK2) | CyclinE | CyclinA | (CyclinB & Cdk1))
+Wee1, (Replication | CHK1) & !(Cdk1 & CyclinB) & (CHK1 | !(Cdk1 & CyclinA & Plk1)) & !Casp3
+Cdc25B, FoxM1 & f4N_DNA
+Plk1, !Cdh1 & (FoxM1 | Plk1_H) & ((CyclinB & Cdk1) | (CyclinA & Cdc25A & !Wee1))
+CyclinA, CyclinA_mRNA & !pAPC & ((Cdc25A & (!Cdh1 | Emi1)) | (CyclinA & ((!Cdh1 & (Emi1 | !UbcH10)) | (Emi1 & !UbcH10))))
+Cdc25C, f4N_DNA & Plk1 & ((Cdc25B & !CHK1 & (!CHK2 | Bipolar_Spindle)) | (CyclinB & Cdk1))
+CyclinB, (FoxM1 | (FoxO3 & CyclinB)) & !(Cdh1 | (pAPC & Cdc20)) & !p53_4
+UbcH10, !Cdh1 | (UbcH10 & (Cdc20 | CyclinA | CyclinB))
+Cdk1, (CyclinB & Cdc25C) & (!(CHK1 | CHK2) | (!Wee1 & Cdk1))
+pAPC, (CyclinB & Cdk1 & Plk1) | (CyclinB & Cdk1 & pAPC) | (pAPC & Cdc20)
+Cdc20, pAPC & !Emi1 & !Cdh1 & ((Bipolar_Spindle & !(Mad2 & Mps1)) | (!CyclinA & !(CyclinB & Cdk1)))
+Cdh1, !(CyclinB & Cdk1) & !(CyclinA & (Emi1 | Cdc25A))
+Replication, Pre_RC & ((E2F1 & CyclinE & Cdc25A) | (Replication & CyclinA & Cdc25A & (E2F1 | !f4N_DNA))) & !CAD
+ATR, Replication | cROS_H
+CHK1, ATR & Glucose
+Nuclear_Membrane, !(CyclinB & Cdk1) & !(U_Kinetochores | A_Kinetochores)
+f4N_DNA, ((Replication & ((Pre_RC & CyclinA) | f4N_DNA)) | (f4N_DNA & !Cytokinesis)) & !CAD
+U_Kinetochores, f4N_DNA & !Nuclear_Membrane & !Cdh1 & !A_Kinetochores & ((CyclinB & Cdk1) | U_Kinetochores)
+A_Kinetochores, f4N_DNA & Bipolar_Spindle & Plk1 & (A_Kinetochores | (U_Kinetochores & CyclinB & Cdk1)) & !Cdh1 & !(pAPC & Cdc20)
+Bipolar_Spindle, (CyclinB & Cdk1 & Unfused) | (Bipolar_Spindle & f4N_DNA & !Cytokinesis & (Ect2 | Plk1_H | ((U_Kinetochores | A_Kinetochores) & !Cdh1)))
+Mps1, U_Kinetochores | (CyclinB & Cdk1)
+Mad2, U_Kinetochores & Mps1 & !A_Kinetochores
+Plk1_H, Plk1 & FoxM1 & (Plk1_H | FoxO3 | FoxO1)
+Ect2, f4N_DNA & Plk1_H & Cdh1 & !U_Kinetochores & !A_Kinetochores & Bipolar_Spindle
+Cytokinesis, Ect2 & Bipolar_Spindle
+cROS, !Glucose | ROS_Ext | cROS_H
+cROS_H, cROS & (ROS_Ext | (mROS & !Glucose & !PGC1))
+ATM, cROS_H | CAD
+CHK2, ATM
+p53, (Nuclear_Membrane & (((AMPK | (ATR & CHK1) | (ATM & CHK2)) & (!Mdm2 | !NF_kB | cROS | (mROS & !SIRT3))))) | p53_2 | p53_3 | p53_4
+p53_2, ((p53 | p53_2) & ((AMPK | (ATR & CHK1) | (ATM & CHK2)) & cROS_H & Nuclear_Membrane)) | p53_3 | p53_4
+p53_3, (((p53_2 & p53) | p53_3) & ((AMPK | (ATR & CHK1) | (ATM & CHK2)) & cROS_H & Nuclear_Membrane)) | p53_4
+p53_4, ((p53 & p53_2 & p53_3) | p53_4) & ((AMPK | (ATR & CHK1) | (ATM & CHK2)) & cROS_H & Nuclear_Membrane)
+Mdm2, !(ATM | ATR) & (AKT_H | p53 | p53_2 | p53_3 | p53_4) & !(Casp2 | Casp3)
+p21_H, p21_mRNA & p21 & p53_3 & !Casp3
+Trail, Trail
+DR4_5, Trail
+Casp8, DR4_5 | Casp3
+Casp2, (U_Kinetochores & Mad2 & !(CyclinB & Cdk1 & Bipolar_Spindle)) | Casp3
+MCL_1, !Casp3 & !Casp2 & (!GSK3 | (AKT_B & (ERK | !E2F1))) & !(Cdk1 & CyclinB & U_Kinetochores)
+BCLXL, !Casp3 & (BCL2 | !BAD) & (!U_Kinetochores | (Plk1 & (!(CyclinB & Cdk1) | (BCL2 & MCL_1) | Bipolar_Spindle)) | ((BCL2 & MCL_1) & (!(CyclinB & Cdk1))))
+BCL2, !(Casp3 | BAD | BIM | BIK | (BID & HIF1)) & ((!U_Kinetochores | (MCL_1 & BCLXL)) | (Plk1 & (BCLXL | MCL_1 | !(Cdk1 & CyclinB))))
+BAD, Casp3 | !(AKT_H | AKT_B | ERK | S6K) | (Casp8 & !(AKT_B & ERK & S6K) & !(AKT_H & (AKT_B | ERK)))
+BIK, !(MCL_1 | BCLXL | BCL2)
+BIM, FoxO3 & GSK3 & !(ERK | MCL_1 | BCLXL | BCL2)
+BID, Casp8 | (Casp2 & (!(BCL2 | BCLXL | MCL_1) | ATM))
+BAK, (BID & (BIM | BIK | !(BCL2 & BCLXL & MCL_1))) | ((BIM | BIK) & !(BCLXL | MCL_1))
+BAX, (BIM & (BID | BIK | !(BCL2 & BCLXL & MCL_1))) | ((BID | BIK) & !(BCL2 | BCLXL))
+Cyto_C, BAX | BAK | (!Mps1 & Drp1 & Unfused & !Mitophagy_High)
+SMAC, BAX | BAK
+IAPs, AKT_H | !SMAC
+Casp9, (!IAPs & Cyto_C) | Casp3
+Casp3, (Casp9 & Casp8) | (Casp3 & (Casp9 | Casp8)) | (!IAPs & (Casp9 | Casp8 | Casp3))
+CAD, Casp3 & Casp9

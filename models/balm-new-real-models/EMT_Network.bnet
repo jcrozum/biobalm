@@ -1,0 +1,34 @@
+# A Cell-Fate Reprogramming Strategy Reverses Epithelial-to-Mesenchymal Transition of Lung Cancer Cells While Avoiding Hybrid States
+targets, factors
+
+TGFb, TGFb
+AKT, NOTCH | PI3K | (SMAD4 & !p53)
+AP1, (ERK & Twist1) | (SMAD4 & p38)
+ERK, (MEK & SMAD4) | (MEK & TGFBR) | (MEK & bcatenin & p53)
+GLI, (SMAD4 & TGFBR) | (TGFBR & bcatenin)
+GRB2SOS, TGFBR
+GSK3b, (!ERK & !bcatenin) | (!AKT & !GLI & !bcatenin)
+IKK, AKT & TAK1
+MDM2, SMAD4 | p53
+MEK, RAF | !ERK
+NFKB, IKK | NOTCH
+NOTCH, (TGFb & bcatenin) | (TGFb & !miR34)
+PI3K, (GRB2SOS & RAS) | (RAS & !p53)
+RAF, (RAS & TGFBR) | (RAS & !ERK)
+RAS, GRB2SOS
+SMAD23, NOTCH | TGFBR
+SMAD4, ERK | SMAD23 | TGFBR
+Snail, (SMAD4 & TGFBR) | (SMAD4 & !miR34) | (AP1 & NFKB & !miR34) | (AP1 & bcatenin & !miR34) | (GLI & NFKB & !miR34) | (GLI & bcatenin & !miR34)
+TAK1, TGFBR
+TGFBR, TGFb
+Twist1, ERK | Snail | !p53
+ZEB1, (ERK & !miR200) | (Snail & !miR200) | (bcatenin & !miR200)
+bcatenin, (ERK & !GSK3b) | (RAS & !GSK3b)
+miR200, (p53 & !Snail) | (p53 & !TGFb) | (p53 & !ZEB1)
+miR34, (ERK & !Snail) | (p53 & !Snail) | (p53 & !ZEB1) | (!TGFBR & !ZEB1)
+p38, RAS & TAK1
+p53, !MDM2
+Ecadherin, !Snail | (!Twist1 & !ZEB1)
+EpCAM, (AP1 & !ERK) | (AP1 & !SMAD4) | (!SMAD4 & !p53) | (AP1 & !ZEB1 & !p53) | (bcatenin & !ZEB1 & !p53)
+MYC, (ERK & !p53) | (bcatenin & !p53) | (!SMAD4 & !miR34) | (ERK & EpCAM & !miR34)
+THY1, Snail | (AKT & !p53) | (bcatenin & !p53)

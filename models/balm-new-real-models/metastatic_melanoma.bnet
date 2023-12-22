@@ -1,0 +1,12 @@
+targets, factors
+# https://doi.org/10.1093/bioinformatics/btt242
+WNT5A, ( S100P & MMP3 & !PHOC ) | ( !MMP3 & PHOC )
+pirin, ( !WNT5A & !S100P & MMP3 ) | ( WNT5A & !S100P & !MMP3 )
+S100P, MART1
+RET1, ( !WNT5A & pirin & RET1 ) | ( !pirin & RET1 )
+MMP3, ( RET1 & synuclein ) | ( !synuclein )
+PHOC, ( !RET1 & !S100P ) | ( RET1 & MART1 & STC2 )
+MART1, MART1
+HADHB, ( WNT5A & MMP3 ) | ( !MMP3 & !synuclein ) | ( WNT5A & !MMP3 & synuclein )
+synuclein, ( !WNT5A & !MART1 & !STC2 ) | ( RET1 & !MART1 & STC2 ) | MART1
+STC2, !S100P

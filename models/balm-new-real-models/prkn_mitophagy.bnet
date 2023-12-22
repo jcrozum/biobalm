@@ -1,0 +1,64 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://gitlab.lcsb.uni.lu/lcsb-biocore/publications/hemedan23-boolean-modelling-of-pd
+
+targets, factors
+path_0_csa1333, path_0_sa8485
+path_0_csa1334, path_0_csa1659&path_0_sa8485
+path_0_csa1419, path_0_sa9071&!path_0_sa9072&path_0_sa3573&!path_0_sa11314&!path_0_sa9074&!path_0_sa9073&!path_0_sa9061&!path_0_sa9063&!path_0_sa9062&path_0_sa9065 | path_0_sa9071&!path_0_sa9072&path_0_sa3573&!path_0_sa11314&!path_0_sa9074&!path_0_sa9073&!path_0_sa9061&!path_0_sa9063&path_0_sa9062 | path_0_sa9071&!path_0_sa9072&path_0_sa3573&!path_0_sa11314&!path_0_sa9074&!path_0_sa9073&!path_0_sa9061&path_0_sa9063 | path_0_sa9071&!path_0_sa9072&path_0_sa3573&!path_0_sa11314&!path_0_sa9074&!path_0_sa9073&path_0_sa9061 | path_0_sa9071&!path_0_sa9072&path_0_sa3573&path_0_sa11314&!path_0_sa9074&!path_0_sa9073 | path_0_sa9071&path_0_sa9072&path_0_sa3573&!path_0_sa9074&!path_0_sa9073
+path_0_csa1659, path_0_csa1659
+path_0_csa279,  !path_0_sa9071&!path_0_sa11240 | path_0_sa9071&!path_0_sa3573&!path_0_sa11240 | path_0_sa9071&path_0_sa3573&!path_0_sa11240 | path_0_sa9071&path_0_sa3573&path_0_sa11240&!path_0_sa5552&!path_0_sa7820&path_0_sa2287 | path_0_sa9071&path_0_sa3573&path_0_sa11240&path_0_sa5552&!path_0_sa7820
+path_0_csa540,  path_0_csa540
+path_0_csa541,  path_0_csa541
+path_0_csa734,  path_0_csa734
+path_0_csa983,  path_0_csa983
+path_0_sa10393, path_0_sa10393
+path_0_sa11240, path_0_sa11240
+path_0_sa11314, path_0_sa11314
+path_0_sa2287,  path_0_sa2287
+path_0_sa3572,  !path_0_sa9036&!path_0_sa9037&!path_0_sa3572&path_0_sa5774 | !path_0_sa9036&!path_0_sa9037&path_0_sa3572 | !path_0_sa9036&path_0_sa9037&path_0_sa5774 | path_0_sa9036&path_0_sa5774
+path_0_sa3573,  !path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3572&!path_0_sa9061&path_0_sa5780 | !path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3572&path_0_sa9061 | !path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3572&!path_0_sa9061&!path_0_sa5780&path_0_sa9058 | !path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3572&!path_0_sa9061&path_0_sa5780 | !path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3572&path_0_sa9061 | !path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&!path_0_sa3572&!path_0_sa9061&path_0_sa5780 | !path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&!path_0_sa3572&path_0_sa9061 | !path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&!path_0_sa5780&path_0_sa9058 | !path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&path_0_sa5780 | !path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&path_0_sa9061 | !path_0_csa540&!path_0_csa541&path_0_sa8889&path_0_sa3573 | !path_0_csa540&path_0_csa541 | path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3573&!path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3573&!path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&!path_0_sa5780&path_0_sa9058 | path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&!path_0_sa8889&!path_0_sa3573&path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&!path_0_sa6460 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&path_0_sa6460&!path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&path_0_sa6460&!path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&path_0_sa6460&path_0_sa3572&!path_0_sa9061&!path_0_sa5780&path_0_sa9058 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&path_0_sa6460&path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&!path_0_sa8889&path_0_sa3573&path_0_sa6460&path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&!path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&!path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&!path_0_sa5780&path_0_sa9058 | path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&!path_0_sa9061&path_0_sa5780 | path_0_csa540&!path_0_csa541&path_0_sa8889&!path_0_sa3573&path_0_sa3572&path_0_sa9061 | path_0_csa540&!path_0_csa541&path_0_sa8889&path_0_sa3573 | path_0_csa540&path_0_csa541
+path_0_sa3576,  path_0_sa3576
+path_0_sa4348,  path_0_sa4348
+path_0_sa4349,  path_0_csa541&path_0_sa4348
+path_0_sa4352,  path_0_csa541&path_0_csa1419
+path_0_sa4353,  path_0_csa541&path_0_csa1419
+path_0_sa4354,  path_0_csa541&path_0_csa1419
+path_0_sa4954,  path_0_sa4954
+path_0_sa5375,  path_0_sa5375
+path_0_sa5552,  path_0_sa5552
+path_0_sa5774,  path_0_sa5774
+path_0_sa5780,  path_0_sa5780
+path_0_sa5819,  path_0_sa5819
+path_0_sa5900,  path_0_sa5900
+path_0_sa6459,  path_0_sa6459
+path_0_sa6460,  path_0_sa6460
+path_0_sa6465,  path_0_sa6466&path_0_sa8110
+path_0_sa6466,  path_0_sa6466
+path_0_sa7458,  path_0_sa7467&path_0_sa7462
+path_0_sa7459,  path_0_sa7463&path_0_sa7467
+path_0_sa7462,  path_0_sa7462
+path_0_sa7463,  path_0_sa7463
+path_0_sa7467,  path_0_sa7467
+path_0_sa7820,  !path_0_sa3573&path_0_sa9058 | path_0_sa3573&!path_0_sa5819&!path_0_sa6459&!path_0_sa9058&path_0_sa3576 | path_0_sa3573&!path_0_sa5819&!path_0_sa6459&path_0_sa9058 | path_0_sa3573&!path_0_sa5819&path_0_sa6459 | path_0_sa3573&path_0_sa5819
+path_0_sa8110,  !path_0_csa1333&!path_0_csa279&!path_0_sa9071&!path_0_sa8487&!path_0_sa7458&!path_0_sa5375&!path_0_sa8968&!path_0_sa10393&path_0_sa7459 | !path_0_csa1333&!path_0_csa279&!path_0_sa9071&!path_0_sa8487&!path_0_sa7458&!path_0_sa5375&!path_0_sa8968&path_0_sa10393 | !path_0_csa1333&!path_0_csa279&!path_0_sa9071&!path_0_sa8487&!path_0_sa7458&!path_0_sa5375&path_0_sa8968 | !path_0_csa1333&!path_0_csa279&!path_0_sa9071&!path_0_sa8487&!path_0_sa7458&path_0_sa5375 | !path_0_csa1333&!path_0_csa279&!path_0_sa9071&!path_0_sa8487&path_0_sa7458 | !path_0_csa1333&!path_0_csa279&!path_0_sa9071&path_0_sa8487 | !path_0_csa1333&!path_0_csa279&path_0_sa9071 | !path_0_csa1333&path_0_csa279 | path_0_csa1333
+path_0_sa8450,  path_0_sa3572
+path_0_sa8484,  path_0_sa8484
+path_0_sa8485,  path_0_sa8484&path_0_sa8486
+path_0_sa8486,  path_0_sa8486
+path_0_sa8487,  path_0_csa1333
+path_0_sa8889,  path_0_sa8889
+path_0_sa8891,  path_0_sa8889&!path_0_sa6460&path_0_sa6459 | path_0_sa8889&path_0_sa6460
+path_0_sa8968,  path_0_sa8968
+path_0_sa9035,  path_0_sa9035
+path_0_sa9036,  path_0_sa9036
+path_0_sa9037,  path_0_sa9037
+path_0_sa9058,  path_0_sa9058
+path_0_sa9061,  path_0_sa9065
+path_0_sa9062,  path_0_sa9062
+path_0_sa9063,  path_0_sa9063
+path_0_sa9065,  path_0_sa9065
+path_0_sa9071,  !path_0_sa3572&!path_0_sa5900&path_0_sa4954&path_0_sa8450 | !path_0_sa3572&path_0_sa5900&path_0_sa4954 | path_0_sa3572&path_0_sa4954
+path_0_sa9072,  path_0_sa9072
+path_0_sa9073,  path_0_sa9073
+path_0_sa9074,  path_0_sa9074

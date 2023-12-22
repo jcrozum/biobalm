@@ -1,0 +1,39 @@
+# A meta-analysis of {Boolean} network models reveals design principles of gene regulatory networks
+
+targets, factors
+SignalLIF, SignalLIF
+iGSK3b, iGSK3b
+bFGF, bFGF
+ActivinA, ((ActivinA & (!Smad7) & (!iAct)) | Oct4) & (!Sox2) & (!Lefty1) & (!Gbx2)
+Bmp4, (Bmp4 & (!Smad6) & (!Smad7) & (!iBMP)) | Gbx2 | Tbx3 | Myc
+Dnmt3b, (Mycn | Tcf3 | EpiTFs) & !(Cdx2 | Klf4)
+EpiTFs, ((Bmp4 & (!Smad6) & (!Smad7) & (!iBMP)) | Pitx2 | Dusp6) & (!Cdx2) & !(Klf4 & Sox2)
+Esrrb, (Klf4 | Klf2 | Nanog | (((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3))) & (!EpiTFs)
+Fgfr2, (((Fgfr2 & (Fgf4 | bFGF))) | Gcnf | Cdx2) & (!Nanog) & (!Oct4)
+Gata6, (Gata6 | (((Fgfr2 & (Fgf4 | bFGF))) & (!(Bmp4 & (!Smad6) & (!Smad7) & (!iBMP))) & (!iERK))) & (!Klf2) & (!Nanog) & (!Fgf4)
+Gbx2, ((((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3)) | SignalLIF) & ((Esrrb | Jarid2) & !(Tbx3))
+Gcnf, (Gata6 | Cdx2) & (!EpiTFs)
+Jarid2, (Klf4 | Oct4)
+Klf4, (SignalLIF | ((Klf2 | Klf4) &  Nanog & Esrrb & (Oct4 & Sox2))) & (!EpiTFs)
+Nanog, (Nanog | (ActivinA & (!Smad7) & (!iAct)) | (Oct4 & Sox2) | Tbx3 | Lrh1 | Klf4) & !(Tcf3 | Gata6)
+Oct4, (((Oct4 & Sox2) | Nanog | Klf2 | Klf4) & !(Cdx2 & Oct4) & (!Dnmt3b | Klf2)) | (((Oct4 & Sox2) | Nanog | Lrh1 | Klf2 | Klf4) & (!Gcnf) & (Dnmt3b & (!Klf2)))
+Pecam1, (Klf2 | Nanog) & (!EpiTFs)
+Rex1, (Nanog | Sox2 | Lrh1 | Klf2 | Esrrb) & (!EpiTFs)
+Smad6, ((Bmp4 & (!Smad6) & (!Smad7) & (!iBMP)) | Gata6) & (!Oct4)
+Smad7, (Oct4 | Nanog | Esrrb | Klf4 | Tbx3) & !(Gbx2 | Jarid2)
+Sox2, Nanog | (Oct4 & Sox2)
+Tcf3, (Nanog | Oct4) & (!((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)))
+Cdx2, ((Bmp4 & (!Smad6) & (!Smad7) & (!iBMP)) | Cdx2)  & !(Cdx2 & Oct4)
+Dusp6, (((Fgfr2 & (Fgf4 | bFGF))) & (!(Bmp4 & (!Smad6) & (!Smad7) & (!iBMP))) & (!iERK))
+Fgf4, (Esrrb | Nanog | (((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3)))
+Klf2, ((Sox2 & Klf4) | Mycn) & (!Pitx2) & (!Dusp6)
+Lefty1, ((ActivinA & (!Smad7) & (!iAct)) | (((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3)) | Mycn | (Oct4 & Sox2)) & !(Jarid2 | Fgf4)
+Lrh1, (Tbx3 | Klf4 | (Oct4 & Sox2))  & (!Tcf3)
+Mycn, (Oct4 & Sox2) & (!Nanog)
+Pitx2, ((ActivinA & (!Smad7) & (!iAct)) | (((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3))) & (!Sox2) & (!Jarid2)
+Tbx3, ((SignalLIF & ((Fgfr2 & (Fgf4 | bFGF)))) | Tbx3) & (Esrrb | Nanog | Klf4) & (!(((Fgfr2 & (Fgf4 | bFGF))) & (!(Bmp4 & (!Smad6) & (!Smad7) & (!iBMP))) & (!iERK))) & (!Tcf3)
+Myc, ( ((((Fgfr2 & (Fgf4 | bFGF))) & (!(Bmp4 & (!Smad6) & (!Smad7) & (!iBMP))) & (!iERK)) | (((iGSK3b | (SignalLIF & ((Fgfr2 & (Fgf4 | bFGF))))) & (!Cdx2) & (!iWnt)) & (!Tcf3))) | SignalLIF | Gbx2) & (!Nanog)
+iAct, iAct
+iBMP, iBMP
+iWnt, iWnt
+iERK, iERK

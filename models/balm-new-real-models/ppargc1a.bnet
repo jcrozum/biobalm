@@ -1,0 +1,72 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://gitlab.lcsb.uni.lu/lcsb-biocore/publications/hemedan23-boolean-modelling-of-pd
+
+targets, factors
+ATP5F1B_rna,                           TF_NRF2_complex
+ATP5F1C_rna,                           TF_NRF1_complex
+ATP5MC1_rna,                           TF_YY1_complex
+CDK5,                                  0
+COX4I1_rna,                            !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX5A_rna,                             !TF_YY1_complex&!TF_NRF1_complex&TF_NRF2_complex | !TF_YY1_complex&TF_NRF1_complex | TF_YY1_complex
+COX5B_rna,                             !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX6A1_rna,                            !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX6B1_rna,                            !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX6C_rna,                             !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX7A2_rna,                            !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX7B_rna,                             !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX7C_rna,                             !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+COX8A_rna,                             !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+CYCS_rna,                              !TF_YY1_complex&TF_NRF1_complex | TF_YY1_complex
+ESRRA,                                 0
+GABPA,                                 0
+IDH3A_rna,                             TF_YY1_complex
+IDH3B_rna,                             TF_YY1_complex
+IDH3G_rna,                             TF_YY1_complex
+KAT2A,                                 0
+MEF2C_nucleus,                         !MEF2C_nucleus&!SNCA&!RNS&!NO&ROS | !MEF2C_nucleus&!SNCA&!RNS&NO | !MEF2C_nucleus&!SNCA&RNS | !MEF2C_nucleus&SNCA | MEF2C_nucleus
+MEF2D,                                 autophagy_phenotype
+MEF2D_phosphorylated,                  !MEF2D&CDK5 | MEF2D
+NAD,                                   !NAD_depletion_phenotype
+NAD_depletion_phenotype,               0
+NDUFS8_rna,                            TF_YY1_complex
+NO,                                    0
+NRF1,                                  0
+POLRMT_rna,                            TF_NRF1_complex
+PPARA,                                 0
+PPARGC1A_acetylated_phosphorylated,    !PPARGC1A_phosphorylated&!acetyl_CoA&KAT2A | !PPARGC1A_phosphorylated&acetyl_CoA | PPARGC1A_phosphorylated
+PPARGC1A_phosphorylated,               !ESRRA | ESRRA&!NAD&!PPARGC1A_acetylated_phosphorylated&SIRT1 | ESRRA&!NAD&PPARGC1A_acetylated_phosphorylated | ESRRA&NAD
+PPARGC1A_rna,                          TF_MEF2C_complex
+RNS,                                   0
+ROS,                                   0
+SDHB_rna,                              !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+SDHC_rna,                              !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+SDHD_rna,                              !TF_NRF1_complex&TF_NRF2_complex | TF_NRF1_complex
+SIRT1,                                 0
+SIRT3_rna,                             TF_ERRa_complex
+SNCA,                                  0
+SURF1_rna,                             TF_NRF1_complex
+TFAM_rna,                              TF_NRF1_complex
+TFB1M_rna,                             TF_NRF1_complex
+TFB2M_rna,                             TF_NRF1_complex
+TF_ERRa_complex,                       !PPARGC1A_phosphorylated&ESRRA | PPARGC1A_phosphorylated
+TF_MEF2C_complex,                      !PPARGC1A_phosphorylated&MEF2C_nucleus | PPARGC1A_phosphorylated
+TF_MEF2D_complex,                      !PPARGC1A_phosphorylated&MEF2D | PPARGC1A_phosphorylated
+TF_NRF1_complex,                       !PPARGC1A_phosphorylated&NRF1 | PPARGC1A_phosphorylated
+TF_NRF2_complex,                       !PPARGC1A_phosphorylated&GABPA | PPARGC1A_phosphorylated
+TF_PPARA_complex,                      !PPARGC1A_phosphorylated&PPARA | PPARGC1A_phosphorylated
+TF_YY1_complex,                        !PPARGC1A_phosphorylated&!YY1&mTORC1_complex | !PPARGC1A_phosphorylated&YY1 | PPARGC1A_phosphorylated
+TOMM20_rna,                            TF_NRF1_complex
+UCP2_rna,                              TF_YY1_complex
+VDAC1_rna,                             TF_NRF1_complex
+YY1,                                   0
+acetyl_CoA,                            0
+autophagy_phenotype,                   0
+complex_II_complex,                    !SDHC_rna&!SDHD_rna&SDHB_rna | !SDHC_rna&SDHD_rna | SDHC_rna
+complex_IV_complex,                    !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&!COX6C_rna&!COX5A_rna&!COX7C_rna&!COX8A_rna&!COX4I1_rna&COX5B_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&!COX6C_rna&!COX5A_rna&!COX7C_rna&!COX8A_rna&COX4I1_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&!COX6C_rna&!COX5A_rna&!COX7C_rna&COX8A_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&!COX6C_rna&!COX5A_rna&COX7C_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&!COX6C_rna&COX5A_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&!COX7B_rna&COX6C_rna | !COX6A1_rna&!COX7A2_rna&!COX6B1_rna&COX7B_rna | !COX6A1_rna&!COX7A2_rna&COX6B1_rna | !COX6A1_rna&COX7A2_rna | COX6A1_rna
+complex_V_complex,                     !ATP5F1B_rna&ATP5F1C_rna | ATP5F1B_rna
+fatty_acid_oxidation_phenotype,        !TF_PPARA_complex&TF_ERRa_complex | TF_PPARA_complex
+mTORC1_complex,                        0
+mitochondrial_biogenesis_phenotype,    !PPARGC1A_phosphorylated&!complex_V_complex&!complex_II_complex&!complex_IV_complex&!SIRT3_rna&CYCS_rna | !PPARGC1A_phosphorylated&!complex_V_complex&!complex_II_complex&!complex_IV_complex&SIRT3_rna | !PPARGC1A_phosphorylated&!complex_V_complex&!complex_II_complex&complex_IV_complex | !PPARGC1A_phosphorylated&!complex_V_complex&complex_II_complex | !PPARGC1A_phosphorylated&complex_V_complex | PPARGC1A_phosphorylated
+mitochondrial_transcription_phenotype, !POLRMT_rna&!TFB2M_rna&!TFB1M_rna&TFAM_rna | !POLRMT_rna&!TFB2M_rna&TFB1M_rna | !POLRMT_rna&TFB2M_rna | POLRMT_rna
+mitochondrial_transport_phenotype,     !VDAC1_rna&!SURF1_rna&TOMM20_rna | !VDAC1_rna&SURF1_rna | VDAC1_rna

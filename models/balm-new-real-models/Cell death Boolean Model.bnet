@@ -1,0 +1,30 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# The lncRNA DLX6-AS1/miR-16-5p axis regulates autophagy and apoptosis in non-small cell lung cancer: A Boolean model of cell death
+
+targets, factors
+AKT,            !Stress_Signals | Stress_Signals&!BMI1&mTORC2 | Stress_Signals&BMI1
+AMPK,           !Stress_Signals&ATM&!ULK1 | Stress_Signals&!ULK1
+APOPTOSIS,      !Caspase3&DRAM1&!ULK1 | Caspase3&!ULK1
+ATM,            Stress_Signals&!E2F1&!BMI1 | Stress_Signals&E2F1
+AUTOPHAGY,      ULK1
+BAX,            !BCL2&DRAM1
+BCL2,           !miR_16&!PUMA&!DRAM1
+BMI1,           !E2F1&!miR_16 | E2F1
+CDK2_CycE,      E2F1&!miR_16&Cdc25A
+CDK46_CycD,     !miR_16&Cdc25A
+Caspase3,       !BCL2&BAX
+Cdc25A,         !ATM&!miR_16
+DLX6_AS1,       E2F1
+DRAM1,          p53
+E2F1,           !ATM&!RB | ATM&!RB | ATM&RB&Cdc25A
+Mdm2,           !ATM | ATM&AKT&p53
+PROLIFERATION,  CDK46_CycD
+PUMA,           p53
+RB,             !CDK46_CycD&!CDK2_CycE
+Stress_Signals, Stress_Signals
+ULK1,           !AMPK&!mTORC2&!mTORC1&DRAM1 | AMPK&!mTORC2&!mTORC1
+mTORC1,         !AMPK&!AKT&!miR_16 | !AMPK&!AKT&miR_16&!DRAM1 | !AMPK&!AKT&miR_16&DRAM1&!ULK1 | !AMPK&AKT | AMPK&AKT
+mTORC2,         !AMPK&!AKT&!miR_16 | !AMPK&!AKT&miR_16&!mTORC1&!DRAM1 | !AMPK&AKT | AMPK&!AKT&!miR_16 | AMPK&AKT
+miR_16,         ATM&!DLX6_AS1
+p53,            ATM&!AMPK&!Mdm2 | ATM&AMPK

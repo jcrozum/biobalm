@@ -1,0 +1,92 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://doi.org/10.1101/2023.09.03.556147
+
+targets, factors
+ALX,        ALX&LXs
+AMPs,       !NFKB1_Rela&!NFKBIZ&Neutrophil | !NFKB1_Rela&NFKBIZ&!Neutrophil&Prol_KC | !NFKB1_Rela&NFKBIZ&Neutrophil | NFKB1_Rela&!Neutrophil&Prol_KC | NFKB1_Rela&Neutrophil
+AhR,        IL23R&IL6R&TNFAR
+BLT1,       BLT1&LTB4
+CCL20,      Prol_KC&STAT3
+CCR6,       CCL20&CCR6
+CD109,      Prol_KC
+CD28,       CD28&CD80
+CD80,       TLR7&!iDC&pDC | TLR7&iDC
+CEBPB,      IL17R
+CREB1,      !EP2&EP4 | EP2
+CTLA4,      CD28&CD80&!CTLA4
+CXCL8,      !NFKBIZ&!Prol_KC&aKC | !NFKBIZ&Prol_KC&!STAT3&!TLR4&aKC | !NFKBIZ&Prol_KC&!STAT3&TLR4 | !NFKBIZ&Prol_KC&STAT3 | NFKBIZ&!Prol_KC&aKC | NFKBIZ&Prol_KC
+CXCR2,      CXCL8&CXCR2
+Death,      !Death&Prol_KC | Death
+Diff_KC,    !CD109&!IL17R&!IL1RL2&!IL22R&!KC&!TGFBR&preDiff_KC | !CD109&!IL17R&!IL1RL2&!IL22R&!KC&TGFBR | !CD109&!IL17R&!IL1RL2&!IL22R&KC | !CD109&!IL17R&!IL1RL2&IL22R&!KC&TGFBR | !CD109&!IL17R&!IL1RL2&IL22R&KC | !CD109&!IL17R&IL1RL2&!KC&TGFBR | !CD109&!IL17R&IL1RL2&KC | !CD109&IL17R&!KC&TGFBR | !CD109&IL17R&KC | CD109&!IL17R&!IL1RL2&!IL22R&!KC&preDiff_KC | CD109&!IL17R&!IL1RL2&!IL22R&KC | CD109&!IL17R&!IL1RL2&IL22R&KC | CD109&!IL17R&IL1RL2&KC | CD109&IL17R&KC
+Division,   !Division&Prol_KC | Division
+EP2,        EP2&PGE2
+EP4,        EP4&PGE2
+FOXP3,      TGFBR&Treg
+Fibroblast, IL19R
+GATA3,      IL4
+IFNAR,      IFNAR&IFNa
+IFNGR,      IFNGR&IFNg
+IFNa,       IRF7&pDC
+IFNg,       Th1
+IL10,       !CXCR2&!FOXP3&!Fibroblast&!GATA3&M2 | !CXCR2&!FOXP3&!Fibroblast&GATA3&!M2&Th2 | !CXCR2&!FOXP3&!Fibroblast&GATA3&M2 | !CXCR2&!FOXP3&Fibroblast&!GATA3&!M2&!TNFAR | !CXCR2&!FOXP3&Fibroblast&!GATA3&M2 | !CXCR2&!FOXP3&Fibroblast&GATA3&!M2&!TNFAR | !CXCR2&!FOXP3&Fibroblast&GATA3&!M2&TNFAR&Th2 | !CXCR2&!FOXP3&Fibroblast&GATA3&M2 | !CXCR2&FOXP3&!Fibroblast&!GATA3&!M2&Treg | !CXCR2&FOXP3&!Fibroblast&!GATA3&M2 | !CXCR2&FOXP3&!Fibroblast&GATA3&!M2&!Th2&Treg | !CXCR2&FOXP3&!Fibroblast&GATA3&!M2&Th2 | !CXCR2&FOXP3&!Fibroblast&GATA3&M2 | !CXCR2&FOXP3&Fibroblast&!GATA3&!M2&!TNFAR | !CXCR2&FOXP3&Fibroblast&!GATA3&!M2&TNFAR&Treg | !CXCR2&FOXP3&Fibroblast&!GATA3&M2 | !CXCR2&FOXP3&Fibroblast&GATA3&!M2&!TNFAR | !CXCR2&FOXP3&Fibroblast&GATA3&!M2&TNFAR&!Th2&Treg | !CXCR2&FOXP3&Fibroblast&GATA3&!M2&TNFAR&Th2 | !CXCR2&FOXP3&Fibroblast&GATA3&M2 | CXCR2&!FOXP3&!GATA3&M2 | CXCR2&!FOXP3&GATA3&!M2&Th2 | CXCR2&!FOXP3&GATA3&M2 | CXCR2&FOXP3&!GATA3&!M2&Treg | CXCR2&FOXP3&!GATA3&M2 | CXCR2&FOXP3&GATA3&!M2&!Th2&Treg | CXCR2&FOXP3&GATA3&!M2&Th2 | CXCR2&FOXP3&GATA3&M2
+IL10R,      IL10&IL10R
+IL12,       !NFKB1_Rela&STAT1&TYK2&iDC | NFKB1_Rela&TYK2&iDC
+IL12R,      CREB1&IL12&IL12R
+IL17,       !ILC3&!Neutrophil&!RORgamma&STAT3&!STAT6&Th17 | !ILC3&!Neutrophil&RORgamma&Th17 | !ILC3&Neutrophil | ILC3&!Neutrophil&!RORgamma&STAT3&!STAT6&Th17 | ILC3&!Neutrophil&RORgamma | ILC3&Neutrophil
+IL17R,      IL17&IL17R
+IL19,       !CEBPB&NFKB1_Rela&Prol_KC | CEBPB&Prol_KC
+IL19R,      IL19&IL19R
+IL1R,       IL1R&IL1b
+IL1RL2,     IL1RL2&IL36
+IL1b,       !NFKB1_Rela&!Neutrophil&!Prol_KC&!STAT1&Th0 | !NFKB1_Rela&!Neutrophil&!Prol_KC&STAT1&!STAT6&!Th0&iDC | !NFKB1_Rela&!Neutrophil&!Prol_KC&STAT1&!STAT6&Th0 | !NFKB1_Rela&!Neutrophil&!Prol_KC&STAT1&STAT6&Th0 | !NFKB1_Rela&!Neutrophil&Prol_KC | !NFKB1_Rela&Neutrophil | NFKB1_Rela
+IL22,       !Neutrophil&STAT3&!Th17&Th22 | !Neutrophil&STAT3&Th17 | Neutrophil
+IL22R,      IL22&IL22R
+IL23,       !CCL20&!EP4&!NFKB1_Rela&Neutrophil | !CCL20&!EP4&NFKB1_Rela&!Neutrophil&Prol_KC | !CCL20&!EP4&NFKB1_Rela&Neutrophil | !CCL20&EP4&!IRF7&!NFKB1_Rela&!Neutrophil&!STAT1&STAT3&iDC | !CCL20&EP4&!IRF7&!NFKB1_Rela&!Neutrophil&STAT1&iDC | !CCL20&EP4&!IRF7&!NFKB1_Rela&Neutrophil | !CCL20&EP4&!IRF7&NFKB1_Rela&!Neutrophil&!Prol_KC&iDC | !CCL20&EP4&!IRF7&NFKB1_Rela&!Neutrophil&Prol_KC | !CCL20&EP4&!IRF7&NFKB1_Rela&Neutrophil | !CCL20&EP4&IRF7&!NFKB1_Rela&!Neutrophil&iDC | !CCL20&EP4&IRF7&!NFKB1_Rela&Neutrophil | !CCL20&EP4&IRF7&NFKB1_Rela&!Neutrophil&!Prol_KC&iDC | !CCL20&EP4&IRF7&NFKB1_Rela&!Neutrophil&Prol_KC | !CCL20&EP4&IRF7&NFKB1_Rela&Neutrophil | CCL20&!EP4&!M1&!NFKB1_Rela&Neutrophil | CCL20&!EP4&!M1&NFKB1_Rela&!Neutrophil&Prol_KC | CCL20&!EP4&!M1&NFKB1_Rela&Neutrophil | CCL20&!EP4&M1 | CCL20&EP4&!IRF7&!M1&!NFKB1_Rela&!Neutrophil&!STAT1&STAT3&iDC | CCL20&EP4&!IRF7&!M1&!NFKB1_Rela&!Neutrophil&STAT1&iDC | CCL20&EP4&!IRF7&!M1&!NFKB1_Rela&Neutrophil | CCL20&EP4&!IRF7&!M1&NFKB1_Rela&!Neutrophil&!Prol_KC&iDC | CCL20&EP4&!IRF7&!M1&NFKB1_Rela&!Neutrophil&Prol_KC | CCL20&EP4&!IRF7&!M1&NFKB1_Rela&Neutrophil | CCL20&EP4&!IRF7&M1 | CCL20&EP4&IRF7&!M1&!NFKB1_Rela&!Neutrophil&iDC | CCL20&EP4&IRF7&!M1&!NFKB1_Rela&Neutrophil | CCL20&EP4&IRF7&!M1&NFKB1_Rela&!Neutrophil&!Prol_KC&iDC | CCL20&EP4&IRF7&!M1&NFKB1_Rela&!Neutrophil&Prol_KC | CCL20&EP4&IRF7&!M1&NFKB1_Rela&Neutrophil | CCL20&EP4&IRF7&M1
+IL23R,      CREB1&IL23&IL23R&STAT3
+IL36,       !NFKB1_Rela&!NFKBIZ&!Neutrophil&Prol_KC&STAT3 | !NFKB1_Rela&!NFKBIZ&Neutrophil | !NFKB1_Rela&NFKBIZ&!Neutrophil&Prol_KC | !NFKB1_Rela&NFKBIZ&Neutrophil | NFKB1_Rela&!Neutrophil&Prol_KC | NFKB1_Rela&Neutrophil
+IL4,        GATA3&!Tbet&Th2
+IL4R,       IL4&IL4R
+IL6,        !CEBPB&!Fibroblast&!Prol_KC&iDC | !CEBPB&!Fibroblast&Prol_KC&!STAT3&iDC | !CEBPB&!Fibroblast&Prol_KC&STAT3 | !CEBPB&Fibroblast&!IFNGR&!Prol_KC&iDC | !CEBPB&Fibroblast&!IFNGR&Prol_KC&!STAT3&iDC | !CEBPB&Fibroblast&!IFNGR&Prol_KC&STAT3 | !CEBPB&Fibroblast&IFNGR | CEBPB&!Fibroblast&!Prol_KC&iDC | CEBPB&!Fibroblast&Prol_KC | CEBPB&Fibroblast&!IFNGR&!Prol_KC&iDC | CEBPB&Fibroblast&!IFNGR&Prol_KC | CEBPB&Fibroblast&IFNGR
+IL6R,       IL6&IL6R
+ILC3,       RORgamma
+IRF7,       TLR7
+KC,         !Trigger
+KGF,        Fibroblast&STAT3
+KGFR,       KGF&KGFR
+LC,         KC
+LL37_Nucl,  !Neutrophil&aKC | Neutrophil
+LTB4,       !Neutrophil&Prol_KC | Neutrophil
+LXs,        M2&Neutrophil&PGE2
+M1,         !CCR6&!Fibroblast&!IL10R&TLR7 | !CCR6&Fibroblast&!IL10R | CCR6&!Fibroblast&!IFNAR&!IL10R&TLR7 | CCR6&!Fibroblast&IFNAR&!IL10R&!STAT1&TLR7 | CCR6&!Fibroblast&IFNAR&!IL10R&STAT1 | CCR6&Fibroblast&!IL10R
+M2,         IL10R
+NFKB1_Rela, !ALX&!EP4&!IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&TNFAR | !ALX&!EP4&!IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&!TLR4&TLR7 | !ALX&!EP4&!IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&TLR4 | !ALX&!EP4&!IFNAR&!IL17R&IL1RL2&!NFKB1_hd | !ALX&!EP4&!IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&!TNFAR&TRAF3IP2 | !ALX&!EP4&!IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&TNFAR | !ALX&!EP4&!IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&TLR7 | !ALX&!EP4&!IFNAR&IL17R&!IL1RL2&!NFKB1_hd&TLR4 | !ALX&!EP4&!IFNAR&IL17R&IL1RL2&!NFKB1_hd | !ALX&!EP4&IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&!TNFAR&TYK2 | !ALX&!EP4&IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&TNFAR | !ALX&!EP4&IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&!TLR4&TLR7 | !ALX&!EP4&IFNAR&!IL17R&!IL1RL2&!NFKB1_hd&TLR4 | !ALX&!EP4&IFNAR&!IL17R&IL1RL2&!NFKB1_hd | !ALX&!EP4&IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&!TNFAR&!TRAF3IP2&TYK2 | !ALX&!EP4&IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&!TNFAR&TRAF3IP2 | !ALX&!EP4&IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&!TLR7&TNFAR | !ALX&!EP4&IFNAR&IL17R&!IL1RL2&!NFKB1_hd&!TLR4&TLR7 | !ALX&!EP4&IFNAR&IL17R&!IL1RL2&!NFKB1_hd&TLR4 | !ALX&!EP4&IFNAR&IL17R&IL1RL2&!NFKB1_hd | !ALX&EP4&!NFKB1_hd
+NFKB1_hd,   IL10R
+NFKBIZ,     IL1RL2&!NFKB1_Rela&Prol_KC&STAT3 | IL1RL2&NFKB1_Rela&Prol_KC
+Neutrophil, !ALX&!BLT1&!CCR6&!CXCR2&IL17R | !ALX&!BLT1&!CCR6&CXCR2 | !ALX&!BLT1&CCR6 | !ALX&BLT1
+PGE2,       !M1&!Neutrophil&!Prol_KC&!Th17&iDC | !M1&!Neutrophil&!Prol_KC&Th17 | !M1&!Neutrophil&Prol_KC | !M1&Neutrophil | M1
+Prol_KC,    !IFNGR&!IL17R&!IL1RL2&IL22R | !IFNGR&!IL17R&IL1RL2 | !IFNGR&IL17R | IFNGR
+RORgamma,   !CREB1&IL23R&IL6R&TGFBR | CREB1&IL23R
+STAT1,      !IFNAR&IFNGR | IFNAR&!IFNGR&TYK2 | IFNAR&IFNGR
+STAT3,      !IL10R&!IL17R&!IL1R&!IL22R&!IL23R&IL6R&TYK2 | !IL10R&!IL17R&!IL1R&!IL22R&IL23R&TYK2 | !IL10R&!IL17R&!IL1R&IL22R&TYK2 | !IL10R&!IL17R&IL1R&TYK2 | !IL10R&IL17R&TYK2 | IL10R&TYK2
+STAT6,      IL4R
+TGFBR,      !CD109&TGFBR&TGFb
+TGFb,       M1&iDC
+TLR4,       !ALX&!AMPs&IL36&TLR4 | !ALX&AMPs&TLR4
+TLR7,       LL37_Nucl&TLR7
+TNFAR,      TNFAR&TNFa
+TNFa,       !M1&!Neutrophil&!Prol_KC&!Tbet&iDC | !M1&!Neutrophil&!Prol_KC&Tbet&!Th1&iDC | !M1&!Neutrophil&!Prol_KC&Tbet&Th1 | !M1&!Neutrophil&Prol_KC&!STAT3&!Tbet&iDC | !M1&!Neutrophil&Prol_KC&!STAT3&Tbet&!Th1&iDC | !M1&!Neutrophil&Prol_KC&!STAT3&Tbet&Th1 | !M1&!Neutrophil&Prol_KC&STAT3 | !M1&Neutrophil | M1
+TRAF3IP2,   IL17R
+TYK2,       !IFNAR&!IL12R&IL23R | !IFNAR&IL12R | IFNAR
+Tbet,       IL12R
+Th0,        CD28&CD80
+Th1,        !IL10R&Tbet&Th0
+Th17,       EP2&EP4&!IL10R&RORgamma&Th0
+Th2,        GATA3&!IFNg&Th0
+Th22,       AhR&!IL10R&Th0
+Treg,       !FOXP3&!IL10&LC | !FOXP3&IL10 | FOXP3&!IL10&!IL23R&!IL6R&!LC&Th0 | FOXP3&!IL10&!IL23R&!IL6R&LC | FOXP3&!IL10&!IL23R&IL6R&LC | FOXP3&!IL10&IL23R&LC | FOXP3&IL10
+Trigger,    Trigger
+aKC,        Trigger
+iDC,        !CCR6&!IFNAR&!IFNGR&!TLR7&TNFAR | !CCR6&!IFNAR&!IFNGR&TLR7 | !CCR6&!IFNAR&IFNGR | !CCR6&IFNAR | CCR6
+pDC,        TLR7&!TNFAR | TLR7&TNFAR&!pDC
+preDiff_KC, Prol_KC

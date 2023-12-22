@@ -1,0 +1,64 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://gitlab.lcsb.uni.lu/lcsb-biocore/publications/hemedan23-boolean-modelling-of-pd
+
+targets, factors
+AKT1_phosphorylated,                         0
+AMP,                                         !glycolysis_phenotype
+AMPK_complex_neuron,                         !energy_homeostasis_phenotype&!caloric_restriction_phenotype&!GHRL&!resveratrol_drug&!STK11&!CAMKK2&SESN2 | !energy_homeostasis_phenotype&!caloric_restriction_phenotype&!GHRL&!resveratrol_drug&!STK11&CAMKK2 | !energy_homeostasis_phenotype&!caloric_restriction_phenotype&!GHRL&!resveratrol_drug&STK11 | !energy_homeostasis_phenotype&!caloric_restriction_phenotype&!GHRL&resveratrol_drug | !energy_homeostasis_phenotype&!caloric_restriction_phenotype&GHRL | !energy_homeostasis_phenotype&caloric_restriction_phenotype | energy_homeostasis_phenotype
+ATP,                                         glycolysis_phenotype
+Akt_pathway_phenotype,                       !PHLPP1 | PHLPP1&mTORC2_complex
+CAMKK2,                                      Calmodulin_complex
+Ca2_ion,                                     cytosolic_calcium_ion_homeostasis_phenotype
+Calmodulin_complex,                          Ca2_ion
+DDB1_CUL4A_complex,                          0
+DDIT4,                                       0
+DDIT4_phosphorylated,                        !GSK3B&DDIT4 | GSK3B
+GATOR1_complex,                              !GATOR2_complex
+GATOR2_complex,                              0
+GHRL,                                        0
+GSK3B,                                       0
+MAPK1_phosphorylated_phosphorylated,         0
+NAD,                                         !NAMPT&!NMRK1&!nicotinamide_riboside_NR&nicotinamide | !NAMPT&!NMRK1&nicotinamide_riboside_NR | !NAMPT&NMRK1 | NAMPT
+NAD_depletion_phenotype,                     nicotinamide
+NAMPT,                                       0
+NMRK1,                                       0
+O_acetyl_ADP_D_ribose,                       !STK11_acetylated&!NAD&SIRT1 | !STK11_acetylated&NAD | STK11_acetylated
+PARP1,                                       !excitotoxicity_phenotype&!ROS&PARP1 | !excitotoxicity_phenotype&ROS | excitotoxicity_phenotype
+PHLPP1,                                      !UCHL1_neuron
+PRKN_neuron,                                 0
+RHEB_lysosome,                               !RHEB_lysosome&TSC1_TSC2_complex_neuron | RHEB_lysosome
+ROS,                                         0
+RPS6KB1_phosphorylated,                      mTORC1_complex
+Ragulator_SLC38A9_complex,                   !arginine&v_ATPase_complex | arginine
+SESN2,                                       !leucine&SESN2 | leucine
+SIRT1,                                       !nicotinamide | nicotinamide&!NAD&!caloric_restriction_phenotype&resveratrol_drug | nicotinamide&!NAD&caloric_restriction_phenotype | nicotinamide&NAD
+STK11,                                       !STK11_acetylated&!ATP | !STK11_acetylated&ATP&!AMP&!NAD&SIRT1 | !STK11_acetylated&ATP&!AMP&NAD | !STK11_acetylated&ATP&AMP | STK11_acetylated
+STK11_acetylated,                            0
+TSC1_TSC2_complex_neuron,                    !MAPK1_phosphorylated_phosphorylated&!AKT1_phosphorylated&!DDIT4&!AMPK_complex_neuron&TSC1_TSC2_complex_neuron | !MAPK1_phosphorylated_phosphorylated&!AKT1_phosphorylated&!DDIT4&AMPK_complex_neuron | !MAPK1_phosphorylated_phosphorylated&!AKT1_phosphorylated&DDIT4 | !MAPK1_phosphorylated_phosphorylated&AKT1_phosphorylated | MAPK1_phosphorylated_phosphorylated
+UBE2N_UBE2V1_complex,                        0
+UCHL1_PRKN_complex,                          1
+UCHL1_neuron,                                !UBE2N_UBE2V1_complex&UCHL1_PRKN_complex | UBE2N_UBE2V1_complex
+aging_phenotype,                             !nicotinamide_riboside_NR
+amino_acids_lysosome,                        autophagy_lysosome_system_phenotype
+amino_acids_neuron,                          amino_acids_lysosome
+apoptosis_phenotype,                         NAD_depletion_phenotype
+arginine,                                    amino_acids_lysosome
+autophagy_lysosome_system_phenotype,         0
+caloric_restriction_phenotype,               0
+catabolism_phenotype,                        AMPK_complex_neuron
+cytosolic_calcium_ion_homeostasis_phenotype, 0
+energy_homeostasis_phenotype,                0
+epilepsy_familial_focal_phenotype,           GATOR1_complex
+excitotoxicity_phenotype,                    0
+glycolysis_phenotype,                        AMPK_complex_neuron
+leucine,                                     amino_acids_neuron
+mTORC1_complex,                              !Ragulator_SLC38A9_complex&!DDB1_CUL4A_complex&!UCHL1_neuron | !Ragulator_SLC38A9_complex&!DDB1_CUL4A_complex&UCHL1_neuron&RHEB_lysosome | !Ragulator_SLC38A9_complex&DDB1_CUL4A_complex | Ragulator_SLC38A9_complex
+mTORC2_complex,                              !UCHL1_neuron&!RPS6KB1_phosphorylated | !UCHL1_neuron&RPS6KB1_phosphorylated&TSC1_TSC2_complex_neuron | UCHL1_neuron
+mitochondrial_dysfunction_phenotype,         NAD_depletion_phenotype
+nicotinamide,                                !PARP1&!STK11_acetylated&!NAD&SIRT1 | !PARP1&!STK11_acetylated&NAD | !PARP1&STK11_acetylated | PARP1
+nicotinamide_riboside_NR,                    0
+parthanatos_phenotype,                       NAD_depletion_phenotype
+resveratrol_drug,                            0
+sestrin_GATOR2_complex,                      !SESN2&GATOR2_complex | SESN2
+v_ATPase_complex,                            amino_acids_lysosome

@@ -1,0 +1,69 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://gitlab.lcsb.uni.lu/lcsb-biocore/publications/hemedan23-boolean-modelling-of-pd
+
+targets, factors
+ADCYAP1_rna,                        TF_NR4A2_complex
+ALDH1A1_rna,                        !TF_FOXA1_2_complex&!TF_NR4A2_complex&TF_PITX3_complex | !TF_FOXA1_2_complex&TF_NR4A2_complex | TF_FOXA1_2_complex
+BDNF_rna,                           !TF_NR4A2_complex&TF_PITX3_complex | TF_NR4A2_complex
+CFLAR_rna,                          TF_NR4A2_complex
+COX5A_rna,                          TF_NR4A2_complex
+COX5B_rna,                          TF_NR4A2_complex
+COX6A1_rna,                         TF_NR4A2_complex
+COX8A_rna,                          TF_NR4A2_complex
+DCTN1_rna,                          TF_LMX1A_B_complex
+DDC_rna,                            !TF_FOXA1_2_complex&TF_NR4A2_complex | TF_FOXA1_2_complex
+DRD2_rna,                           !TF_FOXA1_2_complex&!TF_NR4A2_complex&TF_PITX3_complex | !TF_FOXA1_2_complex&TF_NR4A2_complex | TF_FOXA1_2_complex
+DYNC1H1_rna,                        TF_LMX1A_B_complex
+EN1,                                !TF_PITX3_complex
+EN1_rna,                            TF_FOXA1_2_complex
+FOXA2,                              0
+FOXO1_rna,                          TF_LMX1A_B_complex
+FOXO3_rna,                          TF_LMX1A_B_complex
+GCH1_rna,                           TF_NR4A2_complex
+GDNF_rna,                           TF_PITX3_complex
+KCNJ6_rna,                          TF_PITX3_complex
+KIF1A_rna,                          TF_LMX1A_B_complex
+KLC1_rna,                           TF_LMX1A_B_complex
+LMX1A_rna,                          TF_FOXA1_2_complex
+LMX1B_rna,                          TF_FOXA1_2_complex
+LRRK2,                              0
+MAP1B_rna,                          TF_LMX1A_B_complex
+MIR133B_rna,                        TF_PITX3_complex
+NCOR2,                              0
+NDUFB8_rna,                         TF_NR4A2_complex
+NKX6_1_rna,                         TF_FOXA1_2_complex
+NR4A2_nucleus,                      !PIAS4&NR4A2_nucleus | PIAS4
+NR4A2_rna,                          !TF_LMX1A_B_complex&TF_FOXA1_2_complex | TF_LMX1A_B_complex
+NRF1_rna,                           TF_LMX1A_B_complex
+PARK7,                              PIAS4
+PBX1,                               0
+PIAS4,                              0
+PIN1,                               0
+PITX3,                              !PITX3_rna&!MIR133B_rna | PITX3_rna
+PITX3_rna,                          TF_NR4A2_complex
+PRKAA2_rna,                         TF_NR4A2_complex
+RET_rna,                            TF_NR4A2_complex
+RGS6_rna,                           TF_PITX3_complex
+RXRA,                               retinoic_acid
+SESN3_rna,                          TF_NR4A2_complex
+SFPQ,                               !PARK7
+SLC18A2_rna,                        !TF_FOXA1_2_complex&!TF_NR4A2_complex&TF_PITX3_complex | !TF_FOXA1_2_complex&TF_NR4A2_complex | TF_FOXA1_2_complex
+SLC6A3_rna,                         !TF_FOXA1_2_complex&!TF_NR4A2_complex&TF_PITX3_complex | !TF_FOXA1_2_complex&TF_NR4A2_complex | TF_FOXA1_2_complex
+SNCA,                               0
+SOD1_rna,                           TF_NR4A2_complex
+TFEB_rna,                           TF_LMX1A_B_complex
+TF_FOXA1_2_complex,                 0
+TF_LMX1A_B_complex,                 0
+TF_NR4A2_complex,                   !RXRA&!FOXA2&!PIN1&!PITX3&!SNCA | !RXRA&!FOXA2&!PIN1&!PITX3&SNCA&!NCOR2 | !RXRA&!FOXA2&!PIN1&!PITX3&SNCA&NCOR2&!PIAS4 | !RXRA&!FOXA2&!PIN1&!PITX3&SNCA&NCOR2&PIAS4&NR4A2_nucleus | !RXRA&!FOXA2&!PIN1&PITX3 | !RXRA&!FOXA2&PIN1 | !RXRA&FOXA2 | RXRA
+TF_PITX3_complex,                   !PBX1&!LRRK2 | PBX1
+TH_rna,                             !SFPQ | SFPQ&!TF_FOXA1_2_complex&!TF_NR4A2_complex&TF_PITX3_complex | SFPQ&!TF_FOXA1_2_complex&TF_NR4A2_complex | SFPQ&TF_FOXA1_2_complex
+VIP_rna,                            TF_NR4A2_complex
+autophagy_phenotype,                TFEB_rna
+axonal_transport_phenotype,         !MAP1B_rna&!KLC1_rna&!DYNC1H1_rna&!DCTN1_rna&KIF1A_rna | !MAP1B_rna&!KLC1_rna&!DYNC1H1_rna&DCTN1_rna | !MAP1B_rna&!KLC1_rna&DYNC1H1_rna | !MAP1B_rna&KLC1_rna | MAP1B_rna
+dopamine_metabolism_phenotype,      !GCH1_rna&!DDC_rna&!SLC18A2_rna&!SLC6A3_rna&!DRD2_rna&!ALDH1A1_rna&TH_rna | !GCH1_rna&!DDC_rna&!SLC18A2_rna&!SLC6A3_rna&!DRD2_rna&ALDH1A1_rna | !GCH1_rna&!DDC_rna&!SLC18A2_rna&!SLC6A3_rna&DRD2_rna | !GCH1_rna&!DDC_rna&!SLC18A2_rna&SLC6A3_rna | !GCH1_rna&!DDC_rna&SLC18A2_rna | !GCH1_rna&DDC_rna | GCH1_rna
+mitochondrial_biogenesis_phenotype, !NDUFB8_rna&!COX6A1_rna&!COX5A_rna&!COX8A_rna&COX5B_rna | !NDUFB8_rna&!COX6A1_rna&!COX5A_rna&COX8A_rna | !NDUFB8_rna&!COX6A1_rna&COX5A_rna | !NDUFB8_rna&COX6A1_rna | NDUFB8_rna
+neuron_survival_phenotype,          !RET_rna&!BDNF_rna&GDNF_rna | !RET_rna&BDNF_rna | RET_rna
+pacemaking_activity_phenotype,      KCNJ6_rna
+retinoic_acid,                      0
+retinoic_acid_synthesis_phenotype,  ALDH1A1_rna

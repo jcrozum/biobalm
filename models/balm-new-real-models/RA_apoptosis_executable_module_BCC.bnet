@@ -1,0 +1,185 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://doi.org/10.1093/bioinformatics/btaa484
+
+targets, factors
+csa1,   !csa44&!csa45&!csa70&sa740&sa741 | !csa44&!csa45&csa70&sa740 | !csa44&csa45&sa740 | csa44
+csa10,  csa87&sa71&sa72
+csa100, sa1694
+csa101, sa306&sa305
+csa102, sa1729
+csa11,  sa80
+csa16,  !csa5&!sa1451&!sa112&!sa1400&!sa1352&!sa313&sa197 | !csa5&!sa1451&!sa112&!sa1400&!sa1352&sa313 | !csa5&!sa1451&!sa112&sa1400&!sa1352 | !csa5&!sa1451&sa112&!sa1352 | !csa5&sa1451&!sa1352 | csa5&!sa1352
+csa32,  csa32
+csa38,  sa781&sa780
+csa39,  sa963
+csa42,  sa973
+csa43,  sa978
+csa44,  csa43&sa979
+csa45,  sa981
+csa47,  sa989
+csa49,  sa993
+csa5,   !csa10&!csa99&!sa1467&sa1361 | !csa10&!csa99&sa1467 | !csa10&csa99 | csa10
+csa50,  sa297
+csa51,  sa746
+csa52,  csa52
+csa53,  !csa49&sa819&sa308 | csa49&sa819
+csa54,  sa1674
+csa55,  sa1025
+csa57,  !sa1043&sa368 | sa1043
+csa63,  sa1103
+csa64,  sa1108
+csa66,  sa1242
+csa67,  sa1242
+csa69,  sa1311
+csa70,  csa70
+csa71,  sa1329
+csa72,  sa1332
+csa73,  !sa1800
+csa76,  csa76
+csa77,  csa77
+csa79,  csa16&csa77&!sa1716
+csa80,  csa79
+csa81,  csa1
+csa87,  csa44
+csa91,  sa970
+csa99,  sa1682
+sa1005, sa824
+sa1006, sa1009&!sa313&sa695 | sa1009&sa313
+sa1008, sa1366
+sa1009, sa1008
+sa1020, !csa54&csa63 | csa54
+sa1025, sa1025
+sa1027, sa1027
+sa1043, sa1043
+sa1045, sa1045
+sa1046, csa57&sa1045
+sa1087, sa1087
+sa1099, !sa183&sa1529
+sa1103, sa1103
+sa1108, sa1108
+sa112,  sa112
+sa1131, sa1133
+sa1133, sa1133
+sa1140, sa1188
+sa1188, sa1188
+sa1242, sa1242
+sa1279, !sa1734&!sa313&sa1707&!sa1140 | !sa1734&sa313&!sa1140 | sa1734&!sa1140
+sa1311, sa1087
+sa1317, csa69
+sa1329, sa1329
+sa1332, sa1332
+sa1351, sa174
+sa1352, csa71&sa1351
+sa1361, !csa81&!csa100&sa1352&sa72 | !csa81&csa100&sa72 | csa81&sa72
+sa1364, !csa73&csa72 | csa73
+sa1366, sa695
+sa1370, sa1370
+sa1386, !sa1388
+sa1388, sa1388
+sa1397, !sa1361&!sa1798&sa1364 | !sa1361&sa1798 | sa1361
+sa1400, sa1397
+sa1402, sa1397
+sa1436, !sa1447&sa95 | sa1447
+sa1443, sa95
+sa1445, sa1443
+sa1447, sa1445
+sa1451, sa1402
+sa1464, csa16&csa77&!sa1716
+sa1467, csa51
+sa1505, csa44
+sa1529, csa11
+sa1534, sa1534
+sa1671, !sa313
+sa1674, sa1674
+sa1682, csa50
+sa1684, csa80
+sa1694, sa1694
+sa1707, !csa66&!csa67&csa102&!sa1712&!sa1108 | !csa66&csa67&!sa1712&!sa1108 | csa66&!sa1712&!sa1108
+sa1710, sa1279
+sa1712, sa1710
+sa1716, sa1716
+sa1729, sa1099
+sa1734, csa102
+sa174,  csa80
+sa1792, sa1792
+sa1794, sa1792
+sa1796, sa1794
+sa1798, sa1796
+sa1800, sa1800
+sa183,  sa183
+sa192,  sa192
+sa197,  !csa5&sa1451 | csa5
+sa297,  sa297
+sa299,  csa45
+sa305,  !csa39&sa941&!sa1046 | csa39&!sa1046
+sa306,  !csa49&!csa38&!csa91&!csa55&!csa39&!sa922&sa777 | !csa49&!csa38&!csa91&!csa55&!csa39&sa922 | !csa49&!csa38&!csa91&!csa55&csa39 | !csa49&!csa38&!csa91&csa55 | !csa49&!csa38&csa91 | !csa49&csa38 | csa49
+sa308,  sa308
+sa311,  !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&!sa299&!sa1020&!sa368&!sa757&!sa1707&sa308 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&!sa299&!sa1020&!sa368&!sa757&sa1707 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&!sa299&!sa1020&!sa368&sa757 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&!sa299&!sa1020&sa368 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&!sa299&sa1020 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&!sa735&sa299 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&!sa331&!sa873&sa735 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&!sa941&sa331&!sa873 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&!sa824&sa941&!sa873 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&!sa731&sa824&!sa873 | !csa49&!csa42&!csa91&!csa39&!sa845&!sa922&sa731&!sa873 | !csa49&!csa42&!csa91&!csa39&!sa845&sa922&!sa873 | !csa49&!csa42&!csa91&!csa39&sa845&!sa873 | !csa49&!csa42&!csa91&csa39&!sa873 | !csa49&!csa42&csa91&!sa873 | !csa49&csa42&!sa873 | csa49&!sa873
+sa312,  sa1386
+sa313,  sa312&!sa954&!sa858&!sa314&sa1131 | sa312&!sa954&sa858&!sa314 | sa312&sa954&!sa314
+sa314,  sa314
+sa315,  sa315
+sa328,  !csa49&!csa101&csa39 | !csa49&csa101 | csa49
+sa331,  !sa1317&!sa1020&!sa898&sa328 | !sa1317&!sa1020&sa898 | !sa1317&sa1020 | sa1317
+sa368,  !csa53&!csa44&!sa421&!sa725&!sa331&!sa826&!sa904&sa926 | !csa53&!csa44&!sa421&!sa725&!sa331&sa826&!sa904 | !csa53&!csa44&!sa421&!sa725&sa331&!sa904 | !csa53&!csa44&!sa421&sa725&!sa904 | !csa53&csa44&!sa421&!sa904 | csa53&!sa421&!sa904
+sa390,  sa390
+sa421,  !sa725&!sa712&!sa891&!sa1005&!sa711&sa390 | !sa725&!sa712&!sa891&!sa1005&sa711 | !sa725&!sa712&sa891&!sa1005 | !sa725&sa712&!sa1005 | sa725&!sa1005
+sa68,   !sa192&sa1505
+sa685,  !sa313
+sa687,  sa1671&sa685
+sa689,  sa685
+sa695,  !sa1006
+sa697,  sa1370&sa1366
+sa701,  sa1366
+sa704,  sa1366
+sa705,  sa1366
+sa71,   sa71
+sa711,  sa711
+sa712,  sa712
+sa72,   sa72
+sa725,  !csa32&!sa731&sa727&sa729 | !csa32&sa731&sa727 | csa32&sa727
+sa727,  !csa64&sa1027&sa725
+sa729,  sa874&sa735
+sa731,  sa731
+sa733,  sa734
+sa734,  sa734
+sa735,  sa737&sa733
+sa737,  !csa64&sa735
+sa740,  sa740
+sa741,  sa741
+sa746,  !sa875&!sa936
+sa757,  !csa52&!csa54&csa63 | !csa52&csa54
+sa777,  !csa49&!csa42&!csa38&!sa824&sa735 | !csa49&!csa42&!csa38&sa824 | !csa49&!csa42&csa38 | !csa49&csa42 | csa49
+sa780,  sa780
+sa781,  csa38&csa52
+sa80,   sa68
+sa819,  sa819
+sa824,  !csa32&csa47 | csa32
+sa826,  !csa32&sa824 | csa32
+sa845,  sa845
+sa858,  sa954
+sa873,  !csa52&sa734
+sa874,  sa729&!sa305
+sa875,  sa875
+sa891,  sa891
+sa898,  sa328
+sa904,  sa904
+sa922,  sa922
+sa926,  sa926
+sa936,  !sa937
+sa937,  sa937
+sa94,   !csa76&!csa99&!csa1&sa315 | !csa76&!csa99&csa1 | !csa76&csa99 | csa76
+sa941,  !csa38&sa306 | csa38
+sa948,  !sa697&!sa705&!sa1436&!sa689&!sa701&!sa95&!sa1684&!sa687&sa704 | !sa697&!sa705&!sa1436&!sa689&!sa701&!sa95&!sa1684&sa687 | !sa697&!sa705&!sa1436&!sa689&!sa701&!sa95&sa1684 | !sa697&!sa705&!sa1436&!sa689&!sa701&sa95 | !sa697&!sa705&!sa1436&!sa689&sa701 | !sa697&!sa705&!sa1436&sa689 | !sa697&!sa705&sa1436 | !sa697&sa705 | sa697
+sa95,   sa94
+sa953,  sa953
+sa954,  !sa1534&sa953&sa311
+sa963,  sa963
+sa970,  sa970
+sa973,  sa973
+sa978,  sa978
+sa979,  sa979
+sa981,  sa981
+sa989,  sa989
+sa993,  sa993

@@ -1,0 +1,71 @@
+# model in BoolNet format
+# the header targets, factors is mandatory to be importable in the R package BoolNet
+# https://gitlab.lcsb.uni.lu/lcsb-biocore/publications/hemedan23-boolean-modelling-of-pd
+
+targets, factors
+AKT1_phosphorylated,                      0
+AMPK_complex_neuron,                      0
+AMPK_complex_nucleus,                     0
+ATG12_rna,                                TF_FOXO3_complex_nucleus
+BBC3_rna,                                 !TF_CHOP_FOXO_complex&TF_FOXO3_complex_nucleus | TF_CHOP_FOXO_complex
+BCL2L11_rna,                              !TF_CHOP_FOXO_complex&TF_FOXO3_complex_nucleus | TF_CHOP_FOXO_complex
+BECN1_rna,                                TF_FOXO3_complex_nucleus
+BNIP3L_rna,                               TF_FOXO3_complex_nucleus
+BNIP3_rna,                                TF_FOXO3_complex_nucleus
+CAT_rna,                                  TF_FOXO3_complex_nucleus
+CEBPB_rna,                                TF_AP_1_complex
+CLPP,                                     0
+DDIT3,                                    0
+DDIT3_rna,                                TF_AP_1_complex
+DNM1L_rna,                                TF_FOXO3_complex_nucleus
+EIF4EBP1_rna,                             TF_FOXO3_complex_nucleus
+FASLG_rna,                                TF_FOXO3_complex_nucleus
+FIS1_rna,                                 TF_FOXO3_complex_nucleus
+FOXO3_acetylated_phosphorylated,          !AKT1_phosphorylated&!neuron&!FOXO3_acetylated_phosphorylated&TF_FOXO3_complex_nucleus | !AKT1_phosphorylated&!neuron&FOXO3_acetylated_phosphorylated | !AKT1_phosphorylated&neuron | AKT1_phosphorylated
+FOXO3_mitochondrial_matrix,               SIRT3
+FOXO3_neuron,                             AMPK_complex_neuron
+FOXO3_nucleus,                            !SIRT3&FOXO3_mitochondrial_matrix | SIRT3
+Fission_Fusion_phenotype,                 !DNM1L_rna&!FIS1_rna&MFN2_rna | !DNM1L_rna&FIS1_rna | DNM1L_rna
+GABARAPL1_rna,                            TF_FOXO3_complex_nucleus
+GPX1_rna,                                 TF_FOXO3_complex_nucleus
+HSPD1,                                    0
+HSPE1,                                    0
+HTRA2,                                    0
+JUN,                                      0
+LONP1,                                    0
+MAP1LC3A_rna,                             TF_FOXO3_complex_nucleus
+MAP3K5,                                   ROS_simple_molecule_neuron
+MAPK14_phosphorylated,                    MAP3K5
+MAPK8,                                    0
+MAPK9_mitochondrial_matrix,               mt_UPR_phenotype
+MAPK9_nucleus,                            MAPK9_mitochondrial_matrix
+MAPK9_phosphorylated,                     !mtUPR_phenotype&MAP3K5 | mtUPR_phenotype
+MFN2_rna,                                 TF_FOXO3_complex_nucleus
+MUL1_rna,                                 TF_FOXO3_complex_nucleus
+PINK1,                                    0
+PINK1_rna,                                TF_FOXO3_complex_nucleus
+PPARGC1A_phosphorylated,                  0
+PPARGC1A_rna,                             !SNCA | SNCA&TF_FOXO3_complex_nucleus
+RICTOR_rna,                               TF_FOXO3_complex_nucleus
+ROS_simple_molecule_mitochondrial_matrix, 0
+ROS_simple_molecule_neuron,               0
+SESN3_rna,                                TF_FOXO3_complex_nucleus
+SIRT1,                                    PINK1
+SIRT2,                                    0
+SIRT3,                                    !ROS_simple_molecule_mitochondrial_matrix&!generic_protein_mitochondrial_matrix&SIRT3 | !ROS_simple_molecule_mitochondrial_matrix&generic_protein_mitochondrial_matrix | ROS_simple_molecule_mitochondrial_matrix
+SNCA,                                     0
+SOD2_rna,                                 TF_FOXO3_complex_nucleus
+TFAM_rna,                                 TF_FOXO3_complex_nucleus
+TF_AP_1_complex,                          !MAPK9_nucleus&JUN | MAPK9_nucleus
+TF_CHOP_FOXO_complex,                     !DDIT3&FOXO3_nucleus | DDIT3
+TF_FOXO3_complex_nucleus,                 !PPARGC1A_phosphorylated&!FOXO3_neuron&!SIRT1&!SIRT2&!MAPK9_phosphorylated&!AMPK_complex_nucleus&!FOXO3_acetylated_phosphorylated&TF_FOXO3_complex_nucleus | !PPARGC1A_phosphorylated&!FOXO3_neuron&!SIRT1&!SIRT2&!MAPK9_phosphorylated&!AMPK_complex_nucleus&FOXO3_acetylated_phosphorylated | !PPARGC1A_phosphorylated&!FOXO3_neuron&!SIRT1&!SIRT2&!MAPK9_phosphorylated&AMPK_complex_nucleus | !PPARGC1A_phosphorylated&!FOXO3_neuron&!SIRT1&!SIRT2&MAPK9_phosphorylated | !PPARGC1A_phosphorylated&!FOXO3_neuron&!SIRT1&SIRT2 | !PPARGC1A_phosphorylated&!FOXO3_neuron&SIRT1 | !PPARGC1A_phosphorylated&FOXO3_neuron | PPARGC1A_phosphorylated
+TXNIP_rna,                                TF_FOXO3_complex_nucleus
+apoptosis_phenotype,                      !TXNIP_rna&!FASLG_rna&!BCL2L11_rna&BBC3_rna | !TXNIP_rna&!FASLG_rna&BCL2L11_rna | !TXNIP_rna&FASLG_rna | TXNIP_rna
+autophagy_phenotype,                      !BECN1_rna&!MAP1LC3A_rna&!MUL1_rna&!GABARAPL1_rna&!ATG12_rna&!BNIP3_rna&BNIP3L_rna | !BECN1_rna&!MAP1LC3A_rna&!MUL1_rna&!GABARAPL1_rna&!ATG12_rna&BNIP3_rna | !BECN1_rna&!MAP1LC3A_rna&!MUL1_rna&!GABARAPL1_rna&ATG12_rna | !BECN1_rna&!MAP1LC3A_rna&!MUL1_rna&GABARAPL1_rna | !BECN1_rna&!MAP1LC3A_rna&MUL1_rna | !BECN1_rna&MAP1LC3A_rna | BECN1_rna
+generic_protein_mitochondrial_matrix,     !HTRA2 | HTRA2&!HSPD1&!HSPE1&generic_protein_mitochondrial_matrix | HTRA2&!HSPD1&HSPE1 | HTRA2&HSPD1
+mitochondrial_biogenesis_phenotype,       !TFAM_rna&PPARGC1A_rna | TFAM_rna
+mtUPR_phenotype,                          0
+mt_UPR_phenotype,                         !LONP1&!CLPP&generic_protein_mitochondrial_matrix | !LONP1&CLPP | LONP1
+neuron,                                   !MAPK8&neuron | MAPK8
+response_to_oxidative_stress_phenotype,   !CAT_rna&!SOD2_rna&GPX1_rna | !CAT_rna&SOD2_rna | CAT_rna
+translation_phenotype,                    !EIF4EBP1_rna

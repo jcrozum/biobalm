@@ -1,0 +1,29 @@
+# A meta-analysis of {Boolean} network models reveals design principles of gene regulatory networks
+
+targets, factors
+ICL, ICL & !(NUC1 | NUC2)
+FAcore, ICL & !((RNF4 & PLK1) | (FAcore & !ATR))
+FANCD2I, FAcore & (ATM | ATR) & !FANCD2I
+NUC1, (ICL & FANCD2I) | (DSB & PARP_1)
+RNF4, ICL & !FAcore
+NUC2, ICL & RNF4 & PLK1 & !(R_DSB | NUC1)
+DSB, (DSB | ICL & NUC2) & !(NHEJ | NUC1)
+PARP_1, (DSB | R_DSB) & gH2AX & !(KU_53BP1)
+R_DSB, (R_DSB | ((ICL | DSB) & NUC1)) & !(HRR)
+HRR, gH2AX & R_DSB & ATM & !(PLK1 & CycB_CDK1)
+KU_53BP1, DSB & !PARP_1
+NHEJ, KU_53BP1 & DSB & ATM & !(PLK1 & CycB_CDK1)
+gH2AX, (DSB | R_DSB) & (ATM | ATR | gH2AX | KU_53BP1) & !(WIP1 & PP2A_B55)
+ATR, (ICL | ATM) & !(WIP1 | (PLK1 & KU_53BP1))
+ATM, (ATR | DSB | R_DSB | NUC1 | FAcore) & !(WIP1 | PP2A_B55 | (PLK1 & KU_53BP1))
+MYT1, (ATM | ATR) & !(CDC25 | CycB_CDK1 | PLK1)
+WEE1, (ATM | ATR | PP2A_B55) & !(CDC25 | CycB_CDK1 | PLK1)
+p53, (ATM | ATR) & !(WIP1 & (PLK1 | CDK1_AurA))
+p21, p53
+PP2A_B55, (ATM | ATR) & !CycB_CDK1
+WIP1, p53
+CDK1_AurA, CycB_CDK1 | CDC25 | !(p21 & PP2A_B55) & !(WEE1 | MYT1 | ATM | ATR)
+PLK1, CycB_CDK1 | (ICL & ATR & !FAcore) | ((CDK1_AurA) & !(MYT1 | WEE1 | ATR | ATM))
+CDC25, CycB_CDK1 | (PLK1 & (CycB_CDK1 | CDK1_AurA) & !((WEE1 | MYT1) & (PP2A_B55 | ATM | ATR)))
+CycB_CDK1, CycB_CDK1 | (CDC25 & Plk1 & CDK1_AurA) & !p21
+Plk1, Plk1
