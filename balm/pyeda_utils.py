@@ -10,10 +10,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pyeda.boolalg.expr import Expression
+    from pyeda.boolalg.expr import Literal as PyedaLiteral
 
 import pyeda.boolalg.expr as pyeda_expression
 from pyeda.boolalg.bdd import BinaryDecisionDiagram, expr2bdd
-from pyeda.boolalg.expr import And, Equal, Implies, Literal, Not, Or, Xor
+from pyeda.boolalg.expr import And, Equal, Implies, Not, Or, Xor
 
 PYEDA_TRUE: Expression = pyeda_expression.expr(1)
 PYEDA_FALSE: Expression = pyeda_expression.expr(0)
@@ -133,12 +134,12 @@ def aeon_to_bdd(expression: str) -> BinaryDecisionDiagram:
     return expr2bdd(aeon_to_pyeda(expression))
 
 
-def expression_literals(expression: Expression) -> set[Literal]:
+def expression_literals(expression: Expression) -> set[PyedaLiteral]:
     """
     Compute the set of all literals appearing in the given PyEDA expression.
     """
-    result: set[Literal] = set()
+    result: set[PyedaLiteral] = set()
     for sub_expression in expression.iter_dfs():
-        if isinstance(sub_expression, Literal):
+        if isinstance(sub_expression, PyedaLiteral):
             result.add(sub_expression)
     return result

@@ -2,20 +2,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from balm.state_utils import state_list_to_bdd
+
 if TYPE_CHECKING:
     from balm.SuccessionDiagram import SuccessionDiagram
 
 import balm
 import balm.SuccessionDiagram
 from balm.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
-from balm.terminal_restriction_space import get_terminal_restriction_space
 from balm.trappist_core import compute_fixed_point_reduced_STG
+from balm.types import BooleanSpace
 
 
 def compute_attractor_seeds(
     sd: SuccessionDiagram,
     node_id: int,
-) -> list[dict[str, int]]:
+) -> list[BooleanSpace]:
     """
     Compute the list of vertices such that each attractor within the subspace of
     the given `node_id` is covered by exactly one vertex.
@@ -53,13 +55,7 @@ def compute_attractor_seeds(
         # and its "seed" is the retained set.
         return [retained_set]
 
-    terminal_restriction_space = get_terminal_restriction_space(
-        child_spaces,
-        sd.network,
-        ensure_subspace=node_space,
-        use_single_node_drivers=False,
-        use_tr_trapspaces=False,
-    )
+    terminal_restriction_space = ~state_list_to_bdd(child_spaces)
 
     candidate_seeds = compute_fixed_point_reduced_STG(
         sd.petri_net,

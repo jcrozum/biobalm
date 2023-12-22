@@ -1,6 +1,0 @@
-# Windows troubleshooting
-
-Currently, the code seems to be working on Windows, but with a few caveats:
-
- 1. I was getting some weird linker errors when installing PyEDA. This most likley depends on what method you used to install Python (for me, it was just the official Windows installer). There is probably a more elegant fix, but what I did was downgrade to Python 3.9, and then install PyEDA from a `.whl` file obtained [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/).
- 2 Installing clingo through `pip` is not enough. Instead, you also need the `clingo.exe` standalone executable. For whatever reason, Clingo does not publish binaries for the latest releases, but if you scroll down enough on their [release page](https://github.com/potassco/clingo/releases), some of the more major releases seem to have windows binaries attached (expand the `Assets` section and look for `win64` suffix). Once you extract the archive, place it somewhere appropriate (e.g. `Program Files`) and add the directory to your `PATH` (search for "Edit system environment variables", click "Environment variables", add the path corresponding to the clingo directory and save). Try running the command `clingo` in a fresh terminal to check if it worked.

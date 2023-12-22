@@ -1,26 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from biodivine_aeon import VariableId
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram, BDDVariable
-    from pyeda.boolalg.expr import Expression
     from typing import Any
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph  # type: ignore
-from networkx.algorithms import bipartite  # type: ignore
-from pyeda.boolalg.bdd import bddvar, expr2bdd
-from pyeda.boolalg.expr import expr
-
-from balm.pyeda_utils import aeon_to_pyeda
-from balm.SignedGraph import SignedGraph
-
-"""
-A python package for approximating minimum feedback vertex sets
-"""
-from balm.FVSpython3 import FVS as FVS
 
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
@@ -110,7 +97,7 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
 
 def feedback_vertex_set(
     network: BooleanNetwork | RegulatoryGraph | DiGraph,
-    parity: str | None = None,
+    parity: Literal["positive", "negative"] | None = None,
     subgraph: list[str | VariableId] | None = None,
 ) -> list[str]:
     """
@@ -144,7 +131,7 @@ def feedback_vertex_set(
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
-    parity: str | None = None,
+    parity: Literal["positive", "negative"] | None = None,
     subgraph: list[str | VariableId] | None = None,
 ) -> list[list[str]]:
     """
@@ -178,136 +165,3 @@ def independent_cycles(
 
     ic = network.independent_cycles(parity=parity, restriction=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
-
-
-def find_minimum_NFVS(network: BooleanNetwork) -> list[str]:
-    """
-    BDD variables
-    """
-    bdd_vars: dict[str, BDDVariable] = {}
-
-    """
-    BDDs of Boolean functions
-    """
-    bdd_funs: dict[str, BinaryDecisionDiagram] = {}
-
-    """
-    Negative feedback vertex set
-    """
-    U_neg = []
-
-    """
-    List of source nodes
-    """
-
-    source_nodes: list[str] = []
-
-    """
-    Node to input nodes
-    """
-
-    INx: dict[str, frozenset[Expression]] = {}
-
-    nodes: list[str] = []
-
-    for variable in network.variables():
-        var_name = network.get_variable_name(variable)
-        function = network.get_update_function(variable)
-        assert function is not None
-        nodes.append(var_name)
-
-        if function.strip() == var_name:
-            source_nodes.append(var_name)
-
-        fx_ex = aeon_to_pyeda(function)
-
-        # list of nodes appearing in Boolean function fx
-        INx[var_name] = fx_ex.support
-
-        bdd_vars[var_name] = bddvar(var_name)
-        bdd_funs[var_name] = expr2bdd(expr(fx_ex))
-
-    """Build the unsigned and signed interaction graphs"""
-    u_ig = DiGraph()
-    s_ig = SignedGraph(nodes)
-
-    for x in nodes:
-        u_ig.add_node(x)  # type: ignore
-
-        fx = bdd_funs[x]
-
-        for y in INx[x]:
-            is_actual_arc = False
-
-            vy = bdd_vars[str(y)]
-
-            fx_res_vy_0 = fx.restrict({vy: 0})
-            fx_res_vy_1 = fx.restrict({vy: 1})
-
-            pos_arc = ~fx_res_vy_0 & fx_res_vy_1
-            neg_arc = fx_res_vy_0 & ~fx_res_vy_1
-
-            if pos_arc.is_one() or pos_arc.satisfy_one():
-                # a positive arc with weight = 1
-                s_ig.set_edge(str(y), str(x), 1)
-                is_actual_arc = True
-
-            if neg_arc.is_one() or neg_arc.satisfy_one():
-                # a negative arc with weight = -1
-                s_ig.set_edge(str(y), str(x), -1)
-                is_actual_arc = True
-
-            if is_actual_arc:
-                u_ig.add_edge(str(y), str(x))  # type: ignore
-
-    """First, find feedback vertex set"""
-    U: list[str] = FVS.FVS(u_ig, randomseed=0)  # type: ignore
-
-    U = list(set(U) - set(source_nodes))  # type: ignore
-
-    """Second, filter feedback vertex set to get an negative feedback vertex set"""
-    U_neg = s_ig.get_self_negative_loops()
-    U_candidate: list[str] = []
-
-    for v in U:
-        if v not in U_neg:
-            U_candidate.append(v)
-
-    for v in U_neg:
-        s_ig.remove_vertex(v)
-
-    for v in source_nodes:
-        s_ig.remove_vertex(v)
-
-    while not is_no_negative_cycle(s_ig):
-        v = select_by_negative_degree(s_ig, U_candidate)
-
-        if len(v) == 0:
-            break
-
-        U_candidate.remove(v)
-
-        U_neg.append(v)
-
-        s_ig.remove_vertex(v)
-
-    return U_neg
-
-
-def is_no_negative_cycle(s_ig: SignedGraph) -> bool:
-    udGraph = s_ig.convert_to_undirected_graph()
-    return bipartite.is_bipartite(udGraph)  # type: ignore
-
-
-def select_by_negative_degree(s_ig: SignedGraph, U_candidate: list[str]) -> str:
-    v_selected = ""
-    max_neg_deg = -1
-
-    for v in U_candidate:
-        v_neg_deg = s_ig.get_negative_degree(v)
-
-        if v_neg_deg >= max_neg_deg:
-            v_selected = v
-            max_neg_deg = v_neg_deg
-
-    return v_selected
