@@ -11,7 +11,7 @@ dynamic = ["version"]
 
 
 [tool.setuptools]
-packages = ['balm', 'balm.FVSpython3', 'balm._sd_algorithms']
+packages = ['balm', 'balm._sd_algorithms']
 
 [tool.pyright]
 include = ["balm", "tests"]
