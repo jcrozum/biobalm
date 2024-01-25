@@ -1,15 +1,13 @@
-from typing import cast
-
-from biodivine_aeon import BooleanNetwork  # type: ignore
-from pyeda.boolalg.expr import Expression, expr
+from biodivine_aeon import BooleanNetwork, BooleanExpression, AsynchronousGraph
 
 from balm.space_utils import (
     expression_to_space_list,
     is_subspace,
-    is_syntactic_trap_space,
     percolate_network,
-    percolate_pyeda_expression,
+    percolation_conflicts,
+    percolate_expression,
     percolate_space,
+    percolate_space_strict,
     space_unique_key,
 )
 
@@ -22,12 +20,12 @@ def test_is_subspace():
 
 
 def test_expression_percolation():
-    e = cast(Expression, expr("(a & ~x) | (a & y)"))
+    e = BooleanExpression("(a & !x) | (a & y)")
 
-    assert expr("a") == percolate_pyeda_expression(e, {"x": 0, "y": 1})
-    assert expr(False) == percolate_pyeda_expression(e, {"a": 0})
-    assert expr("a") == percolate_pyeda_expression(e, {"x": 0, "y": 1})
-    assert expr(False) == percolate_pyeda_expression(e, {"a": 0})
+    assert BooleanExpression("a") == percolate_expression(e, {"x": 0, "y": 1})
+    assert BooleanExpression("false") == percolate_expression(e, {"a": 0})
+    assert BooleanExpression("a") == percolate_expression(e, {"x": 0, "y": 1})
+    assert BooleanExpression("false") == percolate_expression(e, {"a": 0})
 
 
 def test_space_percolation():
@@ -38,14 +36,13 @@ def test_space_percolation():
         c, a
     """
     )
+    graph = AsynchronousGraph(bn)
 
-    assert {"a": 0, "b": 0, "c": 0} == percolate_space(bn, {"a": 0})
-    # assert {} == percolate_space(bn, {"a": 0})[1]
-    assert is_syntactic_trap_space(bn, {"a": 0, "b": 0, "c": 0})
-    assert {"a": 1, "b": 1, "c": 1} == percolate_space(bn, {"a": 1})
-    # assert {} == percolate_space(bn, {"a": 1})[1]
-    assert is_syntactic_trap_space(bn, {"a": 1, "b": 1, "c": 1})
-
+    assert {"a": 0, "b": 0, "c": 0} == percolate_space(graph, {"a": 0})
+    assert {} == percolation_conflicts(graph, {"a": 0})
+    assert {"a": 1, "b": 1, "c": 1} == percolate_space(graph, {"a": 1})
+    assert {} == percolation_conflicts(graph, {"a": 1})
+    
     bn = BooleanNetwork.from_bnet(
         """
     a, b
@@ -53,19 +50,14 @@ def test_space_percolation():
     c, a
     """
     )
+    graph = AsynchronousGraph(bn)
 
-    assert {"a": 0, "b": 0, "c": 0} == percolate_space(
-        bn, {"a": 0, "b": 0, "c": 0}, strict_percolation=False
-    )
-    assert {"a": 0, "c": 0} == percolate_space(
-        bn, {"a": 0, "b": 0, "c": 0}, strict_percolation=True
-    )
+    assert {"a": 0, "b": 0, "c": 0} == percolate_space(graph, {"a": 0, "b": 0, "c": 0})
+    assert {"a": 0, "c": 0} == percolate_space_strict(graph, {"a": 0, "b": 0, "c": 0})
 
     # The conflict is on b. The rest is fine.
-    # assert {"b": 1} == percolate_space(bn, {"a": 0, "b": 0, "c": 0})[1]
-    assert not is_syntactic_trap_space(bn, {"a": 0})
-    assert is_syntactic_trap_space(bn, {})
-
+    assert {"b": 1} == percolation_conflicts(graph, {"a": 0, "b": 0, "c": 0})
+    
     bn = BooleanNetwork.from_bnet(
         """
     a, !b
@@ -74,7 +66,8 @@ def test_space_percolation():
     d, !a | d
     """
     )
-    assert {"b": 1, "c": 1} == percolate_space(bn, {"a": 1})
+    graph = AsynchronousGraph(bn)
+    assert {"b": 1, "c": 1} == percolate_space_strict(graph, {"a": 1})
 
 
 def test_constant_percolation():
@@ -85,11 +78,12 @@ def test_constant_percolation():
         c, a | b
     """
     )
+    graph = AsynchronousGraph(bn)
 
-    assert {"a": 1, "c": 1} == percolate_space(bn, {}, strict_percolation=False)
-    # assert {"a": 1} == percolate_space(bn, {"a": 0}, strict_percolation=False)[1]
-    assert {} == percolate_space(bn, {}, strict_percolation=True)
-    # assert {} == percolate_space(bn, {"a": 0}, strict_percolation=True)[1]
+    assert {"a": 1, "c": 1} == percolate_space(graph, {})
+    assert {"a": 1} == percolation_conflicts(graph, {"a": 0}, strict_percolation=False)
+    assert {} == percolate_space_strict(graph, {})
+    assert {} == percolation_conflicts(graph, {"a": 0}, strict_percolation=True)
 
 
 def test_network_percolation():
@@ -100,21 +94,22 @@ def test_network_percolation():
         c, c
     """
     )
+    graph = AsynchronousGraph(bn)
 
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0}))
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 0}))
-    assert "false" == percolated_bn.get_update_function("c")
-    assert "false" == percolated_bn.get_update_function("a")
-    assert "true" == percolated_bn.get_update_function("b")
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1}))
-    percolated_bn = percolate_network(bn, percolate_space(bn, {"c": 1}))
-    assert "true" == percolated_bn.get_update_function("c")
-    assert "b" == percolated_bn.get_update_function("a")
-    assert "!a" == percolated_bn.get_update_function("b")
+    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 0}), ctx=graph.symbolic_context())
+    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 0}), ctx=graph.symbolic_context())
+    assert "false" == str(percolated_bn.get_update_function("c"))
+    assert "false" == str(percolated_bn.get_update_function("a"))
+    assert "true" == str(percolated_bn.get_update_function("b"))
+    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 1}), ctx=graph.symbolic_context())
+    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 1}), ctx=graph.symbolic_context())
+    assert "true" == str(percolated_bn.get_update_function("c"))
+    assert "b" == str(percolated_bn.get_update_function("a"))
+    assert "!a" == str(percolated_bn.get_update_function("b"))
 
 
 def test_expression_to_spaces():
-    e = cast(Expression, expr("(a & c) | (~d & (a | c)) | f"))
+    e = BooleanExpression("(a & c) | (!d & (a | c)) | f")
 
     spaces = expression_to_space_list(e)
 

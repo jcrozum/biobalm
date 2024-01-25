@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 from balm.control import (
     Intervention,
@@ -42,6 +42,8 @@ def test_basic_succession_control():
     E, false
     """
     )
+    graph = AsynchronousGraph(bn)
+
     target_succession: list[BooleanSpace] = [
         {"S": 0},
         {"A": 0, "B": 0},
@@ -54,7 +56,7 @@ def test_basic_succession_control():
         [{"C": 1}, {"D": 1}],
     ]
 
-    drivers = drivers_of_succession(bn, target_succession)
+    drivers = drivers_of_succession(graph, target_succession)
     assert all([controls_are_equal(a, b) for a, b in zip(cs, drivers)])
 
     target_succession = [
@@ -65,7 +67,7 @@ def test_basic_succession_control():
 
     cs = [[{"S": 0}], [{"C": 1}, {"D": 1}], [{"A": 0}, {"B": 0}]]
 
-    drivers = drivers_of_succession(bn, target_succession)
+    drivers = drivers_of_succession(graph, target_succession)
     assert all([controls_are_equal(a, b) for a, b in zip(cs, drivers)])
 
     target_succession = [
@@ -77,7 +79,7 @@ def test_basic_succession_control():
 
     cs = [[{"E": 1}], [{"S": 0}], [{"C": 1}, {"D": 1}], [{"A": 0}, {"B": 0}]]
 
-    drivers = drivers_of_succession(bn, target_succession)
+    drivers = drivers_of_succession(graph, target_succession)
     assert all([controls_are_equal(a, b) for a, b in zip(cs, drivers)])
 
 

@@ -1,10 +1,10 @@
-from biodivine_aeon import BooleanNetwork  # type:ignore
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 from balm.motif_avoidant import _filter_candidates  # type: ignore
 from balm.motif_avoidant import _Pint_reachability  # type: ignore
 from balm.motif_avoidant import _preprocess_candidates  # type: ignore
 from balm.petri_net_translation import network_to_petrinet
-from balm.state_utils import state_list_to_bdd
+from balm.symbolic_utils import state_list_to_bdd
 from balm.types import BooleanSpace
 
 
@@ -15,6 +15,7 @@ def test_preprocessing_ssf_not_optimal():
         x2, (x1 & x2) | (!x1 & !x2)
     """
     )
+    graph = AsynchronousGraph(bn)
 
     s0: BooleanSpace = {"x1": 0, "x2": 0}
     s1: BooleanSpace = {"x1": 0, "x2": 1}
@@ -28,7 +29,7 @@ def test_preprocessing_ssf_not_optimal():
         Assume that terminal_restriction_space = {0, 1}^2 - {11} = {00, 01, 10}.
     """
 
-    terminal_restriction_space = state_list_to_bdd([s0, s1, s2])
+    terminal_restriction_space = state_list_to_bdd(graph.symbolic_context(), [s0, s1, s2])
 
     """
         The minimum NFVS is {x1, x2}.
@@ -39,14 +40,14 @@ def test_preprocessing_ssf_not_optimal():
     # candidates_F = {00}
     candidates_F = [s0]
     candidates_F = _preprocess_candidates(
-        bn, candidates_F, terminal_restriction_space, 1000
+        graph, candidates_F, terminal_restriction_space, 1000
     )
     assert len(candidates_F) == 1
 
     # candidates_F = {01, 10}
     candidates_F = [s1, s2]
     candidates_F = _preprocess_candidates(
-        bn, candidates_F, terminal_restriction_space, 1000
+        graph, candidates_F, terminal_restriction_space, 1000
     )
     assert len(candidates_F) == 1
 
@@ -59,6 +60,7 @@ def test_preprocessing_ssf_optimal():
         C, A | B
     """
     )
+    graph = AsynchronousGraph(bn)
 
     s0: BooleanSpace = {"A": 0, "B": 0, "C": 0}
     # s1 = {"A": 0, "B": 0, "C": 1}
@@ -75,7 +77,7 @@ def test_preprocessing_ssf_optimal():
         It has two time-reversal minimal trap spaces: 110 + 001. Both are self-negating.
         Assume that terminal_restriction_space = {0, 1}^3 - {101, 011, 110, 001} = {000, 010, 100, 111}.
     """
-    terminal_restriction_space = state_list_to_bdd([s0, s2, s4, s7])
+    terminal_restriction_space = state_list_to_bdd(graph.symbolic_context(), [s0, s2, s4, s7])
 
     """
         The minimum NFVS is {A, B}.
@@ -85,7 +87,7 @@ def test_preprocessing_ssf_optimal():
 
     candidates_F = [s0]
     candidates_F = _preprocess_candidates(
-        bn, candidates_F, terminal_restriction_space, 1000
+        graph, candidates_F, terminal_restriction_space, 1000
     )
     assert len(candidates_F) == 0
 
@@ -98,6 +100,8 @@ def test_ABNReach_current_version():
         x3, x3 | !x3
     """
     )
+    graph = AsynchronousGraph(bn)
+    ctx = graph.symbolic_context()
 
     s0: BooleanSpace = {"x1": 0, "x2": 0, "x3": 1}
     s1: BooleanSpace = {"x1": 0, "x2": 1, "x3": 1}
@@ -106,21 +110,21 @@ def test_ABNReach_current_version():
 
     petri_net = network_to_petrinet(bn)
 
-    joint_target_set = state_list_to_bdd([s3])
+    joint_target_set = state_list_to_bdd(ctx, [s3])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
     assert (
         is_reachable is False
     )  # 00 does not reach 11, Pint cannot determinem but Mole can
 
-    joint_target_set = state_list_to_bdd([s0])
+    joint_target_set = state_list_to_bdd(ctx, [s0])
     is_reachable = _Pint_reachability(petri_net, s3, joint_target_set)
     assert is_reachable is False  # 11 does not reach 00
 
-    joint_target_set = state_list_to_bdd([s1])
+    joint_target_set = state_list_to_bdd(ctx, [s1])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
     assert is_reachable is True  # 00 reaches 01
 
-    joint_target_set = state_list_to_bdd([s1, s3])
+    joint_target_set = state_list_to_bdd(ctx, [s1, s3])
     is_reachable = _Pint_reachability(petri_net, s0, joint_target_set)
     assert is_reachable is True  # 00 reaches 01
 
@@ -132,13 +136,14 @@ def test_FilteringProcess():
         x2, (x1 & x2) | (!x1 & !x2)
     """
     )
+    graph = AsynchronousGraph(bn)
 
     s0: BooleanSpace = {"x1": 0, "x2": 0}
     s1: BooleanSpace = {"x1": 0, "x2": 1}
     s2: BooleanSpace = {"x1": 1, "x2": 0}
     # s3 = {"x1": 1, "x2": 1}
 
-    terminal_res_space = state_list_to_bdd([s0, s1, s2])
+    terminal_res_space = state_list_to_bdd(graph.symbolic_context(), [s0, s1, s2])
     petri_net = network_to_petrinet(bn)
 
     F = [s1, s2]  # Candidate set after finishing preprocessing

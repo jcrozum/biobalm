@@ -5,24 +5,15 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from networkx import DiGraph  # type: ignore
-from pyeda.boolalg.bdd import expr2bdd
 from pypint import Goal, InMemoryModel  # type:ignore
 
 from balm.petri_net_translation import place_to_variable
-from balm.pyeda_utils import aeon_to_pyeda
-from balm.state_utils import (
-    dnf_function_is_true,
-    function_eval,
-    function_is_true,
-    remove_state_from_dnf,
-    state_list_to_bdd,
-    state_to_bdd,
-)
+from balm.state_utils import dnf_function_is_true, remove_state_from_dnf
 from balm.types import BooleanSpace
+from balm.symbolic_utils import state_list_to_bdd, state_to_bdd, function_eval, function_is_true
 
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram
+    from biodivine_aeon import AsynchronousGraph, Bdd
 
 
 """
@@ -31,7 +22,7 @@ if TYPE_CHECKING:
 
 
 def make_retained_set(
-    network: BooleanNetwork,
+    graph: AsynchronousGraph,
     nfvs: list[str],
     space: BooleanSpace,
     child_spaces: list[BooleanSpace] | None = None,
@@ -84,14 +75,11 @@ def make_retained_set(
         if x in retained_set:
             continue
 
-        aeon_fx = network.get_update_function(x)
-        pyeda_fx = aeon_to_pyeda(aeon_fx)
-        input_count = len(list(pyeda_fx.support))
-
-        half_count = pow(2, input_count - 1)
-        sat_count = pyeda_fx.satisfy_count()  # type: ignore
-
-        if sat_count > half_count:
+        fn_bdd = graph.mk_update_function(x)        
+        
+        # If most of the function is positive, we set the value 
+        # to `1`, otherwise set it to `0`.
+        if fn_bdd.cardinality() > fn_bdd.l_not().cardinality():
             retained_set[x] = 1
         else:
             retained_set[x] = 0
@@ -100,10 +88,10 @@ def make_retained_set(
 
 
 def detect_motif_avoidant_attractors(
-    network: BooleanNetwork,
+    graph: AsynchronousGraph,
     petri_net: DiGraph,
     candidates: list[BooleanSpace],
-    terminal_restriction_space: BinaryDecisionDiagram,
+    terminal_restriction_space: Bdd,
     max_iterations: int,
     ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
@@ -111,15 +99,13 @@ def detect_motif_avoidant_attractors(
     """
     Compute a sub-list of `candidates` which correspond to motif-avoidant
     attractors. Other method inputs:
-     - `network` and `petri_net` represent the model in which the property
+     - `graph` and `petri_net` represent the model in which the property
        should be checked.
      - `terminal_restriction_space` is a symbolic set of states which contains
-       all motif avoidant
-        attractors (i.e. if a candidate state can leave this set, the candidate
-        cannot be an attractor).
+       all motif avoidant attractors (i.e. if a candidate state can leave this 
+       set, the candidate cannot be an attractor).
      - `max_iterations` specifies how much time should be spent on the "simpler"
-       preprocessing
-        before applying a more complete method.
+       preprocessing before applying a more complete method.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -131,7 +117,7 @@ def detect_motif_avoidant_attractors(
         return candidates
 
     candidates = _preprocess_candidates(
-        network,
+        graph,
         candidates,
         terminal_restriction_space,
         max_iterations,
@@ -149,9 +135,9 @@ def detect_motif_avoidant_attractors(
 
 
 def _preprocess_candidates(
-    network: BooleanNetwork,
+    graph: AsynchronousGraph,
     candidates: list[BooleanSpace],
-    terminal_restriction_space: BinaryDecisionDiagram,
+    terminal_restriction_space: Bdd,
     max_iterations: int,
     ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
@@ -163,10 +149,6 @@ def _preprocess_candidates(
     randomly simulate transitions for individual states, trying to reach a state
     outside of the `terminal_restriction_space`.
 
-    TODO (1): There are multiple places where we build the symbolic encoding, and it
-    will surely introduce extra overhead. We might want to just create the encoding
-    once and then pass it around.
-
     TODO (2): We could probably make this algorithm slighlty less random by doing
     a limited version of symbolic reachability. I.e. instead of simulating just one
     state transition in each step, compute the whole successor BDD and then test
@@ -177,21 +159,12 @@ def _preprocess_candidates(
     if ensure_subspace is None:
         ensure_subspace = {}
 
-    # First, build the symbolic encoding:
-    variables: list[str] = []
-    update_functions: dict[str, BinaryDecisionDiagram] = {}
-    for varID in network.variables():
-        if str(varID) in ensure_subspace:  # do not update constant nodes
-            continue
-        var_name = network.get_variable_name(varID)
-        variables.append(var_name)
-        function_expression = network.get_update_function(varID)
-        function_bdd = expr2bdd(aeon_to_pyeda(function_expression))
-        update_functions[var_name] = function_bdd
-
     # A random generator initialized with a fixed seed. Ensures simulation
     # is randomized but deterministic.
     generator = random.Random(1234567890)
+    
+    variables = graph.network_variable_names()
+    update_functions = { var: graph.mk_update_function(var) for var in variables }
 
     # Use stochastic simulation to prune the set of candidate states.
     # We use different simulation approach depending on whether this space
@@ -240,7 +213,7 @@ def _preprocess_candidates(
 
         return filtered_candidates
     else:
-        filtered_candidates = []
+        filtered_candidates = []                
         for _ in range(max_iterations):
             generator.shuffle(variables)
             candidates_dnf = candidates.copy()
@@ -270,24 +243,26 @@ def _preprocess_candidates(
 def _filter_candidates(
     petri_net: DiGraph,
     candidates: list[BooleanSpace],
-    terminal_restriction_space: BinaryDecisionDiagram,
+    terminal_restriction_space: Bdd,
 ) -> list[BooleanSpace]:
     """
     Filter candidate states using reachability procedure in Pint.
     """
 
-    avoid_states = ~terminal_restriction_space | state_list_to_bdd(candidates)
+    ctx = terminal_restriction_space.__ctx__()
+    candidates_bdd = state_list_to_bdd(ctx, candidates)
+    avoid_states = candidates_bdd.l_and_not(terminal_restriction_space)
     filtered_candidates: list[BooleanSpace] = []
 
     for state in candidates:
-        state_bdd = state_to_bdd(state)
+        state_bdd = state_to_bdd(ctx, state)
 
-        # Remove state from the symbolic set. If we can prove that is
+        # Remove state from the symbolic set. If we can prove that it
         # is not an attractor, we will put it back.
-        avoid_states = avoid_states & ~state_bdd
+        avoid_states = avoid_states.l_and_not(state_bdd)
 
         if not _Pint_reachability(petri_net, state, avoid_states):
-            avoid_states = avoid_states | state_bdd
+            avoid_states = avoid_states.l_or(state_bdd)
             filtered_candidates.append(state)
 
     return filtered_candidates
@@ -296,7 +271,7 @@ def _filter_candidates(
 def _Pint_reachability(
     petri_net: DiGraph,
     initial_state: BooleanSpace,
-    target_states: BinaryDecisionDiagram,
+    target_states: Bdd,
 ) -> bool:
     """
     Use Pint to check if a given `initial_state` can possibly reach some state
@@ -306,7 +281,7 @@ def _Pint_reachability(
     model checker. However, in the future, we might also explore other methods, such as
     petri net reduction or symbolic reachability.
     """
-    if target_states.is_zero():
+    if target_states.is_false():
         return False  # Cannot reach a stat in an empty set.
 
     # Build a Pint model through an automata network and copy
@@ -320,16 +295,17 @@ def _Pint_reachability(
     return pint_model.reachability(goal=goal, fallback="mole")  # type: ignore
 
 
-def _Pint_build_symbolic_goal(states: BinaryDecisionDiagram) -> Goal:
+def _Pint_build_symbolic_goal(states: Bdd) -> Goal:
     """
     A helper method which (very explicitly) converts a set of states
     represented through a BDD into a Pint `Goal`.
     """
-    assert not states.is_zero()
+    assert not states.is_false()
 
     goals: list[Goal] = []
-    for clause in states.satisfy_all():  # type: ignore
-        goal_atoms = [f"{var}={level}" for var, level in clause.items()]  # type: ignore
+    for clause in states.clause_iterator():
+        named_clause = { states.__ctx__().get_variable_name(var): int(value) for var, value in clause.items() }
+        goal_atoms = [f"{var}={level}" for var, level in named_clause.items()]
         goals.append(Goal(",".join(goal_atoms)))
 
     return reduce(lambda a, b: a | b, goals)

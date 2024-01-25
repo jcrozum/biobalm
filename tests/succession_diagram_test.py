@@ -2,7 +2,7 @@ import sys
 import unittest
 
 from biodivine_aeon import find_attractors  # type: ignore
-from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph  # type: ignore
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph  # type: ignore
 
 import balm
 import balm.SuccessionDiagram
@@ -158,7 +158,7 @@ def test_expansion_comparisons(network_file: str):
     sys.setrecursionlimit(150000)
 
     bn = BooleanNetwork.from_file(network_file)
-    bn = bn.infer_regulatory_graph()
+    bn = bn.infer_valid_graph()
 
     sd_bfs = SuccessionDiagram(bn)
     bfs_success = sd_bfs.expand_bfs(bfs_level_limit=DEPTH_LIMIT, size_limit=NODE_LIMIT)
@@ -214,8 +214,8 @@ def test_attractor_detection(network_file: str):
         NODE_LIMIT = 10  # type: ignore
 
     bn = BooleanNetwork.from_file(network_file)
-    bn = bn.infer_regulatory_graph()
-    stg = SymbolicAsyncGraph(bn)
+    bn = bn.infer_valid_graph()
+    stg = AsynchronousGraph(bn)
 
     # Compute the succession diagram.
     sd = SuccessionDiagram(bn)
@@ -240,7 +240,7 @@ def test_attractor_detection(network_file: str):
         attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
             # Just a simple sanity check.
-            assert len(a) == bn.num_vars()
+            assert len(a) == bn.variable_count()
         if len(attr) > 0:
             nfvs_attractors += attr
 
@@ -291,8 +291,8 @@ def test_attractor_expansion(network_file: str):
         NODE_LIMIT = 10  # type: ignore
 
     bn = BooleanNetwork.from_file(network_file)
-    bn = bn.infer_regulatory_graph()
-    stg = SymbolicAsyncGraph(bn)
+    bn = bn.infer_valid_graph()
+    stg = AsynchronousGraph(bn)
 
     # Compute the succession diagram.
     sd = SuccessionDiagram(bn)
@@ -319,7 +319,7 @@ def test_attractor_expansion(network_file: str):
         attr = sd.node_attractor_seeds(i, compute=True)
         for a in attr:
             # Just a simple sanity check.
-            assert len(a) == bn.num_vars()
+            assert len(a) == bn.variable_count()
         if len(attr) > 0:
             nfvs_attractors += attr
 

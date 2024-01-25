@@ -4,7 +4,7 @@ from itertools import combinations, product
 from typing import Literal, cast
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
 from balm.space_utils import is_subspace, percolate_space
 from balm.SuccessionDiagram import SuccessionDiagram
@@ -159,7 +159,7 @@ def succession_control(
 
     for succession in successions:
         controls = drivers_of_succession(
-            bn,
+            succession_diagram.symbolic,
             succession,
             strategy=strategy,
             max_drivers_per_succession_node=max_drivers_per_succession_node,
@@ -228,7 +228,7 @@ def successions_to_target(
 
 
 def drivers_of_succession(
-    bn: BooleanNetwork,
+    stg: AsynchronousGraph,
     succession: list[BooleanSpace],
     strategy: str = "internal",
     max_drivers_per_succession_node: int | None = None,
@@ -265,7 +265,7 @@ def drivers_of_succession(
     for ts in succession:
         control_strategies.append(
             find_drivers(
-                bn,
+                stg,
                 ts,
                 strategy=strategy,
                 assume_fixed=assume_fixed,
@@ -273,14 +273,14 @@ def drivers_of_succession(
                 forbidden_drivers=forbidden_drivers,
             )
         )
-        ldoi = percolate_space(bn, ts | assume_fixed, strict_percolation=False)
+        ldoi = percolate_space(stg, ts | assume_fixed)
         assume_fixed.update(ldoi)
 
     return control_strategies
 
 
 def find_drivers(
-    bn: BooleanNetwork,
+    stg: AsynchronousGraph,
     target_trap_space: BooleanSpace,
     strategy: str = "internal",
     assume_fixed: BooleanSpace | None = None,
@@ -328,9 +328,7 @@ def find_drivers(
     if strategy == "internal":
         driver_pool = set(target_trap_space_inner) - forbidden_drivers
     elif strategy == "all":
-        driver_pool = (
-            set(bn.get_variable_name(id) for id in bn.variables()) - forbidden_drivers
-        )
+        driver_pool = set(stg.network_variable_names()) - forbidden_drivers
     else:
         raise ValueError("Unknown driver search strategy")
 
@@ -348,9 +346,7 @@ def find_drivers(
                     k: cast(Literal[0, 1], target_trap_space_inner[k])
                     for k in driver_set
                 }
-                ldoi = percolate_space(
-                    bn, driver_dict | assume_fixed, strict_percolation=False
-                )
+                ldoi = percolate_space(stg, driver_dict | assume_fixed)
                 if target_trap_space.items() <= ldoi.items():
                     drivers.append(driver_dict)
             elif strategy == "all":
@@ -359,9 +355,7 @@ def find_drivers(
                         driver: cast(Literal[0, 1], value)
                         for driver, value in zip(driver_set, vals)
                     }
-                    ldoi = percolate_space(
-                        bn, driver_dict | assume_fixed, strict_percolation=False
-                    )
+                    ldoi = percolate_space(stg, driver_dict | assume_fixed)
                     if target_trap_space.items() <= ldoi.items():
                         drivers.append(driver_dict)
     return drivers

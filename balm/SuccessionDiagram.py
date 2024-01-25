@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
@@ -96,6 +96,7 @@ class SuccessionDiagram:
 
     __slots__ = (
         "network",
+        "symbolic",
         "petri_net",
         "nfvs",
         "dag",
@@ -105,6 +106,7 @@ class SuccessionDiagram:
     def __init__(self, network: BooleanNetwork):
         # Original Boolean network.
         self.network = network
+        self.symbolic = AsynchronousGraph(network)
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
         # Negative feedback vertex set.
@@ -134,6 +136,7 @@ class SuccessionDiagram:
         self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
     ):
         self.network = BooleanNetwork.from_aeon(str(state["network rules"]))
+        self.symbolic = AsynchronousGraph(self.network)
         self.petri_net = cast(nx.DiGraph, state["petri net"])
         self.nfvs = cast(list[str], state["nfvs"])
         self.dag = cast(nx.DiGraph, state["G"])  # type: ignore
@@ -586,7 +589,7 @@ class SuccessionDiagram:
         if DEBUG:
             print(f"[{node_id}] Expanding: {len(self.node_space(node_id))} fixed vars.")
 
-        if len(current_space) == self.network.num_vars():
+        if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
             # return this fixed-point again. No need to continue.
             if DEBUG:
@@ -632,9 +635,7 @@ class SuccessionDiagram:
         considered to be zero (i.e. the node is the root).
         """
 
-        fixed_vars = percolate_space(
-            self.network, stable_motif, strict_percolation=False
-        )
+        fixed_vars = percolate_space(self.symbolic, stable_motif)
 
         key = space_unique_key(fixed_vars, self.network)
 

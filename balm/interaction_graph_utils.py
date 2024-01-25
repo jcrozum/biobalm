@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from biodivine_aeon import VariableId
+    from biodivine_aeon import VariableId, Regulation
     from typing import Any
 
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph
+from typing import cast
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
 from networkx import DiGraph  # type: ignore
 
 
@@ -28,35 +29,25 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     # from the network functions directly. Note that this step uses BDDs, so in the
     # unlikely event that the update functions are too complex to represent as BDDs,
     # this will crash on an out-of-memory error, or just run for a very long time.
-    network = network.infer_regulatory_graph()
+    network = network.infer_valid_graph()
 
     # Convert AEON `RegulatoryGraph` to a generic `DiGraph` that we can use later.
-    rg = network.graph()
+    rg = network.to_graph()
     ig = DiGraph()
 
     for var in rg.variables():
         ig.add_node(rg.get_variable_name(var))  # type: ignore
 
     for reg in rg.regulations():
-        if not reg["observable"]:
+        if not reg["essential"]:
             # In general, a fully specified network should only contain
-            # observable (i.e. essential) regulations.
+            # essential regulations after `infer_valid_graph`.
             raise Exception(
                 "Unreachable: You are using this on partially specified networks, aren't you?"
             )
         source = rg.get_variable_name(reg["source"])
         target = rg.get_variable_name(reg["target"])
-        sign = "?"
-        if "monotonicity" in reg:
-            # Monotonic regulation---add only one edge.
-            if reg["monotonicity"] == "activation":
-                sign = "+"
-            elif reg["monotonicity"] == "inhibition":
-                sign = "-"
-            else:
-                raise Exception(
-                    f"Unreachable: unknown monotonicity {reg['monotonicity']}."
-                )
+        sign = reg["sign"] if reg["sign"] is not None else "?"
         ig.add_edge(source, target, sign=sign)  # type: ignore
     return ig
 
@@ -72,25 +63,16 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     rg = RegulatoryGraph(list(graph.nodes()))  # type: ignore
     for edge in graph.edges():  # type: ignore
         edge_data: dict[Any, Any] = graph.get_edge_data(edge[0], edge[1])  # type: ignore
-        monotonicity = None
-        if "sign" in edge_data:
-            sign: str = edge_data["sign"]  # type: ignore
-            if sign == "+":
-                monotonicity = "activation"
-            elif sign == "-":
-                monotonicity = "inhibition"
-            elif sign != "?":
-                raise Exception(
-                    f"Unknown monotonicity sign: '{sign}'. Expected '+'/'-'/'?'"
-                )
-        rg.add_regulation(
-            {
-                "source": edge[0],
-                "target": edge[1],
-                "observable": True,  # For now, observability is not in the graph.
-                "monotonicity": monotonicity,
-            }
-        )
+        reg: Regulation[str] = {
+            "source": edge[0],
+            "target": edge[1],
+            "essential": True,
+            "sign": None,
+        }
+        if "sign" in edge_data and edge_data["sign"] in ["+", "-"]:
+            reg["sign"] = cast(SignType, edge_data["sign"])
+
+        rg.add_regulation(reg)
 
     return rg
 
@@ -98,7 +80,7 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
 def feedback_vertex_set(
     network: BooleanNetwork | RegulatoryGraph | DiGraph,
     parity: Literal["positive", "negative"] | None = None,
-    subgraph: list[str | VariableId] | None = None,
+    subgraph: list[str] | list[VariableId] | None = None,
 ) -> list[str]:
     """
     Compute an approximately minimal feedback vertex set (FVS) of
@@ -121,18 +103,18 @@ def feedback_vertex_set(
     The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
     if isinstance(network, BooleanNetwork):
-        network = network.graph()
+        network = network.to_graph()
     if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
     assert isinstance(network, RegulatoryGraph)
-    fvs = network.feedback_vertex_set(parity=parity, restriction=subgraph)
+    fvs = network.feedback_vertex_set(parity=parity, subgraph=subgraph)
     return [network.get_variable_name(x) for x in fvs]
 
 
 def independent_cycles(
     network: BooleanNetwork | RegulatoryGraph,
     parity: Literal["positive", "negative"] | None = None,
-    subgraph: list[str | VariableId] | None = None,
+    subgraph: list[str] | list[VariableId] | None = None,
 ) -> list[list[str]]:
     """
     Compute an approximately maximal set of independent cycles of
@@ -157,11 +139,11 @@ def independent_cycles(
     order of returned cycles with caution :)
     """
     if isinstance(network, BooleanNetwork):
-        network = network.graph()
+        network = network.to_graph()
 
     # this should never happen, but it's easy enough to convert
     if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
 
-    ic = network.independent_cycles(parity=parity, restriction=subgraph)
+    ic = network.independent_cycles(parity=parity, subgraph=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]

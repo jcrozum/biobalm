@@ -9,7 +9,6 @@ from biodivine_aeon import (  # type: ignore
 )
 
 from balm.petri_net_translation import network_to_petrinet
-from balm.space_utils import is_syntactic_trap_space
 from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
 
 # TODO: Right now, this is necessary to correctly parse some of the larger models

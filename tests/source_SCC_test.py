@@ -1,9 +1,9 @@
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 import balm.SuccessionDiagram
 from balm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
-    find_scc_sd,
+    find_subnetwork_sd,
     find_source_nodes,
     perc_and_remove_constants_from_bn,
 )
@@ -22,13 +22,14 @@ def test_find_source_nodes():
     source_after_perc, source_after_perc & constant1_1
     after_perc_0, after_perc_0 & constant1_0"""
     )
+    graph = AsynchronousGraph(bn)
 
     source_nodes = find_source_nodes(bn)
 
     assert source_nodes == ["source"]
 
-    perc_space = percolate_space(bn, {}, strict_percolation=False)
-    perc_bn = percolate_network(bn, perc_space)
+    perc_space = percolate_space(graph, {})
+    perc_bn = percolate_network(bn, perc_space, ctx=graph)
 
     source_nodes = find_source_nodes(perc_bn)
 
@@ -48,7 +49,7 @@ def test_perc_and_remove_constants_from_bn():
     after_perc_0, after_perc_0 & constant1_0"""
     )
 
-    clean_bnet, _ = perc_and_remove_constants_from_bn(bn, {})
+    clean_bnet = perc_and_remove_constants_from_bn(bn, {}).to_bnet()
 
     bn2 = BooleanNetwork.from_bnet(
         """targets,factors
@@ -57,19 +58,21 @@ def test_perc_and_remove_constants_from_bn():
     source_after_perc, source_after_perc"""
     )
 
-    clean_bnet2, _ = perc_and_remove_constants_from_bn(bn2, {})
+    clean_bnet2 = perc_and_remove_constants_from_bn(bn2, {}).to_bnet()
 
     assert clean_bnet == clean_bnet2
 
 
 def test_find_scc_sd():
-    bnet = """targets,factors
+    bn = BooleanNetwork.from_bnet(
+"""targets,factors
 A, B
 B, A | A &  C"""
+    )
+    
 
-    scc_sd, _ = find_scc_sd(
-        bnet,
-        ["A", "B"],
+    scc_sd, _ = find_subnetwork_sd(
+        bn,
         expander=balm.SuccessionDiagram.SuccessionDiagram.expand_bfs,
         check_maa=True,
     )
@@ -84,7 +87,7 @@ def expansion(bn: BooleanNetwork):
     fully_expanded = expand_source_SCCs(sd, check_maa=False)
     assert fully_expanded
 
-    return bn.num_vars(), len(sd), sd.depth(), len(sd.minimal_trap_spaces())
+    return bn.variable_count(), len(sd), sd.depth(), len(sd.minimal_trap_spaces())
 
 
 def test_expansion():
@@ -150,7 +153,7 @@ def attractor_search(bn: BooleanNetwork):
             motif_avoidant_count += len(attr)
 
     return (
-        bn.num_vars(),
+        bn.variable_count(),
         len(sd),
         sd.depth(),
         attractor_count,

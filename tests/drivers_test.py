@@ -1,4 +1,5 @@
-from balm.drivers import BooleanNetwork, find_single_drivers, find_single_node_LDOIs
+from balm.drivers import find_single_drivers, find_single_node_LDOIs
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 
 def test_find_single_node_LDOIs():
@@ -12,7 +13,8 @@ def test_find_single_node_LDOIs():
     E, false
     """
     )
-    LDOIs = find_single_node_LDOIs(bn)
+    graph = AsynchronousGraph(bn)
+    LDOIs = find_single_node_LDOIs(graph)
     assert LDOIs[("S", 0)] == {"S": 0}
     assert LDOIs[("S", 1)] == {"S": 1, "A": 1, "B": 1, "C": 1, "D": 1}
     assert LDOIs[("A", 0)] == {"B": 0}
@@ -36,25 +38,26 @@ def test_find_single_drivers():
     E, true
     """
     )
-    LDOIs = find_single_node_LDOIs(bn)
-    assert find_single_drivers({"A": 0, "B": 0}, bn) == {("A", 0)}
-    assert find_single_drivers({"A": 0, "B": 0}, bn, LDOIs) == {("A", 0)}
-    assert find_single_drivers({"A": 1, "B": 1}, bn) == {("A", 1), ("B", 1), ("S", 1)}
-    assert find_single_drivers({"A": 1, "B": 1}, bn, LDOIs) == {
+    graph = AsynchronousGraph(bn)
+    LDOIs = find_single_node_LDOIs(graph)
+    assert find_single_drivers({"A": 0, "B": 0}, graph) == {("A", 0)}
+    assert find_single_drivers({"A": 0, "B": 0}, graph, LDOIs) == {("A", 0)}
+    assert find_single_drivers({"A": 1, "B": 1}, graph) == {("A", 1), ("B", 1), ("S", 1)}
+    assert find_single_drivers({"A": 1, "B": 1}, graph, LDOIs) == {
         ("A", 1),
         ("B", 1),
         ("S", 1),
     }
-    assert find_single_drivers({"C": 0, "D": 0}, bn) == {("C", 0)}
-    assert find_single_drivers({"C": 0, "D": 0}, bn, LDOIs) == {("C", 0)}
-    assert find_single_drivers({"C": 1, "D": 1}, bn) == {
+    assert find_single_drivers({"C": 0, "D": 0}, graph) == {("C", 0)}
+    assert find_single_drivers({"C": 0, "D": 0}, graph, LDOIs) == {("C", 0)}
+    assert find_single_drivers({"C": 1, "D": 1}, graph) == {
         ("A", 1),
         ("B", 1),
         ("C", 1),
         ("D", 1),
         ("S", 1),
     }
-    assert find_single_drivers({"C": 1, "D": 1}, bn, LDOIs) == {
+    assert find_single_drivers({"C": 1, "D": 1}, graph, LDOIs) == {
         ("A", 1),
         ("B", 1),
         ("C", 1),
