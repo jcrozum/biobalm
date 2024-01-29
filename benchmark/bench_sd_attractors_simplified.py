@@ -1,10 +1,10 @@
 from biodivine_aeon import BooleanNetwork
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
+from balm.SuccessionDiagram import SuccessionDiagram
 import sys
-import nfvsmotifs
+import balm
 
 # Print progress and succession diagram size.
-nfvsmotifs.SuccessionDiagram.DEBUG = True
+balm.SuccessionDiagram.DEBUG = True
 
 NODE_LIMIT = 1_000_000
 

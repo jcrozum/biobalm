@@ -2,13 +2,13 @@ import sys
 sys.path.append("..")
 
 from biodivine_aeon import BooleanNetwork
-from nfvsmotifs.SuccessionDiagram import SuccessionDiagram
-from nfvsmotifs._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from balm.SuccessionDiagram import SuccessionDiagram
+from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 import sys
-import nfvsmotifs
+import balm
 
 # Print progress and succession diagram size.
-nfvsmotifs.SuccessionDiagram.DEBUG = True
+balm.SuccessionDiagram.DEBUG = True
 
 NODE_LIMIT = 1_000_000
 DEPTH_LIMIT = 10_000

@@ -1,5 +1,5 @@
 from biodivine_aeon import BooleanNetwork
-from nfvsmotifs.trappist_core import trappist_async
+from balm.trappist_core import trappist_async
 import sys
 
 # A simple script to benchmark minimal trap space detection using trappist.
