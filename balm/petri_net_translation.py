@@ -16,12 +16,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanNetwork, Bdd
+    from typing import Generator
 
 import re
 import copy
 
 from networkx import DiGraph  # type: ignore
-from biodivine_aeon import SymbolicContext
+from biodivine_aeon import SymbolicContext, BddVariableSet, BddPartialValuation
 
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
@@ -150,20 +151,65 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
         function_bdd = ctx.mk_update_function(update_function)
         var_bdd = ctx.mk_network_variable(var)
 
-        positive_implicants = function_bdd.l_and(var_bdd.l_not())
-        negative_implicants = function_bdd.l_not().l_and(var_bdd)
+        p_bdd = function_bdd.l_and(var_bdd.l_not())
+        n_bdd = function_bdd.l_not().l_and(var_bdd)
 
         # Add 0->1 edges.
-        _create_transitions(pn, ctx, places, var_name, positive_implicants, go_up=True)
+        _create_transitions(pn, ctx.bdd_variable_set(), places, var_name, p_bdd, go_up=True)
         # Add 1-> 0 edges.
-        _create_transitions(pn, ctx, places, var_name, negative_implicants, go_up=False)
+        _create_transitions(pn, ctx.bdd_variable_set(), places, var_name, n_bdd, go_up=False)
 
     return pn
+
+def _optimized_recursive_dnf_generator(bdd: Bdd) -> Generator[BddPartialValuation, None, None]:
+    """
+    Yields a generator of `BddPartialValuation` objects, similar to `bdd.clause_iterator`,
+    but uses a recursive optimization strategy to return a smaller result than the default
+    method `Bdd` clause sequence. Note that this is still not the "optimal" DNF, but is often
+    close enough.
+
+    This is technically slower for BDDs that already have a small clause count, but can be
+    much better in the long-term when the clause count is high.
+    """
+
+    # Some performance notes:
+    #  - We could cache the best restriced BDDs, but usually this does not help much.
+    #  - We could try optimizing based on clause count instead of BDD size, but this will
+    #    need a new method in `lib-bdd` to compute clause count efficiently. (Now
+    #    we can only do it by walking the iterator.)
+    #  - The initial BDD size/ordering still do matter: starting with a smaller but equivalent
+    #    BDD can help achieve smaller DNF size.
+
+    if bdd.is_false():
+        return
+    if bdd.is_true():
+        yield BddPartialValuation(bdd.__ctx__(), {})
+        return
+    
+    support = sorted(bdd.support_set())
+    best_var = support[0]
+    best_size = 10 * len(bdd)
+    for var in support:
+        t = bdd.r_restrict({var: True})
+        f = bdd.r_restrict({var: False})
+        t_size = len(t)
+        f_size = len(f)
+        if t_size + f_size < best_size:
+            best_size = t_size + f_size
+            best_var = var
+
+    for t_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: True})):
+        t_val[best_var] = True
+        yield t_val
+    
+    for f_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: False})):
+        f_val[best_var] = False
+        yield f_val
 
 
 def _create_transitions(
     pn: DiGraph,
-    ctx: SymbolicContext,
+    ctx: BddVariableSet,
     places: dict[str, tuple[str, str]],
     var_name: str,
     implicant_bdd: Bdd,
@@ -174,7 +220,7 @@ def _create_transitions(
     positive/negative BN transitions.
     """
     dir_str = "up" if go_up else "down"
-    for t_id, implicant in enumerate(implicant_bdd.clause_iterator()):
+    for t_id, implicant in enumerate(_optimized_recursive_dnf_generator(implicant_bdd)):
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
         pn.add_node(  # type: ignore[reportUnknownMemberType]
             t_name,
@@ -191,7 +237,7 @@ def _create_transitions(
             pn.add_edge(places[var_name][1], t_name)  # type: ignore[reportUnknownMemberType] # noqa
             pn.add_edge(t_name, places[var_name][0])  # type: ignore[reportUnknownMemberType] # noqa
         for variable, value in implicant.items():            
-            variable_str = ctx.get_network_variable_name(variable)  # Convert from BDD variable to name.
+            variable_str = ctx.get_variable_name(variable)  # Convert from BDD variable to name.
             if variable_str == var_name:
                 continue
             # For the remaining variables, we simply check if the required

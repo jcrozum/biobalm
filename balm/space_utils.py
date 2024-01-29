@@ -10,7 +10,7 @@ from balm.symbolic_utils import function_restrict, function_eval
 """
 
 from typing import TYPE_CHECKING, cast, Literal
-from biodivine_aeon import BddVariableSet, SymbolicContext, UpdateFunction, AsynchronousGraph, BooleanNetwork
+from biodivine_aeon import BddVariableSet, UpdateFunction, AsynchronousGraph, BooleanNetwork
 from copy import copy
 
 if TYPE_CHECKING:
