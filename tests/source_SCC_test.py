@@ -21,7 +21,7 @@ def test_find_source_nodes():
     oscillator, !oscillator
     source_after_perc, source_after_perc & constant1_1
     after_perc_0, after_perc_0 & constant1_0"""
-    )
+    ).infer_valid_graph()
     graph = AsynchronousGraph(bn)
 
     source_nodes = find_source_nodes(bn)
@@ -47,7 +47,7 @@ def test_perc_and_remove_constants_from_bn():
     oscillator, !oscillator
     source_after_perc, source_after_perc & constant1_1
     after_perc_0, after_perc_0 & constant1_0"""
-    )
+    ).infer_valid_graph()
 
     clean_bnet = perc_and_remove_constants_from_bn(bn, {}).to_bnet()
 
@@ -67,15 +67,20 @@ def test_find_scc_sd():
     bn = BooleanNetwork.from_bnet(
 """targets,factors
 A, B
-B, A | A &  C"""
+B, A | C"""
     )
-    
+
+    # This "simulates" what would happen in the SCC expansion algorithm.
+    bn = perc_and_remove_constants_from_bn(bn, {'C': 0})
 
     scc_sd, _ = find_subnetwork_sd(
         bn,
         expander=balm.SuccessionDiagram.SuccessionDiagram.expand_bfs,
         check_maa=True,
     )
+
+    for node in scc_sd.node_ids():
+        print(scc_sd.node_space(node))
 
     assert scc_sd.dag.nodes[0]["space"] == {}
     assert scc_sd.dag.nodes[1]["space"] == {"A": 0, "B": 0}

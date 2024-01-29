@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Literal
-    from biodivine_aeon import Bdd, SymbolicContext, BddVariableSet
+    from biodivine_aeon import Bdd, SymbolicContext
 
 from balm.types import BooleanSpace
+from biodivine_aeon import BddVariableSet
 
 def state_to_bdd(ctx: SymbolicContext | BddVariableSet, state: BooleanSpace) -> Bdd:
     """

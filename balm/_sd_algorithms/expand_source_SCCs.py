@@ -189,7 +189,7 @@ def perc_and_remove_constants_from_bn(
         graph = AsynchronousGraph(bn)
 
     perc_space = percolate_space(graph, space)
-    perc_bn = percolate_network(bn, perc_space, ctx=graph.symbolic_context())
+    perc_bn = percolate_network(bn, perc_space, ctx=graph)
 
     return perc_bn.inline_constants(infer_constants=True, repair_graph=True)    
 

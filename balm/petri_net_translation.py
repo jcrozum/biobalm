@@ -114,12 +114,15 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
     # Assert that all network names are already sanitized.
     sanitize_network_names(network, check_only=True)
 
-    assert (
-        network.explicit_parameter_count() == 0
-    ), "Unsupported: Network contains explicit parameters."
-    assert (
-        network.implicit_parameter_count() == 0
-    ), "Unsupported: Network contains implicit parameters."
+    assert network.explicit_parameter_count() == 0, \
+        f"Parametrized networks are not supported. Found parameters: {network.explicit_parameter_names()}."
+    
+    # Implicit parameters with no regulators are allowed, since they just reprtesent free inputs
+    # and are explicitly handled by the succession diagram.
+    non_input_implicit = [ v for v in network.implicit_parameters() if len(network.predecessors(v)) > 0]
+    if len(non_input_implicit) > 0:
+        names = [network.get_variable_name(x) for x in non_input_implicit]
+        raise AssertionError(f"Parametrized networks are not supported. Found implicit parameters: {names}.")
 
     if ctx is None:
         ctx = SymbolicContext(network)
@@ -139,8 +142,11 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
     for var in network.variables():
         var_name = network.get_variable_name(var)
         update_function = network.get_update_function(var)
-        # All function must be known if there are no parameters.
-        assert update_function is not None 
+        if update_function is None:
+            # This variable is a constant input with a free update function.
+            assert len(network.predecessors(var)) == 0
+            continue
+
         function_bdd = ctx.mk_update_function(update_function)
         var_bdd = ctx.mk_network_variable(var)
 

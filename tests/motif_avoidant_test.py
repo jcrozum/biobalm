@@ -15,7 +15,7 @@ def test_preprocessing_ssf_not_optimal():
         x2, (x1 & x2) | (!x1 & !x2)
     """
     )
-    graph = AsynchronousGraph(bn)
+    graph = AsynchronousGraph(bn.infer_valid_graph())
 
     s0: BooleanSpace = {"x1": 0, "x2": 0}
     s1: BooleanSpace = {"x1": 0, "x2": 1}
@@ -60,7 +60,7 @@ def test_preprocessing_ssf_optimal():
         C, A | B
     """
     )
-    graph = AsynchronousGraph(bn)
+    graph = AsynchronousGraph(bn.infer_valid_graph())
 
     s0: BooleanSpace = {"A": 0, "B": 0, "C": 0}
     # s1 = {"A": 0, "B": 0, "C": 1}
@@ -100,7 +100,7 @@ def test_ABNReach_current_version():
         x3, x3 | !x3
     """
     )
-    graph = AsynchronousGraph(bn)
+    graph = AsynchronousGraph(bn.infer_valid_graph())
     ctx = graph.symbolic_context()
 
     s0: BooleanSpace = {"x1": 0, "x2": 0, "x3": 1}
@@ -136,7 +136,7 @@ def test_FilteringProcess():
         x2, (x1 & x2) | (!x1 & !x2)
     """
     )
-    graph = AsynchronousGraph(bn)
+    graph = AsynchronousGraph(bn.infer_valid_graph())
 
     s0: BooleanSpace = {"x1": 0, "x2": 0}
     s1: BooleanSpace = {"x1": 0, "x2": 1}

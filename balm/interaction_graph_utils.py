@@ -63,7 +63,7 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     rg = RegulatoryGraph(list(graph.nodes()))  # type: ignore
     for edge in graph.edges():  # type: ignore
         edge_data: dict[Any, Any] = graph.get_edge_data(edge[0], edge[1])  # type: ignore
-        reg: Regulation[str] = {
+        reg: Regulation = {
             "source": edge[0],
             "target": edge[1],
             "essential": True,

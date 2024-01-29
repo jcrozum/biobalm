@@ -1,14 +1,13 @@
-# type: ignore
-
 from biodivine_aeon import (
     BooleanNetwork,
     FixedPoints,
-    RegulatoryGraph,
     AsynchronousGraph,
 )
 
 from balm.petri_net_translation import network_to_petrinet
 from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
+from balm.types import BooleanSpace
+
 
 def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:
     """
@@ -19,30 +18,21 @@ def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:
     machine pre-processed files that can contain subtle logical redundancies
     that AEON would otherwise detect as warnings.
     """
-    rg = RegulatoryGraph(
-        [network.get_variable_name(var) for var in network.variables()]
-    )
-    for reg in network.graph().regulations():
-        rg.add_regulation(
-            {
-                "source": network.get_variable_name(reg["source"]),
-                "target": network.get_variable_name(reg["target"]),
-                "observable": False,
-            }
-        )
-
-    bn = BooleanNetwork(rg)
+    bn = BooleanNetwork(network.variable_names())
+    for reg in network.regulations():
+        reg['essential'] = False
+        reg['sign'] = None
+        bn.add_regulation(reg)
+    
     for var in network.variables():
-        bn.set_update_function(
-            network.get_variable_name(var), network.get_update_function(var)
-        )
+        bn.set_update_function(var, network.get_update_function(var))
 
     return bn
 
 
-def test_network_minimum_traps(network_file):
+def test_network_minimum_traps(network_file: str):
     bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
-    stg = SymbolicAsyncGraph(bn)
+    stg = AsynchronousGraph(bn)
 
     min_max_traps = trappist(bn, problem="min") + trappist(bn, problem="max")
 
@@ -56,28 +46,24 @@ def test_network_minimum_traps(network_file):
     # We have no way of knowing if a trap is minimal/maximal, but we can still
     # verify that it is indeed a trap.
     for trap in min_max_traps:
-        # First a quick syntactic check which should work most of the time,
-        # but is incomplete.
-        if is_syntactic_trap_space(bn, trap):
-            continue
         # Then a proper symbolic check that should be reliable every time.
-        symbolic_space = stg.fix_subspace({x: bool(int(trap[x])) for x in trap})
-        if stg.is_trap_set(symbolic_space):
+        symbolic_space = stg.mk_subspace(trap)
+        if stg.post(symbolic_space).is_subset(symbolic_space):
             continue
         raise Exception(f"Failed on {network_file}: {trap} is not a trap space.")
 
 
-def test_network_fixed_points(network_file):
+def test_network_fixed_points(network_file: str):
     # Verify that the fixed-points of the test models are the same
     # as when computing using BDDs.
     bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
-    stg = SymbolicAsyncGraph(bn)
+    stg = AsynchronousGraph(bn)
 
-    symbolic_fixed_points = FixedPoints.symbolic(stg)
+    symbolic_fixed_points = FixedPoints.symbolic(stg, stg.mk_unit_colored_vertices())
     trappist_fixed_points = trappist(bn, problem="fix")
     for fixed_point in trappist_fixed_points:
         # Convert trappist result to a symbolic singleton set.
-        vertex = stg.fix_subspace({x: bool(int(fixed_point[x])) for x in fixed_point})
+        vertex = stg.mk_subspace(fixed_point)
         # Check that the fixed-point has been found, and remove it.
         assert vertex.is_subset(
             symbolic_fixed_points
@@ -102,14 +88,14 @@ def test_network_fixed_point_reduced_STG():
 
     petri_net = network_to_petrinet(bn)
 
-    avoid_subspace_1 = {"x1": 1, "x2": 1}
-    avoid_subspace_2 = {}
-    avoid_subspace_3 = {"x2": 1}
+    avoid_subspace_1: BooleanSpace = {"x1": 1, "x2": 1}
+    avoid_subspace_2: BooleanSpace = {}
+    avoid_subspace_3: BooleanSpace = {"x2": 1}
 
-    ensure_subspace_1 = {}
-    ensure_subspace_2 = {"x1": 0, "x2": 0}
+    ensure_subspace_1: BooleanSpace = {}
+    ensure_subspace_2: BooleanSpace = {"x1": 0, "x2": 0}
 
-    retained_set = {"x1": 0, "x2": 0}
+    retained_set: BooleanSpace = {"x1": 0, "x2": 0}
     candidate_set = compute_fixed_point_reduced_STG(petri_net, retained_set)
     assert len(candidate_set) == 2  # candidate_set = {00, 11}
 

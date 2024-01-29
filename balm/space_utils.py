@@ -10,10 +10,11 @@ from balm.symbolic_utils import function_restrict, function_eval
 """
 
 from typing import TYPE_CHECKING, cast, Literal
-from biodivine_aeon import BooleanExpression, BddVariableSet, SymbolicContext, UpdateFunction, AsynchronousGraph, BooleanNetwork
+from biodivine_aeon import BddVariableSet, SymbolicContext, UpdateFunction, AsynchronousGraph, BooleanNetwork
 from copy import copy
 
-if TYPE_CHECKING:    
+if TYPE_CHECKING:
+    from biodivine_aeon import BooleanExpression
     from balm.types import BooleanSpace
 
 def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
@@ -147,7 +148,7 @@ def percolation_conflicts(
 
 
 def percolate_network(
-        bn: BooleanNetwork, space: BooleanSpace, ctx: SymbolicContext | AsynchronousGraph | None = None
+        bn: BooleanNetwork, space: BooleanSpace, ctx: AsynchronousGraph | None = None
 ) -> BooleanNetwork:
     """
     Takes a `BooleanNetwork` and a `BooleanSpace`. It then produces a new network with
@@ -167,18 +168,27 @@ def percolate_network(
     """
 
     if ctx is None:
-        ctx = SymbolicContext(bn)
-    if isinstance(ctx, AsynchronousGraph):
-        ctx = ctx.symbolic_context()
+        ctx = AsynchronousGraph(bn)
+    var_set = ctx.symbolic_context().bdd_variable_set()
 
+    # Percolate the space first to ensure everything that can be fixed is fixed.
+    space = percolate_space(ctx, space)
+
+    # Make a copy of the BN and copy the relevant functions.
     new_bn = copy(bn)
 
     for var in bn.variables():
         update = bn.get_update_function(var)
-        assert update is not None
-        percolated = percolate_expression(update.as_expression(), space, ctx=ctx.bdd_variable_set())
-        new_update = UpdateFunction(new_bn, percolated)
-        new_bn.set_update_function(var, new_update)
+        if update is None:
+            # This variable is a free input.
+            assert len(bn.predecessors(var)) == 0
+            name = bn.get_variable_name(var)
+            if name in space:                
+                new_bn.set_update_function(var, UpdateFunction.mk_const(new_bn, space[name]))
+        else:
+            percolated = percolate_expression(update.as_expression(), space, ctx=var_set)
+            new_update = UpdateFunction(new_bn, percolated)
+            new_bn.set_update_function(var, new_update)
 
     return new_bn.infer_valid_graph()
 
@@ -262,7 +272,8 @@ def space_unique_key(space: BooleanSpace, network: BooleanNetwork) -> int:
     key: int = 0
     for k, v in space.items():
         var = network.find_variable(k)
-        assert var
+        if var is None:
+            raise IndexError(f"Unknown variable {var}.")
         # Each variable is encoded as two bits, so the total length
         # of the key is 2 * n and the offset of each variable is 2 * index.
         # 00 - unknown; 10 - zero; 11 - one
