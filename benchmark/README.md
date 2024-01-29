@@ -7,9 +7,9 @@ You can then use `run_bench.py` to execute such benchmark script for all network
 This will collect the full output of each script, as well as create an agggregate result table.
 Each row of such table contains the network name, runtime of the whole script, and its output.
 
-## Install `nfvsmotifs`
+## Install `balm`
 
-The benchmark scripts assume `nfvsmotifs` is installed as a package. 
+The benchmark scripts assume `balm` is installed as a package. 
 To do this, go to the repository root and run `pip install .` 
 (this step reqires at least `pip` version `23`).
 

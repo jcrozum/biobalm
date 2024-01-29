@@ -10,7 +10,7 @@ from balm.symbolic_utils import function_restrict, function_eval
 """
 
 from typing import TYPE_CHECKING, cast, Literal
-from biodivine_aeon import BddVariableSet, UpdateFunction, AsynchronousGraph, BooleanNetwork
+from biodivine_aeon import BddVariableSet, UpdateFunction, AsynchronousGraph, BooleanNetwork, Bdd
 from copy import copy
 
 if TYPE_CHECKING:
@@ -104,22 +104,40 @@ def percolate_space(
     """
 
     result: BooleanSpace = copy(space)
+    result_bdd = stg.mk_subspace(result).to_bdd()
 
     candidates = set(stg.network_variable_names()) - set(result.keys())
+
+    fn_bdds = { var:stg.mk_update_function(var) for var in candidates }
+    fn_not_bdds = { var:stg.mk_update_function(var).l_not() for var in candidates }
+
+    dependencies = { var: bdd.support_set() for var, bdd in fn_bdds.items() }
 
     done = False
     while not done:
         done = True
         for var in copy(candidates):
-            fn_bdd = stg.mk_update_function(var)
-            fn_value = function_eval(fn_bdd, result)
+            #fn_bdd = stg.mk_update_function(var)
+            #fn_value = function_eval(fn_bdd, result)
+            fn_value = None
+            if result_bdd.implies(fn_bdds[var]):
+                fn_value = 1
+            if result_bdd.implies(fn_not_bdds[var]):
+                fn_value = 0
             if fn_value is not None:
                 # We know that values that are already fixed in `space` are not
                 # in candidates, and hence we can't get here in case of a conflict.
                 assert var not in result
                 done = False
-                result[var] = fn_value
-                candidates.remove(var)
+                result[var] = cast(Literal[0,1], fn_value)
+                bdd_var = stg.symbolic_context().find_network_bdd_variable(var)
+                assert bdd_var is not None
+                result_bdd = result_bdd.r_select({ bdd_var: bool(fn_value) })
+                for target, deps in dependencies.items():
+                    if (bdd_var in deps) and (target not in result):
+                        candidates.add(target)
+                    
+            candidates.remove(var)
 
     return result
 
