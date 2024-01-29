@@ -15,12 +15,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork, SymbolicContext, Bdd
+    from biodivine_aeon import BooleanNetwork, Bdd
 
 import re
 import copy
 
 from networkx import DiGraph  # type: ignore
+from biodivine_aeon import SymbolicContext
 
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
@@ -47,6 +48,7 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
             while True:
                 try:
                     network.set_variable_name(var, new_name)
+                    break
                 except Exception:
                     # Name clash happened. Try to resolve this by adding an extra underscore to 
                     # the variable name. In theory, this can repeat until a unique name is found.

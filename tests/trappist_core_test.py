@@ -1,20 +1,14 @@
 # type: ignore
-import sys
 
-from biodivine_aeon import (  # type: ignore
+from biodivine_aeon import (
     BooleanNetwork,
     FixedPoints,
     RegulatoryGraph,
-    SymbolicAsyncGraph,
+    AsynchronousGraph,
 )
 
 from balm.petri_net_translation import network_to_petrinet
 from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
-
-# TODO: Right now, this is necessary to correctly parse some of the larger models
-# using PyEDA. In the future, we should ideally use a parser that does not have this problem.
-sys.setrecursionlimit(100_000)
-
 
 def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:
     """

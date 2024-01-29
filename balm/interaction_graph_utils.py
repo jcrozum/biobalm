@@ -108,7 +108,7 @@ def feedback_vertex_set(
         network = _digraph_to_regulatory_graph(network)
     assert isinstance(network, RegulatoryGraph)
     fvs = network.feedback_vertex_set(parity=parity, subgraph=subgraph)
-    return [network.get_variable_name(x) for x in fvs]
+    return sorted([network.get_variable_name(x) for x in fvs])
 
 
 def independent_cycles(

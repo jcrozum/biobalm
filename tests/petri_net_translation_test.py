@@ -1,6 +1,6 @@
 # type: ignore
 import pytest
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph  # type: ignore
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph
 from networkx import DiGraph, is_isomorphic  # type: ignore
 
 from balm.petri_net_translation import (
@@ -11,28 +11,16 @@ from balm.petri_net_translation import (
 
 
 def test_sanitization():
-    rg = RegulatoryGraph([r"a_45[x]", r"b12{z}", "c[", "c]"])
-    bn = BooleanNetwork(rg)
-    a = bn.variables()[0]
-    b = bn.variables()[1]
-    c1 = bn.variables()[2]
-    c2 = bn.variables()[3]
-    assert bn.get_variable_name(a) == r"a_45[x]"
-    assert bn.get_variable_name(b) == r"b12{z}"
-    assert bn.get_variable_name(c1) == "c["
-    assert bn.get_variable_name(c2) == "c]"
+    bn = BooleanNetwork([r"a_45[x]", r"b12{z}", "c[", "c]"])
+    a, b, c1, c2 = bn.variables()    
+    assert bn.variable_names() == [r"a_45[x]", r"b12{z}", "c[", "c]"]    
 
     bn = sanitize_network_names(bn)
-    assert bn.get_variable_name(a) == "a_45_x_"
-    assert bn.get_variable_name(b) == "b12_z_"
-    # Name clash is resolved by adding an ID.
-    assert bn.get_variable_name(c1) == "c_"
-    assert bn.get_variable_name(c2) == "c__id4"
+    assert bn.variable_names() == ["a_45_x_", "b12_z_", "c_", "_c_"]    
 
 
 def test_sanitization_failing():
-    rg = RegulatoryGraph(["x_", "x_id2", "x["])
-    bn = BooleanNetwork(rg)
+    bn = BooleanNetwork(["x_", "x_id2", "x["])
     try:
         bn = sanitize_network_names(bn)
         pytest.fail("This network should not be sanitizeable.")

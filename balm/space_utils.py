@@ -10,11 +10,10 @@ from balm.symbolic_utils import function_restrict, function_eval
 """
 
 from typing import TYPE_CHECKING, cast, Literal
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanExpression, BddVariableSet, SymbolicContext, UpdateFunction, AsynchronousGraph, BooleanNetwork
 from copy import copy
 
-if TYPE_CHECKING:
-    from biodivine_aeon import BooleanExpression, BddVariableSet, SymbolicContext, UpdateFunction, AsynchronousGraph
+if TYPE_CHECKING:    
     from balm.types import BooleanSpace
 
 def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
@@ -138,7 +137,7 @@ def percolation_conflicts(
     else:
         perc_space = percolate_space(stg, space)
 
-    for var, value in space.items():
+    for var, value in perc_space.items():
         fn_bdd = stg.mk_update_function(var)
         fn_value = function_eval(fn_bdd, perc_space)
         if fn_value is not None and value != fn_value:
