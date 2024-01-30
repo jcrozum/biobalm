@@ -24,6 +24,8 @@ import copy
 from networkx import DiGraph  # type: ignore
 from biodivine_aeon import SymbolicContext, BddVariableSet, BddPartialValuation
 
+# Enables statistics logging.
+DEBUG = False
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     """
@@ -154,6 +156,9 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
         p_bdd = function_bdd.l_and(var_bdd.l_not())
         n_bdd = function_bdd.l_not().l_and(var_bdd)
 
+        if DEBUG:
+            print(f"Start translation for `{var_name}`: {len(p_bdd)} | {len(n_bdd)}")
+
         # Add 0->1 edges.
         _create_transitions(pn, ctx.bdd_variable_set(), places, var_name, p_bdd, go_up=True)
         # Add 1-> 0 edges.
@@ -219,8 +224,10 @@ def _create_transitions(
     Just a helper method that creates PN transitions from BDDs representing
     positive/negative BN transitions.
     """
-    dir_str = "up" if go_up else "down"
+    dir_str = "up" if go_up else "down"  
+    total = 0  
     for t_id, implicant in enumerate(_optimized_recursive_dnf_generator(implicant_bdd)):
+        total += 1
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
         pn.add_node(  # type: ignore[reportUnknownMemberType]
             t_name,
@@ -244,3 +251,5 @@ def _create_transitions(
             # token is present in the corresponding place.
             pn.add_edge(places[variable_str][value], t_name)  # type: ignore[reportUnknownMemberType] # noqa
             pn.add_edge(t_name, places[variable_str][value])  # type: ignore[reportUnknownMemberType] # noqa
+    if DEBUG:
+        print(f"  >> Generated {total} total PN transitions.")
