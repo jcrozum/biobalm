@@ -228,7 +228,7 @@ def successions_to_target(
 
 
 def drivers_of_succession(
-    stg: AsynchronousGraph,
+    bn: BooleanNetwork | AsynchronousGraph,
     succession: list[BooleanSpace],
     strategy: str = "internal",
     max_drivers_per_succession_node: int | None = None,
@@ -238,8 +238,11 @@ def drivers_of_succession(
 
     Parameters
     ----------
-    bn : BooleanNetwork
-        The network to analyze, which contains the Boolean update functions.
+    bn : BooleanNetwork | AsynchronousGraph
+        The network to analyze, which contains the Boolean update functions. Ideally,
+        the network should be already provided as a symbolic `AsynchronousGraph`. 
+        Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
+        `AsynchronousGraph` is created automatically.
     succession : list[BooleanSpace]
         A list of sequentially nested trap spaces that specify the target.
     strategy: str
@@ -260,12 +263,15 @@ def drivers_of_succession(
         represented as state dictionaries. Each list item corresponds to a list
         of drivers for the corresponding trap space in the succession.
     """
+    if isinstance(bn, BooleanNetwork):
+        bn = AsynchronousGraph(bn)
+
     control_strategies: list[ControlOverrides] = []
     assume_fixed: BooleanSpace = {}
     for ts in succession:
         control_strategies.append(
             find_drivers(
-                stg,
+                bn,
                 ts,
                 strategy=strategy,
                 assume_fixed=assume_fixed,
@@ -273,14 +279,14 @@ def drivers_of_succession(
                 forbidden_drivers=forbidden_drivers,
             )
         )
-        ldoi = percolate_space(stg, ts | assume_fixed)
+        ldoi = percolate_space(bn, ts | assume_fixed)
         assume_fixed.update(ldoi)
 
     return control_strategies
 
 
 def find_drivers(
-    stg: AsynchronousGraph,
+    bn: BooleanNetwork | AsynchronousGraph,
     target_trap_space: BooleanSpace,
     strategy: str = "internal",
     assume_fixed: BooleanSpace | None = None,
@@ -291,8 +297,11 @@ def find_drivers(
 
     Parameters
     ----------
-    bn : BooleanNetwork
-        The network to analyze, which contains the Boolean update functions.
+    bn : BooleanNetwork | AsynchronousGraph
+        The network to analyze, which contains the Boolean update functions. Ideally,
+        the network should be already provided as a symbolic `AsynchronousGraph`. 
+        Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
+        `AsynchronousGraph` is created automatically.
     target_trap_space : BooleanSpace
         The trap space we want to find drivers for.
     strategy: str
@@ -316,6 +325,9 @@ def find_drivers(
         `max_drivers_per_succession_node` is not `None`, or if all controls
         require nodes in `forbidden_drivers`.
     """
+    if isinstance(bn, BooleanNetwork):
+        bn = AsynchronousGraph(bn)
+
     if assume_fixed is None:
         assume_fixed = {}
     if forbidden_drivers is None:
@@ -328,7 +340,7 @@ def find_drivers(
     if strategy == "internal":
         driver_pool = set(target_trap_space_inner) - forbidden_drivers
     elif strategy == "all":
-        driver_pool = set(stg.network_variable_names()) - forbidden_drivers
+        driver_pool = set(bn.network_variable_names()) - forbidden_drivers
     else:
         raise ValueError("Unknown driver search strategy")
 
@@ -346,7 +358,7 @@ def find_drivers(
                     k: cast(Literal[0, 1], target_trap_space_inner[k])
                     for k in driver_set
                 }
-                ldoi = percolate_space(stg, driver_dict | assume_fixed)
+                ldoi = percolate_space(bn, driver_dict | assume_fixed)
                 if target_trap_space.items() <= ldoi.items():
                     drivers.append(driver_dict)
             elif strategy == "all":
@@ -355,7 +367,7 @@ def find_drivers(
                         driver: cast(Literal[0, 1], value)
                         for driver, value in zip(driver_set, vals)
                     }
-                    ldoi = percolate_space(stg, driver_dict | assume_fixed)
+                    ldoi = percolate_space(bn, driver_dict | assume_fixed)
                     if target_trap_space.items() <= ldoi.items():
                         drivers.append(driver_dict)
     return drivers
