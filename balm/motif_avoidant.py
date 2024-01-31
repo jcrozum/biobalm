@@ -31,10 +31,10 @@ def make_retained_set(
     Calculate the retained set.
 
     The retained set is technically a space-like object that describes the
-    variables which have to be fixed in order for the network to lose any
+    variables which have to be fixed in order for the network to lose all
     complex attractors. However, note that this really means changing the update
     functions. I.e. this is not a trap space that only contains fixed-points,
-    but a description of how the network must be modified to remove complex
+    but a description of how the network must be modified to eliminate complex
     attractors.
 
     Finally, the construction guarantees that any complex attractor of the old
@@ -213,7 +213,7 @@ def _preprocess_candidates(
 
         return filtered_candidates
     else:
-        filtered_candidates = []                
+        filtered_candidates = []
         for _ in range(max_iterations):
             generator.shuffle(variables)
             candidates_dnf = candidates.copy()
