@@ -275,7 +275,7 @@ class SuccessionDiagram:
         if no such node exists in this succession diagram.
         """
         try:
-            key = space_unique_key(node_space, self.network)
+            key = space_unique_key(node_space, self.network) # throws IndexError
             if key in self.node_indices:
                 return self.node_indices[key]                
             else:
