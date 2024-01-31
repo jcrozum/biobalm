@@ -79,7 +79,7 @@ if __name__ == "__main__":
 	BENCHMARKS = sorted(BENCHMARKS)
 
 	if SCRIPT.endswith(".py"):
-		SCRIPT = "python3 " + SCRIPT
+		SCRIPT = sys.executable + " " + SCRIPT
 
 	# Handle data from a finished process. In particular,
 	# update AGGREGATION_LIST and TIMES file.
