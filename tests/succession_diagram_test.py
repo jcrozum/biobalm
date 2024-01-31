@@ -191,11 +191,8 @@ def test_expansion_comparisons(network_file: str):
         assert len(sd_target.minimal_trap_spaces()) == 1
 
 
-def test_attractor_detection(network_file: str):
-    # TODO: Once attractor detection is faster, we should increase this limit.
-    # Right now, checking attractors in larger succession diagrams would often
-    # time out our CI.
-    NODE_LIMIT = 100
+def test_attractor_detection(network_file: str):    
+    NODE_LIMIT = 1000
 
     bn = BooleanNetwork.from_file(network_file)
     stg = AsynchronousGraph(bn.infer_valid_graph())
@@ -250,10 +247,7 @@ def test_attractor_expansion(network_file: str):
     # it will perform only a partial expansion of the succession diagram, which
     # is hopefully faster.
 
-    # TODO: Once attractor detection is faster, we should increase this limit.
-    # Right now, checking attractors in larger succession diagrams would often
-    # time out our CI.
-    NODE_LIMIT = 100
+    NODE_LIMIT = 1000
 
     bn = BooleanNetwork.from_file(network_file)
     stg = AsynchronousGraph(bn.infer_valid_graph())
