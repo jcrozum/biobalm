@@ -277,18 +277,14 @@ class SuccessionDiagram:
         try:
             key = space_unique_key(node_space, self.network)
             if key in self.node_indices:
-                i = self.node_indices[key]
-                # This assertion could be violated if a user gives a node space
-                # that is not based on the same network as this succession
-                # diagram.
-                assert node_space == self.node_space(i)
-                return i
+                return self.node_indices[key]                
             else:
                 return None
         except IndexError:
-            # If the user gives us a space that uses variables not used by this
-            # network, we should get an error that we can catch and report that
-            # no such space exists here.
+            # If `space_unique_key` finds a variable that does not exist in this 
+            # `SuccessionDiagram`, it throws an `IndexError`. This can happen 
+            # for example if we are comparing two succession diagrams based on 
+            # completely different networks.
             return None
 
     def is_subgraph(self, other: SuccessionDiagram) -> bool:

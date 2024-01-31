@@ -203,7 +203,7 @@ def _optimized_recursive_dnf_generator(
     if bdd.is_false():
         return
     if bdd.is_true():
-        yield BddPartialValuation(bdd.__ctx__(), {})  # type: ignore
+        yield BddPartialValuation(bdd.__ctx__(), {})
         return
 
     support = sorted(bdd.support_set())

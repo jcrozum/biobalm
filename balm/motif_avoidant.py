@@ -144,6 +144,7 @@ def _preprocess_candidates(
     max_iterations: int,
     ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
+    simulation_seed: int = 0,
 ) -> list[BooleanSpace]:
     """
     A fast but incomplete method for eliminating spurious attractor candidates.
@@ -164,7 +165,7 @@ def _preprocess_candidates(
 
     # A random generator initialized with a fixed seed. Ensures simulation
     # is randomized but deterministic.
-    generator = random.Random(1234567890)
+    generator = random.Random(simulation_seed)
 
     variables = graph.network_variable_names()
     update_functions = {var: graph.mk_update_function(var) for var in variables}
