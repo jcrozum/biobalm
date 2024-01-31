@@ -195,10 +195,7 @@ def test_attractor_detection(network_file: str):
     # TODO: Once attractor detection is faster, we should increase this limit.
     # Right now, checking attractors in larger succession diagrams would often
     # time out our CI.
-    # For model 146, we can compute the 100 succession_diagram nodes, but
-    # it takes a very long time and the succession_diagram is larger, so we
-    # wouldn't get to attractor computation anyway.
-    NODE_LIMIT = 100 if not "146.bnet" in network_file else 10
+    NODE_LIMIT = 100
 
     bn = BooleanNetwork.from_file(network_file)
     stg = AsynchronousGraph(bn.infer_valid_graph())
@@ -263,10 +260,7 @@ def test_attractor_expansion(network_file: str):
     # TODO: Once attractor detection is faster, we should increase this limit.
     # Right now, checking attractors in larger succession diagrams would often
     # time out our CI.
-    # For model 146, we can compute the 100 succession_diagram nodes, but
-    # it takes a very long time and the succession_diagram is larger, so we
-    # wouldn't get to attractor computation anyway.
-    NODE_LIMIT = 100 if not "146.bnet" in network_file else 10
+    NODE_LIMIT = 100
 
     bn = BooleanNetwork.from_file(network_file)
     stg = AsynchronousGraph(bn.infer_valid_graph())
