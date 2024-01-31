@@ -49,6 +49,7 @@ def test_network_minimum_traps(network_file: str):
         # Then a proper symbolic check that should be reliable every time.
         symbolic_space = stg.mk_subspace(trap)
         if stg.post(symbolic_space).is_subset(symbolic_space):
+            # The symbolic space cannot be escaped, hence it is a trap space.
             continue
         raise Exception(f"Failed on {network_file}: {trap} is not a trap space.")
 

@@ -22,10 +22,10 @@ def test_is_subspace():
 def test_expression_percolation():
     e = BooleanExpression("(a & !x) | (a & y)")
 
-    assert BooleanExpression("a") == percolate_expression(e, {"x": 0, "y": 1})
-    assert BooleanExpression("false") == percolate_expression(e, {"a": 0})
-    assert BooleanExpression("a") == percolate_expression(e, {"x": 0, "y": 1})
-    assert BooleanExpression("false") == percolate_expression(e, {"a": 0})
+    assert "a" == str(percolate_expression(e, {"x": 0, "y": 1}))
+    assert "false" == str(percolate_expression(e, {"a": 0}))
+    assert "a" == str(percolate_expression(e, {"x": 0, "y": 1}))
+    assert "false" == str(percolate_expression(e, {"a": 0}))
 
 
 def test_space_percolation():
