@@ -26,6 +26,11 @@ def erase_inputs(model: BooleanNetwork) -> BooleanNetwork:
 	# Erase all input functions.
 	for input in inputs:
 		model.set_update_function(input, None)
+
+	# Remove all regulations that are no longer necessary.
+	for reg in model.regulations():
+		if reg['target'] in inputs:
+			model.remove_regulation(reg['source'], reg['target'])
 	
 	# The operation probably made some regulations unused. Get rid of them.
 	return model.infer_valid_graph()
