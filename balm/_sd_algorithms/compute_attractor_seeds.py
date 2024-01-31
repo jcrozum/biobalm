@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from balm.state_utils import state_list_to_bdd
+from balm.symbolic_utils import state_list_to_bdd
 
 if TYPE_CHECKING:
     from balm.SuccessionDiagram import SuccessionDiagram
@@ -32,7 +32,7 @@ def compute_attractor_seeds(
 
     node_space = sd.node_space(node_id)
 
-    if len(node_space) == sd.network.num_vars():
+    if len(node_space) == sd.network.variable_count():
         # This node is a fixed-point.
         return [node_space]
 
@@ -48,14 +48,16 @@ def compute_attractor_seeds(
     # We add the whole node space to the retain set because we know
     # the space is a trap and this will remove the corresponding unnecessary
     # Petri net transitions.
-    retained_set = make_retained_set(sd.network, sd.nfvs, node_space, child_spaces)
+    retained_set = make_retained_set(sd.symbolic, sd.nfvs, node_space, child_spaces)
 
-    if len(retained_set) == sd.network.num_vars() and len(child_spaces) == 0:
+    if len(retained_set) == sd.network.variable_count() and len(child_spaces) == 0:
         # There is only a single attractor remaining here,
         # and its "seed" is the retained set.
         return [retained_set]
 
-    terminal_restriction_space = ~state_list_to_bdd(child_spaces)
+    terminal_restriction_space = state_list_to_bdd(
+        sd.symbolic.symbolic_context(), child_spaces
+    ).l_not()
 
     candidate_seeds = compute_fixed_point_reduced_STG(
         sd.petri_net,
@@ -73,7 +75,7 @@ def compute_attractor_seeds(
         return candidate_seeds
     else:
         attractors = detect_motif_avoidant_attractors(
-            sd.network,
+            sd.symbolic,
             sd.petri_net,
             candidate_seeds,
             terminal_restriction_space,

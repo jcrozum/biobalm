@@ -1,34 +1,29 @@
-from __future__ import annotations
-
-from balm.state_utils import bddvar_cache, function_restrict
-
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
 
     Each space is represented as a dictionary with a subset of variable names as
     keys and values `0`/`1` assigned to fixed variables.
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from copy import copy
+from typing import TYPE_CHECKING, Literal, cast
+
+from biodivine_aeon import (
+    AsynchronousGraph,
+    BddVariableSet,
+    BooleanNetwork,
+    Percolation,
+    SymbolicContext,
+    UpdateFunction,
+)
+
+from balm.symbolic_utils import function_eval
 
 if TYPE_CHECKING:
-    from pyeda.boolalg.bdd import BinaryDecisionDiagram
-    from pyeda.boolalg.expr import Expression
+    from biodivine_aeon import BooleanExpression
+
     from balm.types import BooleanSpace
-
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph
-from pyeda.boolalg.expr import Complement
-from pyeda.boolalg.expr import Literal as PyedaLiteral
-from pyeda.boolalg.expr import Variable
-
-from balm.pyeda_utils import (
-    PYEDA_FALSE,
-    PYEDA_TRUE,
-    aeon_to_bdd,
-    aeon_to_pyeda,
-    pyeda_to_aeon,
-    substitute_variables_in_expression,
-)
 
 
 def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
@@ -58,41 +53,84 @@ def is_subspace(x: BooleanSpace, y: BooleanSpace) -> bool:
     return True
 
 
-def is_syntactic_trap_space(bn: BooleanNetwork, space: BooleanSpace) -> bool:
+def dnf_function_is_true(dnf: list[BooleanSpace], state: BooleanSpace) -> bool:
     """
-    Uses percolation to check if the given `space` is a trap space in the given `BooleanNetwork`.
-
-    Note that this does not perform any sophisticated "semantic" analysis of the update functions.
-    For example, if the update function contains a contradiction/tautology, this method will not
-    be able to take this into account. However, aside from such "degenerate" cases, this should
-    still work in typical practical scenarios.
-
-    If you need a guaranteed test, you can try `SymbolicAsyncGraph::is_trap_set` instead.
+    Returns `True` if the given DNF function evaluates to `1` for the given
+    state (or space).
     """
-    for var in bn.variables():
-        var_name = bn.get_variable_name(var)
+    if len(dnf) == 0:
+        return False
 
-        if var_name in space:
-            expression = aeon_to_pyeda(bn.get_update_function(var))
-            expression = percolate_pyeda_expression(expression, space)
-            if str(space[var_name]) != str(expression):
-                print(
-                    space[var_name], str(expression), bn.get_update_function(var), space
-                )
-                return False
-    return True
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            return True
+    return False
+
+
+def remove_state_from_dnf(
+    dnf: list[BooleanSpace], state: BooleanSpace
+) -> list[BooleanSpace]:
+    """
+    Removes all conjunctions that are True in the state
+    """
+    modified_dnf: list[BooleanSpace] = []
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            pass
+        else:
+            modified_dnf.append(conjunction)
+    return modified_dnf
+
+
+def percolate_space_strict(stg: AsynchronousGraph, space: BooleanSpace) -> BooleanSpace:
+    """
+    Returns the set of variables which become fixed as a result of fixing the
+    variables from `space` within the given `AsynchronousGraph`.
+
+    Note that the strict percolation process does not propagate constants that
+    are already fixed within the `stg`, only those that are specified in `space`.
+    Also, the result only contains any *new* constants, not those that are already
+    fixed in `space`.
+    """
+
+    result: BooleanSpace = {}
+    restriction: BooleanSpace = copy(space)
+    candidates = set(stg.network_variable_names())
+
+    # Ignore variables that are already fixed.
+    for var in stg.network_variable_names():
+        fn_bdd = stg.mk_update_function(var)
+        if fn_bdd.is_true() or fn_bdd.is_false():
+            candidates.remove(var)
+
+    done = False
+    while not done:
+        done = True
+        for var in copy(candidates):
+            fn_bdd = stg.mk_update_function(var)
+            fn_value = function_eval(fn_bdd, restriction)
+            if fn_value is not None:
+                if var in restriction and restriction[var] != fn_value:
+                    # There is a conflict. We don't want to output this,
+                    # but we also don't want to change the value.
+                    candidates.remove(var)
+                else:
+                    done = False
+                    restriction[var] = fn_value
+                    result[var] = fn_value
+                    candidates.remove(var)
+
+    return result
 
 
 def percolate_space(
-    network: BooleanNetwork,
+    stg: AsynchronousGraph,
     space: BooleanSpace,
-    strict_percolation: bool = True,
 ) -> BooleanSpace:
     """
-    Takes a Boolean network and a space (partial assignment of `0`/`1` to the
-    network variables). It then percolates the values in the given `space` to
-    the remaining network variables based on the update functions of the given
-    `network`.
+    Takes a symbolic `AsynchronousGraph` and a `BooleanSpace`. It then percolates
+    any values that are effectively constant with the `stg` assuming the variables
+    from `space` are fixed accordingly.
 
     If the argument is a trap space, then the result is a subspace of the
     argument and is also a trap space.
@@ -100,200 +138,152 @@ def percolate_space(
     However, when the argument is a general space, the percolation can actually
     lead "outside" of the original space. In such case, the original fixed value
     is *not* modified and the conflict will remain in the resulting space.
-
-    If `strict_percolation` is used, only variables that become fixed as a
-    result of fixing the space are considered (e.g., nodes with constant update
-    functions are not propagated). Furthermore, the variables in `space` are
-    only returned if the value of their update funciton becomes fixed as a
-    result of percolating the fixed node values specified by `space`.
     """
 
-    if strict_percolation:
-        result: BooleanSpace = {}
-    else:
-        result = {var: space[var] for var in space}
-
-    fixed: BooleanSpace = {var: space[var] for var in space}
-    fixed_bddvars = {bddvar_cache(k): v for k, v in fixed.items()}
-    bdds: dict[str, BinaryDecisionDiagram] = {}
-    bdd_inputs = {}
-    var_name_dict = {network.get_variable_name(var): var for var in network.variables()}
-    deletion_list: list[str] = list(result)
-
-    done = False
-    while not done:
-        for k in deletion_list:
-            del var_name_dict[k]
-        deletion_list = []
-        done = True
-        for var_name, var in var_name_dict.items():
-            if var_name in result:
-                continue
-            if var_name not in bdds:
-                bdds[var_name] = aeon_to_bdd(network.get_update_function(var))
-
-            if bdds[var_name].is_one():
-                if strict_percolation:
-                    continue
-                r = 1
-            elif bdds[var_name].is_zero():
-                if strict_percolation:
-                    continue
-                r = 0
-            else:
-                if var_name not in bdd_inputs:
-                    bdd_inputs[var_name] = set(bdds[var_name].inputs)  # type: ignore
-                point = {x: fixed_bddvars[x] for x in bdd_inputs[var_name] if x in fixed_bddvars}  # type: ignore
-                if point:
-                    bdds[var_name] = bdds[var_name].restrict(point)  # type: ignore
-                    bdd_inputs[var_name] -= set(point)  # type: ignore
-
-                if bdds[var_name].is_one():
-                    r = 1
-                elif bdds[var_name].is_zero():
-                    r = 0
-                else:
-                    continue
-
-            if var_name not in fixed:
-                fixed[var_name] = r  # type: ignore # (mypy bug? mypy cannot see that r is 0 or 1, but pylance can)
-                fixed_bddvars[bddvar_cache(var_name)] = r  # type: ignore
-                result[var_name] = r  # type: ignore
-                deletion_list.append(var_name)
-                done = False
-            elif fixed[var_name] == r and var_name not in result:
-                result[var_name] = r  # type: ignore
-
+    percolated = Percolation.percolate_subspace(stg, space)
+    result: BooleanSpace = {}
+    for var, value in percolated.items():
+        var_name = stg.get_network_variable_name(var)
+        result[var_name] = cast(Literal[0, 1], int(value))
     return result
 
 
 def percolation_conflicts(
-    network: BooleanNetwork,
+    stg: AsynchronousGraph,
     space: BooleanSpace,
     strict_percolation: bool = True,
 ) -> set[str]:
     """
-    Returns a set of variable names that are in conflict with the percolation of
+    Returns a set of variables from `space` that are in conflict with the percolation of
     the given space (see `percolate_space`).
     """
     conflicts: set[str] = set()
 
-    perc_space = percolate_space(network, space, strict_percolation)
+    if strict_percolation:
+        perc_space = percolate_space_strict(stg, space)
+    else:
+        perc_space = percolate_space(stg, space)
 
-    for var, value in space.items():
-        function_restricted = function_restrict(
-            aeon_to_bdd(network.get_update_function(var)), perc_space
-        )
-
-        if function_restricted.is_one() and value == 0:
-            conflicts.add(var)
-        elif function_restricted.is_zero() and value == 1:
+    for var, value in perc_space.items():
+        fn_bdd = stg.mk_update_function(var)
+        fn_value = function_eval(fn_bdd, perc_space)
+        if fn_value is not None and value != fn_value:
             conflicts.add(var)
 
     return conflicts
 
 
-def percolate_network(bn: BooleanNetwork, space: BooleanSpace) -> BooleanNetwork:
+def percolate_network(
+    bn: BooleanNetwork, space: BooleanSpace, ctx: AsynchronousGraph | None = None
+) -> BooleanNetwork:
     """
-    Takes an AEON.py Boolean network and a space (partial assignment of
-    network variables to `0`/`1`). It then produces a new network with
+    Takes a `BooleanNetwork` and a `BooleanSpace`. It then produces a new network with
     update functions percolated based on the supplied space.
+
     There are two caveats to this operation:
 
         (1) If the given space is *not* a trap space, it is up to you to figure
-        out what the relationship between the original and the resulting dynamics
-        is. For trap spaces, we know that everything inside that trap space
-        is preserved. If the space is not a trap space, you have now cut away
-        all outgoing transitions.
-        (2) The underlying regulatory graph of the new network retains all
-        regulations of the original network, but all integrity constraints
-        (essentiality, monotonicity) are removed, because they most likely
-        no longer hold in the new network.
+        out what is the relationship between the dynamics of the original and
+        the percolated network. For trap spaces, we know that every transition
+        inside that trap space is preserved exactly.
+
+    The percolation process is based on BDD conversion. For this purpose, an optional
+    `SymbolicContext` can be provided. If not given, a temporary `SymbolicContext` will
+    be created instead. Note that this is necessary to resolve non-trivial tautologies or
+    contradictions that can arise once the variables from `space` are fixed.
     """
-    # Make a copy of the original regulatory network, but without integrity constraints.
-    old_rg = bn.graph()
-    new_rg = RegulatoryGraph([bn.get_variable_name(var) for var in bn.variables()])
 
-    for reg in old_rg.regulations():
-        reg["observable"] = False
-        if "monotonicity" in reg:
-            del reg["monotonicity"]
-        new_rg.add_regulation(reg)
+    if ctx is None:
+        ctx = AsynchronousGraph(bn)
+    var_set = ctx.symbolic_context().bdd_variable_set()
 
-    # Copy the Boolean network, but with simplified expressions.
-    new_bn = BooleanNetwork(new_rg)
+    # Percolate the space first to ensure everything that can be fixed is fixed.
+    space = percolate_space(ctx, space)
+
+    # Make a copy of the BN and copy the relevant functions.
+    new_bn = copy(bn)
+
     for var in bn.variables():
-        name = bn.get_variable_name(var)
-        new_expr = None
-        if name in space:
-            # If the value is fixed, just use it as a value directly.
-            if space[name] == 1:
-                new_expr = PYEDA_TRUE
-            elif space[name] == 0:
-                new_expr = PYEDA_FALSE
-            else:
-                raise ValueError(f"{space[name]=} is not a valid variable value")
+        update = bn.get_update_function(var)
+        if update is None:
+            # This variable is a free input.
+            assert len(bn.predecessors(var)) == 0
+            name = bn.get_variable_name(var)
+            if name in space:
+                new_bn.set_update_function(
+                    var, UpdateFunction.mk_const(new_bn, space[name])
+                )
         else:
-            # If the value is not fixed, use a simplified expression.
-            expression = aeon_to_pyeda(bn.get_update_function(var))
-            new_expr = percolate_pyeda_expression(expression, space)
+            percolated = percolate_expression(
+                update.as_expression(), space, ctx=var_set
+            )
+            new_update = UpdateFunction(new_bn, percolated)
+            new_bn.set_update_function(var, new_update)
 
-        new_bn.set_update_function(var, pyeda_to_aeon(new_expr))
-
-    return new_bn
+    return new_bn.infer_valid_graph()
 
 
-def percolate_pyeda_expression(
-    expression: Expression, space: BooleanSpace
-) -> Expression:
+def percolate_expression(
+    expression: BooleanExpression,
+    space: BooleanSpace,
+    ctx: BddVariableSet | SymbolicContext | None = None,
+) -> BooleanExpression:
     """
-    Takes a PyEDA expression and a subspace (dictionary assigning `1`/`0` to
-    a subset of variables). Returns a simplified expression that is valid
-    for exactly the same members of the given `space` as the original expression.
-    The resulting expression does not depend on the variables which are fixed
-    in the given `space`.
-    """
-    substitution = {x: (PYEDA_TRUE if space[x] == 1 else PYEDA_FALSE) for x in space}
-    expression = substitute_variables_in_expression(expression, substitution)
-    return expression.simplify()
+    Takes a `BooleanExpression` and a `BooleanSpace`. Returns a simplified `BooleanExpression`
+    that is valid for exactly the same members of the given `space` as the original expression.
+    The resulting expression does not depend on the variables which are fixed in the given `space`.
 
-
-def expression_to_space_list(expression: Expression) -> list[BooleanSpace]:
-    """
-    Convert a PyEDA expression to a list of subspaces whose union represents
-    an equivalent set of network states.
-
-    Note that the spaces are not necessarily pair-wise disjoint. Also,
-    the list is not necessarily minimal.
+    The percolation process is based on BDD conversion. For this purpose, an optional `BddVariableSet`
+    can be provided. If not given, a temporary `BddVariableSet` will be created instead. Note that
+    this is necessary to resolve non-trivial tautologies/contradictions that can arise once the
+    variables from `space` are fixed.
     """
 
-    # TODO:
-    #  Function `to_dnf` in PyEDA actually produces a minimal
-    #  (or at least in some sense canonical) DNF. In the future, we might
-    #  want to either enforce this explicitly or relax this requirement.
+    variables = expression.support_set()
+    space = {k: v for k, v in space.items() if k in variables}
+
+    if len(space) == 0:
+        return expression
+
+    if ctx is None:
+        ctx = BddVariableSet(sorted(variables))
+    if isinstance(ctx, SymbolicContext):
+        ctx = ctx.bdd_variable_set()
+
+    bdd = ctx.eval_expression(expression)
+    bdd = bdd.r_restrict(space)
+    return bdd.to_expression()
+
+
+def expression_to_space_list(
+    expression: BooleanExpression, ctx: BddVariableSet | SymbolicContext | None = None
+) -> list[BooleanSpace]:
+    """
+    Convert a `BooleanExpression` to a list of subspaces whose union represents
+    an equivalent set of the network states which satisfy the expression.
+
+    Note that the spaces are not necessarily pair-wise disjoint. Also, the list
+    is not necessarily minimal.
+
+    The translation uses a DNF conversion based on BDDs. For this purpose, an optional
+    `BddVariableSet` can be provided. If not given, a temporary `BddVariableSet` will be
+    created instead.
+    """
+
+    if ctx is None:
+        variables = sorted(expression.support_set())
+        ctx = BddVariableSet(variables)
+    if isinstance(ctx, SymbolicContext):
+        ctx = ctx.bdd_variable_set()
+
+    bdd = ctx.eval_expression(expression)
 
     sub_spaces: list[BooleanSpace] = []
-    expression_dnf = expression.to_dnf()
-
-    for clause in expression_dnf.xs:  # type: ignore
-        sub_space: BooleanSpace = {}
-
-        # Since we know this is a DNF clause, it can only be
-        # a literal, or a conjunction of literals.
-        # TODO: investigate the types here more closely... something strange is going on
-        literals = [clause] if isinstance(clause, PyedaLiteral) else clause.xs  # type: ignore # noqa
-        for literal in literals:  # type: ignore
-            var = str(literal.inputs[0])  # type: ignore
-            if isinstance(literal, Variable):
-                sub_space[var] = 1
-            elif isinstance(literal, Complement):
-                sub_space[var] = 0
-            else:
-                raise Exception(
-                    f"Unreachable: Invalid literal type `{type(literal)}`."  # type: ignore
-                )  # type: ignore
-
-        sub_spaces.append(sub_space)
+    for clause in bdd.clause_iterator():
+        space = {}
+        for var, value in clause.items():
+            space[ctx.get_variable_name(var)] = cast(Literal[0, 1], int(value))
+        sub_spaces.append(space)
 
     return sub_spaces
 
@@ -318,10 +308,10 @@ def space_unique_key(space: BooleanSpace, network: BooleanNetwork) -> int:
     key: int = 0
     for k, v in space.items():
         var = network.find_variable(k)
-        assert var
-        var_index: int = var.as_index()
+        if var is None:
+            raise IndexError(f"Unknown variable {var}.")
         # Each variable is encoded as two bits, so the total length
         # of the key is 2 * n and the offset of each variable is 2 * index.
         # 00 - unknown; 10 - zero; 11 - one
-        key |= (v + 2) << (2 * var_index)
+        key |= (v + 2) << (2 * int(var))
     return key

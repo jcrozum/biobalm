@@ -154,3 +154,6 @@ mole-*
 
 # Ignore benchmark runs.
 _run_*
+
+# Some weird temporary Z3 files.
+.z3-trace

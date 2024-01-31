@@ -1,4 +1,5 @@
-from balm.drivers import BooleanNetwork, find_single_drivers, find_single_node_LDOIs
+from balm.drivers import find_single_drivers, find_single_node_LDOIs
+from biodivine_aeon import BooleanNetwork
 
 
 def test_find_single_node_LDOIs():

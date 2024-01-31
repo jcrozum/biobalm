@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
@@ -15,7 +15,7 @@ from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
-from balm.interaction_graph_utils import feedback_vertex_set
+from balm.interaction_graph_utils import cleanup_network, feedback_vertex_set
 from balm.petri_net_translation import network_to_petrinet
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
@@ -96,6 +96,7 @@ class SuccessionDiagram:
 
     __slots__ = (
         "network",
+        "symbolic",
         "petri_net",
         "nfvs",
         "dag",
@@ -104,7 +105,8 @@ class SuccessionDiagram:
 
     def __init__(self, network: BooleanNetwork):
         # Original Boolean network.
-        self.network = network
+        self.network = cleanup_network(network)
+        self.symbolic = AsynchronousGraph(self.network)
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
         # Negative feedback vertex set.
@@ -133,7 +135,11 @@ class SuccessionDiagram:
     def __setstate__(
         self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
     ):
-        self.network = BooleanNetwork.from_aeon(str(state["network rules"]))
+        # In theory, the network should be cleaned-up at this point, but just in case...
+        self.network = cleanup_network(
+            BooleanNetwork.from_aeon(str(state["network rules"]))
+        )
+        self.symbolic = AsynchronousGraph(self.network)
         self.petri_net = cast(nx.DiGraph, state["petri net"])
         self.nfvs = cast(list[str], state["nfvs"])
         self.dag = cast(nx.DiGraph, state["G"])  # type: ignore
@@ -269,20 +275,16 @@ class SuccessionDiagram:
         if no such node exists in this succession diagram.
         """
         try:
-            key = space_unique_key(node_space, self.network)
+            key = space_unique_key(node_space, self.network) # throws IndexError
             if key in self.node_indices:
-                i = self.node_indices[key]
-                # This assertion could be violated if a user gives a node space
-                # that is not based on the same network as this succession
-                # diagram.
-                assert node_space == self.node_space(i)
-                return i
+                return self.node_indices[key]                
             else:
                 return None
-        except RuntimeError:
-            # If the user gives us a space that uses variables not used by this
-            # network, we should get an error that we can catch and report that
-            # no such space exists here.
+        except IndexError:
+            # If `space_unique_key` finds a variable that does not exist in this 
+            # `SuccessionDiagram`, it throws an `IndexError`. This can happen 
+            # for example if we are comparing two succession diagrams based on 
+            # completely different networks.
             return None
 
     def is_subgraph(self, other: SuccessionDiagram) -> bool:
@@ -586,7 +588,7 @@ class SuccessionDiagram:
         if DEBUG:
             print(f"[{node_id}] Expanding: {len(self.node_space(node_id))} fixed vars.")
 
-        if len(current_space) == self.network.num_vars():
+        if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
             # return this fixed-point again. No need to continue.
             if DEBUG:
@@ -632,9 +634,7 @@ class SuccessionDiagram:
         considered to be zero (i.e. the node is the root).
         """
 
-        fixed_vars = percolate_space(
-            self.network, stable_motif, strict_percolation=False
-        )
+        fixed_vars = percolate_space(self.symbolic, stable_motif)
 
         key = space_unique_key(fixed_vars, self.network)
 

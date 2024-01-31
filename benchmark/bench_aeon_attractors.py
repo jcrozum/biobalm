@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork, SymbolicAsyncGraph, find_attractors
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph, Attractors
 import sys
 
 # This is a very basic script for running attractor detection usin AEON.
@@ -7,15 +7,15 @@ import sys
 # The script only takes one argument: a path to the network file.
 
 bn = BooleanNetwork.from_file(sys.argv[1])
-bn = bn.infer_regulatory_graph()
+bn = bn.infer_valid_graph()
 
-stg = SymbolicAsyncGraph(bn)
+stg = AsynchronousGraph(bn)
 
-attr = find_attractors(stg)
+attr = Attractors.attractors(stg, stg.mk_unit_colored_vertices())
 
 print("Attractors:", len(attr))
 
-attr_states = stg.empty_colored_vertices()
+attr_states = stg.mk_empty_colored_vertices()
 
 for a in attr:
     attr_states = attr_states.union(a)

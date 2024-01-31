@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork  # type:ignore
+from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph  # type:ignore
 
 from balm.interaction_graph_utils import (

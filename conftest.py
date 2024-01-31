@@ -31,7 +31,7 @@ def pytest_generate_tests(metafunc):
                 continue
             path = f"./models/bbm-bnet-inputs-true/{model}"
             bn = BooleanNetwork.from_file(path)
-            if bn.num_vars() > size:
+            if bn.variable_count() > size:
                 continue
             models.append(path)
         metafunc.parametrize("network_file", models)
