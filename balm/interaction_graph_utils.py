@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from biodivine_aeon import VariableId, Regulation
-    from typing import Any
+    from typing import Any, Sequence
 
 from typing import cast
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
@@ -32,22 +32,21 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     # this will crash on an out-of-memory error, or just run for a very long time.
     network = network.infer_valid_graph()
 
-    # Convert AEON `RegulatoryGraph` to a generic `DiGraph` that we can use later.
-    rg = network.to_graph()
+    # Convert AEON `RegulatoryGraph` to a generic `DiGraph` that we can use later.    
     ig = DiGraph()
 
-    for var in rg.variables():
+    for var in network.variables():
         ig.add_node(rg.get_variable_name(var))  # type: ignore
 
-    for reg in rg.regulations():
+    for reg in network.regulations():
         if not reg["essential"]:
             # In general, a fully specified network should only contain
             # essential regulations after `infer_valid_graph`.
             raise Exception(
                 "Unreachable: You are using this on partially specified networks, aren't you?"
             )
-        source = rg.get_variable_name(reg["source"])
-        target = rg.get_variable_name(reg["target"])
+        source = network.get_variable_name(reg["source"])
+        target = network.get_variable_name(reg["target"])
         sign = reg["sign"] if reg["sign"] is not None else "?"
         ig.add_edge(source, target, sign=sign)  # type: ignore
     return ig
@@ -79,9 +78,9 @@ def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
 
 
 def feedback_vertex_set(
-    network: BooleanNetwork | RegulatoryGraph | DiGraph,
+    network: RegulatoryGraph | DiGraph,
     parity: Literal["positive", "negative"] | None = None,
-    subgraph: list[str] | list[VariableId] | None = None,
+    subgraph: Sequence[str | VariableId] | None = None,
 ) -> list[str]:
     """
     Compute an approximately minimal feedback vertex set (FVS) of
@@ -103,19 +102,17 @@ def feedback_vertex_set(
 
     The method should be deterministic (the same pseudo-optimal FVS is returned every time).
     """
-    if isinstance(network, BooleanNetwork):
-        network = network.to_graph()
     if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
     assert isinstance(network, RegulatoryGraph)
-    fvs = network.feedback_vertex_set(parity=parity, subgraph=subgraph)
+    fvs = network.feedback_vertex_set(parity, subgraph)
     return sorted([network.get_variable_name(x) for x in fvs])
 
 
 def independent_cycles(
-    network: BooleanNetwork | RegulatoryGraph,
+    network: RegulatoryGraph | DiGraph,
     parity: Literal["positive", "negative"] | None = None,
-    subgraph: list[str] | list[VariableId] | None = None,
+    subgraph: Sequence[str | VariableId] | None = None,
 ) -> list[list[str]]:
     """
     Compute an approximately maximal set of independent cycles of
@@ -139,14 +136,10 @@ def independent_cycles(
     every time). However, while I believe the sorting should be stable too, please treat the
     order of returned cycles with caution :)
     """
-    if isinstance(network, BooleanNetwork):
-        network = network.to_graph()
-
-    # this should never happen, but it's easy enough to convert
     if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
 
-    ic = network.independent_cycles(parity=parity, subgraph=subgraph)
+    ic = network.independent_cycles(parity, subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
 
 
