@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from typing import cast
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
 from networkx import DiGraph  # type: ignore
+import copy
 
 
 def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
@@ -147,3 +148,29 @@ def independent_cycles(
 
     ic = network.independent_cycles(parity=parity, subgraph=subgraph)
     return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
+
+
+def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
+    """
+    Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This mainly
+    checks that the network has no parameters and removes any constraints that could
+    add additional overhead to symbolic manipulation.
+    """
+
+    assert network.explicit_parameter_count() == 0, \
+        f"Parametrized networks are not supported. Found parameters: {network.explicit_parameter_names()}."
+    
+    # Implicit parameters with no regulators are allowed, since they just reprtesent free inputs
+    # and are explicitly handled by the succession diagram.
+    non_input_implicit = [ v for v in network.implicit_parameters() if len(network.predecessors(v)) > 0]
+    if len(non_input_implicit) > 0:
+        names = [network.get_variable_name(x) for x in non_input_implicit]
+        raise AssertionError(f"Parametrized networks are not supported. Found implicit parameters: {names}.")
+    
+    network = copy.copy(network)
+    for reg in network.regulations():
+        reg['essential'] = False
+        reg['sign'] = None
+        assert network.ensure_regulation(reg) is not None
+
+    return network

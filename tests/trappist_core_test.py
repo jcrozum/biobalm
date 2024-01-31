@@ -6,32 +6,11 @@ from biodivine_aeon import (
 
 from balm.petri_net_translation import network_to_petrinet
 from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
+from balm.interaction_graph_utils import cleanup_network
 from balm.types import BooleanSpace
 
-
-def remove_static_constraints(network: BooleanNetwork) -> BooleanNetwork:
-    """
-    A method that removes all information about regulation monotonicity and
-    essentiality from the given `BooleanNetwork`.
-
-    This is mostly done to allow handling of randomly generated or otherwise
-    machine pre-processed files that can contain subtle logical redundancies
-    that AEON would otherwise detect as warnings.
-    """
-    bn = BooleanNetwork(network.variable_names())
-    for reg in network.regulations():
-        reg['essential'] = False
-        reg['sign'] = None
-        bn.add_regulation(reg)
-    
-    for var in network.variables():
-        bn.set_update_function(var, network.get_update_function(var))
-
-    return bn
-
-
 def test_network_minimum_traps(network_file: str):
-    bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
+    bn = cleanup_network(BooleanNetwork.from_file(network_file))
     stg = AsynchronousGraph(bn)
 
     min_max_traps = trappist(bn, problem="min") + trappist(bn, problem="max")
@@ -57,7 +36,7 @@ def test_network_minimum_traps(network_file: str):
 def test_network_fixed_points(network_file: str):
     # Verify that the fixed-points of the test models are the same
     # as when computing using BDDs.
-    bn = remove_static_constraints(BooleanNetwork.from_file(network_file))
+    bn = cleanup_network(BooleanNetwork.from_file(network_file))
     stg = AsynchronousGraph(bn)
 
     symbolic_fixed_points = FixedPoints.symbolic(stg, stg.mk_unit_colored_vertices())

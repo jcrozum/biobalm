@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-import copy
 from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
@@ -16,7 +15,7 @@ from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
-from balm.interaction_graph_utils import feedback_vertex_set
+from balm.interaction_graph_utils import feedback_vertex_set, cleanup_network
 from balm.petri_net_translation import network_to_petrinet
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
@@ -24,32 +23,6 @@ from balm.types import BooleanSpace
 
 # Enables helpful "progress" messages.
 DEBUG = False
-
-def _cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
-    """
-    Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This mainly
-    checks that the network has no parameters and removes any constraints that could
-    add additional overhead to symbolic manipulation.
-    """
-
-    assert network.explicit_parameter_count() == 0, \
-        f"Parametrized networks are not supported. Found parameters: {network.explicit_parameter_names()}."
-    
-    # Implicit parameters with no regulators are allowed, since they just reprtesent free inputs
-    # and are explicitly handled by the succession diagram.
-    non_input_implicit = [ v for v in network.implicit_parameters() if len(network.predecessors(v)) > 0]
-    if len(non_input_implicit) > 0:
-        names = [network.get_variable_name(x) for x in non_input_implicit]
-        raise AssertionError(f"Parametrized networks are not supported. Found implicit parameters: {names}.")
-    
-    network = copy.copy(network)
-    for reg in network.regulations():
-        reg['essential'] = False
-        reg['sign'] = None
-        assert network.ensure_regulation(reg) is not None
-
-    return network
-
 
 class SuccessionDiagram:
     """
@@ -131,7 +104,7 @@ class SuccessionDiagram:
 
     def __init__(self, network: BooleanNetwork):
         # Original Boolean network.
-        self.network = _cleanup_network(network)
+        self.network = cleanup_network(network)
         self.symbolic = AsynchronousGraph(self.network)
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
@@ -162,7 +135,7 @@ class SuccessionDiagram:
         self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
     ):
         # In theory, the network should be cleaned-up at this point, but just in case...
-        self.network = _cleanup_network(BooleanNetwork.from_aeon(str(state["network rules"])))
+        self.network = cleanup_network(BooleanNetwork.from_aeon(str(state["network rules"])))
         self.symbolic = AsynchronousGraph(self.network)
         self.petri_net = cast(nx.DiGraph, state["petri net"])
         self.nfvs = cast(list[str], state["nfvs"])
