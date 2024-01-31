@@ -1,3 +1,6 @@
+"""
+    A module responsible for detecting motif-avoidant attractors within terminal restriction space.
+"""
 from __future__ import annotations
 
 import random
@@ -9,16 +12,16 @@ from pypint import Goal, InMemoryModel  # type:ignore
 
 from balm.petri_net_translation import place_to_variable
 from balm.space_utils import dnf_function_is_true, remove_state_from_dnf
+from balm.symbolic_utils import (
+    function_eval,
+    function_is_true,
+    state_list_to_bdd,
+    state_to_bdd,
+)
 from balm.types import BooleanSpace
-from balm.symbolic_utils import state_list_to_bdd, state_to_bdd, function_eval, function_is_true
 
 if TYPE_CHECKING:
     from biodivine_aeon import AsynchronousGraph, Bdd
-
-
-"""
-    A module responsible for detecting motif-avoidant attractors within terminal restriction space.
-"""
 
 
 def make_retained_set(
@@ -75,9 +78,9 @@ def make_retained_set(
         if x in retained_set:
             continue
 
-        fn_bdd = graph.mk_update_function(x)        
-        
-        # If most of the function is positive, we set the value 
+        fn_bdd = graph.mk_update_function(x)
+
+        # If most of the function is positive, we set the value
         # to `1`, otherwise set it to `0`.
         if fn_bdd.cardinality() > fn_bdd.l_not().cardinality():
             retained_set[x] = 1
@@ -102,7 +105,7 @@ def detect_motif_avoidant_attractors(
      - `graph` and `petri_net` represent the model in which the property
        should be checked.
      - `terminal_restriction_space` is a symbolic set of states which contains
-       all motif avoidant attractors (i.e. if a candidate state can leave this 
+       all motif avoidant attractors (i.e. if a candidate state can leave this
        set, the candidate cannot be an attractor).
      - `max_iterations` specifies how much time should be spent on the "simpler"
        preprocessing before applying a more complete method.
@@ -162,9 +165,9 @@ def _preprocess_candidates(
     # A random generator initialized with a fixed seed. Ensures simulation
     # is randomized but deterministic.
     generator = random.Random(1234567890)
-    
+
     variables = graph.network_variable_names()
-    update_functions = { var: graph.mk_update_function(var) for var in variables }
+    update_functions = {var: graph.mk_update_function(var) for var in variables}
 
     # Use stochastic simulation to prune the set of candidate states.
     # We use different simulation approach depending on whether this space
@@ -304,7 +307,10 @@ def _Pint_build_symbolic_goal(states: Bdd) -> Goal:
 
     goals: list[Goal] = []
     for clause in states.clause_iterator():
-        named_clause = { states.__ctx__().get_variable_name(var): int(value) for var, value in clause.items() }
+        named_clause = {
+            states.__ctx__().get_variable_name(var): int(value)
+            for var, value in clause.items()
+        }
         goal_atoms = [f"{var}={level}" for var, level in named_clause.items()]
         goals.append(Goal(",".join(goal_atoms)))
 

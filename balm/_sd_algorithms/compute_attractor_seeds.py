@@ -55,7 +55,9 @@ def compute_attractor_seeds(
         # and its "seed" is the retained set.
         return [retained_set]
 
-    terminal_restriction_space = state_list_to_bdd(sd.symbolic.symbolic_context(), child_spaces).l_not()
+    terminal_restriction_space = state_list_to_bdd(
+        sd.symbolic.symbolic_context(), child_spaces
+    ).l_not()
 
     candidate_seeds = compute_fixed_point_reduced_STG(
         sd.petri_net,

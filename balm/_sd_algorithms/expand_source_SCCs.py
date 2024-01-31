@@ -4,7 +4,12 @@ import itertools as it
 import sys
 from typing import TYPE_CHECKING, Callable, cast
 
-from biodivine_aeon import BooleanNetwork, AsynchronousGraph, SymbolicContext, VariableId
+from biodivine_aeon import (
+    AsynchronousGraph,
+    BooleanNetwork,
+    SymbolicContext,
+    VariableId,
+)
 
 import balm.SuccessionDiagram
 from balm._sd_algorithms.expand_bfs import expand_bfs
@@ -147,9 +152,11 @@ def expand_source_SCCs(
     return True
 
 
-def find_source_nodes(network: BooleanNetwork, ctx: SymbolicContext | None = None) -> list[str]:
+def find_source_nodes(
+    network: BooleanNetwork, ctx: SymbolicContext | None = None
+) -> list[str]:
     """
-    Return the "source nodes" of a `BooleanNetwork`. That is, variables whose value 
+    Return the "source nodes" of a `BooleanNetwork`. That is, variables whose value
     cannot change, but is not fixed to a `true`/`false` constant.
 
     Note that this internally uses BDD translation to detect identity functions
@@ -158,27 +165,29 @@ def find_source_nodes(network: BooleanNetwork, ctx: SymbolicContext | None = Non
     """
     if ctx is None:
         ctx = SymbolicContext(network)
-    
+
     result: list[str] = []
     for var in network.variables():
         update_function = network.get_update_function(var)
-        assert update_function is not None # Parameters are not allowed.
+        assert update_function is not None  # Parameters are not allowed.
         fn_bdd = ctx.mk_update_function(update_function)
         var_bdd = ctx.mk_network_variable(var)
         if fn_bdd == var_bdd:
             result.append(network.get_variable_name(var))
-    
+
     return result
-    
+
 
 def perc_and_remove_constants_from_bn(
-    bn: BooleanNetwork, space: BooleanSpace, graph: AsynchronousGraph | None = None,
+    bn: BooleanNetwork,
+    space: BooleanSpace,
+    graph: AsynchronousGraph | None = None,
 ) -> BooleanNetwork:
     """
-    Take a BooleanNetwork and percolate it w.r.t. the given `space`. Then 
+    Take a BooleanNetwork and percolate it w.r.t. the given `space`. Then
     inline the fixed variables into their respective targets, eliminating
     them from the network completely.
-    
+
     Note that the new network is not compatible with the symbolic encoding
     of the original network, because it has a differnet set of variables.
 
@@ -191,7 +200,7 @@ def perc_and_remove_constants_from_bn(
     perc_space = percolate_space(graph, space)
     perc_bn = percolate_network(bn, perc_space, ctx=graph)
 
-    return perc_bn.inline_constants(infer_constants=True, repair_graph=True)    
+    return perc_bn.inline_constants(infer_constants=True, repair_graph=True)
 
 
 def find_source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
@@ -202,18 +211,21 @@ def find_source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
     for scc in bn.strongly_connected_components():
         scc_list = sorted(scc)
         if bn.backward_reachable(scc_list) == scc:
-            scc_names = [ bn.get_variable_name(var) for var in scc_list ]
+            scc_names = [bn.get_variable_name(var) for var in scc_list]
             result.append(scc_names)
-    
+
     return sorted(result)
-    
-def restrict_to_component(bn: BooleanNetwork, source_component: list[str]) -> BooleanNetwork:
+
+
+def restrict_to_component(
+    bn: BooleanNetwork, source_component: list[str]
+) -> BooleanNetwork:
     """
     Compute a new `BooleanNetwork` which is a sub-network of the original `bn`
     induced by the specified `source_component`.
 
     Note that the `source_component` must be backward-closed: i.e. there is no variable
-    outside of the `source_component` which regulates the `source_component`. Otherwise 
+    outside of the `source_component` which regulates the `source_component`. Otherwise
     the network cannot be constructed.
 
     Also note that the symbolic encoding of the new network is not compatible with the
@@ -226,19 +238,21 @@ def restrict_to_component(bn: BooleanNetwork, source_component: list[str]) -> Bo
     for var in source_component:
         old_id = bn.find_variable(var)
         assert old_id is not None
-        new_id = new_bn.find_variable(var)    
+        new_id = new_bn.find_variable(var)
         assert new_id is not None
         id_map[old_id] = new_id
 
     # Copy regulations that are in the source component.
     for reg in bn.regulations():
         if reg["source"] in id_map and reg["target"] in id_map:
-            new_bn.add_regulation({
-                "source": bn.get_variable_name(reg["source"]),
-                "target": bn.get_variable_name(reg["target"]),
-                "essential": reg["essential"],
-                "sign": reg["sign"],
-            })
+            new_bn.add_regulation(
+                {
+                    "source": bn.get_variable_name(reg["source"]),
+                    "target": bn.get_variable_name(reg["target"]),
+                    "essential": reg["essential"],
+                    "sign": reg["sign"],
+                }
+            )
 
     # Copy update functions from the source component after translating them to the new IDs.
     for var_id in id_map.keys():
@@ -255,7 +269,7 @@ def find_subnetwork_sd(
 ) -> tuple[balm.SuccessionDiagram.SuccessionDiagram, bool]:
     """
     Computes a `SuccessionDiagram` of a particular sub-network using an expander function.
-    
+
     If `check_maa` is set to `True`, also checks if the resulting succession diagram admits
     motif avoidant attractors.
 
@@ -284,7 +298,7 @@ def find_subnetwork_sd(
             attr = sub_sd.node_attractor_seeds(node, compute=True)
             if not sub_sd.node_is_minimal(node):
                 motif_avoidant_count += len(attr)
-        if motif_avoidant_count != 0:  
+        if motif_avoidant_count != 0:
             # ignore source SCCs with motif avoidant attractors
             has_maa = True
 
@@ -318,7 +332,8 @@ def attach_scc_sd(
             continue
 
         scc_parent_id = cast(
-            int, list(scc_sd.dag.predecessors(scc_node_id))[0]  # type: ignore
+            int,
+            list(scc_sd.dag.predecessors(scc_node_id))[0],  # type: ignore
         )  # get the first parent
         assert scc_parent_id < scc_node_id
 

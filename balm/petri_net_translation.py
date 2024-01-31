@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
     Implements the translation from a `BooleanNetwork` object into a Petri net that can be processed
     by Trappist. The Petri net is represented as a `DiGraph`, with nodes having either a `kind=place`
@@ -11,21 +9,24 @@ from __future__ import annotations
     This is also important for `clingo`, as we have to guarantee that in our logic program, symbols
     start with a lowercase letter.
 """
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from biodivine_aeon import BooleanNetwork, Bdd
     from typing import Generator
 
-import re
-import copy
+    from biodivine_aeon import Bdd, BooleanNetwork
 
+import copy
+import re
+
+from biodivine_aeon import BddPartialValuation, BddVariableSet, SymbolicContext
 from networkx import DiGraph  # type: ignore
-from biodivine_aeon import SymbolicContext, BddVariableSet, BddPartialValuation
 
 # Enables statistics logging.
 DEBUG = False
+
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     """
@@ -41,7 +42,7 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     a `RuntimeError` instead.
     """
     network = copy.copy(network)
-    for var in network.variables():        
+    for var in network.variables():
         name = network.get_variable_name(var)
         if not re.match("^[a-zA-Z0-9_]+$", name):
             if check_only:
@@ -53,9 +54,9 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
                     network.set_variable_name(var, new_name)
                     break
                 except Exception:
-                    # Name clash happened. Try to resolve this by adding an extra underscore to 
+                    # Name clash happened. Try to resolve this by adding an extra underscore to
                     # the variable name. In theory, this can repeat until a unique name is found.
-                    new_name = "_" + new_name                    
+                    new_name = "_" + new_name
 
     return network
 
@@ -102,7 +103,9 @@ def extract_variable_names(encoded_network: DiGraph) -> list[str]:
     return sorted(variables)
 
 
-def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = None) -> DiGraph:
+def network_to_petrinet(
+    network: BooleanNetwork, ctx: SymbolicContext | None = None
+) -> DiGraph:
     """
     Converts a `BooleanNetwork` to a `DiGraph` representing a Petri net encoding
     of the original network. For details about the encoding, see module description.
@@ -110,22 +113,27 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
     Note that the given network needs to have "sanitized" names, otherwise the
     method will fail (see `sanitize_network_names` in this module).
 
-    The operation uses translation through `biodivine_aeon.Bdd` to generate a disjunctive normal form 
+    The operation uses translation through `biodivine_aeon.Bdd` to generate a disjunctive normal form
     of the network's update functions. This is facilitated by `biodivine_aeon.SymbolicContext`. If such
     context already exists, it can be provided as the second argument. Otherwise it will be created.
     """
     # Assert that all network names are already sanitized.
     sanitize_network_names(network, check_only=True)
 
-    assert network.explicit_parameter_count() == 0, \
-        f"Parametrized networks are not supported. Found parameters: {network.explicit_parameter_names()}."
-    
+    assert (
+        network.explicit_parameter_count() == 0
+    ), f"Parametrized networks are not supported. Found parameters: {network.explicit_parameter_names()}."
+
     # Implicit parameters with no regulators are allowed, since they just reprtesent free inputs
     # and are explicitly handled by the succession diagram.
-    non_input_implicit = [ v for v in network.implicit_parameters() if len(network.predecessors(v)) > 0]
+    non_input_implicit = [
+        v for v in network.implicit_parameters() if len(network.predecessors(v)) > 0
+    ]
     if len(non_input_implicit) > 0:
         names = [network.get_variable_name(x) for x in non_input_implicit]
-        raise AssertionError(f"Parametrized networks are not supported. Found implicit parameters: {names}.")
+        raise AssertionError(
+            f"Parametrized networks are not supported. Found implicit parameters: {names}."
+        )
 
     if ctx is None:
         ctx = SymbolicContext(network)
@@ -134,7 +142,7 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
 
     # Create a positive and a negative place for each variable.
     places = {}
-    for name in network.variable_names():        
+    for name in network.variable_names():
         p_name = variable_to_place(name, positive=True)
         n_name = variable_to_place(name, positive=False)
         pn.add_node(p_name, kind="place")  # type: ignore[reportUnknownMemberType]
@@ -160,13 +168,20 @@ def network_to_petrinet(network: BooleanNetwork, ctx: SymbolicContext | None = N
             print(f"Start translation for `{var_name}`: {len(p_bdd)} | {len(n_bdd)}")
 
         # Add 0->1 edges.
-        _create_transitions(pn, ctx.bdd_variable_set(), places, var_name, p_bdd, go_up=True)
+        _create_transitions(
+            pn, ctx.bdd_variable_set(), places, var_name, p_bdd, go_up=True
+        )
         # Add 1-> 0 edges.
-        _create_transitions(pn, ctx.bdd_variable_set(), places, var_name, n_bdd, go_up=False)
+        _create_transitions(
+            pn, ctx.bdd_variable_set(), places, var_name, n_bdd, go_up=False
+        )
 
     return pn
 
-def _optimized_recursive_dnf_generator(bdd: Bdd) -> Generator[BddPartialValuation, None, None]:
+
+def _optimized_recursive_dnf_generator(
+    bdd: Bdd,
+) -> Generator[BddPartialValuation, None, None]:
     """
     Yields a generator of `BddPartialValuation` objects, similar to `bdd.clause_iterator`,
     but uses a recursive optimization strategy to return a smaller result than the default
@@ -188,9 +203,9 @@ def _optimized_recursive_dnf_generator(bdd: Bdd) -> Generator[BddPartialValuatio
     if bdd.is_false():
         return
     if bdd.is_true():
-        yield BddPartialValuation(bdd.__ctx__(), {})
+        yield BddPartialValuation(bdd.__ctx__(), {})  # type: ignore
         return
-    
+
     support = sorted(bdd.support_set())
     best_var = support[0]
     best_size = 10 * len(bdd)
@@ -206,7 +221,7 @@ def _optimized_recursive_dnf_generator(bdd: Bdd) -> Generator[BddPartialValuatio
     for t_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: True})):
         t_val[best_var] = True
         yield t_val
-    
+
     for f_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: False})):
         f_val[best_var] = False
         yield f_val
@@ -224,8 +239,8 @@ def _create_transitions(
     Just a helper method that creates PN transitions from BDDs representing
     positive/negative BN transitions.
     """
-    dir_str = "up" if go_up else "down"  
-    total = 0  
+    dir_str = "up" if go_up else "down"
+    total = 0
     for t_id, implicant in enumerate(_optimized_recursive_dnf_generator(implicant_bdd)):
         total += 1
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
@@ -243,8 +258,10 @@ def _create_transitions(
         else:
             pn.add_edge(places[var_name][1], t_name)  # type: ignore[reportUnknownMemberType] # noqa
             pn.add_edge(t_name, places[var_name][0])  # type: ignore[reportUnknownMemberType] # noqa
-        for variable, value in implicant.items():            
-            variable_str = ctx.get_variable_name(variable)  # Convert from BDD variable to name.
+        for variable, value in implicant.items():
+            variable_str = ctx.get_variable_name(
+                variable
+            )  # Convert from BDD variable to name.
             if variable_str == var_name:
                 continue
             # For the remaining variables, we simply check if the required

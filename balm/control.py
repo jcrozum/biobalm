@@ -240,7 +240,7 @@ def drivers_of_succession(
     ----------
     bn : BooleanNetwork | AsynchronousGraph
         The network to analyze, which contains the Boolean update functions. Ideally,
-        the network should be already provided as a symbolic `AsynchronousGraph`. 
+        the network should be already provided as a symbolic `AsynchronousGraph`.
         Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
         `AsynchronousGraph` is created automatically.
     succession : list[BooleanSpace]
@@ -299,7 +299,7 @@ def find_drivers(
     ----------
     bn : BooleanNetwork | AsynchronousGraph
         The network to analyze, which contains the Boolean update functions. Ideally,
-        the network should be already provided as a symbolic `AsynchronousGraph`. 
+        the network should be already provided as a symbolic `AsynchronousGraph`.
         Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
         `AsynchronousGraph` is created automatically.
     target_trap_space : BooleanSpace

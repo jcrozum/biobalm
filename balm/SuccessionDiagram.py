@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import BooleanNetwork, AsynchronousGraph
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
@@ -15,7 +15,7 @@ from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
-from balm.interaction_graph_utils import feedback_vertex_set, cleanup_network
+from balm.interaction_graph_utils import cleanup_network, feedback_vertex_set
 from balm.petri_net_translation import network_to_petrinet
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
@@ -23,6 +23,7 @@ from balm.types import BooleanSpace
 
 # Enables helpful "progress" messages.
 DEBUG = False
+
 
 class SuccessionDiagram:
     """
@@ -135,7 +136,9 @@ class SuccessionDiagram:
         self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
     ):
         # In theory, the network should be cleaned-up at this point, but just in case...
-        self.network = cleanup_network(BooleanNetwork.from_aeon(str(state["network rules"])))
+        self.network = cleanup_network(
+            BooleanNetwork.from_aeon(str(state["network rules"]))
+        )
         self.symbolic = AsynchronousGraph(self.network)
         self.petri_net = cast(nx.DiGraph, state["petri net"])
         self.nfvs = cast(list[str], state["nfvs"])
