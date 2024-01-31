@@ -36,7 +36,7 @@ def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
     ig = DiGraph()
 
     for var in network.variables():
-        ig.add_node(rg.get_variable_name(var))  # type: ignore
+        ig.add_node(network.get_variable_name(var))  # type: ignore
 
     for reg in network.regulations():
         if not reg["essential"]:
