@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from balm.symbolic_utils import function_restrict, function_eval
+from balm.symbolic_utils import function_eval
 
 """
     Some basic utility operations on spaces (partial assignments of BN variables).
@@ -235,7 +235,7 @@ def percolate_expression(
         ctx = ctx.bdd_variable_set()
 
     bdd = ctx.eval_expression(expression)
-    bdd = function_restrict(bdd, space)
+    bdd = bdd.r_restrict(space)
     return bdd.to_expression()
 
 
