@@ -209,13 +209,6 @@ def test_attractor_detection(network_file: str):
     if not fully_expanded:
         return
 
-    # TODO: Remove these once method is fast enough.
-    if network_file.endswith("075.bnet"):
-        # It seems that with current NFVS, the clingo fixed-point part takes too
-        # long. There are better NFVS-es that we could try, but we first need to
-        # make the NFVS algorithm deterministic.
-        return
-
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
     nfvs_attractors: list[BooleanSpace] = []
@@ -272,13 +265,6 @@ def test_attractor_expansion(network_file: str):
     # succession_diagram must be fully expanded, otherwise we may miss some results.
     # If succession_diagram is not fully expanded, we just skip this network.
     if not fully_expanded:
-        return
-
-    # TODO: Remove these once method is fast enough.
-    if network_file.endswith("075.bnet"):
-        # It seems that with current NFVS, the clingo fixed-point part takes too
-        # long. There are better NFVS-es that we could try, but we first need to
-        # make the NFVS algorithm deterministic.
         return
 
     # Compute attractors in diagram nodes.
