@@ -8,7 +8,7 @@ from networkx import DiGraph  # type: ignore
 from pypint import Goal, InMemoryModel  # type:ignore
 
 from balm.petri_net_translation import place_to_variable
-from balm.state_utils import dnf_function_is_true, remove_state_from_dnf
+from balm.space_utils import dnf_function_is_true, remove_state_from_dnf
 from balm.types import BooleanSpace
 from balm.symbolic_utils import state_list_to_bdd, state_to_bdd, function_eval, function_is_true
 

@@ -10,7 +10,7 @@ from balm.symbolic_utils import function_restrict, function_eval
 """
 
 from typing import TYPE_CHECKING, cast, Literal
-from biodivine_aeon import BddVariableSet, UpdateFunction, AsynchronousGraph, BooleanNetwork, Percolation
+from biodivine_aeon import BddVariableSet, UpdateFunction, AsynchronousGraph, BooleanNetwork, Percolation, SymbolicContext
 from copy import copy
 
 if TYPE_CHECKING:
@@ -42,6 +42,35 @@ def is_subspace(x: BooleanSpace, y: BooleanSpace) -> bool:
         if x[var] != y[var]:
             return False
     return True
+
+
+def dnf_function_is_true(dnf: list[BooleanSpace], state: BooleanSpace) -> bool:
+    """
+    Returns `True` if the given DNF function evaluates to `1` for the given
+    state (or space).
+    """
+    if len(dnf) == 0:
+        return False
+
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            return True
+    return False
+
+
+def remove_state_from_dnf(
+    dnf: list[BooleanSpace], state: BooleanSpace
+) -> list[BooleanSpace]:
+    """
+    Removes all conjunctions that are True in the state
+    """
+    modified_dnf: list[BooleanSpace] = []
+    for conjunction in dnf:
+        if conjunction.items() <= state.items():
+            pass
+        else:
+            modified_dnf.append(conjunction)
+    return modified_dnf
 
 
 def percolate_space_strict(
@@ -181,7 +210,7 @@ def percolate_network(
 
 
 def percolate_expression(
-    expression: BooleanExpression, space: BooleanSpace, ctx: BddVariableSet | None = None
+    expression: BooleanExpression, space: BooleanSpace, ctx: BddVariableSet | SymbolicContext | None = None
 ) -> BooleanExpression:
     """
     Takes a `BooleanExpression` and a `BooleanSpace`. Returns a simplified `BooleanExpression` 
@@ -202,6 +231,8 @@ def percolate_expression(
 
     if ctx is None:
         ctx = BddVariableSet(sorted(variables))
+    if isinstance(ctx, SymbolicContext):
+        ctx = ctx.bdd_variable_set()
 
     bdd = ctx.eval_expression(expression)
     bdd = function_restrict(bdd, space)
@@ -209,7 +240,7 @@ def percolate_expression(
 
 
 def expression_to_space_list(
-        expression: BooleanExpression, ctx: BddVariableSet | None = None
+        expression: BooleanExpression, ctx: BddVariableSet | SymbolicContext | None = None
 ) -> list[BooleanSpace]:
     """
     Convert a `BooleanExpression` to a list of subspaces whose union represents
@@ -226,6 +257,8 @@ def expression_to_space_list(
     if ctx is None:        
         variables = sorted(expression.support_set())
         ctx = BddVariableSet(variables)
+    if isinstance(ctx, SymbolicContext):
+        ctx = ctx.bdd_variable_set()
 
     bdd = ctx.eval_expression(expression)
 
