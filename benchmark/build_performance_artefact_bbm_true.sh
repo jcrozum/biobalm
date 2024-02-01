@@ -43,12 +43,12 @@ git rev-parse HEAD > _run_git_rev.txt
 hostname > _run_hostname.txt
 
 # Benchmark "basic" unconstrained expansion.
-./venv/bin/python3 run_bench.py 10m ../models/bbm-inputs-true bench_sd_expand_bfs.py
+./venv/bin/python3 run_bench.py 10m ../models/bbm-bnet-inputs-true bench_sd_expand_bfs.py
 # Benchmark "basic" attractor enumeration.
-./venv/bin/python3 run_bench.py 10m ../models/bbm-inputs-true bench_sd_attractors_full.py
+./venv/bin/python3 run_bench.py 10m ../models/bbm-bnet-inputs-true bench_sd_attractors_full.py
 # Benchmark improved "SCC" attractor enumeration and expansion.
-./venv/bin/python3 run_bench.py 10m ../models/bbm-inputs-true bench_sd_attractors_scc.py
+./venv/bin/python3 run_bench.py 10m ../models/bbm-bnet-inputs-true bench_sd_attractors_scc.py
 # Benchmark simple exhaustive control.
-./venv/bin/python3 run_bench.py 10m ../models/bbm-inputs-true bench_sd_control.py
+./venv/bin/python3 run_bench.py 10m ../models/bbm-bnet-inputs-true bench_sd_control.py
 
 zip -r perf_bbm_true_`hostname`.zip _run_*
