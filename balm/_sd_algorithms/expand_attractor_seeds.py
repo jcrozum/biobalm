@@ -70,7 +70,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
             # are not covered by the already expanded children.
 
             successor_space = sd.node_space(successors[-1])
-            retained_set = make_retained_set(sd.symbolic, sd.nfvs, successor_space)
+            retained_set = make_retained_set(sd.symbolic, sd.node_nfvs(node), successor_space)
 
             avoid_or_none = [
                 intersect(successor_space, child) for child in expanded_motifs

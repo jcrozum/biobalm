@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Generator
-
+    from balm.types import BooleanSpace
     from biodivine_aeon import Bdd, BooleanNetwork
 
 import copy
@@ -23,6 +23,7 @@ import re
 
 from biodivine_aeon import BddPartialValuation, BddVariableSet, SymbolicContext
 from networkx import DiGraph  # type: ignore
+from typing import cast
 
 # Enables statistics logging.
 DEBUG = False
@@ -102,6 +103,68 @@ def extract_variable_names(encoded_network: DiGraph) -> list[str]:
 
     return sorted(variables)
 
+def extract_source_variables(encoded_network: DiGraph) -> list[str]:
+    """
+    Extract the list of variable names that represent source nodes of the encoded network.
+
+    That is, nodes with an identity update function.
+    """
+    variables = extract_variable_names(encoded_network)
+    source_set = set(variables)
+    for _, change_var in encoded_network.nodes(data="change"):  # type: ignore
+        if change_var in source_set:
+            source_set.remove(change_var)  # type: ignore[reportUnknownArgumentType] # noqa
+    source_nodes: list[str] = sorted(source_set)
+    return source_nodes
+
+def restrict_petrinet_to_subspace(
+    petri_net: DiGraph,
+    sub_space: BooleanSpace,
+) -> DiGraph: 
+    """
+    Create a copy of the given {etri net, but with the variables given in `sub_space` fixed to their
+    respective values. 
+
+    Note that this completely eliminates the constant variables from the {etri net, but it does not 
+    perform any further constant propagation or percolation. Variables that are fixed in the sub_space
+    but do not exist in the Petri net are ignored.
+    """    
+    result = copy.deepcopy(petri_net)
+    for (var, value) in sub_space.items():
+        # The idea is that we want to *remove* the place that corresponds to the fixed
+        # value (it's effect on transitions is assumed to be fulfilled). Then, we remove
+        # all transitions that depend on the inverse of the fixed value, as these can
+        # never be satisfied. Then, we also remove inverse place.
+        fixed_place = variable_to_place(var, bool(value))
+        inverse_place = variable_to_place(var, not bool(value))
+
+        if fixed_place not in result.nodes or inverse_place not in result.nodes:
+            # These nodes were already removed.
+            continue
+
+        # First, remove all transitions that modify the fixed variable.
+        # These are removed regardless of the actual value.
+
+        to_delete: set[str] = set()
+        
+        # Transitions that put marker into one of the place values, but do not take it.
+        for tr in result.predecessors(fixed_place):     # type: ignore
+            if not result.has_edge(fixed_place, tr):    # type: ignore
+                to_delete.add(cast(str, tr))
+        for tr in result.predecessors(inverse_place):   # type: ignore
+            if not result.has_edge(inverse_place, tr):  # type: ignore
+                to_delete.add(cast(str, tr))
+        
+        # Transitions that depend on the value of the inverse place
+        for tr in result.successors(inverse_place):     # type: ignore
+            to_delete.add(cast(str, tr))
+        
+        for tr in to_delete:
+            result.remove_node(tr)                      # type: ignore
+        
+        result.remove_node(fixed_place)                 # type: ignore
+        result.remove_node(inverse_place)               # type: ignore
+    return result
 
 def network_to_petrinet(
     network: BooleanNetwork, ctx: SymbolicContext | None = None
