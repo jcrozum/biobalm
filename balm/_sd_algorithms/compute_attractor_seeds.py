@@ -48,7 +48,9 @@ def compute_attractor_seeds(
     # We add the whole node space to the retain set because we know
     # the space is a trap and this will remove the corresponding unnecessary
     # Petri net transitions.
-    retained_set = make_retained_set(sd.symbolic, sd.node_nfvs(node_id), node_space, child_spaces)
+    retained_set = make_retained_set(
+        sd.symbolic, sd.node_nfvs(node_id), node_space, child_spaces
+    )
 
     if len(retained_set) == sd.network.variable_count() and len(child_spaces) == 0:
         # There is only a single attractor remaining here,

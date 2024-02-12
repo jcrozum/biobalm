@@ -1,14 +1,16 @@
-from __future__ import annotations
-
 """
     Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
     and maximum trap spaces, including time-reversed networks.
 """
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Callable
+
     from clingo import Model
+
     from balm.types import BooleanSpace
 
 from biodivine_aeon import BooleanNetwork
@@ -16,11 +18,11 @@ from clingo import Control, SolveHandle
 from networkx import DiGraph  # type: ignore
 
 from balm.petri_net_translation import (
+    extract_source_variables,
     extract_variable_names,
     network_to_petrinet,
     place_to_variable,
     variable_to_place,
-    extract_source_variables,
 )
 
 

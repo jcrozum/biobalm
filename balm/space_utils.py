@@ -280,7 +280,7 @@ def expression_to_space_list(
 
     sub_spaces: list[BooleanSpace] = []
     for clause in bdd.clause_iterator():
-        space = {}
+        space: BooleanSpace = {}
         for var, value in clause.items():
             space[ctx.get_variable_name(var)] = cast(Literal[0, 1], int(value))
         sub_spaces.append(space)

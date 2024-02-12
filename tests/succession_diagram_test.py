@@ -1,6 +1,6 @@
 import unittest
 
-from biodivine_aeon import BooleanNetwork, AsynchronousGraph, Attractors
+from biodivine_aeon import AsynchronousGraph, Attractors, BooleanNetwork
 
 import balm
 import balm.SuccessionDiagram
@@ -108,6 +108,17 @@ class SuccessionDiagramTest(unittest.TestCase):
         assert not succession_diagram.is_subgraph(succession_diagram_partial)
 
 
+def test_state():
+    sd1 = SuccessionDiagram.from_bnet("A, B\nB, A")
+    sd2 = SuccessionDiagram.from_bnet("A, B\nB, A\nC, C & B")
+    sd1.build()
+    sd2.__setstate__(sd1.__getstate__())
+    slots1 = [x + str(sd1.__getattribute__(x)) for x in sd1.__slots__]
+    slots2 = [x + str(sd2.__getattribute__(x)) for x in sd2.__slots__]
+    assert slots1 == slots2
+    assert sd1.summary() == sd2.summary()
+
+
 def test_expansion_depth_limit_bfs():
     bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/033.bnet")
 
@@ -191,7 +202,7 @@ def test_expansion_comparisons(network_file: str):
         assert len(sd_target.minimal_trap_spaces()) == 1
 
 
-def test_attractor_detection(network_file: str):    
+def test_attractor_detection(network_file: str):
     NODE_LIMIT = 1000
 
     bn = BooleanNetwork.from_file(network_file)
