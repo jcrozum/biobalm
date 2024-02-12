@@ -1,14 +1,16 @@
-from __future__ import annotations
-
 """
     Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
     and maximum trap spaces, including time-reversed networks.
 """
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Callable
+
     from clingo import Model
+
     from balm.types import BooleanSpace
 
 from biodivine_aeon import BooleanNetwork
@@ -16,6 +18,7 @@ from clingo import Control, SolveHandle
 from networkx import DiGraph  # type: ignore
 
 from balm.petri_net_translation import (
+    extract_source_variables,
     extract_variable_names,
     network_to_petrinet,
     place_to_variable,
@@ -30,6 +33,7 @@ def trappist_async(
     reverse_time: bool = False,
     ensure_subspace: BooleanSpace | None = None,
     avoid_subspaces: list[BooleanSpace] | None = None,
+    optimize_source_variables: list[str] | None = None,
 ):
     """
     The same as the `trappist` method, but instead of returning a list of spaces
@@ -55,13 +59,8 @@ def trappist_async(
     else:
         variables = [bn.get_variable_name(v) for v in bn.variables()]
 
-    # Source node is a node that has no transitions in the PN encoding
-    # (i.e. it's value cannot change).
-    source_set = set(variables)
-    for _, change_var in petri_net.nodes(data="change"):  # type: ignore
-        if change_var in source_set:
-            source_set.remove(change_var)  # type: ignore[reportUnknownArgumentType] # noqa
-    source_nodes: list[str] = sorted(source_set)
+    if optimize_source_variables is None:
+        optimize_source_variables = extract_source_variables(petri_net)
 
     ctl = _create_clingo_constraints(
         variables,
@@ -70,7 +69,7 @@ def trappist_async(
         reverse_time,
         ensure_subspace,
         avoid_subspaces,
-        source_nodes,
+        optimize_source_variables,
     )
 
     ctl.ground()
@@ -90,6 +89,7 @@ def trappist(
     solution_limit: int | None = None,
     ensure_subspace: BooleanSpace | None = None,
     avoid_subspaces: list[BooleanSpace] | None = None,
+    optimize_source_variables: list[str] | None = None,
 ) -> list[BooleanSpace]:
     """
     Solve the given `problem` for the given `network` using the Trappist
@@ -134,6 +134,7 @@ def trappist(
         reverse_time=reverse_time,
         ensure_subspace=ensure_subspace,
         avoid_subspaces=avoid_subspaces,
+        optimize_source_variables=optimize_source_variables,
     )
 
     return results

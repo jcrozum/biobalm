@@ -16,10 +16,14 @@ from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
 from balm.interaction_graph_utils import cleanup_network, feedback_vertex_set
-from balm.petri_net_translation import network_to_petrinet
+from balm.petri_net_translation import (
+    extract_source_variables,
+    network_to_petrinet,
+    restrict_petrinet_to_subspace,
+)
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
-from balm.types import BooleanSpace
+from balm.types import BooleanSpace, SuccessionDiagramState
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -94,6 +98,9 @@ class SuccessionDiagram:
 
     """
 
+    NFVS_NODE_THRESHOLD = (
+        2_000  # if more than this many nodes, we only find FVS, not NFVS
+    )
     __slots__ = (
         "network",
         "symbolic",
@@ -109,10 +116,12 @@ class SuccessionDiagram:
         self.symbolic = AsynchronousGraph(self.network)
         # A Petri net representation of the original Boolean network.
         self.petri_net = network_to_petrinet(network)
-        # Negative feedback vertex set.
-        self.nfvs = feedback_vertex_set(
-            network, parity="negative"
-        )  # find_minimum_NFVS(network)
+        if DEBUG:
+            print(
+                f"Generated global Petri net with {len(self.petri_net.nodes)} nodes and {len(self.petri_net.edges)} edges."
+            )
+        # Initially, we don't need the NFVS for anything.
+        self.nfvs: list[str] | None = None
         # A directed acyclic graph representing the succession diagram.
         self.dag = nx.DiGraph()
         # A dictionary used for uniqueness checks on the nodes of the succession
@@ -122,28 +131,23 @@ class SuccessionDiagram:
         # Create an un-expanded root node.
         self._ensure_node(None, {})
 
-    def __getstate__(self) -> dict[str, str | nx.DiGraph | list[str] | dict[int, int]]:
-        state = {
-            "network rules": self.network.to_aeon(),
-            "petri net": self.petri_net,
+    def __getstate__(self) -> SuccessionDiagramState:
+        return {
+            "network_rules": self.network.to_aeon(),
+            "petri_net": self.petri_net,
             "nfvs": self.nfvs,
-            "G": self.dag,
+            "dag": self.dag,
             "node_indices": self.node_indices,
         }
-        return state
 
-    def __setstate__(
-        self, state: dict[str, str | nx.DiGraph | list[str] | dict[int, int]]
-    ):
+    def __setstate__(self, state: SuccessionDiagramState):
         # In theory, the network should be cleaned-up at this point, but just in case...
-        self.network = cleanup_network(
-            BooleanNetwork.from_aeon(str(state["network rules"]))
-        )
+        self.network = cleanup_network(BooleanNetwork.from_aeon(state["network_rules"]))
         self.symbolic = AsynchronousGraph(self.network)
-        self.petri_net = cast(nx.DiGraph, state["petri net"])
-        self.nfvs = cast(list[str], state["nfvs"])
-        self.dag = cast(nx.DiGraph, state["G"])  # type: ignore
-        self.node_indices = cast(BooleanSpace, state["node_indices"])  # type: ignore
+        self.petri_net = state["petri_net"]
+        self.nfvs = state["nfvs"]
+        self.dag = state["dag"]
+        self.node_indices = state["node_indices"]
 
     def __len__(self) -> int:
         """
@@ -275,15 +279,15 @@ class SuccessionDiagram:
         if no such node exists in this succession diagram.
         """
         try:
-            key = space_unique_key(node_space, self.network) # throws IndexError
+            key = space_unique_key(node_space, self.network)  # throws IndexError
             if key in self.node_indices:
-                return self.node_indices[key]                
+                return self.node_indices[key]
             else:
                 return None
         except IndexError:
-            # If `space_unique_key` finds a variable that does not exist in this 
-            # `SuccessionDiagram`, it throws an `IndexError`. This can happen 
-            # for example if we are comparing two succession diagrams based on 
+            # If `space_unique_key` finds a variable that does not exist in this
+            # `SuccessionDiagram`, it throws an `IndexError`. This can happen
+            # for example if we are comparing two succession diagrams based on
             # completely different networks.
             return None
 
@@ -414,6 +418,39 @@ class SuccessionDiagram:
             node["attractors"] = attractors
 
         return attractors
+
+    def node_nfvs(self, node_id: int) -> list[str]:
+        """
+        Return the approximation of a minimum negative feedback vertex set that
+        is valid for the specified SD node.
+        """
+
+        # TODO: Right now, we are just returning the gloval FVS. But in the future,
+        # we probably want to compute a separate FVS for each node, because it could
+        # be much smaller if a lot of the nodes are fixed.
+        assert node_id in self.dag.nodes
+
+        if self.nfvs is None:
+            if self.network.variable_count() < SuccessionDiagram.NFVS_NODE_THRESHOLD:
+                # Computing the *negative* variant of the FVS is surprisingly costly.
+                # Hence it mostly makes sense for the smaller networks only.
+                self.nfvs = feedback_vertex_set(self.network, parity="negative")
+            else:
+                self.nfvs = feedback_vertex_set(self.network)
+
+        return self.nfvs
+
+    def node_restricted_petri_net(self, node_id: int) -> nx.DiGraph | None:
+        """
+        Return the pre-computed Petri net representation restricted to the subspace
+        of the specified SD node.
+
+        This can return `None` if the requested node is already fully expanded, because
+        in such a case, there is no need to store the Petri net anymore. However,
+        in general you should assume that this field is optional, even on nodes that
+        are not expanded yet.
+        """
+        return cast(nx.DiGraph, self.dag.nodes[node_id]["petri_net"])
 
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
@@ -565,6 +602,52 @@ class SuccessionDiagram:
         current_depth = cast(int, self.dag.nodes[node_id]["depth"])
         self.dag.nodes[node_id]["depth"] = max(current_depth, parent_depth + 1)
 
+    def _update_node_petri_net(self, node_id: int, parent_id: int | None):
+        """
+        Try to compute a restricted Petri net for this node using the Petri net
+        stored in the node's parent.
+
+        If the parent Petri net does not exist or the parent is not specified, the
+        restriction is performed on the "global" Petri net object, which is usually
+        slower but should yield the same result.
+
+        No Petri net is computed if the specified node is a fixed-point, since
+        such Petri net is always empty.
+        """
+
+        node_space = self.node_space(node_id)
+
+        if len(node_space) == self.network.variable_count():
+            # If fixed point, no need to compute.
+            return
+
+        if parent_id is not None:
+            parent_pn = self.node_restricted_petri_net(parent_id)
+            if parent_pn is None:
+                pn = self.petri_net
+            else:
+                pn = parent_pn
+        else:
+            pn = self.petri_net
+
+        restricted_pn = restrict_petrinet_to_subspace(pn, node_space)
+
+        if DEBUG:
+            print(
+                f"[{node_id}] Generated Petri net restriction with {len(restricted_pn.nodes)} nodes and {len(restricted_pn.edges)} edges."
+            )
+
+        self.dag.nodes[node_id]["petri_net"] = restricted_pn
+
+    def _clear_node_petri_net(self, node_id: int):
+        """
+        Remove the computed Petri net for this node.
+
+        This is typically done once the node is expanded, since we know the Petri net won't
+        be needed anymore.
+        """
+        del self.dag.nodes[node_id]["petri_net"]
+
     def _expand_one_node(self, node_id: int):
         """
         An internal method that expands a single node of the succession diagram.
@@ -595,11 +678,31 @@ class SuccessionDiagram:
                 print(f"[{node_id}] Found fixed-point: {current_space}.")
             return
 
-        sub_spaces = trappist(
-            self.petri_net,
-            problem="max",
-            ensure_subspace=current_space,
-        )
+        # We use the non-propagated Petri net for backwards-compatibility reasons here.
+        # The SD created from the restricted Petri net is technically correct, but can
+        # propagate some of the input values further and yields a smaller SD.
+        source_nodes = []
+        if node_id == self.root():
+            source_nodes = extract_source_variables(self.petri_net)
+
+        sub_spaces: list[BooleanSpace]
+        pn = self.node_restricted_petri_net(node_id)
+        if pn is not None:
+            # We have a pre-propagated PN for this sub-space, hence we can use
+            # that to compute the trap spaces.
+            partial_sub_spaces = trappist(
+                pn, problem="max", optimize_source_variables=source_nodes
+            )
+            sub_spaces = [(s | current_space) for s in partial_sub_spaces]
+        else:
+            # If we (for whatever reason) don't have the pre-propagated PN,
+            # we can still use the "global" PN and let trappist deal with the restriction.
+            sub_spaces = trappist(
+                self.petri_net,
+                problem="max",
+                ensure_subspace=current_space,
+                optimize_source_variables=source_nodes,
+            )
 
         # Sort the spaces based on a unique key in case trappist is not always
         # sorted deterministically.
@@ -620,6 +723,9 @@ class SuccessionDiagram:
 
             if DEBUG:
                 print(f"[{node_id}] Created edge into node {child_id}.")
+
+        # The node is now fully expanded, hence we won't need the restricted PN anymore.
+        self._clear_node_petri_net(node_id)
 
     def _ensure_node(self, parent_id: int | None, stable_motif: BooleanSpace) -> int:
         """
@@ -661,5 +767,7 @@ class SuccessionDiagram:
             # approach these... but this is probably good enough for now.
             self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
             self._update_node_depth(child_id, parent_id)
+
+        self._update_node_petri_net(child_id, parent_id)
 
         return child_id
