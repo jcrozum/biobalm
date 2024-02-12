@@ -1,6 +1,6 @@
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
-import balm.succession_diagram
+from balm import SuccessionDiagram
 from balm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
     find_source_nodes,
@@ -75,7 +75,7 @@ B, A | C"""
 
     scc_sd, _ = find_subnetwork_sd(
         bn,
-        expander=balm.succession_diagram.SuccessionDiagram.expand_bfs,
+        expander=SuccessionDiagram.expand_bfs,
         check_maa=True,
     )
 
@@ -88,7 +88,7 @@ B, A | C"""
 
 
 def expansion(bn: BooleanNetwork):
-    sd = balm.succession_diagram.SuccessionDiagram(bn)
+    sd = SuccessionDiagram(bn)
     fully_expanded = expand_source_SCCs(sd, check_maa=False)
     assert fully_expanded
 
@@ -145,7 +145,7 @@ def test_expansion():
 
 
 def attractor_search(bn: BooleanNetwork):
-    sd = balm.succession_diagram.SuccessionDiagram(bn)
+    sd = SuccessionDiagram(bn)
     fully_expanded = expand_source_SCCs(sd)
     assert fully_expanded
 
@@ -369,10 +369,10 @@ def test_isomorph():
     path = "models/bbm-bnet-inputs-true/005.bnet"
     bn = BooleanNetwork.from_file(path)
 
-    sd_bfs = balm.succession_diagram.SuccessionDiagram(bn)
+    sd_bfs = SuccessionDiagram(bn)
     sd_bfs.expand_bfs()
 
-    sd_scc = balm.succession_diagram.SuccessionDiagram(bn)
+    sd_scc = SuccessionDiagram(bn)
     expand_source_SCCs(sd_scc)
 
     assert [sd_bfs.node_space(id) for id in sd_bfs.node_ids()] == [

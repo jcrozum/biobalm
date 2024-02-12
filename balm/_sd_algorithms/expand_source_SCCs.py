@@ -11,14 +11,15 @@ from biodivine_aeon import (
     VariableId,
 )
 
-import balm.succession_diagram
 from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm.space_utils import percolate_network, percolate_space
 from balm.types import BooleanSpace
 
 if TYPE_CHECKING:
+    from balm.succession_diagram import SuccessionDiagram
+
     ExpanderFunctionType = Callable[
-        [balm.succession_diagram.SuccessionDiagram, int | None, int | None, int | None],
+        [SuccessionDiagram, int | None, int | None, int | None],
         bool,
     ]
 
@@ -28,7 +29,7 @@ DEBUG = False
 
 
 def expand_source_SCCs(
-    sd: balm.succession_diagram.SuccessionDiagram,
+    sd: SuccessionDiagram,
     expander: ExpanderFunctionType = expand_bfs,
     check_maa: bool = True,
 ) -> bool:
@@ -266,7 +267,7 @@ def restrict_to_component(
 
 def find_subnetwork_sd(
     sub_network: BooleanNetwork, expander: ExpanderFunctionType, check_maa: bool
-) -> tuple[balm.succession_diagram.SuccessionDiagram, bool]:
+) -> tuple[SuccessionDiagram, bool]:
     """
     Computes a `SuccessionDiagram` of a particular sub-network using an expander function.
 
@@ -280,11 +281,12 @@ def find_subnetwork_sd(
                 True if there is motif avoidance
 
     """
+    from balm import SuccessionDiagram
 
     if DEBUG:
         print("scc_bnet\n", sub_network.to_bnet())
 
-    sub_sd = balm.succession_diagram.SuccessionDiagram(sub_network)
+    sub_sd = SuccessionDiagram(sub_network)
     fully_expanded = expander(sub_sd, None, None, None)
     assert fully_expanded
 
@@ -306,8 +308,8 @@ def find_subnetwork_sd(
 
 
 def attach_scc_sd(
-    sd: balm.succession_diagram.SuccessionDiagram,
-    scc_sd: balm.succession_diagram.SuccessionDiagram,
+    sd: SuccessionDiagram,
+    scc_sd: SuccessionDiagram,
     branch: int,
     check_maa: bool,
 ) -> list[int]:
