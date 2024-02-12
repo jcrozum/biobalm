@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from balm.SuccessionDiagram import SuccessionDiagram
+    from balm.succession_diagram import SuccessionDiagram
 
 from balm.space_utils import intersect, is_subspace
 from balm.types import BooleanSpace
