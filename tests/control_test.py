@@ -7,7 +7,7 @@ from balm.control import (
     succession_control,
     successions_to_target,
 )
-from balm.SuccessionDiagram import SuccessionDiagram
+from balm.succession_diagram import SuccessionDiagram
 from balm.types import BooleanSpace
 
 
@@ -255,7 +255,8 @@ def test_forbidden_drivers():
     true_successions = [[{"A": 1, "B": 1, "C": 1}]]
 
     true_interventions = [
-        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
+        Intervention(c, "internal", s)
+        for c, s in zip(true_controls, true_successions)  # type: ignore
     ]
 
     # do not show failed solution (default)
@@ -305,7 +306,8 @@ def test_size_restriction():
     true_successions = [[{"A": 1, "B": 1, "C": 1}]]
 
     true_interventions = [
-        Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)  # type: ignore
+        Intervention(c, "internal", s)
+        for c, s in zip(true_controls, true_successions)  # type: ignore
     ]
 
     # show the failed solution

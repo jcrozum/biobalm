@@ -1,10 +1,10 @@
-from biodivine_aeon import BooleanNetwork, AsynchronousGraph
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
-import balm.SuccessionDiagram
+from balm import SuccessionDiagram
 from balm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
-    find_subnetwork_sd,
     find_source_nodes,
+    find_subnetwork_sd,
     perc_and_remove_constants_from_bn,
 )
 from balm.space_utils import percolate_network, percolate_space
@@ -65,17 +65,17 @@ def test_perc_and_remove_constants_from_bn():
 
 def test_find_scc_sd():
     bn = BooleanNetwork.from_bnet(
-"""targets,factors
+        """targets,factors
 A, B
 B, A | C"""
     )
 
     # This "simulates" what would happen in the SCC expansion algorithm.
-    bn = perc_and_remove_constants_from_bn(bn, {'C': 0})
+    bn = perc_and_remove_constants_from_bn(bn, {"C": 0})
 
     scc_sd, _ = find_subnetwork_sd(
         bn,
-        expander=balm.SuccessionDiagram.SuccessionDiagram.expand_bfs,
+        expander=SuccessionDiagram.expand_bfs,
         check_maa=True,
     )
 
@@ -88,7 +88,7 @@ B, A | C"""
 
 
 def expansion(bn: BooleanNetwork):
-    sd = balm.SuccessionDiagram.SuccessionDiagram(bn)
+    sd = SuccessionDiagram(bn)
     fully_expanded = expand_source_SCCs(sd, check_maa=False)
     assert fully_expanded
 
@@ -145,7 +145,7 @@ def test_expansion():
 
 
 def attractor_search(bn: BooleanNetwork):
-    sd = balm.SuccessionDiagram.SuccessionDiagram(bn)
+    sd = SuccessionDiagram(bn)
     fully_expanded = expand_source_SCCs(sd)
     assert fully_expanded
 
@@ -369,10 +369,10 @@ def test_isomorph():
     path = "models/bbm-bnet-inputs-true/005.bnet"
     bn = BooleanNetwork.from_file(path)
 
-    sd_bfs = balm.SuccessionDiagram.SuccessionDiagram(bn)
+    sd_bfs = SuccessionDiagram(bn)
     sd_bfs.expand_bfs()
 
-    sd_scc = balm.SuccessionDiagram.SuccessionDiagram(bn)
+    sd_scc = SuccessionDiagram(bn)
     expand_source_SCCs(sd_scc)
 
     assert [sd_bfs.node_space(id) for id in sd_bfs.node_ids()] == [
@@ -381,7 +381,13 @@ def test_isomorph():
 
     assert sd_scc.is_isomorphic(sd_bfs)
 
-    edge_motifs_bfs = set(str(sorted(sd_bfs.edge_stable_motif(x, y).items())) for (x, y) in sd_bfs.dag.edges)  # type: ignore
-    edge_motifs_scc = set(str(sorted(sd_scc.edge_stable_motif(x, y).items())) for (x, y) in sd_scc.dag.edges)  # type: ignore
+    edge_motifs_bfs = set(
+        str(sorted(sd_bfs.edge_stable_motif(x, y).items()))  # type: ignore
+        for (x, y) in sd_bfs.dag.edges  # type: ignore
+    )  # type: ignore
+    edge_motifs_scc = set(
+        str(sorted(sd_scc.edge_stable_motif(x, y).items()))  # type: ignore
+        for (x, y) in sd_scc.dag.edges  # type: ignore
+    )  # type: ignore
 
     assert edge_motifs_bfs == edge_motifs_scc

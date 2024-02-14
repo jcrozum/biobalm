@@ -7,7 +7,7 @@ import networkx as nx  # type: ignore
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
 from balm.space_utils import is_subspace, percolate_space
-from balm.SuccessionDiagram import SuccessionDiagram
+from balm.succession_diagram import SuccessionDiagram
 from balm.types import BooleanSpace, ControlOverrides, SubspaceSuccession
 
 

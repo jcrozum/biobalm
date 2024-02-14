@@ -3,12 +3,12 @@ import unittest
 from biodivine_aeon import AsynchronousGraph, Attractors, BooleanNetwork
 
 import balm
-import balm.SuccessionDiagram
-from balm.SuccessionDiagram import SuccessionDiagram
+import balm.succession_diagram
+from balm.succession_diagram import SuccessionDiagram
 from balm.types import BooleanSpace
 
 # This just ensures that the debug outputs are a part of the test output.
-balm.SuccessionDiagram.DEBUG = True
+balm.succession_diagram.DEBUG = True
 
 
 class SuccessionDiagramTest(unittest.TestCase):
@@ -160,7 +160,7 @@ def test_expansion_size_limit_dfs():
 
 def test_expansion_comparisons(network_file: str):
     # Compare the succession diagrams for various expansion methods.
-    balm.SuccessionDiagram.DEBUG = True
+    balm.succession_diagram.DEBUG = True
     NODE_LIMIT = 100
     DEPTH_LIMIT = 10
 
