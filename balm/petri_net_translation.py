@@ -9,6 +9,7 @@
     This is also important for `clingo`, as we have to guarantee that in our logic program, symbols
     start with a lowercase letter.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

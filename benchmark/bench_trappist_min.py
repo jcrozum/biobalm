@@ -14,10 +14,12 @@ bn = bn.infer_valid_graph()
 
 count = 0
 
+
 def count_all(x: BooleanSpace):
     global count
     count += 1
     return True
+
 
 trappist_async(bn, on_solution=count_all, problem="min")
 

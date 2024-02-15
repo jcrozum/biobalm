@@ -2,6 +2,7 @@
     Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
     and maximum trap spaces, including time-reversed networks.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

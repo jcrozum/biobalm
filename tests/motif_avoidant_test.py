@@ -29,7 +29,9 @@ def test_preprocessing_ssf_not_optimal():
         Assume that terminal_restriction_space = {0, 1}^2 - {11} = {00, 01, 10}.
     """
 
-    terminal_restriction_space = state_list_to_bdd(graph.symbolic_context(), [s0, s1, s2])
+    terminal_restriction_space = state_list_to_bdd(
+        graph.symbolic_context(), [s0, s1, s2]
+    )
 
     """
         The minimum NFVS is {x1, x2}.
@@ -77,7 +79,9 @@ def test_preprocessing_ssf_optimal():
         It has two time-reversal minimal trap spaces: 110 + 001. Both are self-negating.
         Assume that terminal_restriction_space = {0, 1}^3 - {101, 011, 110, 001} = {000, 010, 100, 111}.
     """
-    terminal_restriction_space = state_list_to_bdd(graph.symbolic_context(), [s0, s2, s4, s7])
+    terminal_restriction_space = state_list_to_bdd(
+        graph.symbolic_context(), [s0, s2, s4, s7]
+    )
 
     """
         The minimum NFVS is {A, B}.

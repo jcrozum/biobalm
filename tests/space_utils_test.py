@@ -42,7 +42,7 @@ def test_space_percolation():
     assert set() == percolation_conflicts(graph, {"a": 0})
     assert {"a": 1, "b": 1, "c": 1} == percolate_space(graph, {"a": 1})
     assert set() == percolation_conflicts(graph, {"a": 1})
-    
+
     bn = BooleanNetwork.from_bnet(
         """
     a, b
@@ -56,8 +56,10 @@ def test_space_percolation():
     assert {"a": 0, "c": 0} == percolate_space_strict(graph, {"a": 0, "b": 0, "c": 0})
 
     # The conflict is on b. The rest is fine.
-    assert {"b"} == percolation_conflicts(graph, {"a": 0, "b": 0, "c": 0}, strict_percolation=False)
-    
+    assert {"b"} == percolation_conflicts(
+        graph, {"a": 0, "b": 0, "c": 0}, strict_percolation=False
+    )
+
     bn = BooleanNetwork.from_bnet(
         """
     a, !b
@@ -111,14 +113,14 @@ def test_network_percolation():
 def test_expression_to_spaces():
     e = BooleanExpression("(a & c) | (!d & (a | c)) | f")
 
-    spaces = expression_to_space_list(e)    
+    spaces = expression_to_space_list(e)
 
-    assert {'a': 0, 'c': 0, 'f': 1} in spaces
-    assert {'a': 0, 'c': 1, 'd': 0} in spaces
-    assert {'a': 0, 'c': 1, 'd': 1, 'f': 1} in spaces
-    assert {'a': 1, 'c': 0, 'd': 0} in spaces
-    assert {'a': 1, 'c': 0, 'd': 1, 'f': 1} in spaces
-    assert {'a': 1, 'c': 1} in spaces
+    assert {"a": 0, "c": 0, "f": 1} in spaces
+    assert {"a": 0, "c": 1, "d": 0} in spaces
+    assert {"a": 0, "c": 1, "d": 1, "f": 1} in spaces
+    assert {"a": 1, "c": 0, "d": 0} in spaces
+    assert {"a": 1, "c": 0, "d": 1, "f": 1} in spaces
+    assert {"a": 1, "c": 1} in spaces
 
     assert {"a": 1, "c": 0} not in spaces
 

@@ -9,6 +9,7 @@ from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
 from balm.interaction_graph_utils import cleanup_network
 from balm.types import BooleanSpace
 
+
 def test_network_minimum_traps(network_file: str):
     bn = cleanup_network(BooleanNetwork.from_file(network_file))
     stg = AsynchronousGraph(bn)

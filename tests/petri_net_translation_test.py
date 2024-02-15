@@ -12,11 +12,11 @@ from balm.petri_net_translation import (
 
 def test_sanitization():
     bn = BooleanNetwork([r"a_45[x]", r"b12{z}", "c[", "c]"])
-    a, b, c1, c2 = bn.variables()    
-    assert bn.variable_names() == [r"a_45[x]", r"b12{z}", "c[", "c]"]    
+    a, b, c1, c2 = bn.variables()
+    assert bn.variable_names() == [r"a_45[x]", r"b12{z}", "c[", "c]"]
 
     bn = sanitize_network_names(bn)
-    assert bn.variable_names() == ["a_45_x_", "b12_z_", "c_", "_c_"]    
+    assert bn.variable_names() == ["a_45_x_", "b12_z_", "c_", "_c_"]
 
 
 def test_sanitization_failing():
