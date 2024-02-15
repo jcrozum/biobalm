@@ -2,8 +2,6 @@ name: test
 on:
   push:
   pull_request:
-permissions: # so we can upload the docs
-  contents: write
 
 jobs:
   # First, check if the types/formatting is correct.
