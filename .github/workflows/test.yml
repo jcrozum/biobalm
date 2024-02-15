@@ -1,6 +1,6 @@
 name: test
 on:
-  push:
+  # push:
   pull_request:
 permissions: # so we can upload the docs
   contents: write
@@ -37,18 +37,16 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 balm --ignore=E203,W503,C901 --select=C,E,F,W,B,B950 --max-line-length=127 --statistics --count --max-complexity=10
   doctests:
-    # only on merged PR
-    # if: github.event.pull_request.merged == true 
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [types-and-linting]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install clingo
         run: sudo apt-get -y install gringo
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
           architecture: x64

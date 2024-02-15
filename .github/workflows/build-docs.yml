@@ -3,22 +3,23 @@ on:
   pull_request:
     types:
       - closed
+  push:
 permissions: # so we can upload the docs
   contents: write
 
 jobs:
   docs-build-and-deploy:
     # only on merged PR
-    if: github.event.pull_request.merged == true 
+    # if: github.event.pull_request.merged == true 
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install clingo
         run: sudo apt-get -y install gringo
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
           architecture: x64
