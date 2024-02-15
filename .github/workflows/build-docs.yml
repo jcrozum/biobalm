@@ -27,11 +27,11 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install sphinx requirements
         run: pip install sphinx sphinx-toolbox pydata-sphinx-theme sphinx-copybutton sphinx-autoapi
-      - uses: actions/checkout@v1
-      - uses: ammaraskar/sphinx-action@master
-        with:
-          docs-folder: "docs/"
+      - name: Build docs
+        run: |
+          sphinx-build -M html docs/source/ docs/build/
       - name: deploy docs
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: docs/_build/ # The folder the action should deploy.
+          folder: docs/build/html
+          single-commit: true
