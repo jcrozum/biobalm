@@ -39,7 +39,7 @@ def find_single_node_LDOIs(
 
     Example
     _______
-    >>> ldois = balm.drivers.find_single_node_LDOIs(sd.network)
+    >>> import balm
     >>> sd = balm.SuccessionDiagram.from_bnet('A, A\\nB, A')
     >>> ldois = balm.drivers.find_single_node_LDOIs(sd.network)
     >>> for k in sorted(ldois):
