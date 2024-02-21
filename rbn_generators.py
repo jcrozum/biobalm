@@ -32,7 +32,7 @@ def power_law_graph_generator(n_nodes: int, power: float = 3.0, seed: int = 0):
     # print(np.average(ks))
 
     G = nx.DiGraph()
-    while np.sum(ks) > 0: # type: ignore
+    while np.sum(ks) > 0:  # type: ignore
         source, sink = rng.integers(0, n_nodes, 2)
         # if all the out degree is filled, find a new source
         while ks[source] == 0:
@@ -80,7 +80,7 @@ def add_negative_edges(G: nx.DiGraph, pNeg: float = 0.25, seed: int = 0):
 
 def generate_ncf_rule(
     G: nx.DiGraph, node: int, bias: float = 0.5, seed: int = 0
-    ) -> str:
+) -> str:
     """
     Function to write a nested canalyzing function for a node as a read-once function (RoF)
     inputs:

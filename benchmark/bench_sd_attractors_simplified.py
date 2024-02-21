@@ -26,4 +26,6 @@ for node in sd.expanded_ids():
         motif_avoidant_count += len(attr)
 
 print("nodes, expanded, attractors, motif-avoidant")
-print(f"{len(sd)}, {len(list(sd.expanded_ids()))}, {attractor_count}, {motif_avoidant_count}")
+print(
+    f"{len(sd)}, {len(list(sd.expanded_ids()))}, {attractor_count}, {motif_avoidant_count}"
+)

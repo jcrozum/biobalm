@@ -4,6 +4,7 @@
     Each space is represented as a dictionary with a subset of variable names as
     keys and values `0`/`1` assigned to fixed variables.
 """
+
 from __future__ import annotations
 
 from copy import copy
