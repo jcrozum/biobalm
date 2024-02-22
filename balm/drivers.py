@@ -72,12 +72,45 @@ def find_single_drivers(
     LDOIs: dict[tuple[str, int], BooleanSpace] | None = None,
 ) -> set[tuple[str, int]]:
     """
-    Find all the single node drivers for a given target_subspace, usually (but not necessarily)
-    a maximal trapspace (stablemotif).
+    Find all one-node drivers for a target subspace.
 
-    This operation requires the symbolic update functions provided by an `AsynchronousGraph`.
-    If you provide a `BooleanNetwork`, the `AsynchronousGraph` will be created automatically,
-    but this can incur additional overhead.
+    This operation requires the symbolic update functions provided by an
+    `AsynchronousGraph`. If you provide a `BooleanNetwork`, the
+    `AsynchronousGraph` will be created automatically, but this can incur
+    additional overhead.
+
+    Parameters
+    ----------
+    target_subspace : BooleanSpace
+        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        target trap space.
+    network : AsynchronousGraph | BooleanNetwork
+       The symbolic update functions stored as a `AsynchronousGraph` or
+        `BooleanNetwork` object from the `biodivine_aeon` library.
+    LDOIs : dict[tuple[str, int], BooleanSpace] | None, optional
+        A dictionary encoding the LDOI for every one-node state to be
+        considered. The keys should be `(variable, value)` tuples, where
+        `variable` is the name of the node that is fixed in the state `value`
+        (`0` or `1`). The keys are
+        :class:`BooleanSpace<balm.types.BooleanSpace>` objects, which are
+        dictionaries of node values describing the node states that become fixed
+        as a result of percolation. If not provided, the LDOI will be computed
+        automatically for each node state using :func:`find_single_node_LDOIs`.
+
+
+    Returns
+    -------
+    set[tuple[str, int]]
+        A set of driver node states that result in the target subspace, with
+        each node state represented as a node name and value (`0` or `1`).
+
+    Example
+    -------
+    >>> import balm
+    >>> sd = balm.SuccessionDiagram.from_bnet('A, A\\nB, A')
+    >>> drivers = balm.drivers.find_single_drivers({'B': 0}, sd.network)
+    >>> sorted(list(drivers))
+    [('A', 0), ('B', 0)]
     """
     if isinstance(network, BooleanNetwork):
         network = AsynchronousGraph(network)
