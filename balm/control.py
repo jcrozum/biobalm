@@ -19,9 +19,22 @@ class Intervention:
     def __init__(
         self,
         control: list[ControlOverrides],
-        strategy: str,
+        strategy: Literal["internal", "all"],
         succession: SubspaceSuccession,
     ):
+        """A class for encoding an intervention to a network to reach a target subspace.
+
+        Parameters
+        ----------
+        control : list[ControlOverrides]
+            The :class:`ControlOverrides<balm.types.ControlOverrides>`, in
+            order, that are applied. Each represens a set of node values that
+            must be overridden for control.
+        strategy : str
+            Either "internal" or "all"; "internal" means that the :class:`ControlOverrides<balm.types.ControlOverrides>`
+        succession : SubspaceSuccession
+            _description_
+        """
         self._control = control
         self._strategy = strategy
         self._succession = succession
@@ -109,13 +122,14 @@ class Intervention:
 def succession_control(
     bn: BooleanNetwork,
     target: BooleanSpace,
-    strategy: str = "internal",
+    strategy: Literal["internal", "all"] = "internal",
     succession_diagram: SuccessionDiagram | None = None,
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
     successful_only: bool = True,
 ) -> list[Intervention]:
-    """_summary_
+    """
+    Performs succession-diagram control on a network to reach a target subspace.
 
     Parameters
     ----------

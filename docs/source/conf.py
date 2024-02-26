@@ -67,13 +67,14 @@ autoapi_python_class_content = "both"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
 }
 
-autodoc_type_aliases = {
-    "BooleanSpace": "BooleanSpace",
-    "SubspaceSuccession": "SubspaceSuccession",
-    "ControlOverrides": "ControlOverrides",
-}
+# autodoc_type_aliases = {
+#     "BooleanSpace": "BooleanSpace",
+#     "SubspaceSuccession": "SubspaceSuccession",
+#     "ControlOverrides": "ControlOverrides",
+# }
 autosummary_generate = True
 autosummary_imported_members = True
 autodoc_default_options = {
