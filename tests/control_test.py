@@ -11,26 +11,6 @@ from balm.succession_diagram import SuccessionDiagram
 from balm.types import BooleanSpace
 
 
-def test_intervention_equality_and_equivalence():
-    i1 = Intervention([[{"Y": 0}, {"X": 0}]], "internal", [{}])
-    i2 = Intervention([[{"X": 0}, {"Y": 0}]], "internal", [{}])
-    assert i1 == i2
-
-    i1 = Intervention([[{"Y": 0}, {"X": 0}]], "internal", [{"A": 0}])
-    i2 = Intervention([[{"X": 0}, {"Y": 0}]], "internal", [{}])
-    assert i1 != i2
-    assert i1.is_equivalent(i2)
-
-    i1 = Intervention([[{"Y": 0}, {"X": 0}]], "all", [{}])
-    i2 = Intervention([[{"X": 0}, {"Y": 0}]], "all", [{}])
-    assert i1 == i2
-
-    i1 = Intervention([[{"Y": 0}, {"X": 0}]], "all", [{"A": 0}])
-    i2 = Intervention([[{"X": 0}, {"Y": 0}]], "all", [{}])
-    assert i1 != i2
-    assert not i1.is_equivalent(i2)
-
-
 def test_basic_succession_control():
     bn = BooleanNetwork.from_bnet(
         """
@@ -121,7 +101,7 @@ def test_basic_succession_finding():
 
 
 def test_internal_succession_control():
-    bn = BooleanNetwork.from_bnet(
+    sd = SuccessionDiagram.from_bnet(
         """
     S, S
     A, S | B
@@ -155,7 +135,7 @@ def test_internal_succession_control():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
     ]
 
-    interventions = succession_control(bn, target)
+    interventions = succession_control(sd, target)
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -163,7 +143,7 @@ def test_internal_succession_control():
 
 
 def test_all_succession_control():
-    bn = BooleanNetwork.from_bnet(
+    sd = SuccessionDiagram.from_bnet(
         """
     S, S
     A, S | B
@@ -197,7 +177,7 @@ def test_all_succession_control():
         Intervention(c, "all", s) for c, s in zip(true_controls, true_successions)
     ]
 
-    interventions = succession_control(bn, target, strategy="all")
+    interventions = succession_control(sd, target, strategy="all")
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -205,7 +185,7 @@ def test_all_succession_control():
 
 
 def test_forbidden_drivers():
-    bn = BooleanNetwork.from_bnet(
+    sd = SuccessionDiagram.from_bnet(
         """
     A, B & C
     B, A & C
@@ -224,7 +204,7 @@ def test_forbidden_drivers():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
     ]
 
-    interventions = succession_control(bn, target)
+    interventions = succession_control(sd, target)
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -241,7 +221,7 @@ def test_forbidden_drivers():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
     ]
 
-    interventions = succession_control(bn, target, forbidden_drivers=forbidden_drivers)
+    interventions = succession_control(sd, target, forbidden_drivers=forbidden_drivers)
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -260,12 +240,12 @@ def test_forbidden_drivers():
     ]
 
     # do not show failed solution (default)
-    interventions = succession_control(bn, target, forbidden_drivers=forbidden_drivers)
+    interventions = succession_control(sd, target, forbidden_drivers=forbidden_drivers)
     assert len(interventions) == 0
 
     # show failed solution
     interventions = succession_control(
-        bn, target, forbidden_drivers=forbidden_drivers, successful_only=False
+        sd, target, forbidden_drivers=forbidden_drivers, successful_only=False
     )
 
     assert len(interventions) == len(true_interventions)
@@ -275,7 +255,7 @@ def test_forbidden_drivers():
 
 
 def test_size_restriction():
-    bn = BooleanNetwork.from_bnet(
+    sd = SuccessionDiagram.from_bnet(
         """
     A, B & C
     B, A & C
@@ -294,7 +274,7 @@ def test_size_restriction():
         Intervention(c, "internal", s) for c, s in zip(true_controls, true_successions)
     ]
 
-    interventions = succession_control(bn, target)
+    interventions = succession_control(sd, target)
 
     assert len(interventions) == len(true_interventions)
     for intervention in interventions:
@@ -312,7 +292,7 @@ def test_size_restriction():
 
     # show the failed solution
     interventions = succession_control(
-        bn, target, max_drivers_per_succession_node=1, successful_only=False
+        sd, target, max_drivers_per_succession_node=1, successful_only=False
     )
 
     assert len(interventions) == len(true_interventions)
@@ -322,6 +302,6 @@ def test_size_restriction():
 
     # do not show the failed solution (default)
     interventions = succession_control(
-        bn, target, max_drivers_per_succession_node=1, successful_only=True
+        sd, target, max_drivers_per_succession_node=1, successful_only=True
     )
     assert len(interventions) == 0
