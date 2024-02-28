@@ -11,18 +11,84 @@ from balm.succession_diagram import SuccessionDiagram
 from balm.types import BooleanSpace, ControlOverrides, SubspaceSuccession
 
 
-def controls_are_equal(a: ControlOverrides, b: ControlOverrides) -> bool:
-    return set(frozenset(x.items()) for x in a) == set(frozenset(x.items()) for x in b)
-
-
 class Intervention:
     def __init__(
         self,
         control: list[ControlOverrides],
-        strategy: str,
+        strategy: Literal["internal", "all"],
         succession: SubspaceSuccession,
     ):
-        self._control = control
+        """A class for encoding an intervention to a network to reach a target subspace.
+
+        Generally, this class is created by the
+        :func:`succession_control<balm.control.succession_control>` function,
+        which returns a list of `Intervention` objects. Manipulating the
+        contents of these objects is only recommended for advanced use cases.
+        Typically, it is sufficient to print this object to see a human-readable
+        an explanation of how to interpret the intervention.
+
+        Note that two interventions are considered to be equal if they act on the same succession with
+        equal controls applied to each subspace in the succession. Thus, two
+        interventions that override the same nodes in the same way can be
+        unequal, even when applied to the same subspaces. This is because each
+        subspace imposes a duration condition on the overrides, i.e., the
+        override must be maintained until the succession subspace is reached.
+        Changing the order of the subspaces considered can alter this stop
+        condition.
+
+        Parameters
+        ----------
+        control : list[ControlOverrides]
+            The :class:`ControlOverrides<balm.types.ControlOverrides>` objects,
+            in order, that are applied. The order of the list corresponds the
+            order of the subspaces in the succession. Each
+            :class:`ControlOverrides<balm.types.ControlOverrides>` object
+            represens a list of overrides, stored as a dictionary of node-value
+            pairs, that drive the system to the corresponding subspace. Each
+            :class:`ControlOverrides<balm.types.ControlOverrides>` object is
+            sorted by key value (i.e., alphabetically) upon creation of the
+            `Intervention` object to maintain a canonical ordering.
+        strategy : str
+            Either "internal" or "all"; "internal" means that the
+            :class:`ControlOverrides<balm.types.ControlOverrides>`
+        succession : SubspaceSuccession
+            A sequence of subspaces that are targeted by the corresponding
+            entries of `control`.
+
+        Example
+        -------
+        >>> import balm
+        >>> sd = balm.SuccessionDiagram.from_bnet(
+        ...     \"\"\"
+        ...     A, B & C
+        ...     B, A & C
+        ...     C, A & B
+        ...     \"\"\"
+        ...     )
+        >>> target = {"A": 1, "B": 1, "C": 1}
+        >>> interventions = balm.control.succession_control(sd, target)
+        >>> intervention = interventions[0] # only one in this case
+        >>> intervention.control
+        [[{'A': 1, 'B': 1}, {'A': 1, 'C': 1}, {'B': 1, 'C': 1}]]
+        >>> intervention.strategy
+        'internal'
+        >>> intervention.succession
+        [{'A': 1, 'B': 1, 'C': 1}]
+        >>> intervention.successful
+        True
+        >>> print(intervention)
+        Intervention is SUCCESSFUL operating on
+        {'A': 1, 'B': 1, 'C': 1}
+        override
+        ({'A': 1, 'B': 1} or {'A': 1, 'C': 1} or {'B': 1, 'C': 1})
+        """
+
+        # we store the control in a canonical (sorted) representation
+        self._control: list[ControlOverrides] = []
+        for c in control:
+            cs = sorted(map(lambda x: sorted(x.items()), c))
+            self._control.append(list(map(dict, cs)))
+
         self._strategy = strategy
         self._succession = succession
         self._successful = not any(not c for c in control)
@@ -43,15 +109,12 @@ class Intervention:
     def successful(self):
         return self._successful
 
-    def is_equivalent(self, other: Intervention) -> bool:
-        if self.strategy != other.strategy:
+    def __eq__(self, other: object):
+        if not isinstance(other, Intervention):
             return False
 
-        # if using external drivers, the succession matters because it
-        # determines how long you have to maintain temporary controls
-        if self.strategy == "all":
-            if self.succession != other.succession:
-                return False
+        if self.succession != other.succession:
+            return False
 
         if len(self.control) != len(other.control):
             return False
@@ -59,21 +122,6 @@ class Intervention:
         for d1, d2 in zip(self.control, other.control):
             if not controls_are_equal(d1, d2):
                 return False
-
-        return True
-
-    def __eq__(self, other: object):
-        if not isinstance(other, Intervention):
-            return False
-
-        # if the strategy is "all", then is_equivalent will handle the
-        # succession comparison
-        if self.strategy != "all":
-            if self.succession != other.succession:
-                return False
-
-        if not self.is_equivalent(other):
-            return False
 
         return True
 
@@ -93,12 +141,12 @@ class Intervention:
             + "\noverride\n"
         )
         if self.strategy == "internal":
-            return succession_string + " and \n".join(
+            return succession_string + " and then\n".join(
                 f"({' or '.join(map(str,motif_control))})"
                 for motif_control in self.control
             )
         elif self.strategy == "all":
-            return succession_string + "temporarily, and then \n".join(
+            return succession_string + " temporarily, and then\n".join(
                 f"({' or '.join(map(str,motif_control))})"
                 for motif_control in self.control
             )
@@ -107,28 +155,26 @@ class Intervention:
 
 
 def succession_control(
-    bn: BooleanNetwork,
+    succession_diagram: SuccessionDiagram,
     target: BooleanSpace,
-    strategy: str = "internal",
-    succession_diagram: SuccessionDiagram | None = None,
+    strategy: Literal["internal", "all"] = "internal",
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
     successful_only: bool = True,
 ) -> list[Intervention]:
-    """_summary_
+    """
+    Performs succession-diagram control to reach a target subspace.
 
     Parameters
     ----------
-    bn : BooleanNetwork
-        The network to analyze, which contains the Boolean update functions.
+    succession_diagram : SuccessionDiagram
+        The succession diagram from which successions and rules will be
+        extracted.
     target : BooleanSpace
         The target subspace.
     strategy : str, optional
         The searching strategy to use to look for driver nodes. Options are
         'internal' (default), 'all'.
-    succession_diagram : SuccessionDiagram | None, optional
-        The succession diagram from which successions will be extracted. If
-        `None`, then a succession diagram will be generated from `bn`.
     max_drivers_per_succession_node: int | None = None,
         The maximum number of drivers that will be tested for a succession
         diagram node. If `None`, then a number of drivers up to the size of the
@@ -142,16 +188,91 @@ def succession_control(
     Returns
     -------
     list[Intervention]
-        A list of control intervention objects. Note that when `successful_only`
-        is `False`, returned interventions may be unsuccessful if
-        `max_drivers_per_succession_node` is set too small, or crucial nodes are
-        included in `forbidden_drivers`. To test, examine the `successful`
-        property of the intervention.
+        A list of control :class:`Intervention<balm.control.Intervention>`
+        objects. Note that when `successful_only` is `False`, returned
+        interventions may be unsuccessful if `max_drivers_per_succession_node`
+        is set too small, or crucial nodes are included in `forbidden_drivers`.
+        To test, examine the `successful` property of the intervention.
+
+    Example
+    -------
+    >>> import balm
+    >>> from balm.control import succession_control
+    >>> sd = balm.SuccessionDiagram.from_bnet(
+    ...     \"\"\"
+    ...     S, S
+    ...     A, S | B
+    ...     B, A
+    ...     C, A | D
+    ...     D, C
+    ...     E, false
+    ...     \"\"\"
+    ...     )
+    >>> target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+    >>> interventions = succession_control(sd, target, forbidden_drivers = {"A"})
+    >>> interventions.sort(key=lambda x: len(x.control)) # to maintain fixed order
+    >>> for i in interventions:
+    ...     print(f'{i}\\n'+'-'*20)
+    ...
+    Intervention is SUCCESSFUL operating on
+    {'S': 0}
+    {'A': 0, 'B': 0}
+    {'C': 1, 'D': 1}
+    override
+    ({'S': 0}) and then
+    ({'B': 0}) and then
+    ({'C': 1} or {'D': 1})
+    --------------------
+    Intervention is SUCCESSFUL operating on
+    {'S': 0}
+    {'C': 1, 'D': 1}
+    {'A': 0, 'B': 0}
+    override
+    ({'S': 0}) and then
+    ({'C': 1} or {'D': 1}) and then
+    ({'B': 0})
+    --------------------
+
+    Example
+    -------
+    >>> import balm
+    >>> from balm.control import succession_control
+    >>> sd = balm.SuccessionDiagram.from_bnet(
+    ...         \"\"\"
+    ...     S, S
+    ...     A, S | B
+    ...     B, A
+    ...     C, A | D
+    ...     D, C
+    ...     E, false
+    ...     \"\"\"
+    ...     )
+    >>> target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+    >>> interventions = succession_control(sd, target, strategy = "all")
+    >>> interventions.sort(key=lambda x: len(x.control)) # to maintain fixed order
+    >>> for i in interventions:
+    ...     print(f'{i}\\n'+'-'*20)
+    ...
+    Intervention is SUCCESSFUL operating on
+    {'S': 0}
+    {'A': 0, 'B': 0}
+    {'C': 1, 'D': 1}
+    override
+    ({'S': 0}) temporarily, and then
+    ({'A': 0} or {'B': 0}) temporarily, and then
+    ({'C': 1} or {'D': 1})
+    --------------------
+    Intervention is SUCCESSFUL operating on
+    {'S': 0}
+    {'C': 1, 'D': 1}
+    {'A': 0, 'B': 0}
+    override
+    ({'S': 0}) temporarily, and then
+    ({'A': 1} or {'B': 1} or {'C': 1} or {'D': 1}) temporarily, and then
+    ({'A': 0} or {'B': 0})
+    --------------------
     """
     interventions: list[Intervention] = []
-
-    if succession_diagram is None:
-        succession_diagram = SuccessionDiagram(bn)
 
     successions = successions_to_target(
         succession_diagram, target=target, expand_diagram=True
@@ -180,6 +301,14 @@ def successions_to_target(
 ) -> list[SubspaceSuccession]:
     """Find lists of nested trap spaces (successions) that lead to the
     specified target subspace.
+
+    Generally, it is not necessary to call this function directly, as it is
+    automatically invoked by
+    :func:`succession_control<balm.control.succession_control>`. It is primarily
+    provided in the public API for testing and benchmarking purposes, or in the
+    case that the user wants to implement a custom strategy to identify
+    succession drivers rather than relying on
+    :func:`drivers_of_succession<balm.control.drivers_of_succession>`.
 
     Parameters
     ----------
@@ -234,7 +363,13 @@ def drivers_of_succession(
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
 ) -> list[ControlOverrides]:
-    """Find driver nodes of a list of sequentially nested trap spaces
+    """
+    Find driver nodes of a list of sequentially nested trap spaces.
+
+    Generally, it is not necessary to call this function directly, as it is
+    automatically invoked by
+    :func:`succession_control<balm.control.succession_control>`. It is primarily
+    provided in the public API for testing and benchmarking purposes.
 
     Parameters
     ----------
@@ -293,7 +428,15 @@ def find_drivers(
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
 ) -> ControlOverrides:
-    """Finds drives of a given target trap space
+    """
+    Finds drives of a given target trap space
+
+    Generally, it is not necessary to call this function directly, as it is
+    automatically invoked by
+    :func:`drivers_of_succession<balm.control.drivers_of_succession>`, which in
+    turn is invoked by
+    :func:`succession_control<balm.control.succession_control>`. It is primarily
+    provided in the public API for testing and benchmarking purposes.
 
     Parameters
     ----------
@@ -371,3 +514,31 @@ def find_drivers(
                     if target_trap_space.items() <= ldoi.items():
                         drivers.append(driver_dict)
     return drivers
+
+
+def controls_are_equal(a: ControlOverrides, b: ControlOverrides) -> bool:
+    """
+    Determine if two :class:`ControlOverrides<balm.types.ControlOverrides>`
+    objects are equal.
+
+    Two `ControlOverrides` objects are equal if they contain the same
+    :class:`BooleanSpace<balm.types.BooleanSpace>` objects, without respect to
+    order.
+
+    Parameters
+    ----------
+    a : ControlOverrides
+        First :class:`ControlOverrides<balm.types.ControlOverrides>` object for
+        comparison.
+    b : ControlOverrides
+        Second :class:`ControlOverrides<balm.types.ControlOverrides>` object for
+        comparison.
+
+    Returns
+    -------
+    bool
+        Returns `True` if the two
+        :class:`ControlOverrides<balm.types.ControlOverrides>` objects are
+        equal.
+    """
+    return set(frozenset(x.items()) for x in a) == set(frozenset(x.items()) for x in b)

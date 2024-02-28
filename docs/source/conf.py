@@ -33,7 +33,7 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 html_css_files = ["css/custom.css"]
 html_theme_options = {
     "show_nav_level": 9,
@@ -60,20 +60,21 @@ autoapi_options = [
     "undoc-members",
     "show-inheritance",
     "show-module-summary",
-    "special-members",
+    # "special-members",
     "imported-members",
 ]
 autoapi_python_class_content = "both"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
 }
 
-autodoc_type_aliases = {
-    "BooleanSpace": "BooleanSpace",
-    "SubspaceSuccession": "SubspaceSuccession",
-    "ControlOverrides": "ControlOverrides",
-}
+# autodoc_type_aliases = {
+#     "BooleanSpace": "BooleanSpace",
+#     "SubspaceSuccession": "SubspaceSuccession",
+#     "ControlOverrides": "ControlOverrides",
+# }
 autosummary_generate = True
 autosummary_imported_members = True
 autodoc_default_options = {
