@@ -1,40 +1,11 @@
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph  # type:ignore
 
-from balm.interaction_graph_utils import (
-    feedback_vertex_set,
-    independent_cycles,
-    infer_signed_interaction_graph,
-)
-
-
-def test_ig_inference():
-    bn = BooleanNetwork.from_bnet(
-        """
-        # Just a normal function.
-        b, a | !b
-        # Contradiciton on `a` - the regulation should not appear in the result
-        # Also, non-monotonic dependence on b and c.
-        a, (a & !a) | (b <=> c)
-        c, c
-    """
-    )
-    ig = infer_signed_interaction_graph(bn)
-
-    edges = {edge: ig.get_edge_data(edge[0], edge[1])["sign"] for edge in ig.edges}  # type: ignore
-    assert len(edges) == 5  # type: ignore
-    assert edges[("a", "b")] == "+"
-    assert edges[("b", "b")] == "-"
-    assert edges[("b", "a")] == "?"
-    assert edges[("c", "a")] == "?"
-    assert edges[("c", "c")] == "+"
-    assert ("a", "a") not in edges
-
+from balm.interaction_graph_utils import feedback_vertex_set, independent_cycles
 
 # There should be a negative cycle between b_1 and b_2,
 # a positive cycle between d_1 and d_2, and a negative cycle
 # between d_1, d_2, and d_3. Other nodes are not on cycles
-# except for e, which has a positive self-loop.
 CYCLES_BN = BooleanNetwork.from_aeon(
     """
             a -> c

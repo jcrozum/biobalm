@@ -14,46 +14,6 @@ from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
 from networkx import DiGraph  # type: ignore
 
 
-def infer_signed_interaction_graph(network: BooleanNetwork) -> DiGraph:
-    """
-    Takes an arbitrary `BooleanNetwork` and extracts a signed interacion graph
-    based on the *actual* dependencies of the network's update functions.
-
-    In particular, this eliminates things like unused variables and it will also
-    infer correct monotonicity of inputs. Importantly, this is performed using
-    BDDs, so it is not merely a syntactic transformation (but general BDD
-    limitations apply).
-
-    In the resulting digraph, we use edge attribute `sign="+"` or `sign="-"`
-    to differentiate between positive and negative edges. An iteraction that
-    is not monotonic is represented as `sign="?"`.
-    """
-    # Since the model files can be incorrect, we have to infer the regulations
-    # from the network functions directly. Note that this step uses BDDs, so in the
-    # unlikely event that the update functions are too complex to represent as BDDs,
-    # this will crash on an out-of-memory error, or just run for a very long time.
-    network = network.infer_valid_graph()
-
-    # Convert AEON `RegulatoryGraph` to a generic `DiGraph` that we can use later.
-    ig = DiGraph()
-
-    for var in network.variables():
-        ig.add_node(network.get_variable_name(var))  # type: ignore
-
-    for reg in network.regulations():
-        if not reg["essential"]:
-            # In general, a fully specified network should only contain
-            # essential regulations after `infer_valid_graph`.
-            raise Exception(
-                "Unreachable: You are using this on partially specified networks, aren't you?"
-            )
-        source = network.get_variable_name(reg["source"])
-        target = network.get_variable_name(reg["target"])
-        sign = reg["sign"] if reg["sign"] is not None else "?"
-        ig.add_edge(source, target, sign=sign)  # type: ignore
-    return ig
-
-
 def _digraph_to_regulatory_graph(graph: DiGraph) -> RegulatoryGraph:
     """
     A helper method to transform between a "signed digraph" and AEON's `RegulatoryGraph`.
