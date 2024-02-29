@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
     from biodivine_aeon import Regulation, VariableId
 
-import copy
 from typing import cast
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
@@ -148,8 +147,8 @@ def independent_cycles(
 def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
     """
     Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This mainly
-    checks that the network has no parameters and removes any constraints that could
-    add additional overhead to symbolic manipulation.
+    checks that the network has no parameters and fixes any static constraints to
+    ensure that they are actually correct.
     """
 
     assert (
@@ -167,10 +166,4 @@ def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
             f"Parametrized networks are not supported. Found implicit parameters: {names}."
         )
 
-    network = copy.copy(network)
-    for reg in network.regulations():
-        reg["essential"] = False
-        reg["sign"] = None
-        assert network.ensure_regulation(reg) is not None
-
-    return network
+    return network.infer_valid_graph()
