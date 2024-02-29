@@ -71,40 +71,6 @@ def feedback_vertex_set(
     return sorted([network.get_variable_name(x) for x in fvs])
 
 
-def independent_cycles(
-    network: RegulatoryGraph | DiGraph,
-    parity: Literal["positive", "negative"] | None = None,
-    subgraph: Sequence[str | VariableId] | None = None,
-) -> list[list[str]]:
-    """
-    Compute an approximately maximal set of independent cycles of
-    a `BooleanNetwork`, `RegulatoryGraph` or a `DiGraph` with optional `sign` annotations
-    on its edges. The result is guaranteed to be a set of independent cycles, but it may
-    not be maximal.
-
-    There are two optional parameters:
-
-     - `parity`: Can be either `positive` or `negative`. If parity is specified, only cycles of
-        the specified parity are considered (e.g. if `pairty='negative'`, there can still be positive
-        cycles in the graph which are not covered by this independent cycle set).
-     - `subgraph`: A list of network variables (either string names or AEON `VariableId` objects
-        are fine). If given, the result is restricted to the sub-graph induced by these network
-        nodes.
-
-    The result is a list of cycles, such that each cycle is a list of variable names in the order
-    in which they appear on the cycle. The cycles are sorted by increasing length.
-
-    In general, the method should be deterministic (the same pseudo-optimal cycles are returned
-    every time). However, while I believe the sorting should be stable too, please treat the
-    order of returned cycles with caution :)
-    """
-    if isinstance(network, DiGraph):
-        network = _digraph_to_regulatory_graph(network)
-
-    ic = network.independent_cycles(parity, subgraph)
-    return [[network.get_variable_name(x) for x in cycle] for cycle in ic]
-
-
 def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
     """
     Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This mainly
