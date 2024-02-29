@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
     from biodivine_aeon import Regulation, VariableId
 
-import copy
 from typing import cast
 
 from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
@@ -92,6 +91,22 @@ def feedback_vertex_set(
         A list of node names representing the smallest FVS found during the
         search. Sorted in the same order as in the input network (usually
         lexicographically).
+
+    Examples
+    --------
+    >>> import balm
+    >>> from balm.interaction_graph_utils import feedback_vertex_set
+    >>> sd = balm.SuccessionDiagram.from_bnet(\"\"\"
+    ...     A, B
+    ...     B, A
+    ...     C, D
+    ...     D, !C\"\"\")
+    >>> feedback_vertex_set(sd.network)
+    ['A', 'C']
+    >>> feedback_vertex_set(sd.network, parity="positive")
+    ['A']
+    >>> feedback_vertex_set(sd.network, parity="negative")
+    ['C']
     """
     if isinstance(network, DiGraph):
         network = _digraph_to_regulatory_graph(network)
@@ -102,9 +117,9 @@ def feedback_vertex_set(
 
 def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
     """
-    Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This mainly
-    checks that the network has no parameters and removes any constraints that could
-    add additional overhead to symbolic manipulation.
+    Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This
+    mainly and fixes any static constraints to ensure that they are actually
+    correct.
 
     Parameters
     ----------
@@ -132,10 +147,4 @@ def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
             f"Parametrized networks are not supported. Found implicit parameters: {names}."
         )
 
-    network = copy.copy(network)
-    for reg in network.regulations():
-        reg["essential"] = False
-        reg["sign"] = None
-        assert network.ensure_regulation(reg) is not None
-
-    return network
+    return network.infer_valid_graph()
