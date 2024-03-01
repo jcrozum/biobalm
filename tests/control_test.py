@@ -101,7 +101,7 @@ def test_basic_succession_finding():
 
 
 def test_internal_succession_control():
-    sd = SuccessionDiagram.from_bnet(
+    sd = SuccessionDiagram.from_rules(
         """
     S, S
     A, S | B
@@ -143,7 +143,7 @@ def test_internal_succession_control():
 
 
 def test_all_succession_control():
-    sd = SuccessionDiagram.from_bnet(
+    sd = SuccessionDiagram.from_rules(
         """
     S, S
     A, S | B
@@ -185,7 +185,7 @@ def test_all_succession_control():
 
 
 def test_forbidden_drivers():
-    sd = SuccessionDiagram.from_bnet(
+    sd = SuccessionDiagram.from_rules(
         """
     A, B & C
     B, A & C
@@ -255,7 +255,7 @@ def test_forbidden_drivers():
 
 
 def test_size_restriction():
-    sd = SuccessionDiagram.from_bnet(
+    sd = SuccessionDiagram.from_rules(
         """
     A, B & C
     B, A & C

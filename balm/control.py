@@ -58,7 +58,7 @@ class Intervention:
         Example
         -------
         >>> import balm
-        >>> sd = balm.SuccessionDiagram.from_bnet(
+        >>> sd = balm.SuccessionDiagram.from_rules(
         ...     \"\"\"
         ...     A, B & C
         ...     B, A & C
@@ -198,7 +198,7 @@ def succession_control(
     -------
     >>> import balm
     >>> from balm.control import succession_control
-    >>> sd = balm.SuccessionDiagram.from_bnet(
+    >>> sd = balm.SuccessionDiagram.from_rules(
     ...     \"\"\"
     ...     S, S
     ...     A, S | B
@@ -237,7 +237,7 @@ def succession_control(
     -------
     >>> import balm
     >>> from balm.control import succession_control
-    >>> sd = balm.SuccessionDiagram.from_bnet(
+    >>> sd = balm.SuccessionDiagram.from_rules(
     ...         \"\"\"
     ...     S, S
     ...     A, S | B

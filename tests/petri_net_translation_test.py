@@ -1,6 +1,6 @@
 # type: ignore
 import pytest
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph
+from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph, is_isomorphic  # type: ignore
 
 from balm.petri_net_translation import (

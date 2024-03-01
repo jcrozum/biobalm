@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
     from typing import Iterator
@@ -44,7 +44,7 @@ class SuccessionDiagram:
     Examples
     --------
     >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_bnet(\"""
+    >>> sd = balm.SuccessionDiagram.from_rules(\"""
     ...     A, B
     ...     B, A & C
     ...     C, !A | B
@@ -158,25 +158,35 @@ class SuccessionDiagram:
         return self.dag.number_of_nodes()
 
     @staticmethod
-    def from_aeon(model: str) -> SuccessionDiagram:
+    def from_rules(
+        rules: str,
+        format: Literal["bnet", "aeon", "sbml"] = "bnet",
+    ) -> SuccessionDiagram:
         """
-        Read a `BooleanNetwork` from the string contents of an `.aeon` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_aeon(model))
+        Generate a succession diagram from the given string.
 
-    @staticmethod
-    def from_bnet(model: str) -> SuccessionDiagram:
-        """
-        Read a `BooleanNetwork` from the string contents of a `.bnet` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_bnet(model))
+        Parameters
+        ----------
+        rules : str
+            The string representation of the network rules.
+        format : Literal['bnet', 'aeon', 'sbml']
+            The format of the string. One of `"bnet"`, `"aeon"`, or `"sbml"`.
+            Defaults to `"bnet"`.
 
-    @staticmethod
-    def from_sbml(model: str) -> SuccessionDiagram:
+        Returns
+        -------
+        SuccessionDiagram
+            The generated succession diagram. Initially unexpanded.
         """
-        Read a `BooleanNetwork` from the string contents of an `.sbml` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_sbml(model))
+
+        if format == "bnet":
+            return SuccessionDiagram(BooleanNetwork.from_bnet(rules))
+        elif format == "aeon":
+            return SuccessionDiagram(BooleanNetwork.from_aeon(rules))
+        elif format == "sbml":
+            return SuccessionDiagram(BooleanNetwork.from_sbml(rules))
+        else:
+            raise ValueError(f"Unknown format: {format}")
 
     @staticmethod
     def from_file(path: str) -> SuccessionDiagram:
@@ -207,7 +217,7 @@ class SuccessionDiagram:
         Example
         -------
         >>> import balm
-        >>> sd = balm.SuccessionDiagram.from_bnet(\"""
+        >>> sd = balm.SuccessionDiagram.from_rules(\"""
         ...     A, B
         ...     B, A & C
         ...     C, !A | B

@@ -109,8 +109,8 @@ class SuccessionDiagramTest(unittest.TestCase):
 
 
 def test_state():
-    sd1 = SuccessionDiagram.from_bnet("A, B\nB, A")
-    sd2 = SuccessionDiagram.from_bnet("A, B\nB, A\nC, C & B")
+    sd1 = SuccessionDiagram.from_rules("A, B\nB, A")
+    sd2 = SuccessionDiagram.from_rules("A, B\nB, A\nC, C & B")
     sd1.build()
     sd2.__setstate__(sd1.__getstate__())
     slots1 = [x + str(sd1.__getattribute__(x)) for x in sd1.__slots__]
@@ -311,7 +311,7 @@ def test_attractor_expansion(network_file: str):
 
 
 def test_attractor_extraction():
-    sd = balm.SuccessionDiagram.from_bnet(
+    sd = balm.SuccessionDiagram.from_rules(
         """
         A, B
         B, A & C

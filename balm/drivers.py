@@ -40,7 +40,7 @@ def find_single_node_LDOIs(
     Example
     _______
     >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_bnet('A, A\\nB, A')
+    >>> sd = balm.SuccessionDiagram.from_rules('A, A\\nB, A')
     >>> ldois = balm.drivers.find_single_node_LDOIs(sd.network)
     >>> for k in sorted(ldois):
     ...     print(f'{k} ==> {sorted(ldois[k].items())}')
@@ -107,7 +107,7 @@ def find_single_drivers(
     Example
     -------
     >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_bnet('A, A\\nB, A')
+    >>> sd = balm.SuccessionDiagram.from_rules('A, A\\nB, A')
     >>> drivers = balm.drivers.find_single_drivers({'B': 0}, sd.network)
     >>> sorted(list(drivers))
     [('A', 0), ('B', 0)]
