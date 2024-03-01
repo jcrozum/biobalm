@@ -1,40 +1,11 @@
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph  # type:ignore
 
-from balm.interaction_graph_utils import (
-    feedback_vertex_set,
-    independent_cycles,
-    infer_signed_interaction_graph,
-)
-
-
-def test_ig_inference():
-    bn = BooleanNetwork.from_bnet(
-        """
-        # Just a normal function.
-        b, a | !b
-        # Contradiciton on `a` - the regulation should not appear in the result
-        # Also, non-monotonic dependence on b and c.
-        a, (a & !a) | (b <=> c)
-        c, c
-    """
-    )
-    ig = infer_signed_interaction_graph(bn)
-
-    edges = {edge: ig.get_edge_data(edge[0], edge[1])["sign"] for edge in ig.edges}  # type: ignore
-    assert len(edges) == 5  # type: ignore
-    assert edges[("a", "b")] == "+"
-    assert edges[("b", "b")] == "-"
-    assert edges[("b", "a")] == "?"
-    assert edges[("c", "a")] == "?"
-    assert edges[("c", "c")] == "+"
-    assert ("a", "a") not in edges
-
+from balm.interaction_graph_utils import feedback_vertex_set
 
 # There should be a negative cycle between b_1 and b_2,
 # a positive cycle between d_1 and d_2, and a negative cycle
 # between d_1, d_2, and d_3. Other nodes are not on cycles
-# except for e, which has a positive self-loop.
 CYCLES_BN = BooleanNetwork.from_aeon(
     """
             a -> c
@@ -129,67 +100,6 @@ def test_subgraph_fvs():
     assert ("d_1" in fvs) or ("d_2" in fvs)
     assert ("d_1" in nfvs) or ("d_2" in nfvs) or ("d_3" in nfvs)
     assert ("d_1" in pfvs) or ("d_2" in pfvs)
-
-
-def test_ic():
-    ic = independent_cycles(CYCLES_BN)
-    n_ic = independent_cycles(CYCLES_BN, parity="negative")
-    p_ic = independent_cycles(CYCLES_BN, parity="positive")
-
-    assert len(ic) == 3
-    assert len(n_ic) == 2
-    assert len(p_ic) == 2
-
-    # e is the shortes positive (and overall) cycle, so should be first
-    assert ic[0] == ["e"]
-    assert p_ic[0] == ["e"]
-
-    # "b_*" is the smallest negative cycle
-    assert set(n_ic[0]) == set(["b_1", "b_2"])
-
-    # The second positive cycle is in the shorter "d_*" cycle.
-    assert set(p_ic[1]) == set(["d_1", "d_2"])
-    # And the second negative cycle is the longer "d_*" cycle.
-    assert set(n_ic[1]) == set(["d_1", "d_2", "d_3"])
-
-    # For the general case, both cycles of length two are included.
-    # But their order is not guaranteed.
-    assert set(ic[1]) == set(["b_1", "b_2"]) or set(ic[2]) == set(["b_1", "b_2"])
-    assert set(ic[1]) == set(["d_1", "d_2"]) or set(ic[2]) == set(["d_1", "d_2"])
-
-    # Check that the `DiGraph` results are the same as `BooleanNetwork` results.
-    # Note that these are not necessarily entirely equivalent, as the DiGraph
-    # seems to store the nodes/edges in a hashmap, resulting in
-    # not-quite-deterministic ordering and possibly different results (I think?).
-    dg_ic = independent_cycles(CYCLES_DIGRAPH)  # type: ignore
-    dg_n_ic = independent_cycles(CYCLES_DIGRAPH, parity="negative")  # type: ignore
-    dg_p_ic = independent_cycles(CYCLES_DIGRAPH, parity="positive")  # type: ignore
-
-    print(ic)
-    print(dg_ic)
-
-    assert [set(x) for x in ic] == [set(x) for x in dg_ic]
-    assert [set(x) for x in n_ic] == [set(x) for x in dg_n_ic]
-    assert [set(x) for x in p_ic] == [set(x) for x in dg_p_ic]
-
-
-def test_subgraph_ic():
-    # We only keep the two cycles consisting of "d_*". The "b_*" cycle
-    # and "e" self-loop are not considered.
-    ic = independent_cycles(CYCLES_BN, subgraph=["a", "b_1", "d_1", "d_2", "d_3"])
-    p_ic = independent_cycles(
-        CYCLES_BN, parity="positive", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
-    )
-    n_ic = independent_cycles(
-        CYCLES_BN, parity="negative", subgraph=["a", "b_1", "d_1", "d_2", "d_3"]
-    )
-
-    assert len(ic) == 1
-    assert len(p_ic) == 1
-    assert len(n_ic) == 1
-    assert set(ic[0]) == set(["d_1", "d_2"]) or set(ic[0]) == set(["d_1", "d_2", "d_3"])
-    assert set(p_ic[0]) == set(["d_1", "d_2"])
-    assert set(n_ic[0]) == set(["d_1", "d_2", "d_3"])
 
 
 def test_fvs_determinism_CASCADE3():
