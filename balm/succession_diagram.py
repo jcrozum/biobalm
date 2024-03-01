@@ -677,13 +677,14 @@ class SuccessionDiagram:
     ) -> bool:
         """
         Explore the succession diagram in a BFS manner.
-            - If `node_id` is given, initiate BFS from this node. Otherwise use
-              root.
-            - If `bfs_level_limit` is given, this is the last "level" (distance
-              from the initial node)
-            of nodes that should be expanded (any subsequent child nodes are
-            left unexplored). - If `size_limit` is given, the procedure stops
-            once `SuccessionDiagram` exceeds the given size.
+
+        If `node_id` is given, initiate BFS from this node. Otherwise use root.
+        If `bfs_level_limit` is given, this is the last "level" (distance from
+        the initial node) of nodes that should be expanded (any subsequent child
+        nodes are left unexplored).
+
+        If `size_limit` is given, the procedure stops once `SuccessionDiagram`
+        exceeds the given size.
 
         With default settings, the method will explore the whole succession
         diagram without any restrictions.
