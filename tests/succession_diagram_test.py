@@ -311,11 +311,13 @@ def test_attractor_expansion(network_file: str):
 
 
 def test_attractor_extraction():
-    sd = balm.SuccessionDiagram.from_bnet("""
+    sd = balm.SuccessionDiagram.from_bnet(
+        """
         A, B
         B, A & C
         C, !A | B
-        """)
+        """
+    )
     sd.build()
     eas = sd.expanded_attractor_seeds()
     assert eas == {1: [{"A": 0, "B": 0, "C": 1}], 2: [{"A": 1, "B": 1, "C": 1}]}
