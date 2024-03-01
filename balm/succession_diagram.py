@@ -450,27 +450,6 @@ class SuccessionDiagram:
         """
         return cast(NodeData, self.dag.nodes[node_id])
 
-    # def node_depth(self, node_id: int) -> int:
-    #     """
-    #     Get the depth associated with the provided `node_id`. The depth is counted
-    #     as the longest path from the root node to the given node.
-    #     """
-    #     return cast(int, self.dag.nodes[node_id]["depth"])
-    # def node_space(self, node_id: int) -> BooleanSpace:
-    #     """
-    #     Get the sub-space associated with the provided `node_id`.
-
-    #     Note that this is the space *after* percolation. Hence it can hold that
-    #     `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
-    #     """
-    #     return cast(BooleanSpace, self.dag.nodes[node_id]["space"])
-
-    # def node_is_expanded(self, node_id: int) -> bool:
-    #     """
-    #     True if the successors of the given node are already computed.
-    #     """
-    #     return cast(bool, self.dag.nodes[node_id]["expanded"])
-
     def node_is_minimal(self, node_id: int) -> bool:
         """
         True if the node represents a minimal trap space.
@@ -601,18 +580,6 @@ class SuccessionDiagram:
                 self.nfvs = feedback_vertex_set(self.network)
 
         return self.nfvs
-
-    # def node_restricted_petri_net(self, node_id: int) -> nx.DiGraph | None:
-    #     """
-    #     Return the pre-computed Petri net representation restricted to the subspace
-    #     of the specified SD node.
-
-    #     This can return `None` if the requested node is already fully expanded, because
-    #     in such a case, there is no need to store the Petri net anymore. However,
-    #     in general you should assume that this field is optional, even on nodes that
-    #     are not expanded yet.
-    #     """
-    #     return cast(nx.DiGraph, self.dag.nodes[node_id]["petri_net"])
 
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
