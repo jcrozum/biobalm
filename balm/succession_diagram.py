@@ -186,23 +186,48 @@ class SuccessionDiagram:
         """
         return SuccessionDiagram(BooleanNetwork.from_file(path))
 
-    def expanded_attractor_seeds(self) -> list[list[BooleanSpace]]:
+    def expanded_attractor_seeds(self) -> dict[int, list[BooleanSpace]]:
         """
-        List of attractor seeds for each expanded node.
+        Attractor seeds for each expanded node.
 
         An attractor seed is a state belonging to an attractor (and thus a state
         from which the entire attractor is reachable, by definition).
 
         If called before the `SuccessionDiagram` is fully built, this will not
-        be a complete list of attractor seed states.
+        be a complete accounting of attractor seed states.
 
         Returns
         -------
-        list[list[BooleanSpace]]
-            A list of attractor seeds for each expanded succession diagram node.
-            One succession diagram node can have multiple attractors.
+        dict[int,list[BooleanSpace]]
+            Each key is the id of an expanded succession diagram node, whose
+            corresponding value is a list of attractor seeds for that node. Note
+            that one succession diagram node can have multiple attractors. Ordering
+            of the lists in the returned dictionary is not guaranteed.
+
+        Example
+        -------
+        >>> import balm
+        >>> sd = balm.SuccessionDiagram.from_bnet(\"""
+        ...     A, B
+        ...     B, A & C
+        ...     C, !A | B
+        ... \""")
+        >>> sd.build()
+        >>> eas = sd.expanded_attractor_seeds()
+        >>> for id, atts in sorted(eas.items()):
+        ...     for x in atts:
+        ...         print(f"{id}: {dict(sorted(x.items()))}")
+        1: {'A': 0, 'B': 0, 'C': 1}
+        2: {'A': 1, 'B': 1, 'C': 1}
         """
-        return [self.node_attractor_seeds(id) for id in self.expanded_ids()]
+        res: dict[int, list[BooleanSpace]] = {}
+        for id in self.expanded_ids():
+            atts = self.node_attractor_seeds(id)
+            if not atts:  # no attractors for this node
+                continue
+            res[id] = atts
+
+        return res
 
     def summary(self) -> str:
         """
@@ -222,6 +247,9 @@ class SuccessionDiagram:
             except KeyError:
                 continue
 
+            if not attrs:
+                continue
+
             space = self.node_data(node)["space"]
 
             if self.node_is_minimal(node):
@@ -239,7 +267,8 @@ class SuccessionDiagram:
                 attr_str = "".join(str(v) for _, v in sorted(attr.items()))
                 report_string += "." * len(space_str_prefix) + f"{attr_str}\n"
             report_string += "\n"
-        return report_string
+        # remove final extra newline and return
+        return report_string[:-1]
 
     def root(self) -> int:
         """

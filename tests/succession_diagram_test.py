@@ -308,3 +308,14 @@ def test_attractor_expansion(network_file: str):
 
     # All symbolic attractors must be covered by some seed at this point.
     assert len(symbolic_attractors) == 0
+
+
+def test_attractor_extraction():
+    sd = balm.SuccessionDiagram.from_bnet("""
+        A, B
+        B, A & C
+        C, !A | B
+        """)
+    sd.build()
+    eas = sd.expanded_attractor_seeds()
+    assert eas == {1: [{"A": 0, "B": 0, "C": 1}], 2: [{"A": 1, "B": 1, "C": 1}]}
