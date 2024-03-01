@@ -30,7 +30,7 @@ class SuccessionDiagramTest(unittest.TestCase):
         assert (
             max(
                 [
-                    succession_diagram.node_depth(i)
+                    succession_diagram.node_data(i)["depth"]
                     for i in succession_diagram.node_ids()
                 ]
             )
@@ -80,7 +80,7 @@ class SuccessionDiagramTest(unittest.TestCase):
         assert (
             max(
                 [
-                    succession_diagram.node_depth(i)
+                    succession_diagram.node_data(i)["depth"]
                     for i in succession_diagram.node_ids()
                 ]
             )
@@ -193,7 +193,7 @@ def test_expansion_comparisons(network_file: str):
     # This should always create a succession_diagram with exactly one minimal trap space,
     # as the rest
     for min_trap in sd_bfs.minimal_trap_spaces():
-        space = sd_bfs.node_space(min_trap)
+        space = sd_bfs.node_data(min_trap)["space"]
 
         sd_target = SuccessionDiagram(bn)
         assert sd_target.expand_to_target(space, size_limit=NODE_LIMIT)

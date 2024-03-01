@@ -36,3 +36,11 @@ class SuccessionDiagramState(TypedDict):
     nfvs: list[str] | None
     dag: nx.DiGraph
     node_indices: dict[int, int]
+
+
+class NodeData(TypedDict):
+    depth: int
+    attractors: list[BooleanSpace] | None
+    petri_net: nx.DiGraph | None
+    space: BooleanSpace
+    expanded: bool

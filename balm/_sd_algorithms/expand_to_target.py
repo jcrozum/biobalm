@@ -25,7 +25,7 @@ def expand_to_target(
 
     while len(current_level) > 0:
         for node in current_level:
-            node_space = sd.node_space(node)
+            node_space = sd.node_data(node)["space"]
 
             if intersect(node_space, target) is None:
                 # If `node_space` does not intersect with `target`, it is not relevant

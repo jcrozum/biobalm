@@ -30,7 +30,7 @@ def compute_attractor_seeds(
     if balm.succession_diagram.DEBUG:
         print(f"[{node_id}] Start computing attractor seeds.")
 
-    node_space = sd.node_space(node_id)
+    node_space = sd.node_data(node_id)["space"]
 
     if len(node_space) == sd.network.variable_count():
         # This node is a fixed-point.
@@ -39,8 +39,8 @@ def compute_attractor_seeds(
     # Compute the list of child spaces if the node is expanded. Otherwise
     # "pretend" that there are no children.
     child_spaces = []
-    if sd.node_is_expanded(node_id):
-        child_spaces = [sd.node_space(s) for s in sd.node_successors(node_id)]
+    if sd.node_data(node_id)["expanded"]:
+        child_spaces = [sd.node_data(s)["space"] for s in sd.node_successors(node_id)]
 
     # Fix everything in the NFVS to zero, as long as
     # it isn't already fixed by our `node_space`.

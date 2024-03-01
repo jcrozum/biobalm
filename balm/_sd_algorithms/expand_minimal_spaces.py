@@ -34,7 +34,7 @@ def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) 
             successors = sorted(successors, reverse=True)  # For determinism!
             # (reversed because we explore the list from the back)
 
-        node_space = sd.node_space(node)
+        node_space = sd.node_data(node)["space"]
 
         # Remove all immediate successors that are already visited or those who
         # do not cover any new minimal trap space.
@@ -52,7 +52,7 @@ def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) 
         # of this node is already in the succession diagram.
         if len(successors) == 0:
             if sd.node_is_minimal(node):
-                minimal_traps.remove(sd.node_space(node))
+                minimal_traps.remove(sd.node_data(node)["space"])
             continue
 
         # At this point, we know that `s` is not visited and it contains

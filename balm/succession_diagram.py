@@ -23,7 +23,7 @@ from balm.petri_net_translation import (
 )
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
-from balm.types import BooleanSpace, SuccessionDiagramState
+from balm.types import BooleanSpace, NodeData, SuccessionDiagramState
 
 # Enables helpful "progress" messages.
 DEBUG = False
@@ -205,7 +205,7 @@ class SuccessionDiagram:
             except KeyError:
                 continue
 
-            space = self.node_space(node)
+            space = self.node_data(node)["space"]
 
             if self.node_is_minimal(node):
                 space_str_prefix = "minimal trap space "
@@ -238,7 +238,7 @@ class SuccessionDiagram:
         """
         d = 0
         for node in cast(set[int], self.dag.nodes()):
-            d = max(d, self.node_depth(int(node)))
+            d = max(d, self.node_data(int(node))["depth"])
         return d
 
     def node_ids(self) -> Iterator[int]:
@@ -253,7 +253,7 @@ class SuccessionDiagram:
         Iterator over all node IDs that are currently not expanded.
         """
         for i in range(len(self)):
-            if not self.node_is_expanded(i):
+            if not self.node_data(i)["expanded"]:
                 yield i
 
     def expanded_ids(self) -> Iterator[int]:
@@ -261,7 +261,7 @@ class SuccessionDiagram:
         Iterator over all node IDs that are currently expanded.
         """
         for i in range(len(self)):
-            if self.node_is_expanded(i):
+            if self.node_data(i)["expanded"]:
                 yield i
 
     def minimal_trap_spaces(self) -> list[int]:
@@ -307,16 +307,16 @@ class SuccessionDiagram:
         # Every stub node is reachable through an expanded node and
         # thus will be checked by the following code.
         for i in self.expanded_ids():
-            other_i = other.find_node(self.node_space(i))
+            other_i = other.find_node(self.node_data(i)["space"])
             if other_i is None:
                 return False
             my_successors = self.node_successors(i)
             other_successors = []
-            if other.node_is_expanded(other_i):
+            if other.node_data(other_i)["expanded"]:
                 other_successors = other.node_successors(other_i)
 
             for my_s in my_successors:
-                other_s = other.find_node(self.node_space(my_s))
+                other_s = other.find_node(self.node_data(my_s)["space"])
                 if other_s not in other_successors:
                     return False
         return True
@@ -335,27 +335,32 @@ class SuccessionDiagram:
         """
         return self.is_subgraph(other) and other.is_subgraph(self)
 
-    def node_depth(self, node_id: int) -> int:
+    def node_data(self, node_id: int) -> NodeData:
         """
-        Get the depth associated with the provided `node_id`. The depth is counted
-        as the longest path from the root node to the given node.
+        Get the data associated with the provided `node_id`.
         """
-        return cast(int, self.dag.nodes[node_id]["depth"])
+        return cast(NodeData, self.dag.nodes[node_id])
 
-    def node_space(self, node_id: int) -> BooleanSpace:
-        """
-        Get the sub-space associated with the provided `node_id`.
+    # def node_depth(self, node_id: int) -> int:
+    #     """
+    #     Get the depth associated with the provided `node_id`. The depth is counted
+    #     as the longest path from the root node to the given node.
+    #     """
+    #     return cast(int, self.dag.nodes[node_id]["depth"])
+    # def node_space(self, node_id: int) -> BooleanSpace:
+    #     """
+    #     Get the sub-space associated with the provided `node_id`.
 
-        Note that this is the space *after* percolation. Hence it can hold that
-        `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
-        """
-        return cast(BooleanSpace, self.dag.nodes[node_id]["space"])
+    #     Note that this is the space *after* percolation. Hence it can hold that
+    #     `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
+    #     """
+    #     return cast(BooleanSpace, self.dag.nodes[node_id]["space"])
 
-    def node_is_expanded(self, node_id: int) -> bool:
-        """
-        True if the successors of the given node are already computed.
-        """
-        return cast(bool, self.dag.nodes[node_id]["expanded"])
+    # def node_is_expanded(self, node_id: int) -> bool:
+    #     """
+    #     True if the successors of the given node are already computed.
+    #     """
+    #     return cast(bool, self.dag.nodes[node_id]["expanded"])
 
     def node_is_minimal(self, node_id: int) -> bool:
         """
@@ -406,9 +411,9 @@ class SuccessionDiagram:
         same attractor in multiple stub nodes, if the stub nodes intersect), and
         (b) this data is erased if the stub node is expanded later on.
         """
-        node = cast(dict[str, Any], self.dag.nodes[node_id])
+        node = cast(NodeData, self.dag.nodes[node_id])
 
-        attractors = cast(list[BooleanSpace] | None, node["attractors"])
+        attractors = node["attractors"]
 
         if attractors is None and not compute:
             raise KeyError(f"Attractor data not computed for node {node_id}.")
@@ -440,17 +445,17 @@ class SuccessionDiagram:
 
         return self.nfvs
 
-    def node_restricted_petri_net(self, node_id: int) -> nx.DiGraph | None:
-        """
-        Return the pre-computed Petri net representation restricted to the subspace
-        of the specified SD node.
+    # def node_restricted_petri_net(self, node_id: int) -> nx.DiGraph | None:
+    #     """
+    #     Return the pre-computed Petri net representation restricted to the subspace
+    #     of the specified SD node.
 
-        This can return `None` if the requested node is already fully expanded, because
-        in such a case, there is no need to store the Petri net anymore. However,
-        in general you should assume that this field is optional, even on nodes that
-        are not expanded yet.
-        """
-        return cast(nx.DiGraph, self.dag.nodes[node_id]["petri_net"])
+    #     This can return `None` if the requested node is already fully expanded, because
+    #     in such a case, there is no need to store the Petri net anymore. However,
+    #     in general you should assume that this field is optional, even on nodes that
+    #     are not expanded yet.
+    #     """
+    #     return cast(nx.DiGraph, self.dag.nodes[node_id]["petri_net"])
 
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
@@ -472,7 +477,7 @@ class SuccessionDiagram:
                 {
                     k: v
                     for k, v in self.dag.edges[parent_id, child_id]["motif"].items()  # type: ignore
-                    if k not in self.node_space(parent_id)
+                    if k not in self.node_data(parent_id)["space"]
                 },
             )
         else:
@@ -615,14 +620,14 @@ class SuccessionDiagram:
         such Petri net is always empty.
         """
 
-        node_space = self.node_space(node_id)
+        node_space = self.node_data(node_id)["space"]
 
         if len(node_space) == self.network.variable_count():
             # If fixed point, no need to compute.
             return
 
         if parent_id is not None:
-            parent_pn = self.node_restricted_petri_net(parent_id)
+            parent_pn = self.node_data(parent_id)["petri_net"]
             if parent_pn is None:
                 pn = self.petri_net
             else:
@@ -669,7 +674,9 @@ class SuccessionDiagram:
         current_space = node["space"]
 
         if DEBUG:
-            print(f"[{node_id}] Expanding: {len(self.node_space(node_id))} fixed vars.")
+            print(
+                f"[{node_id}] Expanding: {len(self.node_data(node_id)['space'])} fixed vars."
+            )
 
         if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
@@ -686,7 +693,7 @@ class SuccessionDiagram:
             source_nodes = extract_source_variables(self.petri_net)
 
         sub_spaces: list[BooleanSpace]
-        pn = self.node_restricted_petri_net(node_id)
+        pn = self.node_data(node_id)["petri_net"]
         if pn is not None:
             # We have a pre-propagated PN for this sub-space, hence we can use
             # that to compute the trap spaces.
@@ -747,9 +754,10 @@ class SuccessionDiagram:
         child_id = None
         if key not in self.node_indices:
             child_id = self.dag.number_of_nodes()
+
+            # Note: this must match the fields of the `NodeData` class
             self.dag.add_node(  # type: ignore
                 child_id,
-                id=child_id,  # In case we ever need it within the "node data" dictionary.
                 space=fixed_vars,
                 depth=0,
                 expanded=False,
