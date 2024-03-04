@@ -1,5 +1,5 @@
 """
-    A module responsible for detecting motif-avoidant attractors within terminal restriction space.
+A module responsible for detecting motif-avoidant attractors within terminal restriction space.
 """
 
 from __future__ import annotations
@@ -103,13 +103,16 @@ def detect_motif_avoidant_attractors(
     """
     Compute a sub-list of `candidates` which correspond to motif-avoidant
     attractors. Other method inputs:
-     - `graph` and `petri_net` represent the model in which the property
-       should be checked.
-     - `terminal_restriction_space` is a symbolic set of states which contains
-       all motif avoidant attractors (i.e. if a candidate state can leave this
-       set, the candidate cannot be an attractor).
-     - `max_iterations` specifies how much time should be spent on the "simpler"
-       preprocessing before applying a more complete method.
+
+    `graph` and `petri_net` represent the model in which the property
+    should be checked.
+
+    `terminal_restriction_space` is a symbolic set of states which contains
+    all motif avoidant attractors (i.e. if a candidate state can leave this
+    set, the candidate cannot be an attractor).
+
+    `max_iterations` specifies how much time should be spent on the "simpler"
+    preprocessing before applying a more complete method.
     """
     if ensure_subspace is None:
         ensure_subspace = {}

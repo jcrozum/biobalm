@@ -96,7 +96,7 @@ def feedback_vertex_set(
     --------
     >>> import balm
     >>> from balm.interaction_graph_utils import feedback_vertex_set
-    >>> sd = balm.SuccessionDiagram.from_bnet(\"\"\"
+    >>> sd = balm.SuccessionDiagram.from_rules(\"\"\"
     ...     A, B
     ...     B, A
     ...     C, D

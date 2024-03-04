@@ -30,7 +30,7 @@ class SuccessionDiagramTest(unittest.TestCase):
         assert (
             max(
                 [
-                    succession_diagram.node_depth(i)
+                    succession_diagram.node_data(i)["depth"]
                     for i in succession_diagram.node_ids()
                 ]
             )
@@ -80,7 +80,7 @@ class SuccessionDiagramTest(unittest.TestCase):
         assert (
             max(
                 [
-                    succession_diagram.node_depth(i)
+                    succession_diagram.node_data(i)["depth"]
                     for i in succession_diagram.node_ids()
                 ]
             )
@@ -109,8 +109,8 @@ class SuccessionDiagramTest(unittest.TestCase):
 
 
 def test_state():
-    sd1 = SuccessionDiagram.from_bnet("A, B\nB, A")
-    sd2 = SuccessionDiagram.from_bnet("A, B\nB, A\nC, C & B")
+    sd1 = SuccessionDiagram.from_rules("A, B\nB, A")
+    sd2 = SuccessionDiagram.from_rules("A, B\nB, A\nC, C & B")
     sd1.build()
     sd2.__setstate__(sd1.__getstate__())
     slots1 = [x + str(sd1.__getattribute__(x)) for x in sd1.__slots__]
@@ -193,7 +193,7 @@ def test_expansion_comparisons(network_file: str):
     # This should always create a succession_diagram with exactly one minimal trap space,
     # as the rest
     for min_trap in sd_bfs.minimal_trap_spaces():
-        space = sd_bfs.node_space(min_trap)
+        space = sd_bfs.node_data(min_trap)["space"]
 
         sd_target = SuccessionDiagram(bn)
         assert sd_target.expand_to_target(space, size_limit=NODE_LIMIT)
@@ -308,3 +308,16 @@ def test_attractor_expansion(network_file: str):
 
     # All symbolic attractors must be covered by some seed at this point.
     assert len(symbolic_attractors) == 0
+
+
+def test_attractor_extraction():
+    sd = balm.SuccessionDiagram.from_rules(
+        """
+        A, B
+        B, A & C
+        C, !A | B
+        """
+    )
+    sd.build()
+    eas = sd.expanded_attractor_seeds()
+    assert eas == {1: [{"A": 0, "B": 0, "C": 1}], 2: [{"A": 1, "B": 1, "C": 1}]}

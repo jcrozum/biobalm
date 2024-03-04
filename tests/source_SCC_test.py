@@ -80,7 +80,7 @@ B, A | C"""
     )
 
     for node in scc_sd.node_ids():
-        print(scc_sd.node_space(node))
+        print(scc_sd.node_data(node)["space"])
 
     assert scc_sd.dag.nodes[0]["space"] == {}
     assert scc_sd.dag.nodes[1]["space"] == {"A": 0, "B": 0}
@@ -375,8 +375,8 @@ def test_isomorph():
     sd_scc = SuccessionDiagram(bn)
     expand_source_SCCs(sd_scc)
 
-    assert [sd_bfs.node_space(id) for id in sd_bfs.node_ids()] == [
-        sd_scc.node_space(id) for id in sd_scc.node_ids()
+    assert [sd_bfs.node_data(id)["space"] for id in sd_bfs.node_ids()] == [
+        sd_scc.node_data(id)["space"] for id in sd_scc.node_ids()
     ]
 
     assert sd_scc.is_isomorphic(sd_bfs)

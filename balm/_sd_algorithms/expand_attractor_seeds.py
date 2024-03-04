@@ -47,7 +47,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
 
         # Retrieve the stable motifs of children that are already expanded.
         expanded_children = [
-            x for x in sd.node_successors(node) if sd.node_is_expanded(x)
+            x for x in sd.node_successors(node) if sd.node_data(x)["expanded"]
         ]
         expanded_motifs = [
             sd.edge_stable_motif(node, child) for child in expanded_children
@@ -61,7 +61,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 # and continue to the next one.
                 successors.pop()
                 continue
-            if sd.node_is_expanded(successors[-1]):
+            if sd.node_data(successors[-1])["expanded"]:
                 # The next node to explore is expanded (by some previous procedure)
                 # but not "seen" in this search yet. We need to visit this node
                 # regardless of other conditions
@@ -69,7 +69,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
             # Now, we need to asses if the next successor has some candidate states which
             # are not covered by the already expanded children.
 
-            successor_space = sd.node_space(successors[-1])
+            successor_space = sd.node_data(successors[-1])["space"]
             retained_set = make_retained_set(
                 sd.symbolic, sd.node_nfvs(node), successor_space
             )

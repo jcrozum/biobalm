@@ -1,13 +1,13 @@
-from biodivine_aeon import BooleanNetwork, BooleanExpression, AsynchronousGraph
+from biodivine_aeon import AsynchronousGraph, BooleanExpression, BooleanNetwork
 
 from balm.space_utils import (
     expression_to_space_list,
     is_subspace,
-    percolate_network,
-    percolation_conflicts,
     percolate_expression,
+    percolate_network,
     percolate_space,
     percolate_space_strict,
+    percolation_conflicts,
     space_unique_key,
 )
 

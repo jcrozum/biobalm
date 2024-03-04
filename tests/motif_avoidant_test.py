@@ -1,4 +1,4 @@
-from biodivine_aeon import BooleanNetwork, AsynchronousGraph
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
 from balm.motif_avoidant import _filter_candidates  # type: ignore
 from balm.motif_avoidant import _Pint_reachability  # type: ignore

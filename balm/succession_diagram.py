@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
     from typing import Iterator
@@ -23,84 +23,63 @@ from balm.petri_net_translation import (
 )
 from balm.space_utils import percolate_space, space_unique_key
 from balm.trappist_core import trappist
-from balm.types import BooleanSpace, SuccessionDiagramState
+from balm.types import BooleanSpace, NodeData, SuccessionDiagramState
 
-# Enables helpful "progress" messages.
-DEBUG = False
+DEBUG: bool = False
+"""
+If `True`, print debug and progress messages.
+"""
 
 
 class SuccessionDiagram:
     """
-    `SuccessionDiagram` (SD) is a directed acyclic graph representing the
-    structure of trap spaces induced by a particular `BooleanNetwork`. The root
-    of the graph is the whole state space (after percolation of constant
-    values). The leaf nodes are individual minimal trap spaces. Each path from
-    the root to a leaf represents a succession of gradually more restrictive
-    trap spaces.
+    Succession diagram of a Boolean network.
 
-    There are several additional "features" implemented by `SuccessionDiagram`
-    that allow us to implement more advanced (and efficient) algorithms:
-        - The succession diagram can be expanded lazily. Each node is initially
-          a *stub* node,
-        meaning none of its child nodes are known. A stub can be then *expanded*
-        into a full node by computing the *stable motifs* for the associated
-        trap space. - Each node can be annotated with *attractor seed states*,
-        i.e. states that are known to cover all network attractors within that
-        space.
+    This encodes relationships between minimal trap spaces and can be used for
+    attractor detection and control. Note that the succession diagram is
+    expanded lazily, so it is not built until `build` or a similar method is
+    called.
 
-    Overview of the `SuccessionDiagram` API:
-        - Introspection of the whole diagram:
-            * `SuccessionDiagram.root()`: the integer ID of the root node.
-            * `SuccessionDiagram.depth()`: The depth (hight?) of the current
-              succession diagram.
-            * `SuccessionDiagram.node_ids() / .stub_ids() / .expanded_ids()`:
-              Iterates over the
-            corresponding *node IDs* managed by this SD. *
-            `SuccessionDiagram.is_subgraph() / .is_isomorphic()`: Compares two
-            succession diagrams.
-        - Inspecting individual nodes:
-            * `SuccessionDiagram.node_depth(id)`: The depth (length of a maximal
-              path from the
-            root) of the given node. * `SuccessionDiagram.node_space(id)`: The
-            trap space associated with the given node. *
-            `SuccessionDiagram.node_is_minimal(id)`: Checks if the given node is
-            a minimal trap space: i.e. it is expanded and has no successor
-            nodes. * `SuccessionDiagram.node_is_expaned(id)`: Check if the given
-            node is expanded, i.e. its successor nodes are computed. *
-            `SuccessionDiagram.node_successors(id, compute=True/False)`: The
-            list of successor node IDs for the given node (can be computed if
-            not yet known, in which case the node becomes expanded). *
-            `SuccessionDiagram.node_attractor_seeds(id, compute=True/False)`:
-            The list of "attractor seed states" associated with the given node
-            (if these are not known yet, they can be computed). *
-            `SuccessionDiagram.edge_stable_motif(id, id)`: Obtain the stable
-            motif which enables the edge between the two nodes.
-        - There are several "expand procedures" that can explore a larger part
-          of the SD at once,
-        typically with a specific goal in mind:
-            * `SuccessionDiagram.expand_bfs() / .expand_dfs()`: Expands the
-              whole SD up to a certain
-            upper bound on size/depth. *
-            `SuccessionDiagram.expand_minimal_traps()`: Expands the SD such that
-            each minimal trap space is reachable by at least one path from the
-            root.
 
-    *Other internal implementation notes:*
-
-    *The node IDs are assumed to be a continuous range of integers. If this
-    breaks at any point, please make sure to check the correctness of the new
-    implementation thoroughly.*
-
-    *There is no way to remove or otherwise "contract" the succession diagram:
-    Once a node is expanded, it stays expanded. At the time of writing, there
-    does not appear to be a need for deleting SD nodes and it greatly simplifies
-    reasoning about correctness.*
-
+    Examples
+    --------
+    >>> import balm
+    >>> sd = balm.SuccessionDiagram.from_rules(\"""
+    ...     A, B
+    ...     B, A & C
+    ...     C, !A | B
+    ... \""")
+    >>> print(sd.summary()) # not built yet!
+    Succession Diagram with 1 nodes and depth 0.
+    State order: A, B, C
+    <BLANKLINE>
+    Attractors in diagram:
+    <BLANKLINE>
+    >>> sd.build()
+    >>> print(sd.summary()) # now it's built
+    Succession Diagram with 3 nodes and depth 1.
+    State order: A, B, C
+    <BLANKLINE>
+    Attractors in diagram:
+    <BLANKLINE>
+    minimal trap space 001
+    ...................001
+    <BLANKLINE>
+    minimal trap space 111
+    ...................111
+    <BLANKLINE>
     """
 
-    NFVS_NODE_THRESHOLD = (
-        2_000  # if more than this many nodes, we only find FVS, not NFVS
-    )
+    NFVS_NODE_THRESHOLD: int = 2_000
+    """
+    If the number of nodes in the (redunced) network is greater than this
+    threshold, we find a feedback vertex set (without consideration of cycle
+    sign) for reachability preprocessing. There is a trade-off between the speed
+    gains from a smaller node set to consider and the cost of determining which
+    FVS nodes only intersect negative cycles to find an NFVS subset. Typcially,
+    for smaller networks, the trade-off is in favor of computing a smaller NFVS.
+    """
+
     __slots__ = (
         "network",
         "symbolic",
@@ -112,21 +91,44 @@ class SuccessionDiagram:
 
     def __init__(self, network: BooleanNetwork):
         # Original Boolean network.
-        self.network = cleanup_network(network)
-        self.symbolic = AsynchronousGraph(self.network)
-        # A Petri net representation of the original Boolean network.
-        self.petri_net = network_to_petrinet(network)
+        self.network: BooleanNetwork = cleanup_network(network)
+        """
+        The Boolean network as an AEON network.
+        """
+
+        self.symbolic: AsynchronousGraph = AsynchronousGraph(self.network)
+        """
+        The symbolic representation of the network.
+        """
+
+        self.petri_net: nx.DiGraph = network_to_petrinet(network)
+        """
+        The Petri net representation of the network.
+        """
+
         if DEBUG:
             print(
                 f"Generated global Petri net with {len(self.petri_net.nodes)} nodes and {len(self.petri_net.edges)} edges."
             )
+
         # Initially, we don't need the NFVS for anything.
         self.nfvs: list[str] | None = None
-        # A directed acyclic graph representing the succession diagram.
-        self.dag = nx.DiGraph()
+        """
+        The negative feedback vertex set used for attractor detection.
+        """
+
+        self.dag: nx.DiGraph = nx.DiGraph()
+        """
+        The directed acyclic graph (DAG) representation of the succession
+        diagram structure.
+        """
         # A dictionary used for uniqueness checks on the nodes of the succession
         # diagram. See `SuccessionDiagram.ensure_node` for details.
         self.node_indices: dict[int, int] = {}
+        """
+        A dictionary mapping subspace keys to their positions in the succession
+        diagram (see :func:`balm.space_utils.space_unique_key`).
+        """
 
         # Create an un-expanded root node.
         self._ensure_node(None, {})
@@ -156,25 +158,35 @@ class SuccessionDiagram:
         return self.dag.number_of_nodes()
 
     @staticmethod
-    def from_aeon(model: str) -> SuccessionDiagram:
+    def from_rules(
+        rules: str,
+        format: Literal["bnet", "aeon", "sbml"] = "bnet",
+    ) -> SuccessionDiagram:
         """
-        Read a `BooleanNetwork` from the string contents of an `.aeon` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_aeon(model))
+        Generate a succession diagram from the given string.
 
-    @staticmethod
-    def from_bnet(model: str) -> SuccessionDiagram:
-        """
-        Read a `BooleanNetwork` from the string contents of a `.bnet` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_bnet(model))
+        Parameters
+        ----------
+        rules : str
+            The string representation of the network rules.
+        format : Literal['bnet', 'aeon', 'sbml']
+            The format of the string. One of `"bnet"`, `"aeon"`, or `"sbml"`.
+            Defaults to `"bnet"`.
 
-    @staticmethod
-    def from_sbml(model: str) -> SuccessionDiagram:
+        Returns
+        -------
+        SuccessionDiagram
+            The generated succession diagram. Initially unexpanded.
         """
-        Read a `BooleanNetwork` from the string contents of an `.sbml` model.
-        """
-        return SuccessionDiagram(BooleanNetwork.from_sbml(model))
+
+        if format == "bnet":
+            return SuccessionDiagram(BooleanNetwork.from_bnet(rules))
+        elif format == "aeon":
+            return SuccessionDiagram(BooleanNetwork.from_aeon(rules))
+        elif format == "sbml":
+            return SuccessionDiagram(BooleanNetwork.from_sbml(rules))
+        else:
+            raise ValueError(f"Unknown format: {format}")
 
     @staticmethod
     def from_file(path: str) -> SuccessionDiagram:
@@ -184,12 +196,52 @@ class SuccessionDiagram:
         """
         return SuccessionDiagram(BooleanNetwork.from_file(path))
 
-    def expanded_attractor_seeds(self) -> list[list[BooleanSpace]]:
-        return [self.node_attractor_seeds(id) for id in self.expanded_ids()]
+    def expanded_attractor_seeds(self) -> dict[int, list[BooleanSpace]]:
+        """
+        Attractor seeds for each expanded node.
+
+        An attractor seed is a state belonging to an attractor (and thus a state
+        from which the entire attractor is reachable, by definition).
+
+        If called before the `SuccessionDiagram` is fully built, this will not
+        be a complete accounting of attractor seed states.
+
+        Returns
+        -------
+        dict[int,list[BooleanSpace]]
+            Each key is the id of an expanded succession diagram node, whose
+            corresponding value is a list of attractor seeds for that node. Note
+            that one succession diagram node can have multiple attractors. Ordering
+            of the lists in the returned dictionary is not guaranteed.
+
+        Example
+        -------
+        >>> import balm
+        >>> sd = balm.SuccessionDiagram.from_rules(\"""
+        ...     A, B
+        ...     B, A & C
+        ...     C, !A | B
+        ... \""")
+        >>> sd.build()
+        >>> eas = sd.expanded_attractor_seeds()
+        >>> for id, atts in sorted(eas.items()):
+        ...     for x in atts:
+        ...         print(f"{id}: {dict(sorted(x.items()))}")
+        1: {'A': 0, 'B': 0, 'C': 1}
+        2: {'A': 1, 'B': 1, 'C': 1}
+        """
+        res: dict[int, list[BooleanSpace]] = {}
+        for id in self.expanded_ids():
+            atts = self.node_attractor_seeds(id)
+            if not atts:  # no attractors for this node
+                continue
+            res[id] = atts
+
+        return res
 
     def summary(self) -> str:
         """
-        Return a summary of the succession diagram.
+        Return a summary of the succession diagram as a string.
         """
         var_ordering = sorted(
             [self.network.get_variable_name(v) for v in self.network.variables()]
@@ -205,7 +257,10 @@ class SuccessionDiagram:
             except KeyError:
                 continue
 
-            space = self.node_space(node)
+            if not attrs:
+                continue
+
+            space = self.node_data(node)["space"]
 
             if self.node_is_minimal(node):
                 space_str_prefix = "minimal trap space "
@@ -222,7 +277,8 @@ class SuccessionDiagram:
                 attr_str = "".join(str(v) for _, v in sorted(attr.items()))
                 report_string += "." * len(space_str_prefix) + f"{attr_str}\n"
             report_string += "\n"
-        return report_string
+        # remove final extra newline and return
+        return report_string[:-1]
 
     def root(self) -> int:
         """
@@ -238,7 +294,7 @@ class SuccessionDiagram:
         """
         d = 0
         for node in cast(set[int], self.dag.nodes()):
-            d = max(d, self.node_depth(int(node)))
+            d = max(d, self.node_data(int(node))["depth"])
         return d
 
     def node_ids(self) -> Iterator[int]:
@@ -253,7 +309,7 @@ class SuccessionDiagram:
         Iterator over all node IDs that are currently not expanded.
         """
         for i in range(len(self)):
-            if not self.node_is_expanded(i):
+            if not self.node_data(i)["expanded"]:
                 yield i
 
     def expanded_ids(self) -> Iterator[int]:
@@ -261,7 +317,7 @@ class SuccessionDiagram:
         Iterator over all node IDs that are currently expanded.
         """
         for i in range(len(self)):
-            if self.node_is_expanded(i):
+            if self.node_data(i)["expanded"]:
                 yield i
 
     def minimal_trap_spaces(self) -> list[int]:
@@ -277,6 +333,17 @@ class SuccessionDiagram:
         """
         Return the ID of the node matching the provided `node_space`, or `None`
         if no such node exists in this succession diagram.
+
+        Parameters
+        ----------
+        node_space: BooleanSpace
+            The space of the node to find.
+
+        Returns
+        -------
+        int | None
+            The ID of the node matching the provided `node_space`, or `None`
+            if no such node exists in this succession diagram.
         """
         try:
             key = space_unique_key(node_space, self.network)  # throws IndexError
@@ -303,20 +370,31 @@ class SuccessionDiagram:
         WARNING: This does not take into account the stable motifs on individual
         edges. Just the subspaces associated with nodes and the presence of
         edges between nodes.
+
+        Parameters
+        ----------
+        other: SuccessionDiagram
+            The other succession diagram.
+
+        Returns
+        -------
+        bool
+            `True` if this succession diagram is a subgraph of the `other`
+            succession diagram.
         """
         # Every stub node is reachable through an expanded node and
         # thus will be checked by the following code.
         for i in self.expanded_ids():
-            other_i = other.find_node(self.node_space(i))
+            other_i = other.find_node(self.node_data(i)["space"])
             if other_i is None:
                 return False
             my_successors = self.node_successors(i)
             other_successors = []
-            if other.node_is_expanded(other_i):
+            if other.node_data(other_i)["expanded"]:
                 other_successors = other.node_successors(other_i)
 
             for my_s in my_successors:
-                other_s = other.find_node(self.node_space(my_s))
+                other_s = other.find_node(self.node_data(my_s)["space"])
                 if other_s not in other_successors:
                     return False
         return True
@@ -332,46 +410,73 @@ class SuccessionDiagram:
         WARNING: This does not take into account the stable motifs on individual
         edges. Just the subspaces associated with nodes and the presence of
         edges between nodes.
+
+        Parameters
+        ----------
+        other: SuccessionDiagram
+            The other succession diagram.
+
+        Returns
+        -------
+        bool
+            `True` if the two succession diagrams are isomorphic.
         """
         return self.is_subgraph(other) and other.is_subgraph(self)
 
-    def node_depth(self, node_id: int) -> int:
+    def node_data(self, node_id: int) -> NodeData:
         """
-        Get the depth associated with the provided `node_id`. The depth is counted
-        as the longest path from the root node to the given node.
-        """
-        return cast(int, self.dag.nodes[node_id]["depth"])
+        Get the data associated with the provided `node_id`.
 
-    def node_space(self, node_id: int) -> BooleanSpace:
-        """
-        Get the sub-space associated with the provided `node_id`.
+        Returns a `NodeData` object with the following attributes:
 
-        Note that this is the space *after* percolation. Hence it can hold that
-        `|node_space(child)| < |node_space(parent)| + |stable_motif(parent, child)|`.
-        """
-        return cast(BooleanSpace, self.dag.nodes[node_id]["space"])
+        - `depth`: The depth of the node.
+        - `attractors`: The attractors of the node.
+        - `petri_net`: The Petri net representation of the node.
+        - `space`: The sub-space of the node.
+        - `expanded`: Whether the node is expanded or not.
 
-    def node_is_expanded(self, node_id: int) -> bool:
+        See :class:`balm.types.NodeData` for more information.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+
+        Returns
+        -------
+        NodeData
+            The data associated with the provided `node_id`. Note that at
+            runtime, this object is an untyped dictionary.
         """
-        True if the successors of the given node are already computed.
-        """
-        return cast(bool, self.dag.nodes[node_id]["expanded"])
+        return cast(NodeData, self.dag.nodes[node_id])
 
     def node_is_minimal(self, node_id: int) -> bool:
         """
-        True if the node is expanded and it has no successors, i.e. it is a
-        minimal trap space.
+        True if the node represents a minimal trap space.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+
+        Returns
+        -------
+        bool
+            `True` if the node is expanded and it has no successors, i.e. it is a
+            minimal trap space.
         """
         is_leaf: bool = self.dag.out_degree(node_id) == 0  # type: ignore
         return is_leaf and self.dag.nodes[node_id]["expanded"]  # type: ignore
 
     def node_successors(self, node_id: int, compute: bool = False) -> list[int]:
         """
-        Return the successor nodes for the given `node_id`. If the node is
-        already expanded, known results are simply returned. If the node is not
-        expanded, but `compute` is set to `True`, then the node is expanded and
-        the newly computed results are returned. If the node is not expanded and
-        `compute` is set to `False`, the method raises a `KeyError` exception.
+        Return the successor nodes for the given `node_id`.
+
+        If the node is already expanded, known results are simply returned. If
+        the node is not expanded, but `compute` is set to `True`, then the node
+        is expanded and the newly computed results are returned. If the node is
+        not expanded and `compute` is set to `False`, the method raises a
+        `KeyError` exception.
 
         The default behaviour intentionally does not compute successors to
         prevent "accidental complexity".
@@ -383,6 +488,18 @@ class SuccessionDiagram:
         Also note that if the given `node_id` already has associated attractor
         data but is not expanded, this data will be deleted as it is no longer
         up to date.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the successors if they are not already known.
+
+        Returns
+        -------
+        list[int]
+            The list of successor node ids.
         """
         node = cast(dict[str, Any], self.dag.nodes[node_id])
         if not node["expanded"] and not compute:
@@ -396,8 +513,9 @@ class SuccessionDiagram:
         self, node_id: int, compute: bool = False
     ) -> list[BooleanSpace]:
         """
-        Return the list of attractor seed states corresponding to the given
-        `node_id`. Similar to `node_successors`, the method either computes the
+        Return the list of attractor seed states for the given `node_id`.
+
+        Similar to :meth:`node_successors`, the method either computes the
         data if unknown, or throws an exception, depending on the `compute`
         flag.
 
@@ -405,10 +523,22 @@ class SuccessionDiagram:
         attractors are not guaranteed to be unique (i.e. you can "discover" the
         same attractor in multiple stub nodes, if the stub nodes intersect), and
         (b) this data is erased if the stub node is expanded later on.
-        """
-        node = cast(dict[str, Any], self.dag.nodes[node_id])
 
-        attractors = cast(list[BooleanSpace] | None, node["attractors"])
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the attractor seeds if they are not already known.
+
+        Returns
+        -------
+        list[BooleanSpace]
+            The list of attractor seed states.
+        """
+        node = cast(NodeData, self.dag.nodes[node_id])
+
+        attractors = node["attractors"]
 
         if attractors is None and not compute:
             raise KeyError(f"Attractor data not computed for node {node_id}.")
@@ -421,8 +551,19 @@ class SuccessionDiagram:
 
     def node_nfvs(self, node_id: int) -> list[str]:
         """
-        Return the approximation of a minimum negative feedback vertex set that
-        is valid for the specified SD node.
+        Approximate minimum negative feedback vertex set on the subspace for the given node.
+
+        See :func:`balm.interaction_graph_utils.feedback_vertex_set` for further details.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+
+        Returns
+        -------
+        list[str]
+            The negative feedback vertex set, as a list of node names.
         """
 
         # TODO: Right now, we are just returning the gloval FVS. But in the future,
@@ -440,30 +581,33 @@ class SuccessionDiagram:
 
         return self.nfvs
 
-    def node_restricted_petri_net(self, node_id: int) -> nx.DiGraph | None:
-        """
-        Return the pre-computed Petri net representation restricted to the subspace
-        of the specified SD node.
-
-        This can return `None` if the requested node is already fully expanded, because
-        in such a case, there is no need to store the Petri net anymore. However,
-        in general you should assume that this field is optional, even on nodes that
-        are not expanded yet.
-        """
-        return cast(nx.DiGraph, self.dag.nodes[node_id]["petri_net"])
-
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
     ) -> BooleanSpace:
         """
-        Return the *stable motif* associated with the specified parent-child
-        edge. If `reduced` is set to `False` (default), the unpercolated stable
+        Return the stable motif for the given parent-child edge.
+
+        If `reduced` is set to `False` (default), the unpercolated stable
         motif trap space corresponding to the child node is returned; this
         includes the nodes that are fixed in the percolated trap space of the
         parent node. If `reduced` is set to `True`, the nodes fixed in the
         parent are removed (and thus the reduced stable motif is not a trap
         space of the original network, but is a maximal trap space in the
         network reduced by the parent node).
+
+        Parameters
+        ----------
+        parent_id: int
+            The ID of the parent node.
+        child_id: int
+            The ID of the child node.
+        reduced: bool
+            Whether to return the reduced stable motif.
+
+        Returns
+        -------
+        BooleanSpace
+            The stable motif (maximal trap space) represented by the edge.
         """
 
         if reduced:
@@ -472,7 +616,7 @@ class SuccessionDiagram:
                 {
                     k: v
                     for k, v in self.dag.edges[parent_id, child_id]["motif"].items()  # type: ignore
-                    if k not in self.node_space(parent_id)
+                    if k not in self.node_data(parent_id)["space"]
                 },
             )
         else:
@@ -500,13 +644,14 @@ class SuccessionDiagram:
     ) -> bool:
         """
         Explore the succession diagram in a BFS manner.
-            - If `node_id` is given, initiate BFS from this node. Otherwise use
-              root.
-            - If `bfs_level_limit` is given, this is the last "level" (distance
-              from the initial node)
-            of nodes that should be expanded (any subsequent child nodes are
-            left unexplored). - If `size_limit` is given, the procedure stops
-            once `SuccessionDiagram` exceeds the given size.
+
+        If `node_id` is given, initiate BFS from this node. Otherwise use root.
+        If `bfs_level_limit` is given, this is the last "level" (distance from
+        the initial node) of nodes that should be expanded (any subsequent child
+        nodes are left unexplored).
+
+        If `size_limit` is given, the procedure stops once `SuccessionDiagram`
+        exceeds the given size.
 
         With default settings, the method will explore the whole succession
         diagram without any restrictions.
@@ -615,14 +760,14 @@ class SuccessionDiagram:
         such Petri net is always empty.
         """
 
-        node_space = self.node_space(node_id)
+        node_space = self.node_data(node_id)["space"]
 
         if len(node_space) == self.network.variable_count():
             # If fixed point, no need to compute.
             return
 
         if parent_id is not None:
-            parent_pn = self.node_restricted_petri_net(parent_id)
+            parent_pn = self.node_data(parent_id)["petri_net"]
             if parent_pn is None:
                 pn = self.petri_net
             else:
@@ -669,7 +814,9 @@ class SuccessionDiagram:
         current_space = node["space"]
 
         if DEBUG:
-            print(f"[{node_id}] Expanding: {len(self.node_space(node_id))} fixed vars.")
+            print(
+                f"[{node_id}] Expanding: {len(self.node_data(node_id)['space'])} fixed vars."
+            )
 
         if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
@@ -686,7 +833,7 @@ class SuccessionDiagram:
             source_nodes = extract_source_variables(self.petri_net)
 
         sub_spaces: list[BooleanSpace]
-        pn = self.node_restricted_petri_net(node_id)
+        pn = self.node_data(node_id)["petri_net"]
         if pn is not None:
             # We have a pre-propagated PN for this sub-space, hence we can use
             # that to compute the trap spaces.
@@ -747,9 +894,10 @@ class SuccessionDiagram:
         child_id = None
         if key not in self.node_indices:
             child_id = self.dag.number_of_nodes()
+
+            # Note: this must match the fields of the `NodeData` class
             self.dag.add_node(  # type: ignore
                 child_id,
-                id=child_id,  # In case we ever need it within the "node data" dictionary.
                 space=fixed_vars,
                 depth=0,
                 expanded=False,

@@ -58,7 +58,7 @@ class Intervention:
         Example
         -------
         >>> import balm
-        >>> sd = balm.SuccessionDiagram.from_bnet(
+        >>> sd = balm.SuccessionDiagram.from_rules(
         ...     \"\"\"
         ...     A, B & C
         ...     B, A & C
@@ -87,7 +87,7 @@ class Intervention:
         self._control: list[ControlOverrides] = []
         for c in control:
             cs = sorted(map(lambda x: sorted(x.items()), c))
-            self._control.append(list(map(dict, cs)))
+            self._control.append(list(map(dict, cs)))  # type: ignore
 
         self._strategy = strategy
         self._succession = succession
@@ -198,7 +198,7 @@ def succession_control(
     -------
     >>> import balm
     >>> from balm.control import succession_control
-    >>> sd = balm.SuccessionDiagram.from_bnet(
+    >>> sd = balm.SuccessionDiagram.from_rules(
     ...     \"\"\"
     ...     S, S
     ...     A, S | B
@@ -237,7 +237,7 @@ def succession_control(
     -------
     >>> import balm
     >>> from balm.control import succession_control
-    >>> sd = balm.SuccessionDiagram.from_bnet(
+    >>> sd = balm.SuccessionDiagram.from_rules(
     ...         \"\"\"
     ...     S, S
     ...     A, S | B
@@ -335,7 +335,7 @@ def successions_to_target(
         )
 
     for s in succession_diagram.node_ids():
-        fixed_vars = succession_diagram.node_space(s)
+        fixed_vars = succession_diagram.node_data(s)["space"]
         if not is_subspace(fixed_vars, target):
             continue
 
