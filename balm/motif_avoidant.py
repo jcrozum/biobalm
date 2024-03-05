@@ -43,6 +43,28 @@ def make_retained_set(
 
     Finally, the construction guarantees that any complex attractor of the old
     network will manifest as at least one fixed-point in the new network.
+
+    Parameters
+    ----------
+    graph : AsynchronousGraph
+        The symbolic update functions stored as an `AsynchronousGraph` object
+        from the `biodivine_aeon` library.
+    nfvs : list[str]
+        The list of fixed variables in the current NFVS.
+    space : BooleanSpace
+        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        current trap space.
+    child_spaces : list[BooleanSpace] | None, optional
+        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        describing the child spaces of the current node. Only attractors that
+        are not in the child spaces are considered. If no child spaces are
+        provided, then all attractors are considered.
+
+    Returns
+    -------
+    BooleanSpace
+        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        retained set.
     """
 
     if child_spaces is None:
@@ -97,10 +119,11 @@ def detect_motif_avoidant_attractors(
     candidates: list[BooleanSpace],
     terminal_restriction_space: Bdd,
     max_iterations: int,
-    ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
 ) -> list[BooleanSpace]:
     """
+    Determine which candidate seed states correspond to motif-avoidant attractors.
+
     Compute a sub-list of `candidates` which correspond to motif-avoidant
     attractors. Other method inputs:
 
@@ -111,12 +134,36 @@ def detect_motif_avoidant_attractors(
     all motif avoidant attractors (i.e. if a candidate state can leave this
     set, the candidate cannot be an attractor).
 
-    `max_iterations` specifies how much time should be spent on the "simpler"
+    `max_iterations` specifies how much time should be spent on the simpler
     preprocessing before applying a more complete method.
-    """
-    if ensure_subspace is None:
-        ensure_subspace = {}
 
+    Parameters
+    ----------
+    graph : AsynchronousGraph
+        The symbolic update functions stored as an `AsynchronousGraph` object
+        from the `biodivine_aeon` library.
+    petri_net : DiGraph
+        The Petri net representation of the update functions.
+    candidates : list[BooleanSpace]
+        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        describing the candidate seed states.
+    terminal_restriction_space : Bdd
+        A symbolic set of states which contains all motif avoidant attractors
+        (i.e. if a candidate state can leave this set, the candidate cannot be
+        an attractor).
+    max_iterations : int
+        Specifies how much time should be spent on the simpler preprocessing methods.
+    is_in_an_mts : bool, optional
+        By default `False`. If `True`, the the we assume that the candidates lie
+        within a minimal trap space, enabling certain optimizations. If
+        incorrectly set to `True`, correct behaviour is not guaranteed.
+
+    Returns
+    -------
+    list[BooleanSpace]
+        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        describing the motif-avoidant attractors among the input candidate set.
+    """
     if len(candidates) == 0:
         return []
 
@@ -128,7 +175,6 @@ def detect_motif_avoidant_attractors(
         candidates,
         terminal_restriction_space,
         max_iterations,
-        ensure_subspace=ensure_subspace,
         is_in_an_mts=is_in_an_mts,
     )
 
@@ -146,7 +192,6 @@ def _preprocess_candidates(
     candidates: list[BooleanSpace],
     terminal_restriction_space: Bdd,
     max_iterations: int,
-    ensure_subspace: BooleanSpace | None = None,
     is_in_an_mts: bool = False,
     simulation_seed: int = 0,
 ) -> list[BooleanSpace]:
@@ -164,9 +209,6 @@ def _preprocess_candidates(
     pick a single state from it and start again. Sam: I'll add a version of this
     later, once we can actually benchmark how it performs :)
     """
-    if ensure_subspace is None:
-        ensure_subspace = {}
-
     # A random generator initialized with a fixed seed. Ensures simulation
     # is randomized but deterministic.
     generator = random.Random(simulation_seed)
@@ -294,7 +336,7 @@ def _Pint_reachability(
 
     # Build a Pint model through an automata network and copy
     # over the initial condition.
-    pint_model = InMemoryModel(petri_net_as_automata_network(petri_net))
+    pint_model = InMemoryModel(_petri_net_as_automata_network(petri_net))
     for var, level in initial_state.items():
         pint_model.initial_state[var] = level
 
@@ -322,7 +364,7 @@ def _Pint_build_symbolic_goal(states: Bdd) -> Goal:
     return reduce(lambda a, b: a | b, goals)
 
 
-def petri_net_as_automata_network(petri_net: DiGraph) -> str:
+def _petri_net_as_automata_network(petri_net: DiGraph) -> str:
     """
     Takes a Petri net which was created by implicant encoding from a Boolean network,
     and builds an automata network file (`.an`) compatible with the Pint tool.
