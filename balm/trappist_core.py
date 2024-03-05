@@ -1,11 +1,11 @@
 """
-    Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
-    and maximum trap spaces, including time-reversed networks.
+Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
+and maximum trap spaces, including time-reversed networks.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from typing import Callable
@@ -30,16 +30,23 @@ from balm.petri_net_translation import (
 def trappist_async(
     network: BooleanNetwork | DiGraph,
     on_solution: Callable[[BooleanSpace], bool],
-    problem: str = "min",
+    problem: Literal["min", "max", "fix"] = "min",
     reverse_time: bool = False,
     ensure_subspace: BooleanSpace | None = None,
     avoid_subspaces: list[BooleanSpace] | None = None,
     optimize_source_variables: list[str] | None = None,
 ):
     """
-    The same as the `trappist` method, but instead of returning a list of spaces
+    Asynchronous version of the :func:`trappist` method.
+
+    Note that "asynchronous" refers to the execution of this function, not to
+    the update scheme used (which does not affect the trap spaces in any case).
+
+    The same as the :func:`trappist` method, but instead of returning a list of spaces
     as a result, the spaces are returned to the supplied `on_solution` callback.
     You can stop the enumeration by returning `False` from this callback.
+
+    See :func:`trappist` for details.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -85,7 +92,7 @@ def trappist_async(
 
 def trappist(
     network: BooleanNetwork | DiGraph,
-    problem: str = "min",
+    problem: Literal["min", "max", "fix"] = "min",
     reverse_time: bool = False,
     solution_limit: int | None = None,
     ensure_subspace: BooleanSpace | None = None,
@@ -93,26 +100,55 @@ def trappist(
     optimize_source_variables: list[str] | None = None,
 ) -> list[BooleanSpace]:
     """
-    Solve the given `problem` for the given `network` using the Trappist
+    Trap space solver for Boolean networks.
+
+    Solves the given `problem` for the given `network` using the Trappist
     algorithm, internally relying on the Python bindings of the `clingo` ASP
     solver.
 
-    Arguments:
-        - `network`: Can be either a `BooleanNetwork`, or a Petri net
-          (`DiGraph`) compatible with the encoding
-        in `petri_net_translation` module. The behaviour is undefined for other
-        `DiGraph` instances. - `problem`: `min` minimum trap spaces; `max`
-        maximum trap spaces; `fix` fixed points. Default: `min`. -
-        `reverse_time`: If `True`, a time-reversed network should be considered.
-        Default: `False`. - `solution_limit`: If given, the result is limited to
-        the given number of solutions. Default: `None`.
+    The `problem` can be either `"min"`, `"max"` or `"fix"`, corresponding to
+    finding all minimal trap spaces (`"min"`), maximal trap spaces (`"max"`), or
+    fixed points (`"fix"`).
 
     The result is a list of spaces represented as dictionaries. If you want to
     avoid enumerating all solutions explicitly as one list, you can use
-    `trappist_async` which has a similar API but can yield solutions one by one.
+    :func:`trappist_async` which has a similar API but can yield solutions one by one.
 
     Finally, recall that the supplied network must have its names sanitized (see
-    `petri_net_translation` module).
+    :mod:`petri_net_translation<balm.petri_net_translation>` module).
+
+
+    Parameters
+    ----------
+    network : BooleanNetwork | DiGraph
+        A Boolean network or a Petri net compatible with the encoding in
+        :mod:`petri_net_translation<balm.petri_net_translation>` module. The behaviour is undefined for other
+        `DiGraph` instances.
+    problem : Literal["min", "max", "fix"], optional
+        The problem to solve. Finds all minimal trap spaces (`"min"`), maximal
+        trap spaces (`"max"`), or fixed points (`"fix"`). The default is `"min"`.
+    reverse_time : bool, optional
+        If `True`, a time-reversed network should be considered. The default is
+        `False`.
+    solution_limit : int, optional
+        If given, the result is limited to the given number of solutions.
+        Default: `None`.
+    ensure_subspace : BooleanSpace, optional
+        If given, the result is restricted to the given subspace. Default: `None`.
+    avoid_subspaces : list[BooleanSpace], optional
+        If given, the result is restricted to not be in the given subspaces. Default:
+        `None`.
+    optimize_source_variables : list[str], optional
+        Desingates which variables should be treated as input nodes for the
+        purposes of trap space identification. Fixed values of these variables
+        will be considered together, reducing the number of trap spaces
+        associated with `k` source nodes to `2**k` from `(2**k)*k!`.
+
+    Returns
+    -------
+    list[BooleanSpace]
+        The :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        describing the trap spaces that solve the specified problem.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -167,29 +203,10 @@ def _create_clingo_constraints(
     optimize_source_variables: list[str] | None = None,
 ) -> Control:
     """
-    Translate the given Petri net (represented as a `DiGraph`; see also
-    `petri_net_translation` module for details) into a logic program that solves
-    the given problem type. This logic program is then added to the `Control`
-    object provided by `clingo`.
+    Translate the given Petri net into a logic program that solves
+    the given problem type.
 
-     - The `problem` arugment specifies one of the three problem types: `min`
-       (minimum trap spaces),
-     `max` (maximum trap spaces) and `fix` (fixed-points). - If `reverse_time`
-     is true, the problem is solved for a time-reversed problem. - Argument
-     `ensure_subspace` is a space in which all results must be included. -
-     Argument `avoid_subspaces` is a list of spaces that must be avoided by all
-     solutions. - Argument `optimize_source_variables` designates variables for
-     which a `*` solution should be disregarded when computing maximum trap
-     spaces.
-
-     Finally, note that when `ensure_subspace` or `avoid_subspaces` is included,
-     the result is maximal/minimal within the resulting space of solutions, not
-     globally. For example, if specify some `ensure_subspace` and `problem=max`,
-     then the result is maximal *within* that subspace, not globally.
-     Furthermore, the result can still be a *superspace* of the
-     `avoid_subspaces` argument. For example, if you specify that you want to
-     avoid a particular fixed-point, a globally non-minimal trap space that
-     contains this fixed-point can be still included.
+    All parameters are as specified in :func:`trappist`.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -383,10 +400,18 @@ def compute_fixed_point_reduced_STG_async(
     avoid_subspaces: list[BooleanSpace] | None = None,
 ):
     """
-    The same as the `compute_fixed_point_reduced_STG`, but instead of returning a
+    Asynchronous version of :func:`compute_fixed_point_reduced_STG`.
+
+    Note that "asynchronous" refers to the execution of this function, not to
+    the update scheme used to generate the STG (which is, coincidently, always
+    asynchronous).
+
+    The same as the :func:`compute_fixed_point_reduced_STG`, but instead of returning a
     list of fixed-points as a result, the states are returned to the supplied
     `on_solution` callback. You can stop the enumeration by
     returning `False` from this callback.
+
+    See :func:`compute_fixed_point_reduced_STG` for details.
     """
     if ensure_subspace is None:
         ensure_subspace = {}
@@ -434,14 +459,37 @@ def compute_fixed_point_reduced_STG(
     solution_limit: int | None = None,
 ) -> list[BooleanSpace]:
     """
+    Compute fixed points of the given Petri-net-encoded Boolean network.
+
     This method computes the fixed points of the given Petri-net-encoded Boolean
     network. This makes it possible to modify the Petri net instead of
     re-encoding the BN repeatedly for multiple subsequnet queries.
 
-    The arguments `ensure_subspace`, `avoid_subspaces`, and `solution_limit`
-    work exactly the same way as in the `trappist` method. Meanwhile, the
-    `retained_set` argument is applied as  a restriction on the transitions of
-    the Petri net, forcing given variables to retain the specified values.
+    If you want to avoid enumerating all solutions explicitly as one list, you can use
+    :func:`trappist_async` which has a similar API but can yield solutions one by one.
+
+    Parameters
+    ----------
+    petri_net : DiGraph
+        The Petri net which was created by the implicant encoding from a
+        Boolean network. See :mod:`petri_net_encoding<balm.petri_net_encoding>`
+        for details.
+    retained_set : BooleanSpace
+        A set of variables and their values which can only change their
+        value towards the "retain value".
+    ensure_subspace : BooleanSpace
+        Only fixed points in this subspace will be considered or returned.
+    avoid_subspaces : list[BooleanSpace]
+        Only fixed points not in any of these subspaces will be considered or
+        returned.
+    solution_limit : int
+        The maximum number of solutions to return. If `None`, all solutions will
+        be returned.
+
+    Returns
+    -------
+    list[BooleanSpace]
+        A list of fixed points.
     """
 
     results: list[BooleanSpace] = []
