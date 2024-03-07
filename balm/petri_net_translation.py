@@ -1,13 +1,17 @@
 """
-    Implements the translation from a `BooleanNetwork` object into a Petri net that can be processed
-    by Trappist. The Petri net is represented as a `DiGraph`, with nodes having either a `kind=place`
-    or a `kind=transition` attribute.
+Utilities for translating Boolean networks into Petri nets.
 
-    The variable names in the network have to be "sanitized" before translation. In particular, this
-    means they can't use any special characters beyond "_". In the resulting Petri net, we then use
-    a "b0_*" and "b1_*" prefix to distinguish the "zero" and "one" places created for each variable.
-    This is also important for `clingo`, as we have to guarantee that in our logic program, symbols
-    start with a lowercase letter.
+Implements the translation from a `BooleanNetwork` object into a Petri net that
+can be processed by Trappist (for finding trap spaces). The Petri net is
+represented as a `networkx.DiGraph`, with nodes having either a `kind=place` or
+a `kind=transition` attribute.
+
+The variable names in the network have to be "sanitized" before translation. In
+particular, this means they can't use any special characters beyond "_". In the
+resulting Petri net, we then use a "b0_*" and "b1_*" prefix to distinguish the
+"zero" and "one" places created for each variable. This is also important for
+`clingo`, as we have to guarantee that in our logic program, symbols start with
+a lowercase letter.
 """
 
 from __future__ import annotations
@@ -35,20 +39,37 @@ from networkx import DiGraph  # type: ignore
 
 # Enables statistics logging.
 DEBUG = False
+"""Enables debug logging to stdout."""
 
 
 def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
     """
-    Verifies that all network variable names contain only alphanumeric characters and "_".
-    If this is not the case, attempts to rename the variables to make them compliant.
-    Returns a *copy* of the original network that only uses sanitized names.
+    Rename variables in a network so that they can be safely used in Trappist.
 
-    Note that AEON should already prune away most of the special characters when parsing models,
-    but it still allows names like `Gene_{Subscript}` (i.e. curly brackets) which we have
-    to sanitize here.
+    Verifies that all network variable names contain only alphanumeric
+    characters and underscores. If this is not the case, attempts to rename the
+    variables to make them compliant. Returns a *copy* of the original network
+    that only uses sanitized names.
 
-    If `check_only=True` is specified, no renaming takes place and the function fails with
-    a `RuntimeError` instead.
+    Note that AEON should already prune away most of the special characters when
+    parsing models, but it still allows names like `Gene_{Subscript}` (i.e.
+    curly brackets) which we have to sanitize here.
+
+    If `check_only=True` is specified, no renaming takes place and the function
+    fails with a `RuntimeError` instead.
+
+    Parameters
+    ----------
+    network : BooleanNetwork
+        The network to sanitize.
+    check_only : bool
+        If `True`, no renaming takes place and the function fails with a
+        `RuntimeError` if the network contains invalid variable names.
+
+    Returns
+    -------
+    BooleanNetwork
+        A copy of the original network with sanitized variable names.
     """
     network = copy.copy(network)
     for var in network.variables():
@@ -72,8 +93,20 @@ def sanitize_network_names(network: BooleanNetwork, check_only: bool = False):
 
 def variable_to_place(variable: str, positive: bool) -> str:
     """
-    Convert the name of a network variable to the name of the corresponding positive
-    or negative Petri net place.
+    Generate a Petri net place name from a network variable name.
+
+    Parameters
+    ----------
+    variable : str
+        The name of the network variable.
+    positive : bool
+        `True` if the place corresponding to the variable should be positive,
+        `False` if it shoudl be negative.
+
+    Returns
+    -------
+    str
+        The name of the corresponding Petri net place.
     """
     if positive:
         return f"b1_{variable}"
@@ -83,8 +116,17 @@ def variable_to_place(variable: str, positive: bool) -> str:
 
 def place_to_variable(place: str) -> tuple[str, bool]:
     """
-    Convert the name of a Petri net place to the name of the network variable, plus
-    a Boolean indicating whether the original place was positive or negative.
+    Extract the variable name and state from a Peteri net place name.
+
+    Parameters
+    ----------
+    place : str
+        The name of the Petri net place.
+
+    Returns
+    -------
+    tuple[str, bool]
+        The name of the variable, and whether the variable is positive or negative.
     """
     if place.startswith("b1_"):
         return (place[3:], True)
@@ -98,10 +140,21 @@ def extract_variable_names(encoded_network: DiGraph) -> list[str]:
     """
     Extract the variable names from a Petri net encoded Boolean network.
 
-    The variables are  sorted lexicographically, since the original BN ordering is not
-    preserved by the Petri net. However, BNs order variables lexicographically by default,
-    so unless the Petri net was created from a custom BN (i.e. not from a normal model file),
-    the ordering should be the same.
+    The variables are  sorted lexicographically, since the original BN ordering
+    is not preserved by the Petri net. However, BNs order variables
+    lexicographically by default, so unless the Petri net was created from a
+    custom BN (i.e. not from a normal model file), the ordering should be the
+    same.
+
+    Parameters
+    ----------
+    encoded_network : DiGraph
+        The Petri net encoded Boolean network.
+
+    Returns
+    -------
+    list[str]
+        The list of variable names.
     """
     variables: list[str] = []
     for node in encoded_network.nodes():  # type: ignore
@@ -114,9 +167,19 @@ def extract_variable_names(encoded_network: DiGraph) -> list[str]:
 
 def extract_source_variables(encoded_network: DiGraph) -> list[str]:
     """
-    Extract the list of variable names that represent source nodes of the encoded network.
+    List variable names that represent source nodes of the encoded network.
 
-    That is, nodes with an identity update function.
+    Source nodes are those nodes with an identity update function.
+
+    Parameters
+    ----------
+    encoded_network : DiGraph
+        The Petri net encoded Boolean network.
+
+    Returns
+    -------
+    list[str]
+        The list of source variable names.
     """
     variables = extract_variable_names(encoded_network)
     source_set = set(variables)
@@ -132,12 +195,27 @@ def restrict_petrinet_to_subspace(
     sub_space: BooleanSpace,
 ) -> DiGraph:
     """
-    Create a copy of the given Petri net, but with the variables given in `sub_space` fixed to their
-    respective values.
+    Create a copy of a Petri net restricted to a sub-space.
 
-    Note that this completely eliminates the constant variables from the {etri net, but it does not
-    perform any further constant propagation or percolation. Variables that are fixed in the sub_space
-    but do not exist in the Petri net are ignored.
+    Creates a copy of the given Petri net, but with the variables given in
+    `sub_space` fixed to their respective values.
+
+    Note that this completely eliminates the constant variables from the {etri
+    net, but it does not perform any further constant propagation or
+    percolation. Variables that are fixed in the sub_space but do not exist in
+    the Petri net are ignored.
+
+    Parameters
+    ----------
+    petri_net : DiGraph
+        The Petri net to restrict.
+    sub_space : BooleanSpace
+        The sub-space to restrict the Petri net to.
+
+    Returns
+    -------
+    DiGraph
+        The restricted Petri net.
     """
     result = copy.deepcopy(petri_net)
     for var, value in sub_space.items():
@@ -181,15 +259,33 @@ def network_to_petrinet(
     network: BooleanNetwork, ctx: SymbolicContext | None = None
 ) -> DiGraph:
     """
+    Convert a Boolean network to a Petri net.
+
     Converts a `BooleanNetwork` to a `DiGraph` representing a Petri net encoding
-    of the original network. For details about the encoding, see module description.
+    of the original network. For details about the encoding, see module
+    description.
 
     Note that the given network needs to have "sanitized" names, otherwise the
     method will fail (see `sanitize_network_names` in this module).
 
-    The operation uses translation through `biodivine_aeon.Bdd` to generate a disjunctive normal form
-    of the network's update functions. This is facilitated by `biodivine_aeon.SymbolicContext`. If such
-    context already exists, it can be provided as the second argument. Otherwise it will be created.
+    The operation uses translation through `biodivine_aeon.Bdd` to generate a
+    disjunctive normal form of the network's update functions. This is
+    facilitated by `biodivine_aeon.SymbolicContext`. If such context already
+    exists, it can be provided as the second argument. Otherwise it will be
+    created.
+
+    Parameters
+    ----------
+    network : BooleanNetwork
+        The network to convert.
+    ctx : SymbolicContext | None
+        The context used for the symbolic conversion. If not given, a new one
+        will be created from the network.
+
+    Returns
+    -------
+    DiGraph
+        The Petri net encoding of the given network.
     """
     # Assert that all network names are already sanitized.
     sanitize_network_names(network, check_only=True)
@@ -257,13 +353,13 @@ def _optimized_recursive_dnf_generator(
     bdd: Bdd,
 ) -> Generator[BddPartialValuation, None, None]:
     """
-    Yields a generator of `BddPartialValuation` objects, similar to `bdd.clause_iterator`,
-    but uses a recursive optimization strategy to return a smaller result than the default
-    method `Bdd` clause sequence. Note that this is still not the "optimal" DNF, but is often
-    close enough.
+    Yields a generator of `BddPartialValuation` objects, similar to
+    `bdd.clause_iterator`, but uses a recursive optimization strategy to return
+    a smaller result than the default method `Bdd` clause sequence. Note that
+    this is still not the "optimal" DNF, but is often close enough.
 
-    This is technically slower for BDDs that already have a small clause count, but can be
-    much better in the long-term when the clause count is high.
+    This is technically slower for BDDs that already have a small clause count,
+    but can be much better in the long-term when the clause count is high.
     """
 
     # Some performance notes:
