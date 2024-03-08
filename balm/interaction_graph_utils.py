@@ -148,3 +148,30 @@ def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
         )
 
     return network.infer_valid_graph()
+
+
+def source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
+    """
+    Find source SCCs of the given `BooleanNetwork`.
+
+    Here, SCC stands for "strongly connected component". An SCC is a source SCC
+    if it has no incoming edges.
+
+    Parameters
+    ----------
+    bn : BooleanNetwork
+        The Boolean network to be examined.
+
+    Returns
+    -------
+    list[list[str]]
+        The list of source SCCs.
+    """
+    result: list[list[str]] = []
+    for scc in bn.strongly_connected_components():
+        scc_list = sorted(scc)
+        if bn.backward_reachable(scc_list) == scc:
+            scc_names = [bn.get_variable_name(var) for var in scc_list]
+            result.append(scc_names)
+
+    return sorted(result)

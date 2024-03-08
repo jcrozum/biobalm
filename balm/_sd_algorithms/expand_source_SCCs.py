@@ -4,12 +4,7 @@ import itertools as it
 import sys
 from typing import TYPE_CHECKING, Callable, cast
 
-from biodivine_aeon import (
-    AsynchronousGraph,
-    BooleanNetwork,
-    SymbolicContext,
-    VariableId,
-)
+from biodivine_aeon import BooleanNetwork, SymbolicContext
 
 from balm._sd_algorithms.expand_bfs import expand_bfs
 from balm.space_utils import percolate_network, percolate_space
@@ -64,7 +59,7 @@ def expand_source_SCCs(
 
     # percolate constant nodes
     perc_space = percolate_space(sd.symbolic, {})
-    sd.dag.nodes[root]["space"] = perc_space
+    sd.node_data(root)["space"] = perc_space
 
     # find source nodes
     perc_bn = percolate_network(sd.network, perc_space)
@@ -81,8 +76,8 @@ def expand_source_SCCs(
 
             next_level.append(sd._ensure_node(root, sub_space))  # type: ignore
 
-        sd.dag.nodes[root]["expanded"] = True
-        sd.dag.nodes[root]["attractors"] = []  # no need to look for attractors here
+        sd.node_data(root)["expanded"] = True
+        sd.node_data(root)["attractors"] = []  # no need to look for attractors here
         current_level = next_level
         next_level = []
 
@@ -92,16 +87,9 @@ def expand_source_SCCs(
 
         # each level consists of one round of fixing all source SCCs
         for node_id in current_level:
-            sub_space = cast(BooleanSpace, sd.dag.nodes[node_id]["space"])
-
-            # find source SCCs
-            clean_bn = perc_and_remove_constants_from_bn(perc_bn, sub_space)
-            source_scc_list = find_source_SCCs(clean_bn)
-            if DEBUG:
-                print(f"{source_scc_list=}")
-
+            sub_sds = list(sd.component_subdiagrams(node_id))
             # if there are no more source SCCs in this node, move it to the final level
-            if len(source_scc_list) == 0:
+            if not sub_sds:
                 final_level.append(node_id)
                 continue
 
@@ -110,10 +98,10 @@ def expand_source_SCCs(
                 node_id
             ]  # this is where the scc_sd should be "attached"
             next_branches: list[int] = []
-            while len(source_scc_list) > 0:
-                source_scc = source_scc_list.pop(0)
-                scc_network = restrict_to_component(clean_bn, source_scc)
-                scc_sd, exist_maa = find_subnetwork_sd(scc_network, expander, check_maa)
+            for sub_network_diagram in sub_sds:
+                scc_sd, exist_maa = find_subnetwork_sd(
+                    sub_network_diagram, expander, check_maa
+                )
 
                 if exist_maa:  # we check for maa, and it exists
                     continue
@@ -143,8 +131,8 @@ def expand_source_SCCs(
         print(f"{final_level=}")
     for node_id in final_level:
         # These assertions should be unnecessary, but just to be sure.
-        assert not sd.dag.nodes[node_id]["expanded"]  # expand nodes from here
-        assert sd.dag.nodes[node_id]["attractors"] is None  # check attractors from here
+        assert not sd.node_data(node_id)["expanded"]  # expand nodes from here
+        assert sd.node_data(node_id)["attractors"] is None  # check attractors from here
 
         # restore this once we allow all expansion algorithms to expand from a node
         # expander(sd, node_id)
@@ -179,94 +167,10 @@ def find_source_nodes(
     return result
 
 
-def perc_and_remove_constants_from_bn(
-    bn: BooleanNetwork,
-    space: BooleanSpace,
-    graph: AsynchronousGraph | None = None,
-) -> BooleanNetwork:
-    """
-    Take a BooleanNetwork and percolate it w.r.t. the given `space`. Then
-    inline the fixed variables into their respective targets, eliminating
-    them from the network completely.
-
-    Note that the new network is not compatible with the symbolic encoding
-    of the original network, because it has a differnet set of variables.
-
-    To perform percolation, we require a symbolic `AsynchronousGraph`. If such graph already
-    exists for the network in question, you can supply it as the `graph` argument.
-    """
-    if graph is None:
-        graph = AsynchronousGraph(bn)
-
-    perc_space = percolate_space(graph, space)
-    perc_bn = percolate_network(bn, perc_space, symbolic_network=graph)
-
-    return perc_bn.inline_constants(infer_constants=True, repair_graph=True)
-
-
-def find_source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
-    """
-    Find source SCCs of the given `BooleanNetwork`.
-    """
-    result: list[list[str]] = []
-    for scc in bn.strongly_connected_components():
-        scc_list = sorted(scc)
-        if bn.backward_reachable(scc_list) == scc:
-            scc_names = [bn.get_variable_name(var) for var in scc_list]
-            result.append(scc_names)
-
-    return sorted(result)
-
-
-def restrict_to_component(
-    bn: BooleanNetwork, source_component: list[str]
-) -> BooleanNetwork:
-    """
-    Compute a new `BooleanNetwork` which is a sub-network of the original `bn`
-    induced by the specified `source_component`.
-
-    Note that the `source_component` must be backward-closed: i.e. there is no variable
-    outside of the `source_component` which regulates the `source_component`. Otherwise
-    the network cannot be constructed.
-
-    Also note that the symbolic encoding of the new network is not compatible with the
-    encoding of the original network, because the network have different sets of variables.
-    """
-    new_bn = BooleanNetwork(source_component)
-
-    # Build a mapping between the old and new network variables.
-    id_map: dict[VariableId, VariableId] = {}
-    for var in source_component:
-        old_id = bn.find_variable(var)
-        assert old_id is not None
-        new_id = new_bn.find_variable(var)
-        assert new_id is not None
-        id_map[old_id] = new_id
-
-    # Copy regulations that are in the source component.
-    for reg in bn.regulations():
-        if reg["source"] in id_map and reg["target"] in id_map:
-            new_bn.add_regulation(
-                {
-                    "source": bn.get_variable_name(reg["source"]),
-                    "target": bn.get_variable_name(reg["target"]),
-                    "essential": reg["essential"],
-                    "sign": reg["sign"],
-                }
-            )
-
-    # Copy update functions from the source component after translating them to the new IDs.
-    for var_id in id_map.keys():
-        old_function = bn.get_update_function(var_id)
-        assert old_function is not None
-        new_function = old_function.rename_all(new_bn, variables=id_map)
-        new_bn.set_update_function(id_map[var_id], new_function)
-
-    return new_bn
-
-
 def find_subnetwork_sd(
-    sub_network: BooleanNetwork, expander: ExpanderFunctionType, check_maa: bool
+    sub_network_diagram: SuccessionDiagram,
+    expander: ExpanderFunctionType,
+    check_maa: bool,
 ) -> tuple[SuccessionDiagram, bool]:
     """
     Computes a `SuccessionDiagram` of a particular sub-network using an expander function.
@@ -281,13 +185,7 @@ def find_subnetwork_sd(
                 True if there is motif avoidance
 
     """
-    from balm import SuccessionDiagram
-
-    if DEBUG:
-        print("scc_bnet\n", sub_network.to_bnet())
-
-    sub_sd = SuccessionDiagram(sub_network)
-    fully_expanded = expander(sub_sd, None, None, None)
+    fully_expanded = expander(sub_network_diagram, None, None, None)
     assert fully_expanded
 
     has_maa = False
@@ -296,15 +194,15 @@ def find_subnetwork_sd(
         # TODO: somehow skip this calculation when this source SCC appears again later.
         # it will appear again, since souce SCC with maa are not fixed.
         motif_avoidant_count = 0
-        for node in sub_sd.node_ids():
-            attr = sub_sd.node_attractor_seeds(node, compute=True)
-            if not sub_sd.node_is_minimal(node):
+        for node in sub_network_diagram.node_ids():
+            attr = sub_network_diagram.node_attractor_seeds(node, compute=True)
+            if not sub_network_diagram.node_is_minimal(node):
                 motif_avoidant_count += len(attr)
         if motif_avoidant_count != 0:
             # ignore source SCCs with motif avoidant attractors
             has_maa = True
 
-    return sub_sd, has_maa
+    return sub_network_diagram, has_maa
 
 
 def attach_scc_sd(
