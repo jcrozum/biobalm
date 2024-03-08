@@ -29,7 +29,7 @@ def test_find_source_nodes():
     assert source_nodes == ["source"]
 
     perc_space = percolate_space(graph, {})
-    perc_bn = percolate_network(bn, perc_space, ctx=graph)
+    perc_bn = percolate_network(bn, perc_space, symbolic_network=graph)
 
     source_nodes = find_source_nodes(perc_bn)
 

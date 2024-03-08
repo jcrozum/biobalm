@@ -98,13 +98,21 @@ def test_network_percolation():
     )
     graph = AsynchronousGraph(bn)
 
-    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 0}), ctx=graph)
-    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 0}), ctx=graph)
+    percolated_bn = percolate_network(
+        bn, percolate_space(graph, {"c": 0}), symbolic_network=graph
+    )
+    percolated_bn = percolate_network(
+        bn, percolate_space(graph, {"c": 0}), symbolic_network=graph
+    )
     assert "false" == str(percolated_bn.get_update_function("c"))
     assert "false" == str(percolated_bn.get_update_function("a"))
     assert "true" == str(percolated_bn.get_update_function("b"))
-    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 1}), ctx=graph)
-    percolated_bn = percolate_network(bn, percolate_space(graph, {"c": 1}), ctx=graph)
+    percolated_bn = percolate_network(
+        bn, percolate_space(graph, {"c": 1}), symbolic_network=graph
+    )
+    percolated_bn = percolate_network(
+        bn, percolate_space(graph, {"c": 1}), symbolic_network=graph
+    )
     assert "true" == str(percolated_bn.get_update_function("c"))
     assert "b" == str(percolated_bn.get_update_function("a"))
     assert "!a" == str(percolated_bn.get_update_function("b"))
