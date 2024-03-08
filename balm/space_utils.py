@@ -1,8 +1,8 @@
 """
-    Some basic utility operations on spaces (partial assignments of BN variables).
+Some basic utility operations on spaces (partial assignments of BN variables).
 
-    Each space is represented as a dictionary with a subset of variable names as
-    keys and values `0`/`1` assigned to fixed variables.
+Each space is represented as a dictionary with a subset of variable names as
+keys and values `0`/`1` assigned to fixed variables.
 """
 
 from __future__ import annotations
@@ -29,8 +29,23 @@ if TYPE_CHECKING:
 
 def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
     """
-    Compute the space which is the intersection of two spaces, or `None` if the spaces
-    don't intersect.
+    Compute the intersection of two spaces.
+
+    Returns the intersection as a new space, or `None` if the spaces don't
+    intersect.
+
+    Parameters
+    ----------
+    x : BooleanSpace
+        The first space.
+    y : BooleanSpace
+        The second space.
+
+    Returns
+    -------
+    BooleanSpace | None
+        The intersection of `x` and `y`, or `None` if the spaces don't
+        intersect.
     """
     result: BooleanSpace = {}
     for k, v in x.items():
@@ -45,6 +60,18 @@ def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:
 def is_subspace(x: BooleanSpace, y: BooleanSpace) -> bool:
     """
     Checks if `x` is a subspace of `y`.
+
+    Parameters
+    ----------
+    x : BooleanSpace
+        The first space.
+    y : BooleanSpace
+        The second space.
+
+    Returns
+    -------
+    bool
+        `True` if `x` is a subspace of `y`.
     """
     for var in y:
         if var not in x:
@@ -56,8 +83,19 @@ def is_subspace(x: BooleanSpace, y: BooleanSpace) -> bool:
 
 def dnf_function_is_true(dnf: list[BooleanSpace], state: BooleanSpace) -> bool:
     """
-    Returns `True` if the given DNF function evaluates to `1` for the given
-    state (or space).
+    Checks if a DNF function evaluates to `1` for the given state (or space).
+
+    Parameters
+    ----------
+    dnf : list[BooleanSpace]
+        The DNF function to evaluate.
+    state : BooleanSpace
+        The state in which the function is evaluated.
+
+    Returns
+    -------
+    bool
+        `True` if the function evaluates to `1` in the given state.
     """
     if len(dnf) == 0:
         return False
@@ -72,7 +110,21 @@ def remove_state_from_dnf(
     dnf: list[BooleanSpace], state: BooleanSpace
 ) -> list[BooleanSpace]:
     """
-    Removes all conjunctions that are True in the state
+    Removes all conjunctions that are True in the state.
+
+    Returns a modified copy (i.e., it does not modify the original list).
+
+    Parameters
+    ----------
+    dnf : list[BooleanSpace]
+        The DNF function to modify.
+    state : BooleanSpace
+        The state to remove from the function.
+
+    Returns
+    -------
+    list[BooleanSpace]
+        The modified DNF function.
     """
     modified_dnf: list[BooleanSpace] = []
     for conjunction in dnf:
@@ -83,24 +135,43 @@ def remove_state_from_dnf(
     return modified_dnf
 
 
-def percolate_space_strict(stg: AsynchronousGraph, space: BooleanSpace) -> BooleanSpace:
+def percolate_space_strict(
+    network: AsynchronousGraph, space: BooleanSpace
+) -> BooleanSpace:
     """
+    Percolates a space through a Boolean network, disregarding constants.
+
     Returns the set of variables which become fixed as a result of fixing the
     variables from `space` within the given `AsynchronousGraph`.
 
     Note that the strict percolation process does not propagate constants that
-    are already fixed within the `stg`, only those that are specified in `space`.
-    Also, the result only contains any *new* constants, not those that are already
-    fixed in `space`.
+    are already fixed within the `network`, only those that are specified in
+    `space`. Also, the result only contains any *new* constants, not those that
+    are already fixed in `space`.
+
+    Parameters
+    ----------
+    network : AsynchronousGraph
+        A symbolic representation of the Boolean network (from which state
+        transitions can be generated) in which the percolation is performed. If
+        needed, an `AsynchronousGraph` object can be constructed from a
+        `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+    space : BooleanSpace
+        The space to percolate.
+
+    Returns
+    -------
+    BooleanSpace
+        The percolated space.
     """
 
     result: BooleanSpace = {}
     restriction: BooleanSpace = copy(space)
-    candidates = set(stg.network_variable_names())
+    candidates = set(network.network_variable_names())
 
     # Ignore variables that are already fixed.
-    for var in stg.network_variable_names():
-        fn_bdd = stg.mk_update_function(var)
+    for var in network.network_variable_names():
+        fn_bdd = network.mk_update_function(var)
         if fn_bdd.is_true() or fn_bdd.is_false():
             candidates.remove(var)
 
@@ -108,7 +179,7 @@ def percolate_space_strict(stg: AsynchronousGraph, space: BooleanSpace) -> Boole
     while not done:
         done = True
         for var in copy(candidates):
-            fn_bdd = stg.mk_update_function(var)
+            fn_bdd = network.mk_update_function(var)
             fn_value = function_eval(fn_bdd, restriction)
             if fn_value is not None:
                 if var in restriction and restriction[var] != fn_value:
@@ -125,12 +196,14 @@ def percolate_space_strict(stg: AsynchronousGraph, space: BooleanSpace) -> Boole
 
 
 def percolate_space(
-    stg: AsynchronousGraph,
+    network: AsynchronousGraph,
     space: BooleanSpace,
 ) -> BooleanSpace:
     """
+    Percolates a space through a Boolean network.
+
     Takes a symbolic `AsynchronousGraph` and a `BooleanSpace`. It then percolates
-    any values that are effectively constant with the `stg` assuming the variables
+    any values that are effectively constant with the `network` assuming the variables
     from `space` are fixed accordingly.
 
     If the argument is a trap space, then the result is a subspace of the
@@ -139,34 +212,71 @@ def percolate_space(
     However, when the argument is a general space, the percolation can actually
     lead "outside" of the original space. In such case, the original fixed value
     is *not* modified and the conflict will remain in the resulting space.
+
+    Parameters
+    ----------
+    network : AsynchronousGraph
+        A symbolic representation of the Boolean network (from which state
+        transitions can be generated) in which the percolation is performed. If
+        needed, an `AsynchronousGraph` object can be constructed from a
+        `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+    space : BooleanSpace
+        The space to percolate.
+
+    Returns
+    -------
+    BooleanSpace
+        The percolated space.
     """
 
-    percolated = Percolation.percolate_subspace(stg, space)
+    percolated = Percolation.percolate_subspace(network, space)
     result: BooleanSpace = {}
     for var, value in percolated.items():
-        var_name = stg.get_network_variable_name(var)
+        var_name = network.get_network_variable_name(var)
         result[var_name] = cast(Literal[0, 1], int(value))
     return result
 
 
 def percolation_conflicts(
-    stg: AsynchronousGraph,
+    network: AsynchronousGraph,
     space: BooleanSpace,
     strict_percolation: bool = True,
 ) -> set[str]:
     """
-    Returns a set of variables from `space` that are in conflict with the percolation of
-    the given space (see `percolate_space`).
+    Find variables that conflict with the percolation of the given space.
+
+    Returns a set of variables from `space` that are in conflict with the
+    percolation of the given space (see `percolate_space`).
+
+    Parameters
+    ----------
+    network : AsynchronousGraph
+        A symbolic representation of the Boolean network (from which state
+        transitions can be generated) in which the percolation is performed. If
+        needed, an `AsynchronousGraph` object can be constructed from a
+        `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+    space : BooleanSpace
+        The space to percolate.
+    strict_percolation : bool
+        If `True` (the default), then the percolation is performed using
+        :func:`percolate_space_strict`. Otherwise, it is performed using
+        :func:`percolate_space`.
+
+    Returns
+    -------
+    set[str]
+        A set of variables from `space` that are in conflict with the
+        percolation of the given space.
     """
     conflicts: set[str] = set()
 
     if strict_percolation:
-        perc_space = percolate_space_strict(stg, space)
+        perc_space = percolate_space_strict(network, space)
     else:
-        perc_space = percolate_space(stg, space)
+        perc_space = percolate_space(network, space)
 
     for var, value in perc_space.items():
-        fn_bdd = stg.mk_update_function(var)
+        fn_bdd = network.mk_update_function(var)
         fn_value = function_eval(fn_bdd, perc_space)
         if fn_value is not None and value != fn_value:
             conflicts.add(var)
@@ -175,31 +285,49 @@ def percolation_conflicts(
 
 
 def percolate_network(
-    bn: BooleanNetwork, space: BooleanSpace, ctx: AsynchronousGraph | None = None
+    bn: BooleanNetwork,
+    space: BooleanSpace,
+    symbolic_network: AsynchronousGraph | None = None,
 ) -> BooleanNetwork:
     """
+    Reduces a Boolean network by percolating a given space.
+
     Takes a `BooleanNetwork` and a `BooleanSpace`. It then produces a new network with
     update functions percolated based on the supplied space.
 
-    There are two caveats to this operation:
-
-        (1) If the given space is *not* a trap space, it is up to you to figure
-        out what is the relationship between the dynamics of the original and
-        the percolated network. For trap spaces, we know that every transition
-        inside that trap space is preserved exactly.
+    The dynamics of the resulting network correspond to the dynamics of the
+    network obtained by percolating the given space. If the space (or the
+    percolated space) is a trap space, then the resulting dynamics are a
+    subgraph of the original network's state transition graph. Otherwise, the
+    dynamics correspond to the effects of an external intervention.
 
     The percolation process is based on BDD conversion. For this purpose, an optional
     `SymbolicContext` can be provided. If not given, a temporary `SymbolicContext` will
     be created instead. Note that this is necessary to resolve non-trivial tautologies or
     contradictions that can arise once the variables from `space` are fixed.
+
+    Parameters
+    ----------
+    bn : BooleanNetwork
+        The network to percolate.
+    space : BooleanSpace
+        The space to percolate.
+    symbolic_network : AsynchronousGraph | None
+        An optional symbolic representation to use to perform the percolation. If not
+        given, a temporary one will be created from `bn`.
+
+    Returns
+    -------
+    BooleanNetwork
+        The percolated network.
     """
 
-    if ctx is None:
-        ctx = AsynchronousGraph(bn)
-    var_set = ctx.symbolic_context().bdd_variable_set()
+    if symbolic_network is None:
+        symbolic_network = AsynchronousGraph(bn)
+    var_set = symbolic_network.symbolic_context().bdd_variable_set()
 
     # Percolate the space first to ensure everything that can be fixed is fixed.
-    space = percolate_space(ctx, space)
+    space = percolate_space(symbolic_network, space)
 
     # Make a copy of the BN and copy the relevant functions.
     new_bn = copy(bn)
@@ -215,8 +343,8 @@ def percolate_network(
                     var, UpdateFunction.mk_const(new_bn, space[name])
                 )
         else:
-            percolated = percolate_expression(
-                update.as_expression(), space, ctx=var_set
+            percolated = restrict_expression(
+                update.as_expression(), space, symbolic_context=var_set
             )
             new_update = UpdateFunction(new_bn, percolated)
             new_bn.set_update_function(var, new_update)
@@ -224,12 +352,14 @@ def percolate_network(
     return new_bn.infer_valid_graph()
 
 
-def percolate_expression(
+def restrict_expression(
     expression: BooleanExpression,
     space: BooleanSpace,
-    ctx: BddVariableSet | SymbolicContext | None = None,
+    symbolic_context: BddVariableSet | SymbolicContext | None = None,
 ) -> BooleanExpression:
     """
+    Restricts a Boolean expression to a given space.
+
     Takes a `BooleanExpression` and a `BooleanSpace`. Returns a simplified `BooleanExpression`
     that is valid for exactly the same members of the given `space` as the original expression.
     The resulting expression does not depend on the variables which are fixed in the given `space`.
@@ -238,6 +368,25 @@ def percolate_expression(
     can be provided. If not given, a temporary `BddVariableSet` will be created instead. Note that
     this is necessary to resolve non-trivial tautologies/contradictions that can arise once the
     variables from `space` are fixed.
+
+    Parameters
+    ----------
+    expression : BooleanExpression
+        The expression to restrict.
+    space : BooleanSpace
+        The space to restrict to.
+    symbolic_context : BddVariableSet | SymbolicContext | None
+        An optional symbolic context to use to perform the percolation. If not given,
+        a temporary one will be created. If given, it can be either a
+        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
+        If the former is given, it is converted to the latter. The context is
+        used to ensure compatibility between BDDs by ensuring that the same
+        variable names and ordering are used.
+
+    Returns
+    -------
+    BooleanExpression
+        The restricted expression.
     """
 
     variables = expression.support_set()
@@ -246,22 +395,26 @@ def percolate_expression(
     if len(space) == 0:
         return expression
 
-    if ctx is None:
-        ctx = BddVariableSet(sorted(variables))
-    if isinstance(ctx, SymbolicContext):
-        ctx = ctx.bdd_variable_set()
+    if symbolic_context is None:
+        symbolic_context = BddVariableSet(sorted(variables))
+    if isinstance(symbolic_context, SymbolicContext):
+        symbolic_context = symbolic_context.bdd_variable_set()
 
-    bdd = ctx.eval_expression(expression)
+    bdd = symbolic_context.eval_expression(expression)
     bdd = bdd.r_restrict(space)
     return bdd.to_expression()
 
 
 def expression_to_space_list(
-    expression: BooleanExpression, ctx: BddVariableSet | SymbolicContext | None = None
+    expression: BooleanExpression,
+    symbolic_context: BddVariableSet | SymbolicContext | None = None,
 ) -> list[BooleanSpace]:
     """
-    Convert a `BooleanExpression` to a list of subspaces whose union represents
-    an equivalent set of the network states which satisfy the expression.
+    Convert a Boolean expression to a list of subspaces on which it is true.
+
+    Equivalent to a disjunctive normal form. Convert a `BooleanExpression` to a
+    list of subspaces whose union represents an equivalent set of the network
+    states which satisfy the expression.
 
     Note that the spaces are not necessarily pair-wise disjoint. Also, the list
     is not necessarily minimal.
@@ -269,21 +422,40 @@ def expression_to_space_list(
     The translation uses a DNF conversion based on BDDs. For this purpose, an optional
     `BddVariableSet` can be provided. If not given, a temporary `BddVariableSet` will be
     created instead.
+
+    Parameters
+    ----------
+    expression : BooleanExpression
+        The expression to convert.
+    symbolic_context : BddVariableSet | SymbolicContext | None
+        An optional symbolic context to use to perform the percolation. If not given,
+        a temporary one will be created. If given, it can be either a
+        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
+        If the former is given, it is converted to the latter. The context is
+        used to ensure compatibility between BDDs by ensuring that the same
+        variable names and ordering are used.
+
+    Returns
+    -------
+    list[BooleanSpace]
+        The list of subspaces on which the expression is true.
     """
 
-    if ctx is None:
+    if symbolic_context is None:
         variables = sorted(expression.support_set())
-        ctx = BddVariableSet(variables)
-    if isinstance(ctx, SymbolicContext):
-        ctx = ctx.bdd_variable_set()
+        symbolic_context = BddVariableSet(variables)
+    if isinstance(symbolic_context, SymbolicContext):
+        symbolic_context = symbolic_context.bdd_variable_set()
 
-    bdd = ctx.eval_expression(expression)
+    bdd = symbolic_context.eval_expression(expression)
 
     sub_spaces: list[BooleanSpace] = []
     for clause in bdd.clause_iterator():
         space: BooleanSpace = {}
         for var, value in clause.items():
-            space[ctx.get_variable_name(var)] = cast(Literal[0, 1], int(value))
+            space[symbolic_context.get_variable_name(var)] = cast(
+                Literal[0, 1], int(value)
+            )
         sub_spaces.append(space)
 
     return sub_spaces
@@ -291,6 +463,8 @@ def expression_to_space_list(
 
 def space_unique_key(space: BooleanSpace, network: BooleanNetwork) -> int:
     """
+    Provide a unique hash key for the provided space in a given network.
+
     Computes an integer which is a unique representation of the provided `space`
     (with respect to the given `network`).
 
@@ -301,6 +475,18 @@ def space_unique_key(space: BooleanSpace, network: BooleanNetwork) -> int:
     Note that when used for sorting, this key essentially implements a particular
     form of lexicographic ordering on spaces. This is always a total ordering
     (there is no ambiguity).
+
+    Parameters
+    ----------
+    space : BooleanSpace
+        The space to encode.
+    network : BooleanNetwork
+        The network in which the space is defined.
+
+    Returns
+    -------
+    int
+        A unique key for the space.
     """
 
     # Key is a binary encoding of the space dictionary. Since Python has
