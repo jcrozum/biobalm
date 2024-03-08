@@ -3,11 +3,11 @@ from biodivine_aeon import AsynchronousGraph, BooleanExpression, BooleanNetwork
 from balm.space_utils import (
     expression_to_space_list,
     is_subspace,
-    percolate_expression,
     percolate_network,
     percolate_space,
     percolate_space_strict,
     percolation_conflicts,
+    restrict_expression,
     space_unique_key,
 )
 
@@ -22,10 +22,10 @@ def test_is_subspace():
 def test_expression_percolation():
     e = BooleanExpression("(a & !x) | (a & y)")
 
-    assert "a" == str(percolate_expression(e, {"x": 0, "y": 1}))
-    assert "false" == str(percolate_expression(e, {"a": 0}))
-    assert "a" == str(percolate_expression(e, {"x": 0, "y": 1}))
-    assert "false" == str(percolate_expression(e, {"a": 0}))
+    assert "a" == str(restrict_expression(e, {"x": 0, "y": 1}))
+    assert "false" == str(restrict_expression(e, {"a": 0}))
+    assert "a" == str(restrict_expression(e, {"x": 0, "y": 1}))
+    assert "false" == str(restrict_expression(e, {"a": 0}))
 
 
 def test_space_percolation():
