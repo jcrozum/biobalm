@@ -256,7 +256,7 @@ def restrict_petrinet_to_subspace(
 
 
 def network_to_petrinet(
-    network: BooleanNetwork, ctx: SymbolicContext | None = None
+    network: BooleanNetwork, symbolic_context: SymbolicContext | None = None
 ) -> DiGraph:
     """
     Convert a Boolean network to a Petri net.
@@ -278,9 +278,11 @@ def network_to_petrinet(
     ----------
     network : BooleanNetwork
         The network to convert.
-    ctx : SymbolicContext | None
-        The context used for the symbolic conversion. If not given, a new one
-        will be created from the network.
+    symbolic_context : SymbolicContext | None
+        The context used for the symbolic conversion, as an
+        `biodivine_aeon.SymbolicContext` object. This is a mapping from the
+        network nodes to BDD variables that preserves variable ordering in BDDs.
+        If not given, a new one will be created from the network.
 
     Returns
     -------
@@ -305,8 +307,8 @@ def network_to_petrinet(
             f"Parametrized networks are not supported. Found implicit parameters: {names}."
         )
 
-    if ctx is None:
-        ctx = SymbolicContext(network)
+    if symbolic_context is None:
+        symbolic_context = SymbolicContext(network)
 
     pn = DiGraph()
 
@@ -328,8 +330,8 @@ def network_to_petrinet(
             assert len(network.predecessors(var)) == 0
             continue
 
-        function_bdd = ctx.mk_update_function(update_function)
-        var_bdd = ctx.mk_network_variable(var)
+        function_bdd = symbolic_context.mk_update_function(update_function)
+        var_bdd = symbolic_context.mk_network_variable(var)
 
         p_bdd = function_bdd.l_and(var_bdd.l_not())
         n_bdd = function_bdd.l_not().l_and(var_bdd)
@@ -339,11 +341,16 @@ def network_to_petrinet(
 
         # Add 0->1 edges.
         _create_transitions(
-            pn, ctx.bdd_variable_set(), places, var_name, p_bdd, go_up=True
+            pn, symbolic_context.bdd_variable_set(), places, var_name, p_bdd, go_up=True
         )
         # Add 1-> 0 edges.
         _create_transitions(
-            pn, ctx.bdd_variable_set(), places, var_name, n_bdd, go_up=False
+            pn,
+            symbolic_context.bdd_variable_set(),
+            places,
+            var_name,
+            n_bdd,
+            go_up=False,
         )
 
     return pn
