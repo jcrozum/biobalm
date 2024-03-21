@@ -19,8 +19,8 @@ sd = SuccessionDiagram(bn)
 sd.expand_minimal_spaces()
 
 model_name = os.path.basename(sys.argv[1])
-sd_name = os.path.splitext(model_name)[0] + '.pickle'
-with open(f'./_sd_expand_min/{sd_name}', 'wb') as handle:
+sd_name = os.path.splitext(model_name)[0] + ".pickle"
+with open(f"./_sd_expand_min/{sd_name}", "wb") as handle:
     pickle.dump(sd, handle)
 
 print(f"Succession diagram size:", len(sd))

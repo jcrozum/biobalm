@@ -20,8 +20,8 @@ fully_expanded = sd.expand_bfs(bfs_level_limit=DEPTH_LIMIT, size_limit=NODE_LIMI
 assert fully_expanded
 
 model_name = os.path.basename(sys.argv[1])
-sd_name = os.path.splitext(model_name)[0] + '.pickle'
-with open(f'./_sd_expand_bfs/{sd_name}', 'wb') as handle:
+sd_name = os.path.splitext(model_name)[0] + ".pickle"
+with open(f"./_sd_expand_bfs/{sd_name}", "wb") as handle:
     pickle.dump(sd, handle)
 
 print(f"Succession diagram size:", len(sd))
