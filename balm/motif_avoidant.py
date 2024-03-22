@@ -1,5 +1,6 @@
 """
-A module responsible for detecting motif-avoidant attractors within terminal restriction space.
+A module which provides utility methods for detecting motif-avoidant attractors
+within a terminal restriction space.
 """
 
 from __future__ import annotations
@@ -32,17 +33,23 @@ def make_retained_set(
     child_spaces: list[BooleanSpace] | None = None,
 ) -> BooleanSpace:
     """
-    Calculate the retained set.
+    Calculate the retained set for a given `space`.
 
     The retained set is technically a space-like object that describes the
     variables which have to be fixed in order for the network to lose all
     complex attractors. However, note that this really means changing the update
-    functions. I.e. this is not a trap space that only contains fixed-points,
-    but a description of how the network must be modified to eliminate complex
-    attractors.
+    functions. This is not a trap space that only contains fixed-points,
+    but a description of how the network must be modified to eliminate
+    all complex attractors in the given `space`.
 
-    Finally, the construction guarantees that any complex attractor of the old
-    network will manifest as at least one fixed-point in the new network.
+    The construction guarantees that any complex attractor of the old
+    network will manifest as at least one fixed-point in the new network. But this
+    network modification is not implemented here. This method only generates
+    the necessary list of variables and values.
+
+    Finally, note that the method uses a heuristic to select values
+    that should lead to the least amount of fixed-points in
+    the modified network.
 
     Parameters
     ----------
@@ -50,7 +57,8 @@ def make_retained_set(
         The symbolic update functions stored as an `AsynchronousGraph` object
         from the `biodivine_aeon` library.
     nfvs : list[str]
-        The list of fixed variables in the current NFVS.
+        The list of variables in the NFVS that is valid for a network
+        restricted to the given `space`.
     space : BooleanSpace
         A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
         current trap space.
@@ -122,20 +130,22 @@ def detect_motif_avoidant_attractors(
     is_in_an_mts: bool = False,
 ) -> list[BooleanSpace]:
     """
-    Determine which candidate seed states correspond to motif-avoidant attractors.
+    Determine which seed states from the `candidates` list map to true
+    motif-avoidant attractors.
 
-    Compute a sub-list of `candidates` which correspond to motif-avoidant
-    attractors. Other method inputs:
+    Assumes that all attractors in the `terminal_restriction_space` are
+    covered by at least one state in `candidates`. Eliminates all states
+    from `candidates` that are provably not in an attractor, or that correspond
+    to an attractor that is already covered by some other candidate.
 
-    `graph` and `petri_net` represent the model in which the property
-    should be checked.
+    The method consists of two steps: initial pruning, and exact reachability
+    analysis. As such, the result is always complete. However, some of the
+    parameters can be used to adjust the initial pruning step.
 
-    `terminal_restriction_space` is a symbolic set of states which contains
-    all motif avoidant attractors (i.e. if a candidate state can leave this
-    set, the candidate cannot be an attractor).
-
-    `max_iterations` specifies how much time should be spent on the simpler
-    preprocessing before applying a more complete method.
+    If `is_in_an_mts` is set, the method assumes the `candidates` are members
+    of a minimal trap space. In such case, a different simulation algorithm
+    is used for initial pruning. Furthermore, `max_iterations` can be used to
+    to limit the time spent on the initial pruning step.
 
     Parameters
     ----------
@@ -149,14 +159,14 @@ def detect_motif_avoidant_attractors(
         describing the candidate seed states.
     terminal_restriction_space : Bdd
         A symbolic set of states which contains all motif avoidant attractors
-        (i.e. if a candidate state can leave this set, the candidate cannot be
-        an attractor).
+        in question (i.e. if a candidate state can leave this set, the candidate
+        cannot be an attractor).
     max_iterations : int
         Specifies how much time should be spent on the simpler preprocessing methods.
     is_in_an_mts : bool, optional
-        By default `False`. If `True`, the the we assume that the candidates lie
+        By default `False`. If `True`, then we assume that the candidates lie
         within a minimal trap space, enabling certain optimizations. If
-        incorrectly set to `True`, correct behaviour is not guaranteed.
+        incorrectly set to `True`, the result is undefined.
 
     Returns
     -------

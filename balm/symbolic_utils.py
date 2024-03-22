@@ -25,11 +25,11 @@ def state_to_bdd(
     Parameters
     ----------
     bdd_context : SymbolicContext | BddVariableSet
-        The context in which the state is represented. This can be either a
-        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
-        If the former is given, it is converted to the latter. The context is
-        used to ensure compatibility between BDDs by ensuring that the same
-        variable names and ordering are used.
+        The BDD context in which the state is represented. This is a
+        a `biodivine_aeon.BddVariableSet` or `biodivine_aeon.SymbolicContext`
+        (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+        The context object ensures compatibility between BDDs by
+        maintaining a shared collection of variable names and their ordering.
     state : BooleanSpace
         The state to convert to a BDD.
 
@@ -57,11 +57,11 @@ def state_list_to_bdd(
     Parameters
     ----------
     bdd_context : SymbolicContext | BddVariableSet
-        The context in which the state is represented. This can be either a
-        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
-        If the former is given, it is converted to the latter. The context is
-        used to ensure compatibility between BDDs by ensuring that the same
-        variable names and ordering are used.
+        The BDD context in which the state is represented. This is a
+        a `biodivine_aeon.BddVariableSet` or `biodivine_aeon.SymbolicContext`
+        (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+        The context object ensures compatibility between BDDs by
+        maintaining a shared collection of variable names and their ordering.
     states : list[BooleanSpace]
         The list of states to convert to a BDD.
 

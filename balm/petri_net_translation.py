@@ -116,7 +116,7 @@ def variable_to_place(variable: str, positive: bool) -> str:
 
 def place_to_variable(place: str) -> tuple[str, bool]:
     """
-    Extract the variable name and state from a Peteri net place name.
+    Extract the variable name and state from a Petri net place name.
 
     Parameters
     ----------
@@ -200,9 +200,9 @@ def restrict_petrinet_to_subspace(
     Creates a copy of the given Petri net, but with the variables given in
     `sub_space` fixed to their respective values.
 
-    Note that this completely eliminates the constant variables from the {etri
+    Note that this completely eliminates the constant variables from the Petri
     net, but it does not perform any further constant propagation or
-    percolation. Variables that are fixed in the sub_space but do not exist in
+    percolation. Variables that are fixed in the `sub_space` but do not exist in
     the Petri net are ignored.
 
     Parameters
@@ -261,7 +261,7 @@ def network_to_petrinet(
     """
     Convert a Boolean network to a Petri net.
 
-    Converts a `BooleanNetwork` to a `DiGraph` representing a Petri net encoding
+    Converts a `biodivine_aeon.BooleanNetwork` to a `DiGraph` representing a Petri net encoding
     of the original network. For details about the encoding, see module
     description.
 
@@ -270,7 +270,7 @@ def network_to_petrinet(
 
     The operation uses translation through `biodivine_aeon.Bdd` to generate a
     disjunctive normal form of the network's update functions. This is
-    facilitated by `biodivine_aeon.SymbolicContext`. If such context already
+    facilitated by `biodivine_aeon.SymbolicContext`. If a suitable context already
     exists, it can be provided as the second argument. Otherwise it will be
     created.
 

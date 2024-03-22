@@ -1,6 +1,9 @@
 """
 Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
 and maximum trap spaces, including time-reversed networks.
+
+The implementation is based on the official [trappist package](https://github.com/soli/trap-spaces-as-siphons),
+but has been significantly modified to better suite this project.
 """
 
 from __future__ import annotations
@@ -39,8 +42,8 @@ def trappist_async(
     """
     Asynchronous version of the :func:`trappist` method.
 
-    Note that "asynchronous" refers to the execution of this function, not to
-    the update scheme used (which does not affect the trap spaces in any case).
+    *Note that "asynchronous" refers to the execution of this function, not to
+    the update scheme used (which does not affect the trap spaces in any case).*
 
     The same as the :func:`trappist` method, but instead of returning a list of spaces
     as a result, the spaces are returned to the supplied `on_solution` callback.
@@ -110,8 +113,8 @@ def trappist(
     finding all minimal trap spaces (`"min"`), maximal trap spaces (`"max"`), or
     fixed points (`"fix"`).
 
-    The result is a list of spaces represented as dictionaries. If you want to
-    avoid enumerating all solutions explicitly as one list, you can use
+    The result is a list of spaces represented as :class:`BooleanSpace<balm.types.BooleanSpace>`
+    dictionaries. If you want to avoid enumerating all solutions explicitly as one list, you can use
     :func:`trappist_async` which has a similar API but can yield solutions one by one.
 
     Finally, recall that the supplied network must have its names sanitized (see
@@ -402,9 +405,9 @@ def compute_fixed_point_reduced_STG_async(
     """
     Asynchronous version of :func:`compute_fixed_point_reduced_STG`.
 
-    Note that "asynchronous" refers to the execution of this function, not to
+    *Note that "asynchronous" refers to the execution of this function, not to
     the update scheme used to generate the STG (which is, coincidently, always
-    asynchronous).
+    asynchronous).*
 
     The same as the :func:`compute_fixed_point_reduced_STG`, but instead of returning a
     list of fixed-points as a result, the states are returned to the supplied
@@ -453,7 +456,7 @@ def compute_fixed_point_reduced_STG_async(
 
 def compute_fixed_point_reduced_STG(
     petri_net: DiGraph,
-    retained_set: BooleanSpace,
+    retained_set: BooleanSpace = {},
     ensure_subspace: BooleanSpace = {},
     avoid_subspaces: list[BooleanSpace] = [],
     solution_limit: int | None = None,
@@ -462,8 +465,8 @@ def compute_fixed_point_reduced_STG(
     Compute fixed points of the given Petri-net-encoded Boolean network.
 
     This method computes the fixed points of the given Petri-net-encoded Boolean
-    network. This makes it possible to modify the Petri net instead of
-    re-encoding the BN repeatedly for multiple subsequnet queries.
+    network faster than using the :func:`trappist` function (which considers
+    all minimal trap spaces, not just fixed points).
 
     If you want to avoid enumerating all solutions explicitly as one list, you can use
     :func:`trappist_async` which has a similar API but can yield solutions one by one.
@@ -472,11 +475,12 @@ def compute_fixed_point_reduced_STG(
     ----------
     petri_net : DiGraph
         The Petri net which was created by the implicant encoding from a
-        Boolean network. See :mod:`petri_net_encoding<balm.petri_net_encoding>`
+        Boolean network. See :mod:`petri_net_translation<balm.petri_net_translation>`
         for details.
     retained_set : BooleanSpace
-        A set of variables and their values which can only change their
-        value towards the "retain value".
+        If set, specifies a set of variables that should only be allowed to update
+        towards their "retained value". This condition is applied by modifying
+        the structure of the Petri net encoding.
     ensure_subspace : BooleanSpace
         Only fixed points in this subspace will be considered or returned.
     avoid_subspaces : list[BooleanSpace]

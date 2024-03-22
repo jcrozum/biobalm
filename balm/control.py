@@ -1,3 +1,8 @@
+"""
+This module implementes methods for permanent target control of Boolean networks
+based on the structure of a succession diagram.
+"""
+
 from __future__ import annotations
 
 from itertools import combinations, product
@@ -25,7 +30,7 @@ class Intervention:
         which returns a list of `Intervention` objects. Manipulating the
         contents of these objects is only recommended for advanced use cases.
         Typically, it is sufficient to print this object to see a human-readable
-        an explanation of how to interpret the intervention.
+        explanation of how to interpret the intervention.
 
         Note that two interventions are considered to be equal if they act on the same succession with
         equal controls applied to each subspace in the succession. Thus, two
@@ -142,12 +147,12 @@ class Intervention:
         )
         if self.strategy == "internal":
             return succession_string + " and then\n".join(
-                f"({' or '.join(map(str,motif_control))})"
+                f"({' or '.join(map(str, motif_control))})"
                 for motif_control in self.control
             )
         elif self.strategy == "all":
             return succession_string + " temporarily, and then\n".join(
-                f"({' or '.join(map(str,motif_control))})"
+                f"({' or '.join(map(str, motif_control))})"
                 for motif_control in self.control
             )
         else:
@@ -174,7 +179,7 @@ def succession_control(
         The target subspace.
     strategy : str, optional
         The searching strategy to use to look for driver nodes. Options are
-        'internal' (default), 'all'.
+        'internal' (default) and 'all'.
     max_drivers_per_succession_node: int | None = None,
         The maximum number of drivers that will be tested for a succession
         diagram node. If `None`, then a number of drivers up to the size of the
@@ -382,11 +387,11 @@ def drivers_of_succession(
         A list of sequentially nested trap spaces that specify the target.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
-        'internal' (default), 'all'.
+        'internal' (default) and 'all'.
     max_drivers_per_succession_node: int | None = None,
         The maximum number of drivers that will be tested for a succession
         diagram node. If `None`, then a number of drivers up to the size of the
-        succession diagram node's stable motif will be tested
+        succession diagram node's stable motif will be tested.
     forbidden_drivers: set[str] | None
         A set of forbidden drivers that will not be overridden for control. If
         `None`, then all nodes are candidates for control.
@@ -449,13 +454,13 @@ def find_drivers(
         The trap space we want to find drivers for.
     strategy: str
         The searching strategy to use to look for driver nodes. Options are
-        'internal' (default), 'all'.
+        'internal' (default) and 'all'.
     assume_fixed: dict[str,int] | None
         A dictionary of fixed variables that should be assumed to be fixed.
     max_drivers_per_succession_node: int | None = None,
         The maximum number of drivers that will be tested for a succession
         diagram node. If `None`, then a number of drivers up to the size of the
-        succession diagram node's stable motif will be tested
+        succession diagram node's stable motif will be tested.
     forbidden_drivers: set[str] | None
         A set of forbidden drivers that will not be overridden for control. If
         `None`, then all nodes are candidates for control.
@@ -522,8 +527,8 @@ def controls_are_equal(a: ControlOverrides, b: ControlOverrides) -> bool:
     objects are equal.
 
     Two `ControlOverrides` objects are equal if they contain the same
-    :class:`BooleanSpace<balm.types.BooleanSpace>` objects, without respect to
-    order.
+    :class:`BooleanSpace<balm.types.BooleanSpace>` objects, regardless of their
+    ordering.
 
     Parameters
     ----------
