@@ -19,12 +19,12 @@ class SuccessionDiagramState(TypedDict):
 
     network_rules: str
     """
-    The network rules as a string.
+    The network rules as an `.aeon` formatted string.
     """
 
     petri_net: nx.DiGraph
     """
-    The Petri net representation of the network rules.
+    The Petri net representation of the network rules (see :mod:`balm.petri_net_translation`).
     """
 
     nfvs: list[str] | None
@@ -34,7 +34,8 @@ class SuccessionDiagramState(TypedDict):
 
     dag: nx.DiGraph
     """
-    The directed acyclic graph representation of the succession diagram structure.
+    The directed acyclic graph representation of the succession diagram structure, including
+    the :class:`balm.types.NodeData` of each node.
     """
 
     node_indices: dict[int, int]
@@ -68,7 +69,7 @@ class NodeData(TypedDict):
 
     petri_net: nx.DiGraph | None
     """
-    The Petri net representation of the node. If `None`, this have not been
+    The Petri net representation of the node. If `None`, this has not been
     computed yet.
     """
     space: BooleanSpace
@@ -81,4 +82,8 @@ class NodeData(TypedDict):
     """
     Whether the node has been expanded yet or not (`balm` builds the
     succession diagram lazily).
+
+    If `expanded=False`, the node *must not* have any successor nodes.
+    If `expanded=True`, the node must have all its successors computed
+    and included in the succession diagram.
     """

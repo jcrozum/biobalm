@@ -2,7 +2,8 @@
 Some basic utility operations on spaces (partial assignments of BN variables).
 
 Each space is represented as a dictionary with a subset of variable names as
-keys and values `0`/`1` assigned to fixed variables.
+keys and values `0`/`1` assigned to fixed variables. See also
+:class:`BooleanSpace<balm.types.BooleanSpace>`.
 """
 
 from __future__ import annotations
@@ -85,6 +86,9 @@ def dnf_function_is_true(dnf: list[BooleanSpace], state: BooleanSpace) -> bool:
     """
     Checks if a DNF function evaluates to `1` for the given state (or space).
 
+    The DNF function is represented as a list of spaces, such that each space represents
+    exactly one DNF clause.
+
     Parameters
     ----------
     dnf : list[BooleanSpace]
@@ -110,9 +114,9 @@ def remove_state_from_dnf(
     dnf: list[BooleanSpace], state: BooleanSpace
 ) -> list[BooleanSpace]:
     """
-    Removes all conjunctions that are True in the state.
+    Removes all clauses (conjunctions) that are `True` in the given `state` from a DNF function.
 
-    Returns a modified copy (i.e., it does not modify the original list).
+    The result is a new list (i.e., it does not modify the original list).
 
     Parameters
     ----------
@@ -203,7 +207,7 @@ def percolate_space(
     Percolates a space through a Boolean network.
 
     Takes a symbolic `AsynchronousGraph` and a `BooleanSpace`. It then percolates
-    any values that are effectively constant with the `network` assuming the variables
+    any values that are effectively constant within the `network` assuming the variables
     from `space` are fixed accordingly.
 
     If the argument is a trap space, then the result is a subspace of the
@@ -377,11 +381,12 @@ def restrict_expression(
         The space to restrict to.
     symbolic_context : BddVariableSet | SymbolicContext | None
         An optional symbolic context to use to perform the percolation. If not given,
-        a temporary one will be created. If given, it can be either a
-        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
-        If the former is given, it is converted to the latter. The context is
-        used to ensure compatibility between BDDs by ensuring that the same
-        variable names and ordering are used.
+        a temporary one will be created.
+
+        This is a `biodivine_aeon.BddVariableSet` or a `biodivine_aeon.SymbolicContext`
+        (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+        The context object ensures compatibility between BDDs by
+        maintaining a shared collection of variable names and their ordering.
 
     Returns
     -------
@@ -410,7 +415,7 @@ def expression_to_space_list(
     symbolic_context: BddVariableSet | SymbolicContext | None = None,
 ) -> list[BooleanSpace]:
     """
-    Convert a Boolean expression to a list of subspaces on which it is true.
+    Convert a Boolean expression to a list of subspaces for which it is true.
 
     Equivalent to a disjunctive normal form. Convert a `BooleanExpression` to a
     list of subspaces whose union represents an equivalent set of the network
@@ -429,11 +434,12 @@ def expression_to_space_list(
         The expression to convert.
     symbolic_context : BddVariableSet | SymbolicContext | None
         An optional symbolic context to use to perform the percolation. If not given,
-        a temporary one will be created. If given, it can be either a
-        `biodivine_aeon.SymbolicContext` or a `biodivine_aeon.BddVariableSet`.
-        If the former is given, it is converted to the latter. The context is
-        used to ensure compatibility between BDDs by ensuring that the same
-        variable names and ordering are used.
+        a temporary one will be created.
+
+        This is a `biodivine_aeon.BddVariableSet` or a `biodivine_aeon.SymbolicContext`
+        (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+        The context object ensures compatibility between BDDs by
+        maintaining a shared collection of variable names and their ordering.
 
     Returns
     -------

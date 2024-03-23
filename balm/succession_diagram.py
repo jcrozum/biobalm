@@ -76,7 +76,7 @@ class SuccessionDiagram:
     threshold, we find a feedback vertex set (without consideration of cycle
     sign) for reachability preprocessing. There is a trade-off between the speed
     gains from a smaller node set to consider and the cost of determining which
-    FVS nodes only intersect negative cycles to find an NFVS subset. Typcially,
+    FVS nodes only intersect negative cycles to find an NFVS subset. Typically,
     for smaller networks, the trade-off is in favor of computing a smaller NFVS.
     """
 
@@ -103,7 +103,7 @@ class SuccessionDiagram:
 
         self.petri_net: nx.DiGraph = network_to_petrinet(network)
         """
-        The Petri net representation of the network.
+        The Petri net representation of the network (see :mod:`petri_net_translation<balm.petri_net_translation>`).
         """
 
         if DEBUG:
@@ -306,7 +306,7 @@ class SuccessionDiagram:
 
     def stub_ids(self) -> Iterator[int]:
         """
-        Iterator over all node IDs that are currently not expanded.
+        Iterator over all node IDs that are currently *not* expanded.
         """
         for i in range(len(self)):
             if not self.node_data(i)["expanded"]:
@@ -430,8 +430,8 @@ class SuccessionDiagram:
         Returns a `NodeData` object with the following attributes:
 
         - `depth`: The depth of the node.
-        - `attractors`: The attractors of the node.
-        - `petri_net`: The Petri net representation of the node.
+        - `attractors`: The attractors of the node (if computed).
+        - `petri_net`: The Petri net representation of the node (if computed).
         - `space`: The sub-space of the node.
         - `expanded`: Whether the node is expanded or not.
 

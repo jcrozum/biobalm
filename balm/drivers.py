@@ -1,3 +1,7 @@
+"""
+A module which provides functions for processing the stable motif driver nodes of a Boolean network.
+"""
+
 from __future__ import annotations
 
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork

@@ -1,3 +1,8 @@
+"""
+A utility module which provides several methods for manipulating the influence graph
+of a Boolean network.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
@@ -79,7 +84,8 @@ def feedback_vertex_set(
         Must be `"positive"`, `"negative"`, or `None` (default). If
         `"positive"`, only cycles with an even number of negative edges are
         considered. If `"negative"`, only cycles with an odd number of negative
-        edges are considered. Otherwise, all cycles are considered.
+        edges are considered. Edges with no monotonicity are counted as both
+        positive and negative. Otherwise, all cycles are considered.
     subgraph : Sequence[str  |  VariableId] | None, optional
         A list of network variables (either string names or AEON `VariableId`
         objects are fine). If given, the result is the FVS of the sub-graph induced by
@@ -118,8 +124,8 @@ def feedback_vertex_set(
 def cleanup_network(network: BooleanNetwork) -> BooleanNetwork:
     """
     Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This
-    mainly and fixes any static constraints to ensure that they are actually
-    correct.
+    mainly ensures that the network does not use parameters and fixes all static
+    constraints to ensure that they are actually correct.
 
     Parameters
     ----------
