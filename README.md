@@ -1,6 +1,6 @@
 [![PyPI](https://img.shields.io/pypi/v/balm?style=flat-square)](https://pypi.org/project/balm/) 
-[![Api Docs](https://img.shields.io/badge/docs-api-yellowgreen?style=flat-square)](https://todo.docs.url)
-[![Continuous integration](https://img.shields.io/github/actions/workflow/status/jcrozum/balm/test.yml?branch=master&style=flat-square)](https://github.com/jcrozum/balm/actions?query=workflow%3Atest)
+[![Api Docs](https://img.shields.io/badge/docs-api-yellowgreen?style=flat-square)](https://jcrozum.github.io/balm/)
+[![Continuous integration](https://img.shields.io/github/actions/workflow/status/jcrozum/balm/test.yml?branch=main&style=flat-square)](https://github.com/jcrozum/balm/actions?query=workflow%3Atest)
 [![Coverage](https://img.shields.io/codecov/c/github/jcrozum/balm?style=flat-square)](https://codecov.io/gh/jcrozum/balm) 
 [![GitHub issues](https://img.shields.io/github/issues/jcrozum/balm?style=flat-square)](https://github.com/jcrozum/balm/issues) 
 [![License](https://img.shields.io/pypi/l/balm?style=flat-square)](https://github.com/jcrozum/balm/blob/main/LICENSE)
@@ -34,7 +34,7 @@ pip install git+https://github.com/jcrozum/balm.git@main
 
 ### Using BALM
 
-To learn more about how BALM functions, you can explore the example notebooks listed below. Alternatively, BALM's API documentation is also available [online](https://todo.docs.url).
+To learn more about how BALM functions, you can explore the example notebooks listed below. Alternatively, BALM's API documentation is also available [online](https://jcrozum.github.io/balm/).
 
 **TODO: Usage examples coming soon.**
 
