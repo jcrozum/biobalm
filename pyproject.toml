@@ -1,10 +1,14 @@
 [project]
 name = "balm"
+authors = [{ name = "Jordan Rozum", email = "jrozum@binghamton.edu" }]
+description = "Boolean Attractor Landscape Mapper"
+license = { file = "LISENSE" }
+requires-python = ">=3.11"
 dependencies = [
     'biodivine_aeon ==1.0.0a4',
-    'clingo ==5.6.2',
-    'networkx==2.8.8',
-    'pypint==1.6.2',
+    'clingo >=5.6.2',
+    'networkx>=2.8.8',
+    'pypint>=1.6.2',
 ]
 dynamic = ["version"]
 
