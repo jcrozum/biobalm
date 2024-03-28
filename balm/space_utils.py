@@ -292,6 +292,7 @@ def percolate_network(
     bn: BooleanNetwork,
     space: BooleanSpace,
     symbolic_network: AsynchronousGraph | None = None,
+    remove_constants: bool = False,
 ) -> BooleanNetwork:
     """
     Reduces a Boolean network by percolating a given space.
@@ -319,6 +320,9 @@ def percolate_network(
     symbolic_network : AsynchronousGraph | None
         An optional symbolic representation to use to perform the percolation. If not
         given, a temporary one will be created from `bn`.
+    remove_constants : bool
+        If `True`, then the constants are removed from the resulting network. By
+        default, `False`.
 
     Returns
     -------
@@ -353,7 +357,11 @@ def percolate_network(
             new_update = UpdateFunction(new_bn, percolated)
             new_bn.set_update_function(var, new_update)
 
-    return new_bn.infer_valid_graph()
+    new_bn = new_bn.infer_valid_graph()
+    if remove_constants:
+        new_bn = new_bn.inline_constants(infer_constants=True, repair_graph=True)
+
+    return new_bn
 
 
 def restrict_expression(

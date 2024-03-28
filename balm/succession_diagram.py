@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import AsynchronousGraph, BooleanNetwork
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId
 
 from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
 from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
@@ -15,13 +15,17 @@ from balm._sd_algorithms.expand_dfs import expand_dfs
 from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from balm._sd_algorithms.expand_to_target import expand_to_target
-from balm.interaction_graph_utils import cleanup_network, feedback_vertex_set
+from balm.interaction_graph_utils import (
+    cleanup_network,
+    feedback_vertex_set,
+    source_SCCs,
+)
 from balm.petri_net_translation import (
     extract_source_variables,
     network_to_petrinet,
     restrict_petrinet_to_subspace,
 )
-from balm.space_utils import percolate_space, space_unique_key
+from balm.space_utils import percolate_network, percolate_space, space_unique_key
 from balm.trappist_core import trappist
 from balm.types import BooleanSpace, NodeData, SuccessionDiagramState
 
@@ -621,6 +625,81 @@ class SuccessionDiagram:
             )
         else:
             return cast(BooleanSpace, self.dag.edges[parent_id, child_id]["motif"])
+
+    def component_subdiagrams(
+        self,
+        node_id: int | None = None,
+    ) -> Iterator[SuccessionDiagram]:
+        """
+        Return unexpanded subdiagrams for the source SCCs in a node subspace.
+
+        The subnetwork on which the subdiagram is defined is defined by the
+        variables in `component_variables`, which is a list of variable names.
+        The `component_variables` must be backward-closed, meaning there is no
+        variable outside this list that regulates any variable in the
+        subnetwork. Note that this is not explicitly checked in this function.
+
+        Also note that the symbolic encoding of the new network is not
+        compatible with the encoding of the original network, because the
+        underlying networks have different sets of variables.
+
+        Parameters
+        ----------
+        node_id : int | None
+            The ID of a succession diagram node that will define a subspace on
+            which the subnetworks should be considered. By default, the root node
+            is used.
+
+        Returns
+        -------
+        Iterator[SuccessionDiagram]
+            An iterator over unexpanded succession diagrams of the subnetwork.
+        """
+
+        if node_id is None:
+            node_id = self.root()
+
+        reference_bn = percolate_network(
+            self.network,
+            self.node_data(node_id)["space"],
+            remove_constants=True,
+        )
+
+        source_scc_list = source_SCCs(reference_bn)
+
+        for component_variables in source_scc_list:
+            new_bn = BooleanNetwork(component_variables)
+
+            # Build a mapping between the old and new network variables.
+            id_map: dict[VariableId, VariableId] = {}
+            for var in component_variables:
+                old_id = reference_bn.find_variable(var)
+                assert old_id is not None
+                new_id = new_bn.find_variable(var)
+                assert new_id is not None
+                id_map[old_id] = new_id
+
+            # Copy regulations that are in the source component.
+            for reg in reference_bn.regulations():
+                if reg["source"] in id_map and reg["target"] in id_map:
+                    new_bn.add_regulation(
+                        {
+                            "source": reference_bn.get_variable_name(reg["source"]),
+                            "target": reference_bn.get_variable_name(reg["target"]),
+                            "essential": reg["essential"],
+                            "sign": reg["sign"],
+                        }
+                    )
+
+            # Copy update functions from the source component after translating them
+            # to the new IDs.
+            for var_id in id_map.keys():
+                old_function = reference_bn.get_update_function(var_id)
+                assert old_function is not None
+                new_function = old_function.rename_all(new_bn, variables=id_map)
+                new_bn.set_update_function(id_map[var_id], new_function)
+
+            yield SuccessionDiagram(new_bn)
 
     def build(self):
         """

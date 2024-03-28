@@ -5,7 +5,6 @@ from balm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
     find_source_nodes,
     find_subnetwork_sd,
-    perc_and_remove_constants_from_bn,
 )
 from balm.space_utils import percolate_network, percolate_space
 
@@ -49,7 +48,7 @@ def test_perc_and_remove_constants_from_bn():
     after_perc_0, after_perc_0 & constant1_0"""
     ).infer_valid_graph()
 
-    clean_bnet = perc_and_remove_constants_from_bn(bn, {}).to_bnet()
+    clean_bnet = percolate_network(bn, {}, remove_constants=True).to_bnet()
 
     bn2 = BooleanNetwork.from_bnet(
         """targets,factors
@@ -58,7 +57,7 @@ def test_perc_and_remove_constants_from_bn():
     source_after_perc, source_after_perc"""
     )
 
-    clean_bnet2 = perc_and_remove_constants_from_bn(bn2, {}).to_bnet()
+    clean_bnet2 = percolate_network(bn2, {}, remove_constants=True).to_bnet()
 
     assert clean_bnet == clean_bnet2
 
@@ -71,10 +70,10 @@ B, A | C"""
     )
 
     # This "simulates" what would happen in the SCC expansion algorithm.
-    bn = perc_and_remove_constants_from_bn(bn, {"C": 0})
+    bn = percolate_network(bn, {"C": 0}, remove_constants=True)
 
     scc_sd, _ = find_subnetwork_sd(
-        bn,
+        SuccessionDiagram(bn),
         expander=SuccessionDiagram.expand_bfs,
         check_maa=True,
     )
