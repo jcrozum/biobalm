@@ -7,7 +7,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "balm"
+project = "biobalm"
 copyright = "2024, Trinh, Park, Pastva, Rozum"
 author = "Trinh, Park, Pastva, Rozum"
 release = "0.1.0"
@@ -44,7 +44,7 @@ html_theme_options = {
             # Label for this link
             "name": "GitHub",
             # URL where the link will redirect
-            "url": "https://github.com/jcrozum/balm",  # required
+            "url": "https://github.com/jcrozum/biobalm",  # required
             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
             "icon": "fa-brands fa-square-github",
             # The type of image to be used (see below for details)
@@ -54,7 +54,7 @@ html_theme_options = {
 }
 
 # -- Extension configuration -------------------------------------------------
-autoapi_dirs = ["../../balm"]
+autoapi_dirs = ["../../biobalm"]
 autoapi_options = [
     "members",
     "undoc-members",
@@ -94,9 +94,9 @@ def linkcode_resolve(domain, info):
     if not info["module"]:
         return None
 
-    if info["module"] == "balm":  # to handle top-level exports
+    if info["module"] == "biobalm":  # to handle top-level exports
         if info["fullname"].startswith("SuccessionDiagram"):
-            info["module"] = "balm.succession_diagram"
+            info["module"] = "biobalm.succession_diagram"
 
     filename = info["module"].replace(".", "/")
-    return f"https://github.com/jcrozum/balm/blob/main/{filename}.py"
+    return f"https://github.com/jcrozum/biobalm/blob/main/{filename}.py"

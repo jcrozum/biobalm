@@ -1,6 +1,6 @@
 from biodivine_aeon import AsynchronousGraph, BooleanExpression, BooleanNetwork
 
-from balm.space_utils import (
+from biobalm.space_utils import (
     expression_to_space_list,
     is_subspace,
     percolate_network,

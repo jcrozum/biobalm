@@ -1,6 +1,6 @@
 from biodivine_aeon import BooleanNetwork
-from balm.trappist_core import trappist_async
-from balm.types import BooleanSpace
+from biobalm.trappist_core import trappist_async
+from biobalm.types import BooleanSpace
 import sys
 
 # A simple script to benchmark minimal trap space detection using trappist.

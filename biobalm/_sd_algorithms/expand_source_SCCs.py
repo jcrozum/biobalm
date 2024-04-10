@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Callable, cast
 
 from biodivine_aeon import BooleanNetwork, SymbolicContext
 
-from balm._sd_algorithms.expand_bfs import expand_bfs
-from balm.space_utils import percolate_network, percolate_space
-from balm.types import BooleanSpace
+from biobalm._sd_algorithms.expand_bfs import expand_bfs
+from biobalm.space_utils import percolate_network, percolate_space
+from biobalm.types import BooleanSpace
 
 if TYPE_CHECKING:
-    from balm.succession_diagram import SuccessionDiagram
+    from biobalm.succession_diagram import SuccessionDiagram
 
     ExpanderFunctionType = Callable[
         [SuccessionDiagram, int | None, int | None, int | None],

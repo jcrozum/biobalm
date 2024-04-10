@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from biodivine_aeon import BddVariableSet
 
-from balm.types import BooleanSpace
+from biobalm.types import BooleanSpace
 
 
 def state_to_bdd(

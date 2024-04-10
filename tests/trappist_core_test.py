@@ -1,9 +1,9 @@
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork, FixedPoints
 
-from balm.interaction_graph_utils import cleanup_network
-from balm.petri_net_translation import network_to_petrinet
-from balm.trappist_core import compute_fixed_point_reduced_STG, trappist
-from balm.types import BooleanSpace
+from biobalm.interaction_graph_utils import cleanup_network
+from biobalm.petri_net_translation import network_to_petrinet
+from biobalm.trappist_core import compute_fixed_point_reduced_STG, trappist
+from biobalm.types import BooleanSpace
 
 
 def test_network_minimum_traps(network_file: str):

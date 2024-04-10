@@ -100,9 +100,9 @@ def feedback_vertex_set(
 
     Examples
     --------
-    >>> import balm
-    >>> from balm.interaction_graph_utils import feedback_vertex_set
-    >>> sd = balm.SuccessionDiagram.from_rules(\"\"\"
+    >>> import biobalm
+    >>> from biobalm.interaction_graph_utils import feedback_vertex_set
+    >>> sd = biobalm.SuccessionDiagram.from_rules(\"\"\"
     ...     A, B
     ...     B, A
     ...     C, D

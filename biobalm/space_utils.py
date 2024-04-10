@@ -3,7 +3,7 @@ Some basic utility operations on spaces (partial assignments of BN variables).
 
 Each space is represented as a dictionary with a subset of variable names as
 keys and values `0`/`1` assigned to fixed variables. See also
-:class:`BooleanSpace<balm.types.BooleanSpace>`.
+:class:`BooleanSpace<biobalm.types.BooleanSpace>`.
 """
 
 from __future__ import annotations
@@ -20,12 +20,12 @@ from biodivine_aeon import (
     UpdateFunction,
 )
 
-from balm.symbolic_utils import function_eval
+from biobalm.symbolic_utils import function_eval
 
 if TYPE_CHECKING:
     from biodivine_aeon import BooleanExpression
 
-    from balm.types import BooleanSpace
+    from biobalm.types import BooleanSpace
 
 
 def intersect(x: BooleanSpace, y: BooleanSpace) -> BooleanSpace | None:

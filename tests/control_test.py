@@ -1,14 +1,14 @@
 from biodivine_aeon import BooleanNetwork
 
-from balm.control import (
+from biobalm.control import (
     Intervention,
     controls_are_equal,
     drivers_of_succession,
     succession_control,
     successions_to_target,
 )
-from balm.succession_diagram import SuccessionDiagram
-from balm.types import BooleanSpace
+from biobalm.succession_diagram import SuccessionDiagram
+from biobalm.types import BooleanSpace
 
 
 def test_basic_succession_control():

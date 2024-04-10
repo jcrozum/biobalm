@@ -1,5 +1,5 @@
 [project]
-name = "balm"
+name = "biobiobalm"
 authors = [{ name = "Jordan Rozum", email = "jrozum@binghamton.edu" }]
 description = "Boolean Attractor Landscape Mapper"
 license = { file = "LISENSE" }
@@ -10,14 +10,15 @@ dependencies = [
     'networkx>=2.8.8',
     'pypint>=1.6.2',
 ]
+version = "0.1.0"
 dynamic = ["version"]
 
 
 [tool.setuptools]
-packages = ['balm', 'balm._sd_algorithms']
+packages = ['biobalm', 'biobalm._sd_algorithms']
 
 [tool.pyright]
-include = ["balm", "tests"]
+include = ["biobalm", "tests"]
 stubPath = "stubs"
 reportMissingImports = true
 reportMissingTypeStubs = true

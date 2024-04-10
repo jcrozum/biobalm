@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
     from biodivine_aeon import Bdd, BooleanNetwork
 
-    from balm.types import BooleanSpace
+    from biobalm.types import BooleanSpace
 
 import copy
 import re

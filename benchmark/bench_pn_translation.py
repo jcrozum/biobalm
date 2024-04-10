@@ -1,9 +1,9 @@
 from biodivine_aeon import BooleanNetwork
-from balm.petri_net_translation import network_to_petrinet
-import balm.petri_net_translation
+from biobalm.petri_net_translation import network_to_petrinet
+import biobalm.petri_net_translation
 import sys
 
-balm.petri_net_translation.DEBUG = True
+biobalm.petri_net_translation.DEBUG = True
 
 bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()

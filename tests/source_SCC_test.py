@@ -1,12 +1,12 @@
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
-from balm import SuccessionDiagram
-from balm._sd_algorithms.expand_source_SCCs import (
+from biobalm import SuccessionDiagram
+from biobalm._sd_algorithms.expand_source_SCCs import (
     expand_source_SCCs,
     find_source_nodes,
     find_subnetwork_sd,
 )
-from balm.space_utils import percolate_network, percolate_space
+from biobalm.space_utils import percolate_network, percolate_space
 
 
 def test_find_source_nodes():
