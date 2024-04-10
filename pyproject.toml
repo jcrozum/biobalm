@@ -1,5 +1,5 @@
 [project]
-name = "biobiobalm"
+name = "biobalm"
 authors = [{ name = "Jordan Rozum", email = "jrozum@binghamton.edu" }]
 description = "Boolean Attractor Landscape Mapper"
 license = { file = "LISENSE" }
