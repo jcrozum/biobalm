@@ -14,7 +14,10 @@ from typing import TYPE_CHECKING
 from networkx import DiGraph  # type: ignore
 from pypint import Goal, InMemoryModel  # type:ignore
 
-from biobalm.petri_net_translation import place_to_variable, _optimized_recursive_dnf_generator
+from biobalm.petri_net_translation import (
+    place_to_variable,
+    _optimized_recursive_dnf_generator,
+)
 from biobalm.types import BooleanSpace
 import biobalm
 
@@ -90,7 +93,9 @@ def _pint_build_symbolic_goal(states: Bdd) -> Goal:
             # break here and don't continue. This is not ideal but I'm not sure
             # how to fix this other than modifying `pint` itself.
             if biobalm.succession_diagram.DEBUG:
-                print("WARNING: `pint` goal size limit exceeded. A partial goal is used.")
+                print(
+                    "WARNING: `pint` goal size limit exceeded. A partial goal is used."
+                )
             break
 
         goal_atoms = [f"{var}={level}" for var, level in named_clause.items()]

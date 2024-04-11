@@ -146,7 +146,7 @@ def valuation_to_state(ctx: SymbolicContext, valuation: BddValuation) -> Boolean
     """
 
     result: BooleanSpace = {}
-    for (var, val) in valuation.items():
+    for var, val in valuation.items():
         n_var = ctx.find_network_variable(var)
         if n_var is not None:
             result[ctx.get_network_variable_name(n_var)] = cast(Literal[0, 1], int(val))

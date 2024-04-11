@@ -746,14 +746,18 @@ class SuccessionDiagram:
                 node_id,
                 greedy_asp_minification,
                 simulation_minification,
-                pint_minification
+                pint_minification,
             )
             node["attractor_candidates"] = candidates
 
             # If the computed candidates are actually valid as seeds, just
             # propagate the value so that it doesn't need to be computed later.
-            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(node_id)
-            if len(candidates) == 0 or (node_is_pseudo_minimal and len(candidates) == 1):
+            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
+                node_id
+            )
+            if len(candidates) == 0 or (
+                node_is_pseudo_minimal and len(candidates) == 1
+            ):
                 node["attractor_seeds"] = candidates
 
         return candidates
@@ -797,16 +801,17 @@ class SuccessionDiagram:
             # Typically, this should be done when computing the candidates, but just in case
             # something illegal happended... if we can show that the current candidate set
             # is optimal, we just keep it and don't compute the attractors symbolically.
-            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(node_id)
-            if len(candidates) == 0 or (node_is_pseudo_minimal and len(candidates) == 1):
+            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
+                node_id
+            )
+            if len(candidates) == 0 or (
+                node_is_pseudo_minimal and len(candidates) == 1
+            ):
                 node["attractor_seeds"] = candidates
                 seeds = candidates
             else:
                 result = compute_attractors_symbolic(
-                    self,
-                    node_id,
-                    candidate_states=candidates,
-                    seeds_only=True
+                    self, node_id, candidate_states=candidates, seeds_only=True
                 )
                 node["attractor_seeds"] = result[0]
                 # At this point, attractor_sets could be `None`, but that
@@ -894,7 +899,10 @@ class SuccessionDiagram:
 
         if node["percolated_nfvs"] is None:
             percolated_network = self.node_percolated_network(node_id, compute)
-            if percolated_network.variable_count() < SuccessionDiagram.NFVS_NODE_THRESHOLD:
+            if (
+                percolated_network.variable_count()
+                < SuccessionDiagram.NFVS_NODE_THRESHOLD
+            ):
                 # Computing the *negative* variant of the FVS is surprisingly costly.
                 # Hence it mostly makes sense for the smaller networks only.
                 nfvs = feedback_vertex_set(percolated_network, parity="negative")
@@ -906,7 +914,9 @@ class SuccessionDiagram:
 
         return nfvs
 
-    def node_percolated_network(self, node_id: int, compute: bool = False) -> BooleanNetwork:
+    def node_percolated_network(
+        self, node_id: int, compute: bool = False
+    ) -> BooleanNetwork:
         """
         The Boolean network percolated to the node's sub-space, with
         constant variables removed.
@@ -943,9 +953,13 @@ class SuccessionDiagram:
             raise KeyError(f"Percolated network not computed for node {node_id}.")
 
         if network is None:
-            network = percolate_network(self.network, node_space, self.symbolic, remove_constants=True)
+            network = percolate_network(
+                self.network, node_space, self.symbolic, remove_constants=True
+            )
             if DEBUG:
-                print(f"[{node_id}] Computed percolated network with {network.variable_count()} variables (vs {self.network.variable_count()}).")
+                print(
+                    f"[{node_id}] Computed percolated network with {network.variable_count()} variables (vs {self.network.variable_count()})."
+                )
             node["percolated_network"] = network
 
         return network
@@ -1328,7 +1342,9 @@ class SuccessionDiagram:
             )
 
         if len(sub_spaces) == SuccessionDiagram.MAX_MOTIFS_PER_NODE:
-            raise RuntimeError(f"Exceeded the maximum amount of stable motifs per node (SuccessionDiagram.MAX_MOTIFS_PER_NODE={SuccessionDiagram.MAX_MOTIFS_PER_NODE}).")
+            raise RuntimeError(
+                f"Exceeded the maximum amount of stable motifs per node (SuccessionDiagram.MAX_MOTIFS_PER_NODE={SuccessionDiagram.MAX_MOTIFS_PER_NODE})."
+            )
 
         # Sort the spaces based on a unique key in case trappist is not always
         # sorted deterministically.

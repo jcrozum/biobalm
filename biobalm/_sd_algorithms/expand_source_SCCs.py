@@ -77,7 +77,9 @@ def expand_source_SCCs(
             next_level.append(sd._ensure_node(root, sub_space))  # type: ignore
 
         sd.node_data(root)["expanded"] = True
-        sd.node_data(root)["attractor_seeds"] = []  # no need to look for attractors here
+        sd.node_data(root)[
+            "attractor_seeds"
+        ] = []  # no need to look for attractors here
         current_level = next_level
         next_level = []
 
@@ -132,7 +134,9 @@ def expand_source_SCCs(
     for node_id in final_level:
         # These assertions should be unnecessary, but just to be sure.
         assert not sd.node_data(node_id)["expanded"]  # expand nodes from here
-        assert sd.node_data(node_id)["attractor_seeds"] is None  # check attractors from here
+        assert (
+            sd.node_data(node_id)["attractor_seeds"] is None
+        )  # check attractors from here
 
         # restore this once we allow all expansion algorithms to expand from a node
         # expander(sd, node_id)
