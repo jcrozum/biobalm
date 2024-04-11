@@ -1,7 +1,4 @@
-biodivine_aeon==1.0.0a4
+biodivine_aeon==1.0.0a6
 clingo==5.6.2
 networkx==2.8.8
 pypint==1.6.2
-# This will be eventually required by pandas (which is required by pint),
-# but for now it prevents pandas from printing warnings all over the place.
-pyarrow==15.0.0

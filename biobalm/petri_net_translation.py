@@ -205,6 +205,9 @@ def restrict_petrinet_to_subspace(
     percolation. Variables that are fixed in the `sub_space` but do not exist in
     the Petri net are ignored.
 
+    The `sub_space` can contain variables that do not appear
+    in the `petri_net`. Such variables are simply ignored.
+
     Parameters
     ----------
     petri_net : DiGraph
