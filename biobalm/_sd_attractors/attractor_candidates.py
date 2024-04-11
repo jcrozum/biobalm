@@ -425,7 +425,7 @@ def compute_attractor_candidates(
 
             if biobalm.succession_diagram.DEBUG:
                 print(
-                    f"[{node_id}] > `pint` {i+1}/{len(candidate_states)}: eliminated: {not keep}, retained: {len(filtered_states)}."
+                    f"[{node_id}] > `pint` {i + 1}/{len(candidate_states)}: eliminated: {not keep}, retained: {len(filtered_states)}."
                 )
 
         candidate_states = filtered_states
@@ -504,7 +504,7 @@ def run_simulation_minification(
         for i, state in enumerate(candidate_states):
             if i % 100 == 99 and biobalm.succession_diagram.DEBUG:
                 print(
-                    f"[{node_id}] > Simulation progress: {i+1}/{len(candidate_states)}"
+                    f"[{node_id}] > Simulation progress: {i + 1}/{len(candidate_states)}"
                 )
 
             # Remove the state from the candidates. If we can prove that is
