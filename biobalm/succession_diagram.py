@@ -820,6 +820,13 @@ class SuccessionDiagram:
                 node["attractor_sets"] = result[1]
                 seeds = result[0]
 
+            # Release memory once attractor seeds are known. We might need these
+            # for attractor set computation later, but only if the seeds are not empty.
+            if len(seeds) == 0:
+                node["percolated_network"] = None
+                node["percolated_nfvs"] = None
+                node["percolated_petri_net"] = None
+
         return seeds
 
     def node_attractor_sets(
@@ -858,7 +865,11 @@ class SuccessionDiagram:
 
         if sets is None:
             seeds = self.node_attractor_seeds(node_id, compute=True)
-            result = compute_attractors_symbolic(self, node_id, candidate_states=seeds)
+            result: tuple[list[BooleanSpace], list[VertexSet] | None] = ([], [])
+            if len(seeds) > 0:
+                result = compute_attractors_symbolic(
+                    self, node_id, candidate_states=seeds
+                )
             assert result[1] is not None
             node["attractor_sets"] = result[1]
             sets = result[1]
@@ -1319,7 +1330,7 @@ class SuccessionDiagram:
         sub_spaces: list[BooleanSpace]
 
         # Only use the percolated PN if it is already known.
-        pn = self.node_percolated_petri_net(node_id, compute=False)
+        pn = node["percolated_petri_net"]
         if pn is not None:
             # We have a pre-propagated PN for this sub-space, hence we can use
             # that to compute the trap spaces.
@@ -1340,6 +1351,12 @@ class SuccessionDiagram:
                 optimize_source_variables=source_nodes,
                 solution_limit=SuccessionDiagram.MAX_MOTIFS_PER_NODE,
             )
+
+        # Release the Petri net once the sub_spaces are computed.
+        # It might be needed later for attractor computation, but it
+        # uses a lot of memory in large diagrams to keep all the nets
+        # in memory.
+        node["percolated_petri_net"] = None
 
         if len(sub_spaces) == SuccessionDiagram.MAX_MOTIFS_PER_NODE:
             raise RuntimeError(
