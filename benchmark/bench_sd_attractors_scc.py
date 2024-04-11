@@ -3,12 +3,12 @@ import sys
 sys.path.append(".")
 
 from biodivine_aeon import BooleanNetwork
-from balm.SuccessionDiagram import SuccessionDiagram
-from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
-import balm.SuccessionDiagram
+from biobalm.SuccessionDiagram import SuccessionDiagram
+from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+import biobalm.SuccessionDiagram
 
 # Print progress and succession diagram size.
-balm.SuccessionDiagram.DEBUG = True
+biobalm.SuccessionDiagram.DEBUG = True
 
 NODE_LIMIT = 1_000_000
 DEPTH_LIMIT = 10_000

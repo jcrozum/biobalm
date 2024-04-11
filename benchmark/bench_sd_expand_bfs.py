@@ -1,10 +1,10 @@
 from biodivine_aeon import BooleanNetwork
-from balm.SuccessionDiagram import SuccessionDiagram
+from biobalm.SuccessionDiagram import SuccessionDiagram
 import sys
-import balm.SuccessionDiagram
+import biobalm.SuccessionDiagram
 
 # Print progress and succession diagram size.
-balm.SuccessionDiagram.DEBUG = True
+biobalm.SuccessionDiagram.DEBUG = True
 
 NODE_LIMIT = 1_000_000
 DEPTH_LIMIT = 10_000

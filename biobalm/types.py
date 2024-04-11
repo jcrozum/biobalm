@@ -14,7 +14,7 @@ ControlOverrides: TypeAlias = list[BooleanSpace]
 
 class SuccessionDiagramState(TypedDict):
     """
-    A `TypedDict` class that stores the state of a succession diagram (see :class:`balm.SuccessionDiagram`).
+    A `TypedDict` class that stores the state of a succession diagram (see :class:`biobalm.SuccessionDiagram`).
     """
 
     network_rules: str
@@ -24,7 +24,7 @@ class SuccessionDiagramState(TypedDict):
 
     petri_net: nx.DiGraph
     """
-    The Petri net representation of the network rules (see :mod:`balm.petri_net_translation`).
+    The Petri net representation of the network rules (see :mod:`biobalm.petri_net_translation`).
     """
 
     nfvs: list[str] | None
@@ -35,21 +35,21 @@ class SuccessionDiagramState(TypedDict):
     dag: nx.DiGraph
     """
     The directed acyclic graph representation of the succession diagram structure, including
-    the :class:`balm.types.NodeData` of each node.
+    the :class:`biobalm.types.NodeData` of each node.
     """
 
     node_indices: dict[int, int]
     """
     A dictionary mapping subspace keys to their positions in the succession
-    diagram (see :func:`balm.space_utils.space_unique_key`).
+    diagram (see :func:`biobalm.space_utils.space_unique_key`).
     """
 
 
 class NodeData(TypedDict):
     """
-    A `TypedDict` class that stores the data of a succession diagram node (see :class:`balm.SuccessionDiagram`).
+    A `TypedDict` class that stores the data of a succession diagram node (see :class:`biobalm.SuccessionDiagram`).
 
-    Returned from :func:`balm.SuccessionDiagram.node_data`.
+    Returned from :func:`biobalm.SuccessionDiagram.node_data`.
     However, this class is not directly used at runtime, and only exists for static type-checking.
     Instead, at runtime, an untyped dictionary is used because that is what is returned by `networkx.DiGraph.nodes(data=True)`.
     """
@@ -80,7 +80,7 @@ class NodeData(TypedDict):
 
     expanded: bool
     """
-    Whether the node has been expanded yet or not (`balm` builds the
+    Whether the node has been expanded yet or not (`biobalm` builds the
     succession diagram lazily).
 
     If `expanded=False`, the node *must not* have any successor nodes.

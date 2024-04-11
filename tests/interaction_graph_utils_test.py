@@ -1,7 +1,7 @@
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph  # type:ignore
 
-from balm.interaction_graph_utils import feedback_vertex_set
+from biobalm.interaction_graph_utils import feedback_vertex_set
 
 # There should be a negative cycle between b_1 and b_2,
 # a positive cycle between d_1 and d_2, and a negative cycle

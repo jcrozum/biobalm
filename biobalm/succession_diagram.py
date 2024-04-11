@@ -8,26 +8,26 @@ if TYPE_CHECKING:
 import networkx as nx  # type: ignore
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId
 
-from balm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
-from balm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
-from balm._sd_algorithms.expand_bfs import expand_bfs
-from balm._sd_algorithms.expand_dfs import expand_dfs
-from balm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
-from balm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
-from balm._sd_algorithms.expand_to_target import expand_to_target
-from balm.interaction_graph_utils import (
+from biobalm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
+from biobalm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
+from biobalm._sd_algorithms.expand_bfs import expand_bfs
+from biobalm._sd_algorithms.expand_dfs import expand_dfs
+from biobalm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
+from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from biobalm._sd_algorithms.expand_to_target import expand_to_target
+from biobalm.interaction_graph_utils import (
     cleanup_network,
     feedback_vertex_set,
     source_SCCs,
 )
-from balm.petri_net_translation import (
+from biobalm.petri_net_translation import (
     extract_source_variables,
     network_to_petrinet,
     restrict_petrinet_to_subspace,
 )
-from balm.space_utils import percolate_network, percolate_space, space_unique_key
-from balm.trappist_core import trappist
-from balm.types import BooleanSpace, NodeData, SuccessionDiagramState
+from biobalm.space_utils import percolate_network, percolate_space, space_unique_key
+from biobalm.trappist_core import trappist
+from biobalm.types import BooleanSpace, NodeData, SuccessionDiagramState
 
 DEBUG: bool = False
 """
@@ -47,8 +47,8 @@ class SuccessionDiagram:
 
     Examples
     --------
-    >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_rules(\"""
+    >>> import biobalm
+    >>> sd = biobalm.SuccessionDiagram.from_rules(\"""
     ...     A, B
     ...     B, A & C
     ...     C, !A | B
@@ -107,7 +107,7 @@ class SuccessionDiagram:
 
         self.petri_net: nx.DiGraph = network_to_petrinet(network)
         """
-        The Petri net representation of the network (see :mod:`petri_net_translation<balm.petri_net_translation>`).
+        The Petri net representation of the network (see :mod:`petri_net_translation<biobalm.petri_net_translation>`).
         """
 
         if DEBUG:
@@ -131,7 +131,7 @@ class SuccessionDiagram:
         self.node_indices: dict[int, int] = {}
         """
         A dictionary mapping subspace keys to their positions in the succession
-        diagram (see :func:`balm.space_utils.space_unique_key`).
+        diagram (see :func:`biobalm.space_utils.space_unique_key`).
         """
 
         # Create an un-expanded root node.
@@ -220,8 +220,8 @@ class SuccessionDiagram:
 
         Example
         -------
-        >>> import balm
-        >>> sd = balm.SuccessionDiagram.from_rules(\"""
+        >>> import biobalm
+        >>> sd = biobalm.SuccessionDiagram.from_rules(\"""
         ...     A, B
         ...     B, A & C
         ...     C, !A | B
@@ -439,7 +439,7 @@ class SuccessionDiagram:
         - `space`: The sub-space of the node.
         - `expanded`: Whether the node is expanded or not.
 
-        See :class:`balm.types.NodeData` for more information.
+        See :class:`biobalm.types.NodeData` for more information.
 
         Parameters
         ----------
@@ -557,7 +557,7 @@ class SuccessionDiagram:
         """
         Approximate minimum negative feedback vertex set on the subspace for the given node.
 
-        See :func:`balm.interaction_graph_utils.feedback_vertex_set` for further details.
+        See :func:`biobalm.interaction_graph_utils.feedback_vertex_set` for further details.
 
         Parameters
         ----------

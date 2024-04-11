@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from balm.symbolic_utils import state_list_to_bdd
+from biobalm.symbolic_utils import state_list_to_bdd
 
 if TYPE_CHECKING:
-    from balm.succession_diagram import SuccessionDiagram
+    from biobalm.succession_diagram import SuccessionDiagram
 
-import balm
-import balm.succession_diagram
-from balm.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
-from balm.trappist_core import compute_fixed_point_reduced_STG
-from balm.types import BooleanSpace
+import biobalm
+import biobalm.succession_diagram
+from biobalm.motif_avoidant import detect_motif_avoidant_attractors, make_retained_set
+from biobalm.trappist_core import compute_fixed_point_reduced_STG
+from biobalm.types import BooleanSpace
 
 
 def compute_attractor_seeds(
@@ -27,7 +27,7 @@ def compute_attractor_seeds(
     subspaces of the child nodes.
     """
 
-    if balm.succession_diagram.DEBUG:
+    if biobalm.succession_diagram.DEBUG:
         print(f"[{node_id}] Start computing attractor seeds.")
 
     node_space = sd.node_data(node_id)["space"]
@@ -68,7 +68,7 @@ def compute_attractor_seeds(
         avoid_subspaces=child_spaces,
     )
 
-    if balm.succession_diagram.DEBUG:
+    if biobalm.succession_diagram.DEBUG:
         print(f"[{node_id}] Found {len(candidate_seeds)} seed candidates.")
 
     if len(candidate_seeds) == 1 and len(child_spaces) == 0:

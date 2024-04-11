@@ -3,7 +3,7 @@ import pytest
 from biodivine_aeon import BooleanNetwork
 from networkx import DiGraph, is_isomorphic  # type: ignore
 
-from balm.petri_net_translation import (
+from biobalm.petri_net_translation import (
     extract_variable_names,
     network_to_petrinet,
     sanitize_network_names,

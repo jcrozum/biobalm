@@ -12,15 +12,15 @@ from typing import TYPE_CHECKING
 from networkx import DiGraph  # type: ignore
 from pypint import Goal, InMemoryModel  # type:ignore
 
-from balm.petri_net_translation import place_to_variable
-from balm.space_utils import dnf_function_is_true, remove_state_from_dnf
-from balm.symbolic_utils import (
+from biobalm.petri_net_translation import place_to_variable
+from biobalm.space_utils import dnf_function_is_true, remove_state_from_dnf
+from biobalm.symbolic_utils import (
     function_eval,
     function_is_true,
     state_list_to_bdd,
     state_to_bdd,
 )
-from balm.types import BooleanSpace
+from biobalm.types import BooleanSpace
 
 if TYPE_CHECKING:
     from biodivine_aeon import AsynchronousGraph, Bdd
@@ -60,10 +60,10 @@ def make_retained_set(
         The list of variables in the NFVS that is valid for a network
         restricted to the given `space`.
     space : BooleanSpace
-        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        A :class:`BooleanSpace<biobalm.types.BooleanSpace>` object describing the
         current trap space.
     child_spaces : list[BooleanSpace] | None, optional
-        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        A list of :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects
         describing the child spaces of the current node. Only attractors that
         are not in the child spaces are considered. If no child spaces are
         provided, then all attractors are considered.
@@ -71,7 +71,7 @@ def make_retained_set(
     Returns
     -------
     BooleanSpace
-        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        A :class:`BooleanSpace<biobalm.types.BooleanSpace>` object describing the
         retained set.
     """
 
@@ -155,7 +155,7 @@ def detect_motif_avoidant_attractors(
     petri_net : DiGraph
         The Petri net representation of the update functions.
     candidates : list[BooleanSpace]
-        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        A list of :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects
         describing the candidate seed states.
     terminal_restriction_space : Bdd
         A symbolic set of states which contains all motif avoidant attractors
@@ -171,7 +171,7 @@ def detect_motif_avoidant_attractors(
     Returns
     -------
     list[BooleanSpace]
-        A list of :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        A list of :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects
         describing the motif-avoidant attractors among the input candidate set.
     """
     if len(candidates) == 0:

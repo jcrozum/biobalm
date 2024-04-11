@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
-from balm.space_utils import percolate_space_strict
-from balm.types import BooleanSpace
+from biobalm.space_utils import percolate_space_strict
+from biobalm.types import BooleanSpace
 
 
 def find_single_node_LDOIs(
@@ -18,7 +18,7 @@ def find_single_node_LDOIs(
 
     The logical domain of influence is equivalent to the set of node states that
     become fixed after percolation. See
-    :func:`percolate_space<balm.space_utils.percolate_space>` for details.
+    :func:`percolate_space<biobalm.space_utils.percolate_space>` for details.
 
     This operation requires the symbolic update functions provided by an
     `AsynchronousGraph`. If you provide a `BooleanNetwork`, the
@@ -37,15 +37,15 @@ def find_single_node_LDOIs(
         The LDOI for every one-node state. The keys are `(variable, value)`
         tuples, where `variable` is the name of the node that is fixed in the
         state `value` (`0` or `1`). The keys are
-        :class:`BooleanSpace<balm.types.BooleanSpace>` objects, which are dictionaries
+        :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects, which are dictionaries
         of node values describing the node states that become fixed as a result
         of percolation.
 
     Example
     _______
-    >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_rules('A, A\\nB, A')
-    >>> ldois = balm.drivers.find_single_node_LDOIs(sd.network)
+    >>> import biobalm
+    >>> sd = biobalm.SuccessionDiagram.from_rules('A, A\\nB, A')
+    >>> ldois = biobalm.drivers.find_single_node_LDOIs(sd.network)
     >>> for k in sorted(ldois):
     ...     print(f'{k} ==> {sorted(ldois[k].items())}')
     ...
@@ -86,7 +86,7 @@ def find_single_drivers(
     Parameters
     ----------
     target_subspace : BooleanSpace
-        A :class:`BooleanSpace<balm.types.BooleanSpace>` object describing the
+        A :class:`BooleanSpace<biobalm.types.BooleanSpace>` object describing the
         target trap space.
     network : AsynchronousGraph | BooleanNetwork
        The symbolic update functions stored as a `AsynchronousGraph` or
@@ -96,7 +96,7 @@ def find_single_drivers(
         considered. The keys should be `(variable, value)` tuples, where
         `variable` is the name of the node that is fixed in the state `value`
         (`0` or `1`). The keys are
-        :class:`BooleanSpace<balm.types.BooleanSpace>` objects, which are
+        :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects, which are
         dictionaries of node values describing the node states that become fixed
         as a result of percolation. If not provided, the LDOI will be computed
         automatically for each node state using :func:`find_single_node_LDOIs`.
@@ -110,9 +110,9 @@ def find_single_drivers(
 
     Example
     -------
-    >>> import balm
-    >>> sd = balm.SuccessionDiagram.from_rules('A, A\\nB, A')
-    >>> drivers = balm.drivers.find_single_drivers({'B': 0}, sd.network)
+    >>> import biobalm
+    >>> sd = biobalm.SuccessionDiagram.from_rules('A, A\\nB, A')
+    >>> drivers = biobalm.drivers.find_single_drivers({'B': 0}, sd.network)
     >>> sorted(list(drivers))
     [('A', 0), ('B', 0)]
     """

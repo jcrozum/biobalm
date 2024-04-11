@@ -1,19 +1,25 @@
 [project]
-name = "balm"
+name = "biobalm"
+authors = [{ name = "Jordan Rozum", email = "jrozum@binghamton.edu" }]
+description = "Boolean Attractor Landscape Mapper"
+readme = "README.md"
+license = { file = "LISENSE" }
+requires-python = ">=3.11"
 dependencies = [
     'biodivine_aeon ==1.0.0a4',
-    'clingo ==5.6.2',
-    'networkx==2.8.8',
-    'pypint==1.6.2',
+    'clingo >=5.6.2',
+    'networkx>=2.8.8',
+    'pypint>=1.6.2',
 ]
-dynamic = ["version"]
+version = "0.1.0"
 
 
 [tool.setuptools]
-packages = ['balm', 'balm._sd_algorithms']
+packages = ['biobalm', 'biobalm._sd_algorithms']
+
 
 [tool.pyright]
-include = ["balm", "tests"]
+include = ["biobalm", "tests"]
 stubPath = "stubs"
 reportMissingImports = true
 reportMissingTypeStubs = true

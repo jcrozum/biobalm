@@ -27,13 +27,13 @@ jobs:
         black_args: ". --check"
     - name: Check types
       run: |
-        mypy balm
+        mypy biobalm
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 balm --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 biobalm --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 balm --ignore=E203,W503,C901 --select=C,E,F,W,B,B950 --max-line-length=127 --statistics --count --max-complexity=10
+        flake8 biobalm --ignore=E203,W503,C901 --select=C,E,F,W,B,B950 --max-line-length=127 --statistics --count --max-complexity=10
   doctests:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -61,7 +61,7 @@ jobs:
       - name: Install repo dependencies
         run: pip install -r requirements.txt
       - name: Run doctests
-        run: python -m doctest balm/*.py
+        run: python -m doctest biobalm/*.py
   # Then do a "small" test run with code coverage.
   coverage:
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
       - name: Install pytest
         run: pip install pytest pytest-cov      
       - name: Run pytest with coverage
-        run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=balm tests/ | tee pytest-coverage.txt
+        run: python3 -m pytest --networksize 20 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=biobalm tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:

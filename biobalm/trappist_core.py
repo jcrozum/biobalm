@@ -15,13 +15,13 @@ if TYPE_CHECKING:
 
     from clingo import Model
 
-    from balm.types import BooleanSpace
+    from biobalm.types import BooleanSpace
 
 from biodivine_aeon import BooleanNetwork
 from clingo import Control, SolveHandle
 from networkx import DiGraph  # type: ignore
 
-from balm.petri_net_translation import (
+from biobalm.petri_net_translation import (
     extract_source_variables,
     extract_variable_names,
     network_to_petrinet,
@@ -113,19 +113,19 @@ def trappist(
     finding all minimal trap spaces (`"min"`), maximal trap spaces (`"max"`), or
     fixed points (`"fix"`).
 
-    The result is a list of spaces represented as :class:`BooleanSpace<balm.types.BooleanSpace>`
+    The result is a list of spaces represented as :class:`BooleanSpace<biobalm.types.BooleanSpace>`
     dictionaries. If you want to avoid enumerating all solutions explicitly as one list, you can use
     :func:`trappist_async` which has a similar API but can yield solutions one by one.
 
     Finally, recall that the supplied network must have its names sanitized (see
-    :mod:`petri_net_translation<balm.petri_net_translation>` module).
+    :mod:`petri_net_translation<biobalm.petri_net_translation>` module).
 
 
     Parameters
     ----------
     network : BooleanNetwork | DiGraph
         A Boolean network or a Petri net compatible with the encoding in
-        :mod:`petri_net_translation<balm.petri_net_translation>` module. The behaviour is undefined for other
+        :mod:`petri_net_translation<biobalm.petri_net_translation>` module. The behaviour is undefined for other
         `DiGraph` instances.
     problem : Literal["min", "max", "fix"], optional
         The problem to solve. Finds all minimal trap spaces (`"min"`), maximal
@@ -150,7 +150,7 @@ def trappist(
     Returns
     -------
     list[BooleanSpace]
-        The :class:`BooleanSpace<balm.types.BooleanSpace>` objects
+        The :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects
         describing the trap spaces that solve the specified problem.
     """
     if ensure_subspace is None:
@@ -475,7 +475,7 @@ def compute_fixed_point_reduced_STG(
     ----------
     petri_net : DiGraph
         The Petri net which was created by the implicant encoding from a
-        Boolean network. See :mod:`petri_net_translation<balm.petri_net_translation>`
+        Boolean network. See :mod:`petri_net_translation<biobalm.petri_net_translation>`
         for details.
     retained_set : BooleanSpace
         If set, specifies a set of variables that should only be allowed to update
