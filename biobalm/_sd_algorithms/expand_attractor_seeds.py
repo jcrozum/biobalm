@@ -82,6 +82,10 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 intersect(successor_space, child) for child in expanded_motifs
             ]
             avoid = [x for x in avoid_or_none if x is not None]
+            avoid_restricted = []
+            for x in avoid:
+                y = {var: val for (var, val) in x.items() if var not in successor_space}
+                avoid_restricted.append(y)
 
             retained_set = make_heuristic_retained_set(
                 successor_graph, successor_nfvs, avoid
@@ -90,7 +94,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
             successor_seeds = compute_fixed_point_reduced_STG(
                 successor_pn,
                 retained_set,
-                avoid_subspaces=avoid,
+                avoid_subspaces=avoid_restricted,
                 solution_limit=1,
             )
 
