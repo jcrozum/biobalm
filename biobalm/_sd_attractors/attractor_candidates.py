@@ -498,12 +498,10 @@ def run_simulation_minification(
     # We use different simulation approach depending on whether this space
     # is a minimal trap or not.
     if not avoid_bdd.is_false():
-
         candidates_bdd = state_list_to_bdd(symbolic_ctx, candidate_states)
         filtered_candidates: list[BooleanSpace] = []
 
         for i, state in enumerate(candidate_states):
-
             if i % 100 == 99 and biobalm.succession_diagram.DEBUG:
                 print(
                     f"[{node_id}] > Simulation progress: {i+1}/{len(candidate_states)}"
@@ -570,7 +568,6 @@ def run_simulation_minification(
         candidates_bdd = state_list_to_bdd(symbolic_ctx, candidate_states)
         printed = set()
         for i in range(max_iterations):
-
             progress = int((i * len(candidate_states)) / max_iterations)
             if (
                 progress % 100 == 99
