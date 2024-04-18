@@ -10,7 +10,7 @@ dependencies = [
     'clingo >=5.6.2',
     'networkx >=2.8.8',    
 ]
-version = "0.1.1"
+version = "0.2.0"
 
 # Pint can be used for static analysis, but is not mandatory.
 [project.optional-dependencies]
