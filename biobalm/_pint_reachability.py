@@ -9,7 +9,7 @@ safely when Pint is not installed.
 from __future__ import annotations
 
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, Iterable
 
 from networkx import DiGraph  # type: ignore
 from pypint import Goal, InMemoryModel  # type:ignore
@@ -127,23 +127,23 @@ def _petri_net_as_automata_network(petri_net: DiGraph) -> str:
         if kind != "transition":
             continue
 
-        predecessors = set(petri_net.predecessors(transition))  # type: ignore
-        successors = set(petri_net.successors(transition))  # type: ignore
+        predecessors = set(cast(Iterable[str], petri_net.predecessors(transition)))
+        successors = set(cast(Iterable[str], petri_net.successors(transition)))
 
         # The value under modification is the only
         # value that is different between successors and predecessors.
-        source_place = next(iter(predecessors - successors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
-        target_place = next(iter(successors - predecessors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
+        source_place = next(iter(predecessors - successors))
+        target_place = next(iter(successors - predecessors))
 
-        (s_var, s_level) = place_to_variable(source_place)  # type: ignore[reportUnknownArgumentType] # noqa
-        (t_var, t_level) = place_to_variable(target_place)  # type: ignore[reportUnknownArgumentType] # noqa
+        (s_var, s_level) = place_to_variable(source_place)
+        (t_var, t_level) = place_to_variable(target_place)
         assert s_var == t_var
 
         # The remaining places represent the necessary conditions.
         # Here, we transform them into a text format.
-        conditions = sorted(predecessors.intersection(successors))  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
-        conditions = [place_to_variable(p) for p in conditions]  # type: ignore[reportUnknownVariableType,reportUnknownArgumentType] # noqa
-        conditions = [f'"{var}"={int(level)}' for var, level in conditions]
+        condition_places = sorted(predecessors.intersection(successors))
+        condition_tuples = [place_to_variable(p) for p in condition_places]
+        conditions = [f'"{var}"={int(level)}' for var, level in condition_tuples]
 
         # A pint rule consists of a variable name, value transition,
         # and a list of necessary conditions for the transition (if any).
