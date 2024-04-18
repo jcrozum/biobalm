@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Literal, TypeAlias, TypedDict
 
 import networkx as nx  # type: ignore
+import biodivine_aeon as ba
 
 BooleanSpace: TypeAlias = dict[str, Literal[0, 1]]
 """Type alias for `dict[str, Literal[0, 1]]`. Represents a Boolean subspace, which is defined by a set of fixed node values."""
@@ -44,6 +45,11 @@ class SuccessionDiagramState(TypedDict):
     diagram (see :func:`biobalm.space_utils.space_unique_key`).
     """
 
+    config: SuccessionDiagramConfiguration
+    """
+    "Global" configuration of a succession diagram.
+    """
+
 
 class NodeData(TypedDict):
     """
@@ -61,17 +67,6 @@ class NodeData(TypedDict):
     the longest is used.
     """
 
-    attractors: list[BooleanSpace] | None
-    """
-    Attractor seed states for the node. If `None`, these have not been
-    computed, and the node may or may not have associated attractors.
-    """
-
-    petri_net: nx.DiGraph | None
-    """
-    The Petri net representation of the node. If `None`, this has not been
-    computed yet.
-    """
     space: BooleanSpace
     """
     The sub-space that the node represents (this subspace will always be a
@@ -86,4 +81,150 @@ class NodeData(TypedDict):
     If `expanded=False`, the node *must not* have any successor nodes.
     If `expanded=True`, the node must have all its successors computed
     and included in the succession diagram.
+    """
+
+    percolated_network: ba.BooleanNetwork | None
+    """
+    The AEON `BooleanNetwork` that has variables fixed and percolated
+    according to the node `space`. Constant variables are then fully
+    eliminated.
+
+    If `None`, this has not been computed yet (`SuccessionDiagram.network` can be
+    often used instead).
+    """
+
+    percolated_petri_net: nx.DiGraph | None
+    """
+    The Petri net representation of the network rules percolated to the
+    node's sub-space (i.e. a Petri net encoding of the `percolated_network`).
+    Constant variables are fully eliminated.
+
+    If `None`, this has not been computed yet (`SuccessionDiagram.petri_net` can be
+    often used instead).
+    """
+
+    percolated_nfvs: list[str] | None
+    """
+    An NFVS of the `percolated_network`.
+
+    Note that this contains no variables that are fixed by the node `space`.
+    Also, there is no guarantee that this is a subset of `SuccessionDiagram.nfvs`.
+
+    If `None`, this has not been computed yet (`SuccessionDiagram.nfvs` can be
+    often used instead).
+    """
+
+    attractor_candidates: list[BooleanSpace] | None
+    """
+    List of states that cover all network attractors in the node's sub-space
+    (excluding child nodes, if known).
+
+    Note that each complex/cyclic attractor can be covered by more than
+    one state, but each attractor has to be covered by at least one state. Furthermore,
+    outside of minimal trap spaces, some candidate states can cover zero attractors.
+    That is, even if the candidate set is not empty, it does not guarantee that
+    the non-minimal sub-space contains attractors.
+
+    If `None`, these have not been computed, and the node may or may not
+    have associated attractors.
+    """
+
+    attractor_seeds: list[BooleanSpace] | None
+    """
+    List of states that one-to-one correspond to network attractors in the node's
+    sub-space (excluding child nodes, if known).
+
+    This is very similar to `attractor_candidates`, but here, it is guaranteed
+    that each attractor is represented by exactly one state.
+
+    If `None`, these have not been computed, and the node may or may not
+    have associated attractors.
+    """
+
+    attractor_sets: list[ba.VertexSet] | None
+    """
+    List of attractors that are present in the node's sub-space (excluding
+    child nodes, if known).
+
+    Each attractor is represented symbolically using `biodivine_aeon.VertexSet`.
+
+    Note that for fixed-point attractors, the attractor set is effectively
+    equivalent to the attractor seed. However, for complex attractors, this
+    set containes *all* the attractor states as opposed to just one. Hence it
+    is harder to compute, but can be used to analyze things like the average
+    value of each variable in the attractor states, or the presence of
+    particular oscillation patterns.
+
+    If `None`, these have not been computed, and the node may or may not
+    have associated attractors.
+    """
+
+
+class SuccessionDiagramConfiguration(TypedDict):
+    """
+    Describes the configuration options of a `SuccessionDiagram`.
+
+    Use :meth:`SuccessionDiagram.default_config` to create a
+    configuration dictionary pre-populated with default values.
+    """
+
+    debug: bool
+    """
+    If `True`, the `SuccessionDiagram` will print messages
+    describing the progress of the running operations.
+
+    [Default: False]
+    """
+
+    max_motifs_per_node: int
+    """
+    Limit on the number of stable motifs explored for one node of a succession
+    diagram. If this limit is exceeded during node expansion, a `RuntimeError`
+    is raised and the node remains unexpanded.
+
+    This limit is in place mainly to avoid surprising out of memory errors,
+    because currently there is no logging mechanism that would report the
+    number of stable motifs gradually.
+
+    [Default: 100_000]
+    """
+
+    nfvs_size_threshold: int
+    """
+    For networks larger than this threshold, we only run FVS detection
+    instead of NFVS detection. This is still correct, but can produce
+    a larger node set.
+
+
+    There is a trade-off between the speed gains from a smaller node set
+    to consider and the cost of determining which FVS nodes only
+    intersect negative cycles to find an NFVS subset. Typically,
+    for smaller networks, the trade-off is in favor of
+    computing a smaller NFVS.
+    """
+
+    pint_goal_size_limit: int
+    """
+    Pint is called using command line and can only accept a limited number of arguments.
+    This limit is applied when constructing goals to avoid reaching this argument limit.
+
+    The limit currently applies to the total number of literals that can be used to
+    represent a goal.
+
+    The default value was empirically tested as safe on Debian linux, but other operating
+    systems may need a different limit to stay safe. Nevertheless, this should not be
+    an issue on smaller/simpler networks.
+    """
+
+    attractor_candidates_limit: int
+    """
+    If more than `attractor_candidates_limit` states are produced during the
+    attractor detection process, then the process fails with a `RuntimeError`.
+    This is mainly to avoid out-of-memory errors or crashing `clingo`.
+    """
+
+    retained_set_optimization_threshold: int
+    """
+    If there are more than this amount of attractor candidates, the attractor
+    detection process will try to optimize the retained set using ASP (if enabled).
     """

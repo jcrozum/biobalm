@@ -6,15 +6,20 @@ if TYPE_CHECKING:
     from typing import Iterator
 
 import networkx as nx  # type: ignore
-from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId, VertexSet
 
-from biobalm._sd_algorithms.compute_attractor_seeds import compute_attractor_seeds
+# Attractor detection algorithms.
+from biobalm._sd_attractors.attractor_candidates import compute_attractor_candidates
+from biobalm._sd_attractors.attractor_symbolic import compute_attractors_symbolic
+
+# SD expansion algorithms/heuristics.
 from biobalm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
 from biobalm._sd_algorithms.expand_bfs import expand_bfs
 from biobalm._sd_algorithms.expand_dfs import expand_dfs
 from biobalm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 from biobalm._sd_algorithms.expand_to_target import expand_to_target
+
 from biobalm.interaction_graph_utils import (
     cleanup_network,
     feedback_vertex_set,
@@ -27,12 +32,12 @@ from biobalm.petri_net_translation import (
 )
 from biobalm.space_utils import percolate_network, percolate_space, space_unique_key
 from biobalm.trappist_core import trappist
-from biobalm.types import BooleanSpace, NodeData, SuccessionDiagramState
-
-DEBUG: bool = False
-"""
-If `True`, print debug and progress messages.
-"""
+from biobalm.types import (
+    BooleanSpace,
+    NodeData,
+    SuccessionDiagramState,
+    SuccessionDiagramConfiguration,
+)
 
 
 class SuccessionDiagram:
@@ -74,16 +79,6 @@ class SuccessionDiagram:
     <BLANKLINE>
     """
 
-    NFVS_NODE_THRESHOLD: int = 2_000
-    """
-    If the number of nodes in the (redunced) network is greater than this
-    threshold, we find a feedback vertex set (without consideration of cycle
-    sign) for reachability preprocessing. There is a trade-off between the speed
-    gains from a smaller node set to consider and the cost of determining which
-    FVS nodes only intersect negative cycles to find an NFVS subset. Typically,
-    for smaller networks, the trade-off is in favor of computing a smaller NFVS.
-    """
-
     __slots__ = (
         "network",
         "symbolic",
@@ -91,18 +86,27 @@ class SuccessionDiagram:
         "nfvs",
         "dag",
         "node_indices",
+        "config",
     )
 
-    def __init__(self, network: BooleanNetwork):
+    def __init__(
+        self,
+        network: BooleanNetwork,
+        config: SuccessionDiagramConfiguration | None = None,
+    ):
+        if config is None:
+            config = SuccessionDiagram.default_config()
+        self.config = config
+
         # Original Boolean network.
         self.network: BooleanNetwork = cleanup_network(network)
         """
-        The Boolean network as an AEON network.
+        The Boolean network represented as a `biodivine_aeon.BooleanNetwork` object.
         """
 
         self.symbolic: AsynchronousGraph = AsynchronousGraph(self.network)
         """
-        The symbolic representation of the network.
+        The symbolic representation of the network using `biodivine_aeon.AsynchronousGraph`.
         """
 
         self.petri_net: nx.DiGraph = network_to_petrinet(network)
@@ -110,15 +114,14 @@ class SuccessionDiagram:
         The Petri net representation of the network (see :mod:`petri_net_translation<biobalm.petri_net_translation>`).
         """
 
-        if DEBUG:
+        if self.config["debug"]:
             print(
                 f"Generated global Petri net with {len(self.petri_net.nodes)} nodes and {len(self.petri_net.edges)} edges."
             )
 
-        # Initially, we don't need the NFVS for anything.
         self.nfvs: list[str] | None = None
         """
-        The negative feedback vertex set used for attractor detection.
+        The negative feedback vertex set of `SuccessionDiagram.network`, or `None` if not computed yet.
         """
 
         self.dag: nx.DiGraph = nx.DiGraph()
@@ -126,8 +129,7 @@ class SuccessionDiagram:
         The directed acyclic graph (DAG) representation of the succession
         diagram structure.
         """
-        # A dictionary used for uniqueness checks on the nodes of the succession
-        # diagram. See `SuccessionDiagram.ensure_node` for details.
+
         self.node_indices: dict[int, int] = {}
         """
         A dictionary mapping subspace keys to their positions in the succession
@@ -144,6 +146,7 @@ class SuccessionDiagram:
             "nfvs": self.nfvs,
             "dag": self.dag,
             "node_indices": self.node_indices,
+            "config": self.config,
         }
 
     def __setstate__(self, state: SuccessionDiagramState):
@@ -154,6 +157,7 @@ class SuccessionDiagram:
         self.nfvs = state["nfvs"]
         self.dag = state["dag"]
         self.node_indices = state["node_indices"]
+        self.config = state["config"]
 
     def __len__(self) -> int:
         """
@@ -162,9 +166,21 @@ class SuccessionDiagram:
         return self.dag.number_of_nodes()
 
     @staticmethod
+    def default_config() -> SuccessionDiagramConfiguration:
+        return {
+            "debug": False,
+            "max_motifs_per_node": 100_000,
+            "nfvs_size_threshold": 2_000,
+            "pint_goal_size_limit": 8_192,
+            "attractor_candidates_limit": 100_000,
+            "retained_set_optimization_threshold": 100,
+        }
+
+    @staticmethod
     def from_rules(
         rules: str,
         format: Literal["bnet", "aeon", "sbml"] = "bnet",
+        config: SuccessionDiagramConfiguration | None = None,
     ) -> SuccessionDiagram:
         """
         Generate a succession diagram from the given string.
@@ -176,6 +192,9 @@ class SuccessionDiagram:
         format : Literal['bnet', 'aeon', 'sbml']
             The format of the string. One of `"bnet"`, `"aeon"`, or `"sbml"`.
             Defaults to `"bnet"`.
+        config : SuccessionDiagramConfiguration | None
+            An optional configuration object with internal settings
+            and default values.
 
         Returns
         -------
@@ -184,31 +203,99 @@ class SuccessionDiagram:
         """
 
         if format == "bnet":
-            return SuccessionDiagram(BooleanNetwork.from_bnet(rules))
+            return SuccessionDiagram(BooleanNetwork.from_bnet(rules), config)
         elif format == "aeon":
-            return SuccessionDiagram(BooleanNetwork.from_aeon(rules))
+            return SuccessionDiagram(BooleanNetwork.from_aeon(rules), config)
         elif format == "sbml":
-            return SuccessionDiagram(BooleanNetwork.from_sbml(rules))
+            return SuccessionDiagram(BooleanNetwork.from_sbml(rules), config)
         else:
             raise ValueError(f"Unknown format: {format}")
 
     @staticmethod
-    def from_file(path: str) -> SuccessionDiagram:
+    def from_file(
+        path: str, config: SuccessionDiagramConfiguration | None = None
+    ) -> SuccessionDiagram:
         """
         Read a `BooleanNetwork` from the given file path. The format is automatically inferred from
         the file extension.
+
+        Optionally, you can also supply a configuration object to customize the
+        resulting succession diagram.
         """
-        return SuccessionDiagram(BooleanNetwork.from_file(path))
+        return SuccessionDiagram(BooleanNetwork.from_file(path), config)
+
+    def expanded_attractor_candidates(self) -> dict[int, list[BooleanSpace]]:
+        """
+        Attractor candidates for each expanded node. The candidate list is
+        computed for nodes where it is not known yet.
+
+        Collectively, for every attractor in every expanded node, this returns
+        at least one candidate state for said attractor. However, for complex
+        attractors, there can be more than one candidate state, and there can
+        be candidates that are not contained in any attractor.
+
+        *If called before the `SuccessionDiagram` is fully built, this will not
+        be a complete accounting of attractors, since any node that isn't expanded
+        is not included in the result.*
+
+        See also:
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_seeds>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_sets>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_candidates>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_seeds>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_sets>`
+
+        Returns
+        -------
+        dict[int,list[BooleanSpace]]
+            Each key is the id of an expanded succession diagram node, whose
+            corresponding value is a list of attractor candidates for that node. Note
+            that one succession diagram node can have multiple attractors. Ordering
+            of the lists in the returned dictionary is not guaranteed.
+
+        Example
+        -------
+        >>> import biobalm
+        >>> sd = biobalm.SuccessionDiagram.from_rules(\"""
+        ...     A, B
+        ...     B, A & C
+        ...     C, !A | B
+        ... \""")
+        >>> sd.build()
+        >>> eas = sd.expanded_attractor_candidates()
+        >>> for id, atts in sorted(eas.items()):
+        ...     for x in atts:
+        ...         print(f"{id}: {dict(sorted(x.items()))}")
+        1: {'A': 0, 'B': 0, 'C': 1}
+        2: {'A': 1, 'B': 1, 'C': 1}
+        """
+        res: dict[int, list[BooleanSpace]] = {}
+        for id in self.expanded_ids():
+            atts = self.node_attractor_candidates(id, compute=True)
+            if not atts:  # no attractors for this node
+                continue
+            res[id] = atts
+
+        return res
 
     def expanded_attractor_seeds(self) -> dict[int, list[BooleanSpace]]:
         """
-        Attractor seeds for each expanded node.
+        Attractor seeds for each expanded node. The seed list is
+        computed for nodes where it is not known yet.
 
-        An attractor seed is a state belonging to an attractor (and thus a state
-        from which the entire attractor is reachable, by definition).
+        Collectively, for every attractor in every expanded node, this returns
+        exactly one seed state for said attractor.
 
-        If called before the `SuccessionDiagram` is fully built, this will not
-        be a complete accounting of attractor seed states.
+        *If called before the `SuccessionDiagram` is fully built, this will not
+        be a complete accounting of attractors, since any node that isn't expanded
+        is not included in the result.*
+
+        See also:
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_candidates>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_sets>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_candidates>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_seeds>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_sets>`
 
         Returns
         -------
@@ -220,6 +307,10 @@ class SuccessionDiagram:
 
         Example
         -------
+
+        *Note that for this simple network, attractor candidates and attractor
+        seeds are the same states.*
+
         >>> import biobalm
         >>> sd = biobalm.SuccessionDiagram.from_rules(\"""
         ...     A, B
@@ -236,7 +327,62 @@ class SuccessionDiagram:
         """
         res: dict[int, list[BooleanSpace]] = {}
         for id in self.expanded_ids():
-            atts = self.node_attractor_seeds(id)
+            atts = self.node_attractor_seeds(id, compute=True)
+            if not atts:  # no attractors for this node
+                continue
+            res[id] = atts
+
+        return res
+
+    def expanded_attractor_sets(self) -> dict[int, list[VertexSet]]:
+        """
+        Attractor sets for each expanded node. The sets are
+        computed for nodes where they are not known yet.
+
+        These sets represent the complete collection of attractor states in each
+        expanded node. For fixed-point attractors, this is effectively equivalent
+        to the attractor seeds. For complex attractors, this set contains the
+        full attractor. Hence, it is harder to compute but can facilitate richer
+        post-processing and analysis.
+
+        *If called before the `SuccessionDiagram` is fully built, this will not
+        be a complete accounting of attractors, since any node that isn't expanded
+        is not included in the result.*
+
+        See also:
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_candidates>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.expanded_attractor_seeds>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_candidates>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_seeds>`
+         - :meth:`expanded_attractor_seeds<SuccessionDiagram.node_attractor_sets>`
+
+        Returns
+        -------
+        dict[int,list[biodivine_aeon.VertexSet]]
+            Each key is the id of an expanded succession diagram node, whose
+            corresponding value is a list of attractor sets for that node. Note
+            that one succession diagram node can have multiple attractors. Ordering
+            of the lists in the returned dictionary is not guaranteed.
+
+        Example
+        -------
+        >>> import biobalm
+        >>> sd = biobalm.SuccessionDiagram.from_rules(\"""
+        ...     A, B
+        ...     B, A & C
+        ...     C, !A | B
+        ... \""")
+        >>> sd.build()
+        >>> eas = sd.expanded_attractor_sets()
+        >>> for id, atts in sorted(eas.items()):
+        ...     for x in atts:
+        ...         print(f"{id}: {x}")
+        1: VertexSet(cardinality=1, symbolic_size=5)
+        2: VertexSet(cardinality=1, symbolic_size=5)
+        """
+        res: dict[int, list[VertexSet]] = {}
+        for id in self.expanded_ids():
+            atts = self.node_attractor_sets(id, compute=True)
             if not atts:  # no attractors for this node
                 continue
             res[id] = atts
@@ -434,10 +580,19 @@ class SuccessionDiagram:
         Returns a `NodeData` object with the following attributes:
 
         - `depth`: The depth of the node.
-        - `attractors`: The attractors of the node (if computed).
-        - `petri_net`: The Petri net representation of the node (if computed).
         - `space`: The sub-space of the node.
         - `expanded`: Whether the node is expanded or not.
+        - `percolated_network`: [`None` if not computed] The percolation of
+        `SuccessionDiagram.network` with respect to the node's `space`.
+        - `percolated_petri_net`: [`None` if not computed] The percolation of
+        `SuccessionDiagram.petri_net` with respect to the node's `space`.
+        - `percolated_nfvs`: [`None` if not computed] The NFVS of `percolated_network`.
+        - `attractor_candidates`: [`None` if not computed] A collection of states
+        that collectively cover every attractor of this node.
+        - `attractor_seeds`: [`None` if not computed] A collection of states
+        one-to-one corresponding to the attractors of this node.
+        - `attractor_sets`: [`None` if not computed] A complete collection of
+        attractors of this node.
 
         See :class:`biobalm.types.NodeData` for more information.
 
@@ -453,6 +608,29 @@ class SuccessionDiagram:
             runtime, this object is an untyped dictionary.
         """
         return cast(NodeData, self.dag.nodes[node_id])
+
+    def reclaim_node_data(self):
+        """
+        Removes non-essential data from the `NodeData` dictionary of each node.
+
+        This method can be used to reduce the memory footprint of the succession
+        diagram, especially before serialization. However, note that this can
+        also slow down subsequent computations if the erased data needs
+        to be re-computed.
+
+        The method removes the `percolated_network`, `percolated_petri_net`,
+        and the `percolated_nfvs`. Furthermore, if `attractor_seeds` are known,
+        it erases the `attractor_candidates`, since seeds can be used for the
+        same tasks.
+        """
+
+        for node_id in self.node_ids():
+            data = self.node_data(node_id)
+            data["percolated_network"] = None
+            data["percolated_petri_net"] = None
+            data["percolated_nfvs"] = None
+            if data["attractor_seeds"] is not None:
+                data["attractor_candidates"] = None
 
     def node_is_minimal(self, node_id: int) -> bool:
         """
@@ -505,7 +683,7 @@ class SuccessionDiagram:
         list[int]
             The list of successor node ids.
         """
-        node = cast(dict[str, Any], self.dag.nodes[node_id])
+        node = self.node_data(node_id)
         if not node["expanded"] and not compute:
             raise KeyError(f"Node {node_id} is not expanded.")
         if not node["expanded"]:
@@ -513,8 +691,92 @@ class SuccessionDiagram:
 
         return list(self.dag.successors(node_id))  # type: ignore
 
+    def node_attractor_candidates(
+        self,
+        node_id: int,
+        compute: bool = False,
+        greedy_asp_minification: bool = True,
+        simulation_minification: bool = True,
+        pint_minification: bool = False,
+    ) -> list[BooleanSpace]:
+        """
+        Return the list of attractor candidate states for the given `node_id`.
+
+        If attractor candidates are not computed but seeds are, returns
+        attractor seeds, as these are also valid as candidate states, but
+        even more precise.
+
+        Similar to :meth:`node_successors`, the method either computes the
+        data if unknown, or throws an exception, depending on the `compute`
+        flag. If `compute` is set to `True`, additional flags can be used
+        to adjust the candidate identification process (see *Parameters*).
+
+        Note that you can compute attractor candidates for nodes that are not expanded,
+        but (a) multiple unexpanded nodes can contain the same attractor, and hence also
+        the same/similar candidates (i.e. you can "discover" the same attractor in multiple
+        unexpanded nodes, if the nodes intersect), and (b) this data is erased if the
+        node is later expanded.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the attractor candidates if they are not already known.
+        greedy_asp_minification: bool
+            Indicate that the initial candidate set should be first greedily minified
+            through repeated ASP queries. [Default: True]
+        simulation_minification: bool
+            Indicate that the candidate set should be refined through stochastic
+            simulation. [Default: True]
+        pint_minification: bool
+            Indicate that the candidate set should be refined through reachability
+            analysis using `pint`. Only enable this option if you actually have `pint`
+            installed (it is an optional dependency). [Default: False]
+
+        Returns
+        -------
+        list[BooleanSpace]
+            The list of attractor candidate states.
+        """
+        node = self.node_data(node_id)
+
+        candidates = node["attractor_candidates"]
+
+        # If candidates are already cleared, but seeds are known, we can
+        # just use seeds.
+        if candidates is None and node["attractor_seeds"] is not None:
+            return node["attractor_seeds"]
+
+        if candidates is None and not compute:
+            raise KeyError(f"Attractor candidates not computed for node {node_id}.")
+
+        if candidates is None:
+            candidates = compute_attractor_candidates(
+                self,
+                node_id,
+                greedy_asp_minification,
+                simulation_minification,
+                pint_minification,
+            )
+            node["attractor_candidates"] = candidates
+
+            # If the computed candidates are actually valid as seeds, just
+            # propagate the value so that it doesn't need to be computed later.
+            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
+                node_id
+            )
+            if len(candidates) == 0 or (
+                node_is_pseudo_minimal and len(candidates) == 1
+            ):
+                node["attractor_seeds"] = candidates
+
+        return candidates
+
     def node_attractor_seeds(
-        self, node_id: int, compute: bool = False
+        self,
+        node_id: int,
+        compute: bool = False,
     ) -> list[BooleanSpace]:
         """
         Return the list of attractor seed states for the given `node_id`.
@@ -523,10 +785,8 @@ class SuccessionDiagram:
         data if unknown, or throws an exception, depending on the `compute`
         flag.
 
-        Note that you can compute attractor seeds for stub nodes, but (a) these
-        attractors are not guaranteed to be unique (i.e. you can "discover" the
-        same attractor in multiple stub nodes, if the stub nodes intersect), and
-        (b) this data is erased if the stub node is expanded later on.
+        Note that the same considerations regarding attractors in unexpanded
+        nodes apply as for :meth:`node_attractor_candidates`.
 
         Parameters
         ----------
@@ -540,29 +800,111 @@ class SuccessionDiagram:
         list[BooleanSpace]
             The list of attractor seed states.
         """
-        node = cast(NodeData, self.dag.nodes[node_id])
+        node = self.node_data(node_id)
 
-        attractors = node["attractors"]
+        seeds = node["attractor_seeds"]
 
-        if attractors is None and not compute:
-            raise KeyError(f"Attractor data not computed for node {node_id}.")
+        if seeds is None and not compute:
+            raise KeyError(f"Attractor seeds not computed for node {node_id}.")
 
-        if attractors is None:
-            attractors = compute_attractor_seeds(self, node_id)
-            node["attractors"] = attractors
+        if seeds is None:
+            candidates = self.node_attractor_candidates(node_id, compute=True)
+            # Typically, this should be done when computing the candidates, but just in case
+            # something illegal happended... if we can show that the current candidate set
+            # is optimal, we just keep it and don't compute the attractors symbolically.
+            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
+                node_id
+            )
+            if len(candidates) == 0 or (
+                node_is_pseudo_minimal and len(candidates) == 1
+            ):
+                node["attractor_seeds"] = candidates
+                seeds = candidates
+            else:
+                result = compute_attractors_symbolic(
+                    self, node_id, candidate_states=candidates, seeds_only=True
+                )
+                node["attractor_seeds"] = result[0]
+                # At this point, attractor_sets could be `None`, but that
+                # is valid, as long as we actually compute them later when
+                # they are needed.
+                node["attractor_sets"] = result[1]
+                seeds = result[0]
 
-        return attractors
+            # Release memory once attractor seeds are known. We might need these
+            # for attractor set computation later, but only if the seeds are not empty.
+            if len(seeds) == 0:
+                node["percolated_network"] = None
+                node["percolated_nfvs"] = None
+                node["percolated_petri_net"] = None
 
-    def node_nfvs(self, node_id: int) -> list[str]:
+        return seeds
+
+    def node_attractor_sets(
+        self,
+        node_id: int,
+        compute: bool = False,
+    ) -> list[VertexSet]:
         """
-        Approximate minimum negative feedback vertex set on the subspace for the given node.
+        Return the list of attractor sets for the given `node_id`.
 
-        See :func:`biobalm.interaction_graph_utils.feedback_vertex_set` for further details.
+        Similar to :meth:`node_successors`, the method either computes the
+        data if unknown, or throws an exception, depending on the `compute`
+        flag.
+
+        Note that the same considerations regarding attractors in unexpanded
+        nodes apply as for :meth:`node_attractor_candidates`.
 
         Parameters
         ----------
         node_id: int
             The ID of the node.
+        compute: bool
+            Whether to compute the attractor sets if they are not already known.
+
+        Returns
+        -------
+        list[biodivine_aeon.VertexSet]
+            The list of attractor sets.
+        """
+        node = self.node_data(node_id)
+
+        sets = node["attractor_sets"]
+
+        if sets is None and not compute:
+            raise KeyError(f"Attractor sets not computed for node {node_id}.")
+
+        if sets is None:
+            seeds = self.node_attractor_seeds(node_id, compute=True)
+            result: tuple[list[BooleanSpace], list[VertexSet] | None] = ([], [])
+            if len(seeds) > 0:
+                result = compute_attractors_symbolic(
+                    self, node_id, candidate_states=seeds
+                )
+            assert result[1] is not None
+            node["attractor_sets"] = result[1]
+            sets = result[1]
+
+        return sets
+
+    def node_percolated_nfvs(self, node_id: int, compute: bool = False) -> list[str]:
+        """
+        Approximate minimum negative feedback vertex set on the Boolean network
+        percolated to the node's sub-space.
+
+        Similar to :meth:`node_successors`, the method either computes the
+        data if unknown, or throws an exception, depending on the `compute`
+        flag.
+
+        See :func:`biobalm.interaction_graph_utils.feedback_vertex_set` for
+        further details.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the node NFVS if it is not already known.
 
         Returns
         -------
@@ -570,20 +912,143 @@ class SuccessionDiagram:
             The negative feedback vertex set, as a list of node names.
         """
 
-        # TODO: Right now, we are just returning the gloval FVS. But in the future,
-        # we probably want to compute a separate FVS for each node, because it could
-        # be much smaller if a lot of the nodes are fixed.
         assert node_id in self.dag.nodes
 
-        if self.nfvs is None:
-            if self.network.variable_count() < SuccessionDiagram.NFVS_NODE_THRESHOLD:
+        node = self.node_data(node_id)
+
+        if node["percolated_nfvs"] is None and not compute:
+            raise KeyError(f"NFVS not computed for node {node_id}.")
+
+        if node["percolated_nfvs"] is None:
+            percolated_network = self.node_percolated_network(node_id, compute)
+            percolated_size = percolated_network.variable_count()
+            if percolated_size < self.config["nfvs_size_threshold"]:
                 # Computing the *negative* variant of the FVS is surprisingly costly.
                 # Hence it mostly makes sense for the smaller networks only.
-                self.nfvs = feedback_vertex_set(self.network, parity="negative")
+                nfvs = feedback_vertex_set(percolated_network, parity="negative")
             else:
-                self.nfvs = feedback_vertex_set(self.network)
+                nfvs = feedback_vertex_set(percolated_network)
+            node["percolated_nfvs"] = nfvs
+        else:
+            nfvs = node["percolated_nfvs"]
 
-        return self.nfvs
+        return nfvs
+
+    def node_percolated_network(
+        self, node_id: int, compute: bool = False
+    ) -> BooleanNetwork:
+        """
+        The Boolean network percolated to the node's sub-space, with
+        constant variables removed.
+
+        Similar to :meth:`node_successors`, the method either computes the
+        data if unknown, or throws an exception, depending on the `compute`
+        flag.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the node NFVS if it is not already known.
+
+        Returns
+        -------
+        biodivine_aeon.BooleanNetwork
+            The percolated Boolean network.
+        """
+
+        assert node_id in self.dag.nodes
+
+        node = self.node_data(node_id)
+        network = node["percolated_network"]
+
+        node_space = node["space"]
+
+        if len(node_space) == self.network.variable_count():
+            # If fixed point, no need to compute, the network is always empty.
+            return BooleanNetwork()
+
+        if network is None and not compute:
+            raise KeyError(f"Percolated network not computed for node {node_id}.")
+
+        if network is None:
+            network = percolate_network(
+                self.network, node_space, self.symbolic, remove_constants=True
+            )
+            if self.config["debug"]:
+                print(
+                    f"[{node_id}] Computed percolated network with {network.variable_count()} variables (vs {self.network.variable_count()})."
+                )
+            node["percolated_network"] = network
+
+        return network
+
+    def node_percolated_petri_net(
+        self,
+        node_id: int,
+        compute: bool = False,
+        parent_id: int | None = None,
+    ) -> nx.DiGraph:
+        """
+        The Petri net representation of the Boolean network percolated to the
+        node's sub-space (with constant variables removed).
+
+        Similar to :meth:`node_successors`, the method either computes the
+        data if unknown, or throws an exception, depending on the `compute`
+        flag.
+
+        Parameters
+        ----------
+        node_id: int
+            The ID of the node.
+        compute: bool
+            Whether to compute the node NFVS if it is not already known.
+        parent_id: int | None
+            If given, the percolation process starts with the Petri net of the given
+            parent node (if computed). If parent is not given, the percolation starts
+            with `SuccessionDiagram.petri_net`, which can be slower but yields the
+            same result.
+
+        Returns
+        -------
+        networkx.DiGraph
+            The percolated Boolean network.
+        """
+
+        assert node_id in self.dag.nodes
+
+        node = self.node_data(node_id)
+        percolated_pn = node["percolated_petri_net"]
+
+        node_space = node["space"]
+
+        if len(node_space) == self.network.variable_count():
+            # If fixed point, the result is always empty.
+            return nx.DiGraph()
+
+        if percolated_pn is None and not compute:
+            raise KeyError(f"Percolated network not computed for node {node_id}.")
+
+        if percolated_pn is None:
+            base_pn = self.petri_net
+            percolate_space = node_space
+            if parent_id is not None:
+                parent_pn = self.node_data(parent_id)["percolated_petri_net"]
+                if parent_pn is not None:
+                    base_pn = parent_pn
+                    percolate_space = node_space
+
+            percolated_pn = restrict_petrinet_to_subspace(base_pn, percolate_space)
+
+            if self.config["debug"]:
+                print(
+                    f"[{node_id}] Generated Petri net restriction with {len(percolated_pn.nodes)} nodes and {len(percolated_pn.edges)} edges."
+                )
+
+            node["percolated_petri_net"] = percolated_pn
+
+        return percolated_pn
 
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
@@ -826,52 +1291,6 @@ class SuccessionDiagram:
         current_depth = cast(int, self.dag.nodes[node_id]["depth"])
         self.dag.nodes[node_id]["depth"] = max(current_depth, parent_depth + 1)
 
-    def _update_node_petri_net(self, node_id: int, parent_id: int | None):
-        """
-        Try to compute a restricted Petri net for this node using the Petri net
-        stored in the node's parent.
-
-        If the parent Petri net does not exist or the parent is not specified, the
-        restriction is performed on the "global" Petri net object, which is usually
-        slower but should yield the same result.
-
-        No Petri net is computed if the specified node is a fixed-point, since
-        such Petri net is always empty.
-        """
-
-        node_space = self.node_data(node_id)["space"]
-
-        if len(node_space) == self.network.variable_count():
-            # If fixed point, no need to compute.
-            return
-
-        if parent_id is not None:
-            parent_pn = self.node_data(parent_id)["petri_net"]
-            if parent_pn is None:
-                pn = self.petri_net
-            else:
-                pn = parent_pn
-        else:
-            pn = self.petri_net
-
-        restricted_pn = restrict_petrinet_to_subspace(pn, node_space)
-
-        if DEBUG:
-            print(
-                f"[{node_id}] Generated Petri net restriction with {len(restricted_pn.nodes)} nodes and {len(restricted_pn.edges)} edges."
-            )
-
-        self.dag.nodes[node_id]["petri_net"] = restricted_pn
-
-    def _clear_node_petri_net(self, node_id: int):
-        """
-        Remove the computed Petri net for this node.
-
-        This is typically done once the node is expanded, since we know the Petri net won't
-        be needed anymore.
-        """
-        del self.dag.nodes[node_id]["petri_net"]
-
     def _expand_one_node(self, node_id: int):
         """
         An internal method that expands a single node of the succession diagram.
@@ -888,11 +1307,15 @@ class SuccessionDiagram:
         if node["expanded"]:
             return
 
-        node["expanded"] = True
-        node["attractors"] = None
+        # If the node had any attractor data computed as unexpanded, these are
+        # no longer valid and need to be erased.
+        node["attractor_seeds"] = None
+        node["attractor_candidates"] = None
+        node["attractor_sets"] = None
+
         current_space = node["space"]
 
-        if DEBUG:
+        if self.config["debug"]:
             print(
                 f"[{node_id}] Expanding: {len(self.node_data(node_id)['space'])} fixed vars."
             )
@@ -900,8 +1323,9 @@ class SuccessionDiagram:
         if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
             # return this fixed-point again. No need to continue.
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Found fixed-point: {current_space}.")
+            node["expanded"] = True
             return
 
         # We use the non-propagated Petri net for backwards-compatibility reasons here.
@@ -912,12 +1336,17 @@ class SuccessionDiagram:
             source_nodes = extract_source_variables(self.petri_net)
 
         sub_spaces: list[BooleanSpace]
-        pn = self.node_data(node_id)["petri_net"]
+
+        # Only use the percolated PN if it is already known.
+        pn = node["percolated_petri_net"]
         if pn is not None:
             # We have a pre-propagated PN for this sub-space, hence we can use
             # that to compute the trap spaces.
             partial_sub_spaces = trappist(
-                pn, problem="max", optimize_source_variables=source_nodes
+                pn,
+                problem="max",
+                optimize_source_variables=source_nodes,
+                solution_limit=self.config["max_motifs_per_node"],
             )
             sub_spaces = [(s | current_space) for s in partial_sub_spaces]
         else:
@@ -928,6 +1357,18 @@ class SuccessionDiagram:
                 problem="max",
                 ensure_subspace=current_space,
                 optimize_source_variables=source_nodes,
+                solution_limit=self.config["max_motifs_per_node"],
+            )
+
+        # Release the Petri net once the sub_spaces are computed.
+        # It might be needed later for attractor computation, but it
+        # uses a lot of memory in large diagrams to keep all the nets
+        # in memory.
+        node["percolated_petri_net"] = None
+
+        if len(sub_spaces) == self.config["max_motifs_per_node"]:
+            raise RuntimeError(
+                f"Exceeded the maximum amount of stable motifs per node ({self.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
             )
 
         # Sort the spaces based on a unique key in case trappist is not always
@@ -937,21 +1378,22 @@ class SuccessionDiagram:
         )
 
         if len(sub_spaces) == 0:
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Found minimum trap space: {current_space}.")
+            node["expanded"] = True
             return
 
-        if DEBUG:
+        if self.config["debug"]:
             print(f"[{node_id}] Found sub-spaces: {len(sub_spaces)}")
 
         for sub_space in sub_spaces:
             child_id = self._ensure_node(node_id, sub_space)
 
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Created edge into node {child_id}.")
 
-        # The node is now fully expanded, hence we won't need the restricted PN anymore.
-        self._clear_node_petri_net(node_id)
+        # If everything else worked out, we can mark the node as expanded.
+        node["expanded"] = True
 
     def _ensure_node(self, parent_id: int | None, stable_motif: BooleanSpace) -> int:
         """
@@ -980,7 +1422,12 @@ class SuccessionDiagram:
                 space=fixed_vars,
                 depth=0,
                 expanded=False,
-                attractors=None,
+                percolated_network=None,
+                percolated_petri_net=None,
+                percolated_nfvs=None,
+                attractor_candidates=None,
+                attractor_seeds=None,
+                attractor_sets=None,
             )
             self.node_indices[key] = child_id
         else:
@@ -995,6 +1442,11 @@ class SuccessionDiagram:
             self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
             self._update_node_depth(child_id, parent_id)
 
-        self._update_node_petri_net(child_id, parent_id)
+        # Compute the percolated petri net here, because we know the parent node ID
+        # and using its already percolated petri net helps a lot.
+        #
+        # (For percolated network and nfvs, knowing the parent ID is not as useful,
+        #  so the parent is not used and we can just compute them lazily)
+        self.node_percolated_petri_net(child_id, compute=True, parent_id=parent_id)
 
         return child_id

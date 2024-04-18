@@ -6,17 +6,20 @@ readme = "README.md"
 license = { file = "LISENSE" }
 requires-python = ">=3.11"
 dependencies = [
-    'biodivine_aeon ==1.0.0a4',
+    'biodivine_aeon ==1.0.0a6',
     'clingo >=5.6.2',
-    'networkx>=2.8.8',
-    'pypint>=1.6.2',
+    'networkx >=2.8.8',    
 ]
-version = "0.1.1"
+version = "0.2.0"
 
+# Pint can be used for static analysis, but is not mandatory.
+[project.optional-dependencies]
+pint = [
+    "pypint==1.6.2"
+]
 
 [tool.setuptools]
-packages = ['biobalm', 'biobalm._sd_algorithms']
-
+packages = ['biobalm', 'biobalm._sd_algorithms', 'biobalm._sd_attractors']
 
 [tool.pyright]
 include = ["biobalm", "tests"]

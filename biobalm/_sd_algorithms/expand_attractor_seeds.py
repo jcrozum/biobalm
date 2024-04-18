@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
 
-import biobalm
-import biobalm.succession_diagram
-from biobalm.motif_avoidant import make_retained_set
+from biobalm.types import BooleanSpace
 from biobalm.space_utils import intersect
 from biobalm.trappist_core import compute_fixed_point_reduced_STG
+from biobalm._sd_attractors.attractor_candidates import make_heuristic_retained_set
+from biodivine_aeon import AsynchronousGraph
 
 
 def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None):
@@ -24,7 +24,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
     # motif-avoidant attractors.
     sd.expand_minimal_spaces(size_limit)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(
             "Minimal trap space expansion finished. Proceeding to attractor expansion."
         )
@@ -69,21 +69,33 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
             # Now, we need to asses if the next successor has some candidate states which
             # are not covered by the already expanded children.
 
-            successor_space = sd.node_data(successors[-1])["space"]
-            retained_set = make_retained_set(
-                sd.symbolic, sd.node_nfvs(node), successor_space
-            )
+            s = successors[-1]
+
+            successor_space = sd.node_data(s)["space"]
+            successor_bn = sd.node_percolated_network(s, compute=True)
+            successor_nfvs = sd.node_percolated_nfvs(s, compute=True)
+            successor_pn = sd.node_percolated_petri_net(s, compute=True)
+            successor_graph = AsynchronousGraph(successor_bn)
 
             avoid_or_none = [
                 intersect(successor_space, child) for child in expanded_motifs
             ]
             avoid = [x for x in avoid_or_none if x is not None]
+            avoid_restricted: list[BooleanSpace] = []
+            for x in avoid:
+                y: BooleanSpace = {
+                    var: val for (var, val) in x.items() if var not in successor_space
+                }
+                avoid_restricted.append(y)
+
+            retained_set = make_heuristic_retained_set(
+                successor_graph, successor_nfvs, avoid
+            )
 
             successor_seeds = compute_fixed_point_reduced_STG(
-                sd.petri_net,
+                successor_pn,
                 retained_set,
-                ensure_subspace=successor_space,
-                avoid_subspaces=avoid,
+                avoid_subspaces=avoid_restricted,
                 solution_limit=1,
             )
 
@@ -94,7 +106,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 successors.pop()
                 continue
 
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node}] Found successor with new attractor candidate seeds. Expand node {successors[-1]}."
                 )
@@ -103,7 +115,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
 
         if len(successors) == 0:
             # Everything is done for this `node` and we can continue to the next one.
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(f"[{node}] Finished node attractor expansion.")
             continue
 

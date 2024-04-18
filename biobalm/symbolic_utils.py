@@ -4,14 +4,12 @@ Utility operations for creating and manipulating symbolic functions.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
-    from typing import Literal
-
     from biodivine_aeon import Bdd, SymbolicContext
 
-from biodivine_aeon import BddVariableSet
+from biodivine_aeon import BddVariableSet, BddValuation
 
 from biobalm.types import BooleanSpace
 
@@ -128,3 +126,29 @@ def function_is_true(f: Bdd, state: BooleanSpace) -> bool:
         `True` if the function evaluates to `1` in the given state.
     """
     return function_eval(f, state) == 1
+
+
+def valuation_to_state(ctx: SymbolicContext, valuation: BddValuation) -> BooleanSpace:
+    """
+    Extract network state from a `BddValuation` into a `BooleanSpace`.
+
+    Parameters
+    ----------
+    f : SymbolicContext
+        A context which maps between network variables and their symbolic counterparts.
+    state : BddValuation
+        A valuation of the network's symbolic encoding.
+
+    Returns
+    -------
+    BooleanSpace
+        A `BooleanSpace` encoding the state data from the given valuation.
+    """
+
+    result: BooleanSpace = {}
+    for var, val in valuation.items():
+        n_var = ctx.find_network_variable(var)
+        if n_var is not None:
+            result[ctx.get_network_variable_name(n_var)] = cast(Literal[0, 1], int(val))
+
+    return result
