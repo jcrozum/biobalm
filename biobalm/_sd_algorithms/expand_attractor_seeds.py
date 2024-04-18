@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
 
-import biobalm
-import biobalm.succession_diagram
+from biobalm.types import BooleanSpace
 from biobalm.space_utils import intersect
 from biobalm.trappist_core import compute_fixed_point_reduced_STG
 from biobalm._sd_attractors.attractor_candidates import make_heuristic_retained_set
@@ -25,7 +24,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
     # motif-avoidant attractors.
     sd.expand_minimal_spaces(size_limit)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(
             "Minimal trap space expansion finished. Proceeding to attractor expansion."
         )
@@ -82,9 +81,11 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 intersect(successor_space, child) for child in expanded_motifs
             ]
             avoid = [x for x in avoid_or_none if x is not None]
-            avoid_restricted = []
+            avoid_restricted: list[BooleanSpace] = []
             for x in avoid:
-                y = {var: val for (var, val) in x.items() if var not in successor_space}
+                y: BooleanSpace = {
+                    var: val for (var, val) in x.items() if var not in successor_space
+                }
                 avoid_restricted.append(y)
 
             retained_set = make_heuristic_retained_set(
@@ -105,7 +106,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
                 successors.pop()
                 continue
 
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node}] Found successor with new attractor candidate seeds. Expand node {successors[-1]}."
                 )
@@ -114,7 +115,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
 
         if len(successors) == 0:
             # Everything is done for this `node` and we can continue to the next one.
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(f"[{node}] Finished node attractor expansion.")
             continue
 

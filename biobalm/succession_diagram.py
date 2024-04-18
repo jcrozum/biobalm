@@ -32,12 +32,12 @@ from biobalm.petri_net_translation import (
 )
 from biobalm.space_utils import percolate_network, percolate_space, space_unique_key
 from biobalm.trappist_core import trappist
-from biobalm.types import BooleanSpace, NodeData, SuccessionDiagramState
-
-DEBUG: bool = False
-"""
-If `True`, print debug and progress messages.
-"""
+from biobalm.types import (
+    BooleanSpace,
+    NodeData,
+    SuccessionDiagramState,
+    SuccessionDiagramConfiguration,
+)
 
 
 class SuccessionDiagram:
@@ -79,26 +79,6 @@ class SuccessionDiagram:
     <BLANKLINE>
     """
 
-    NFVS_NODE_THRESHOLD: int = 2_000
-    """
-    If the number of nodes in the (redunced) network is greater than this
-    threshold, we find a feedback vertex set (without consideration of cycle
-    sign) for reachability preprocessing. There is a trade-off between the speed
-    gains from a smaller node set to consider and the cost of determining which
-    FVS nodes only intersect negative cycles to find an NFVS subset. Typically,
-    for smaller networks, the trade-off is in favor of computing a smaller NFVS.
-    """
-
-    MAX_MOTIFS_PER_NODE = 100_000
-    """
-    An artificial limit on the number of stable motifs that can be
-    considered during the expansion a single node.
-
-    This limit is in place mainly to avoid surprising out of memory errors,
-    because currently there is no logging mechanism that would report the
-    number of stable motifs gradually.
-    """
-
     __slots__ = (
         "network",
         "symbolic",
@@ -106,9 +86,18 @@ class SuccessionDiagram:
         "nfvs",
         "dag",
         "node_indices",
+        "config",
     )
 
-    def __init__(self, network: BooleanNetwork):
+    def __init__(
+        self,
+        network: BooleanNetwork,
+        config: SuccessionDiagramConfiguration | None = None,
+    ):
+        if config is None:
+            config = SuccessionDiagram.default_config()
+        self.config = config
+
         # Original Boolean network.
         self.network: BooleanNetwork = cleanup_network(network)
         """
@@ -125,7 +114,7 @@ class SuccessionDiagram:
         The Petri net representation of the network (see :mod:`petri_net_translation<biobalm.petri_net_translation>`).
         """
 
-        if DEBUG:
+        if self.config["debug"]:
             print(
                 f"Generated global Petri net with {len(self.petri_net.nodes)} nodes and {len(self.petri_net.edges)} edges."
             )
@@ -157,6 +146,7 @@ class SuccessionDiagram:
             "nfvs": self.nfvs,
             "dag": self.dag,
             "node_indices": self.node_indices,
+            "config": self.config,
         }
 
     def __setstate__(self, state: SuccessionDiagramState):
@@ -167,12 +157,24 @@ class SuccessionDiagram:
         self.nfvs = state["nfvs"]
         self.dag = state["dag"]
         self.node_indices = state["node_indices"]
+        self.config = state["config"]
 
     def __len__(self) -> int:
         """
         Returns the number of nodes in this `SuccessionDiagram`.
         """
         return self.dag.number_of_nodes()
+
+    @staticmethod
+    def default_config() -> SuccessionDiagramConfiguration:
+        return {
+            "debug": False,
+            "max_motifs_per_node": 100_000,
+            "nfvs_size_threshold": 2_000,
+            "pint_goal_size_limit": 8_192,
+            "attractor_candidates_limit": 100_000,
+            "retained_set_optimization_threshold": 100,
+        }
 
     @staticmethod
     def from_rules(
@@ -614,7 +616,7 @@ class SuccessionDiagram:
         """
 
         for node_id in self.node_ids():
-            data = self.node_data[node_id]
+            data = self.node_data(node_id)
             data["percolated_network"] = None
             data["percolated_petri_net"] = None
             data["percolated_nfvs"] = None
@@ -910,10 +912,8 @@ class SuccessionDiagram:
 
         if node["percolated_nfvs"] is None:
             percolated_network = self.node_percolated_network(node_id, compute)
-            if (
-                percolated_network.variable_count()
-                < SuccessionDiagram.NFVS_NODE_THRESHOLD
-            ):
+            percolated_size = percolated_network.variable_count()
+            if percolated_size < self.config["nfvs_size_threshold"]:
                 # Computing the *negative* variant of the FVS is surprisingly costly.
                 # Hence it mostly makes sense for the smaller networks only.
                 nfvs = feedback_vertex_set(percolated_network, parity="negative")
@@ -967,7 +967,7 @@ class SuccessionDiagram:
             network = percolate_network(
                 self.network, node_space, self.symbolic, remove_constants=True
             )
-            if DEBUG:
+            if self.config["debug"]:
                 print(
                     f"[{node_id}] Computed percolated network with {network.variable_count()} variables (vs {self.network.variable_count()})."
                 )
@@ -1032,7 +1032,7 @@ class SuccessionDiagram:
 
             percolated_pn = restrict_petrinet_to_subspace(base_pn, percolate_space)
 
-            if DEBUG:
+            if self.config["debug"]:
                 print(
                     f"[{node_id}] Generated Petri net restriction with {len(percolated_pn.nodes)} nodes and {len(percolated_pn.edges)} edges."
                 )
@@ -1298,8 +1298,6 @@ class SuccessionDiagram:
         if node["expanded"]:
             return
 
-        node["expanded"] = True
-
         # If the node had any attractor data computed as unexpanded, these are
         # no longer valid and need to be erased.
         node["attractor_seeds"] = None
@@ -1308,7 +1306,7 @@ class SuccessionDiagram:
 
         current_space = node["space"]
 
-        if DEBUG:
+        if self.config["debug"]:
             print(
                 f"[{node_id}] Expanding: {len(self.node_data(node_id)['space'])} fixed vars."
             )
@@ -1316,8 +1314,9 @@ class SuccessionDiagram:
         if len(current_space) == self.network.variable_count():
             # This node is a fixed-point. Trappist would just
             # return this fixed-point again. No need to continue.
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Found fixed-point: {current_space}.")
+            node["expanded"] = True
             return
 
         # We use the non-propagated Petri net for backwards-compatibility reasons here.
@@ -1338,7 +1337,7 @@ class SuccessionDiagram:
                 pn,
                 problem="max",
                 optimize_source_variables=source_nodes,
-                solution_limit=SuccessionDiagram.MAX_MOTIFS_PER_NODE,
+                solution_limit=self.config["max_motifs_per_node"],
             )
             sub_spaces = [(s | current_space) for s in partial_sub_spaces]
         else:
@@ -1349,7 +1348,7 @@ class SuccessionDiagram:
                 problem="max",
                 ensure_subspace=current_space,
                 optimize_source_variables=source_nodes,
-                solution_limit=SuccessionDiagram.MAX_MOTIFS_PER_NODE,
+                solution_limit=self.config["max_motifs_per_node"],
             )
 
         # Release the Petri net once the sub_spaces are computed.
@@ -1358,9 +1357,9 @@ class SuccessionDiagram:
         # in memory.
         node["percolated_petri_net"] = None
 
-        if len(sub_spaces) == SuccessionDiagram.MAX_MOTIFS_PER_NODE:
+        if len(sub_spaces) == self.config["max_motifs_per_node"]:
             raise RuntimeError(
-                f"Exceeded the maximum amount of stable motifs per node (SuccessionDiagram.MAX_MOTIFS_PER_NODE={SuccessionDiagram.MAX_MOTIFS_PER_NODE})."
+                f"Exceeded the maximum amount of stable motifs per node ({self.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
             )
 
         # Sort the spaces based on a unique key in case trappist is not always
@@ -1370,18 +1369,22 @@ class SuccessionDiagram:
         )
 
         if len(sub_spaces) == 0:
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Found minimum trap space: {current_space}.")
+            node["expanded"] = True
             return
 
-        if DEBUG:
+        if self.config["debug"]:
             print(f"[{node_id}] Found sub-spaces: {len(sub_spaces)}")
 
         for sub_space in sub_spaces:
             child_id = self._ensure_node(node_id, sub_space)
 
-            if DEBUG:
+            if self.config["debug"]:
                 print(f"[{node_id}] Created edge into node {child_id}.")
+
+        # If everything else worked out, we can mark the node as expanded.
+        node["expanded"] = True
 
     def _ensure_node(self, parent_id: int | None, stable_motif: BooleanSpace) -> int:
         """

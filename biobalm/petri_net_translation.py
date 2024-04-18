@@ -359,14 +359,14 @@ def network_to_petrinet(
     return pn
 
 
-def _optimized_recursive_dnf_generator(
+def optimized_recursive_dnf_generator(
     bdd: Bdd,
 ) -> Generator[BddPartialValuation, None, None]:
     """
     Yields a generator of `BddPartialValuation` objects, similar to
-    `bdd.clause_iterator`, but uses a recursive optimization strategy to return
-    a smaller result than the default method `Bdd` clause sequence. Note that
-    this is still not the "optimal" DNF, but is often close enough.
+    `Bdd.clause_iterator` in AEON, but uses a recursive optimization strategy
+    to return a smaller result than the default method `Bdd` clause sequence.
+    Note that this is still not the "optimal" DNF, but is often close enough.
 
     This is technically slower for BDDs that already have a small clause count,
     but can be much better in the long-term when the clause count is high.
@@ -398,11 +398,11 @@ def _optimized_recursive_dnf_generator(
             best_size = t_size + f_size
             best_var = var
 
-    for t_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: True})):
+    for t_val in optimized_recursive_dnf_generator(bdd.r_restrict({best_var: True})):
         t_val[best_var] = True
         yield t_val
 
-    for f_val in _optimized_recursive_dnf_generator(bdd.r_restrict({best_var: False})):
+    for f_val in optimized_recursive_dnf_generator(bdd.r_restrict({best_var: False})):
         f_val[best_var] = False
         yield f_val
 
@@ -421,7 +421,7 @@ def _create_transitions(
     """
     dir_str = "up" if go_up else "down"
     total = 0
-    for t_id, implicant in enumerate(_optimized_recursive_dnf_generator(implicant_bdd)):
+    for t_id, implicant in enumerate(optimized_recursive_dnf_generator(implicant_bdd)):
         total += 1
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
         pn.add_node(  # type: ignore[reportUnknownMemberType]

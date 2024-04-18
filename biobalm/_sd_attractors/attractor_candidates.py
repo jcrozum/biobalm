@@ -16,29 +16,15 @@ if TYPE_CHECKING:
 
 import random
 import biobalm
-from biodivine_aeon import Bdd, AsynchronousGraph
+from biodivine_aeon import Bdd, AsynchronousGraph, BddVariable
 from biobalm.trappist_core import compute_fixed_point_reduced_STG
 from biobalm.symbolic_utils import state_list_to_bdd, valuation_to_state, state_to_bdd
 
 try:
-    PINT_AVAILABLE = True
-    import biobalm._pint_reachability as pint
+    pint_available = True
+    import biobalm._pint_reachability
 except ModuleNotFoundError:
-    PINT_AVAILABLE = False
-
-
-CANDIDATES_HARD_LIMIT = 100_000
-"""
-If there are more than this amount of attractor candidates, then
-attractor detection will fail with a runtime error. This is mainly to
-avoid out-of-memory errors or crashing clingo.
-"""
-
-RETAINED_SET_OPTIMIZATION_THRESHOLD = 100
-"""
-If there are more than this amount of attractor candidates, we will
-try to optimize the retained set using ASP (if enabled).
-"""
+    pint_available = False
 
 
 def compute_attractor_candidates(
@@ -103,7 +89,7 @@ def compute_attractor_candidates(
         The list of attractor candidate states.
     """
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(f"[{node_id}] Start computing attractor candidates.")
 
     node_data = sd.node_data(node_id)
@@ -111,13 +97,13 @@ def compute_attractor_candidates(
     node_space = node_data["space"]
 
     if len(node_space) == sd.network.variable_count():
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] > Attractor candidates done: node is a fixed-point.")
         return [node_space]
 
     node_nfvs = sd.node_percolated_nfvs(node_id, compute=True)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         root_nfvs = sd.node_percolated_nfvs(sd.root(), compute=True)
         print(
             f"[{node_id}] > Percolated node NFVS contains {len(node_nfvs)} nodes (vs {len(root_nfvs)} in the root)."
@@ -140,7 +126,7 @@ def compute_attractor_candidates(
     # In either case, the space must contain at least one attractor.
     node_is_pseudo_minimal = len(child_motifs_reduced) == 0
 
-    if biobalm.succession_diagram.DEBUG and node_is_pseudo_minimal:
+    if sd.config["debug"] and node_is_pseudo_minimal:
         print(
             f"[{node_id}] > The node has no children (i.e. it is minimal or unexpanded)."
         )
@@ -162,7 +148,7 @@ def compute_attractor_candidates(
         assert not sd.node_is_minimal(node_id)
 
         if not node_is_pseudo_minimal:
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node_id}] > Attractor candidates done: empty NFVS in a non-minimal space."
                 )
@@ -197,7 +183,7 @@ def compute_attractor_candidates(
     if len(retained_set) == sd.network.variable_count() and node_is_pseudo_minimal:
         # If the retained set describes a fixed point, then only one attractor
         # is present in this space and it must contain the state described by the retained set.
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(
                 f"[{node_id}] > Singular attractor found through fixed-point retained set. Done."
             )
@@ -208,13 +194,13 @@ def compute_attractor_candidates(
             pn_reduced,
             retained_set,
             avoid_subspaces=child_motifs_reduced,
-            solution_limit=CANDIDATES_HARD_LIMIT,
+            solution_limit=sd.config["attractor_candidates_limit"],
         )
-        if len(candidate_states) == CANDIDATES_HARD_LIMIT:
+        if len(candidate_states) == sd.config["attractor_candidates_limit"]:
             raise RuntimeError(
-                f"Exceeded the maximum amount of attractor candidates ({CANDIDATES_HARD_LIMIT=})."
+                f"Exceeded the maximum amount of attractor candidates ({sd.config['attractor_candidates_limit']}; see `SuccessionDiagramConfiguation.attractor_candidates_limit`)."
             )
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(
                 f"[{node_id}] Computed {len(candidate_states)} candidate states without retained set optimization."
             )
@@ -223,21 +209,22 @@ def compute_attractor_candidates(
             pn_reduced,
             retained_set,
             avoid_subspaces=child_motifs_reduced,
-            solution_limit=RETAINED_SET_OPTIMIZATION_THRESHOLD,
+            solution_limit=sd.config["retained_set_optimization_threshold"],
         )
 
-        if len(candidate_states) < RETAINED_SET_OPTIMIZATION_THRESHOLD:
+        if len(candidate_states) < sd.config["retained_set_optimization_threshold"]:
             # The candidate set is small. No need to overthink it. The original
             # retained set is probably quite good. However, we can still try to
             # optimize it further if it makes sense.
             if len(candidate_states) > 1 or (
                 not node_is_pseudo_minimal and len(candidate_states) > 0
             ):
-                if biobalm.succession_diagram.DEBUG:
+                if sd.config["debug"]:
                     print(
                         f"[{node_id}] Initial retained set generated {len(candidate_states)} candidates. Optimizing..."
                     )
                 optimized = asp_greedy_retained_set_optimization(
+                    sd,
                     node_id,
                     petri_net=pn_reduced,
                     retained_set=retained_set,
@@ -249,9 +236,9 @@ def compute_attractor_candidates(
         else:
             # There seem to be many candidates, in which case it might be better
             # to optimize the retained set dynamically.
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
-                    f"[{node_id}] Initial retained set generated >{RETAINED_SET_OPTIMIZATION_THRESHOLD} candidates. Regenerate retained set."
+                    f"[{node_id}] Initial retained set generated >{sd.config['retained_set_optimization_threshold']} candidates. Regenerate retained set."
                 )
             retained_set = {}
             candidate_states = []
@@ -261,11 +248,11 @@ def compute_attractor_candidates(
                     pn_reduced,
                     retained_set,
                     avoid_subspaces=child_motifs_reduced,
-                    solution_limit=CANDIDATES_HARD_LIMIT,
+                    solution_limit=sd.config["attractor_candidates_limit"],
                 )
 
                 if len(candidate_states_zero) <= len(candidate_states):
-                    if biobalm.succession_diagram.DEBUG:
+                    if sd.config["debug"]:
                         print(
                             f"[{node_id}] Chosen {var}=0 without increasing candidate count ({len(candidate_states_zero)}). {len(retained_set)}/{len(node_nfvs)} variables chosen."
                         )
@@ -281,15 +268,17 @@ def compute_attractor_candidates(
                 )
 
                 if (
-                    len(candidate_states_zero) == CANDIDATES_HARD_LIMIT
-                    and len(candidate_states_one) == CANDIDATES_HARD_LIMIT
+                    len(candidate_states_zero)
+                    == sd.config["attractor_candidates_limit"]
+                    and len(candidate_states_one)
+                    == sd.config["attractor_candidates_limit"]
                 ):
                     raise RuntimeError(
-                        f"Exceeded the maximum amount of attractor candidates ({CANDIDATES_HARD_LIMIT=})."
+                        f"Exceeded the maximum amount of attractor candidates ({sd.config['attractor_candidates_limit']}; see `SuccessionDiagramConfiguation.attractor_candidates_limit`)."
                     )
 
                 if len(candidate_states_one) <= len(candidate_states):
-                    if biobalm.succession_diagram.DEBUG:
+                    if sd.config["debug"]:
                         print(
                             f"[{node_id}] Chosen {var}=1 without increasing candidate count ({len(candidate_states_one)}). {len(retained_set)}/{len(node_nfvs)} variables chosen."
                         )
@@ -297,14 +286,14 @@ def compute_attractor_candidates(
                     continue
 
                 if len(candidate_states_zero) < len(candidate_states_one):
-                    if biobalm.succession_diagram.DEBUG:
+                    if sd.config["debug"]:
                         print(
                             f"[{node_id}] Chosen {var}=0 with better candidate count ({len(candidate_states_zero)}). {len(retained_set)}/{len(node_nfvs)} variables chosen."
                         )
                     candidate_states = candidate_states_zero
                     retained_set[var] = 0
                 else:
-                    if biobalm.succession_diagram.DEBUG:
+                    if sd.config["debug"]:
                         print(
                             f"[{node_id}] Chosen {var}=1 with better candidate count ({len(candidate_states_one)}). {len(retained_set)}/{len(node_nfvs)} variables chosen."
                         )
@@ -313,9 +302,10 @@ def compute_attractor_candidates(
 
                 # At this point, we know the candidate count increased and so we should
                 # try to bring it back down.
-                if biobalm.succession_diagram.DEBUG:
+                if sd.config["debug"]:
                     print(f"[{node_id}] Optimizing partial retained set...")
                 optimized = asp_greedy_retained_set_optimization(
+                    sd,
                     node_id,
                     petri_net=pn_reduced,
                     retained_set=retained_set,
@@ -327,23 +317,23 @@ def compute_attractor_candidates(
 
     # Terminate if done.
     if len(candidate_states) == 0:
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] > Initial candidate set empty. Done.")
         return []
     if node_is_pseudo_minimal and len(candidate_states) == 1:
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(
                 f"[{node_id}] > Single candidate found in (pseudo) minimal trap space. Done."
             )
         return [candidate_states[0] | node_space]
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(
             f"[{node_id}] > Attractor candidates from retained set: {len(candidate_states)}."
         )
 
     if simulation_minification:
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] Start simulation minification...")
         avoid_children_symbolic = state_list_to_bdd(
             graph_reduced.symbolic_context(), child_motifs_reduced
@@ -354,11 +344,12 @@ def compute_attractor_candidates(
         # cannot reduce any further states, we are done.
         iterations = 1024
         while len(candidate_states) > 0:
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node_id}] > Start simulation with {len(candidate_states)} states and simulation limit {iterations}."
                 )
             reduced = run_simulation_minification(
+                sd,
                 node_id,
                 graph_reduced,
                 candidate_states,
@@ -377,25 +368,25 @@ def compute_attractor_candidates(
             if len(candidate_states) == 1 and avoid_children_symbolic.is_false():
                 break
 
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] > Candidates after simulation: {len(candidate_states)}")
 
     # Terminate if done.
     if len(candidate_states) == 0:
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] > Candidate set empty. Done.")
         return []
     if node_is_pseudo_minimal and len(candidate_states) == 1:
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(
                 f"[{node_id}] > Single candidate found in (pseudo) minimal trap space. Done."
             )
         return [candidate_states[0] | node_space]
 
-    if pint_minification and not PINT_AVAILABLE:
+    if pint_minification and not pint_available:
         print("WARNING: Using `pint`, but `pint` is not installed. Skipping.")
-    elif pint_minification and PINT_AVAILABLE:
-        if biobalm.succession_diagram.DEBUG:
+    elif pint_minification and pint_available:
+        if sd.config["debug"]:
             print(f"[{node_id}] Start `pint` minification...")
 
         children_bdd = state_list_to_bdd(
@@ -406,7 +397,7 @@ def compute_attractor_candidates(
         )
         avoid_bdd = children_bdd.l_or(candidates_bdd)
 
-        filtered_states = []
+        filtered_states: list[BooleanSpace] = []
         for i, state in enumerate(candidate_states):
             state_bdd = state_to_bdd(graph_reduced.symbolic_context(), state)
 
@@ -414,7 +405,9 @@ def compute_attractor_candidates(
 
             keep = True
             try:
-                if pint._pint_reachability(pn_reduced, state, avoid_bdd):
+                if biobalm._pint_reachability.pint_reachability(
+                    pn_reduced, state, avoid_bdd, sd.config
+                ):
                     keep = False
             except RuntimeError as e:
                 assert str(e) == "Cannot verify."
@@ -423,14 +416,14 @@ def compute_attractor_candidates(
                 avoid_bdd = avoid_bdd.l_or(state_bdd)
                 filtered_states.append(state)
 
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node_id}] > `pint` {i + 1}/{len(candidate_states)}: eliminated: {not keep}, retained: {len(filtered_states)}."
                 )
 
         candidate_states = filtered_states
 
-        if biobalm.succession_diagram.DEBUG:
+        if sd.config["debug"]:
             print(f"[{node_id}] > Candidates after `pint`: {len(candidate_states)}")
 
     # Finally, we need to augment each candidate state with the
@@ -442,6 +435,7 @@ def compute_attractor_candidates(
 
 
 def run_simulation_minification(
+    sd: SuccessionDiagram,
     node_id: int,
     graph: AsynchronousGraph,
     candidate_states: list[BooleanSpace],
@@ -484,7 +478,7 @@ def run_simulation_minification(
     # associate them with the corresponding network's update functions.
     symbolic_ctx = graph.symbolic_context()
     network_vars = graph.network_variables()
-    symbolic_vars = []
+    symbolic_vars: list[BddVariable] = []
     for var in network_vars:
         s_var = symbolic_ctx.find_network_bdd_variable(var)
         assert s_var is not None
@@ -502,7 +496,7 @@ def run_simulation_minification(
         filtered_candidates: list[BooleanSpace] = []
 
         for i, state in enumerate(candidate_states):
-            if i % 100 == 99 and biobalm.succession_diagram.DEBUG:
+            if i % 100 == 99 and sd.config["debug"]:
                 print(
                     f"[{node_id}] > Simulation progress: {i + 1}/{len(candidate_states)}"
                 )
@@ -566,12 +560,12 @@ def run_simulation_minification(
         # and (b) we can stop with one candidate instead of zero.
 
         candidates_bdd = state_list_to_bdd(symbolic_ctx, candidate_states)
-        printed = set()
+        printed: set[int] = set()
         for i in range(max_iterations):
             progress = int((i * len(candidate_states)) / max_iterations)
             if (
                 progress % 100 == 99
-                and biobalm.succession_diagram.DEBUG
+                and sd.config["debug"]
                 and (progress not in printed)
             ):
                 printed.add(progress)
@@ -613,6 +607,7 @@ def run_simulation_minification(
 
 
 def asp_greedy_retained_set_optimization(
+    sd: SuccessionDiagram,
     node_id: int,
     petri_net: DiGraph,
     retained_set: BooleanSpace,
@@ -674,7 +669,7 @@ def asp_greedy_retained_set_optimization(
                 retained_set = retained_set_2
                 candidate_states = candidate_states_2
                 done = False
-                if biobalm.succession_diagram.DEBUG:
+                if sd.config["debug"]:
                     print(
                         f"[{node_id}] > Candidate states optimized to {len(candidate_states)}."
                     )
@@ -723,7 +718,7 @@ def make_heuristic_retained_set(
         A :class:`BooleanSpace<biobalm.types.BooleanSpace>` object describing the
         retained set.
     """
-    retained_set = {}
+    retained_set: BooleanSpace = {}
 
     # First, if there are any child spaces present, we extend the retained set
     # with the values from the one that has the least amount of fixed variables

@@ -45,6 +45,11 @@ class SuccessionDiagramState(TypedDict):
     diagram (see :func:`biobalm.space_utils.space_unique_key`).
     """
 
+    config: SuccessionDiagramConfiguration
+    """
+    "Global" configuration of a succession diagram.
+    """
+
 
 class NodeData(TypedDict):
     """
@@ -152,4 +157,74 @@ class NodeData(TypedDict):
 
     If `None`, these have not been computed, and the node may or may not
     have associated attractors.
+    """
+
+
+class SuccessionDiagramConfiguration(TypedDict):
+    """
+    Describes the configuration options of a `SuccessionDiagram`.
+
+    Use :meth:`SuccessionDiagram.default_config` to create a
+    configuration dictionary pre-populated with default values.
+    """
+
+    debug: bool
+    """
+    If `True`, the `SuccessionDiagram` will print messages
+    describing the progress of the running operations.
+
+    [Default: False]
+    """
+
+    max_motifs_per_node: int
+    """
+    Limit on the number of stable motifs explored for one node of a succession
+    diagram. If this limit is exceeded during node expansion, a `RuntimeError`
+    is raised and the node remains unexpanded.
+
+    This limit is in place mainly to avoid surprising out of memory errors,
+    because currently there is no logging mechanism that would report the
+    number of stable motifs gradually.
+
+    [Default: 100_000]
+    """
+
+    nfvs_size_threshold: int
+    """
+    For networks larger than this threshold, we only run FVS detection
+    instead of NFVS detection. This is still correct, but can produce
+    a larger node set.
+
+
+    There is a trade-off between the speed gains from a smaller node set
+    to consider and the cost of determining which FVS nodes only
+    intersect negative cycles to find an NFVS subset. Typically,
+    for smaller networks, the trade-off is in favor of
+    computing a smaller NFVS.
+    """
+
+    pint_goal_size_limit: int
+    """
+    Pint is called using command line and can only accept a limited number of arguments.
+    This limit is applied when constructing goals to avoid reaching this argument limit.
+
+    The limit currently applies to the total number of literals that can be used to
+    represent a goal.
+
+    The default value was empirically tested as safe on Debian linux, but other operating
+    systems may need a different limit to stay safe. Nevertheless, this should not be
+    an issue on smaller/simpler networks.
+    """
+
+    attractor_candidates_limit: int
+    """
+    If more than `attractor_candidates_limit` states are produced during the
+    attractor detection process, then the process fails with a `RuntimeError`.
+    This is mainly to avoid out-of-memory errors or crashing `clingo`.
+    """
+
+    retained_set_optimization_threshold: int
+    """
+    If there are more than this amount of attractor candidates, the attractor
+    detection process will try to optimize the retained set using ASP (if enabled).
     """

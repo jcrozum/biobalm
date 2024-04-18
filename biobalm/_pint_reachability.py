@@ -16,32 +16,19 @@ from pypint import Goal, InMemoryModel  # type:ignore
 
 from biobalm.petri_net_translation import (
     place_to_variable,
-    _optimized_recursive_dnf_generator,
+    optimized_recursive_dnf_generator,
 )
-from biobalm.types import BooleanSpace
-import biobalm
+from biobalm.types import BooleanSpace, SuccessionDiagramConfiguration
 
 if TYPE_CHECKING:
     from biodivine_aeon import Bdd
 
-GOAL_SIZE_LIMIT = 8192
-"""
-Pint is called using command line and can only accept a limited number of arguments.
-This limit is applied when constructing goals to avoid reaching this argument limit.
 
-The limit currently applies to the total number of literals that can be used to
-represent a goal.
-
-The default value was empirically tested as safe on Debian linux, but other operating
-systems may need a different limit to stay safe. Nevertheless, this should not be
-an issue on smaller/simpler networks.
-"""
-
-
-def _pint_reachability(
+def pint_reachability(
     petri_net: DiGraph,
     initial_state: BooleanSpace,
     target_states: Bdd,
+    config: SuccessionDiagramConfiguration,
 ) -> bool:
     """
     Use Pint to check if a given `initial_state` can possibly reach some state
@@ -59,15 +46,17 @@ def _pint_reachability(
     for var, level in initial_state.items():
         pint_model.initial_state[var] = level
 
-    goal = _pint_build_symbolic_goal(target_states)
+    goal = _pint_build_symbolic_goal(target_states, config)
 
-    def failed(_model, _goal):
+    def failed(*_):
         raise RuntimeError("Cannot verify.")
 
     return pint_model.reachability(goal=goal, fallback=failed)  # type: ignore
 
 
-def _pint_build_symbolic_goal(states: Bdd) -> Goal:
+def _pint_build_symbolic_goal(
+    states: Bdd, config: SuccessionDiagramConfiguration
+) -> Goal:
     """
     A helper method which (very explicitly) converts a set of states
     represented through a BDD into a Pint `Goal`.
@@ -80,8 +69,8 @@ def _pint_build_symbolic_goal(states: Bdd) -> Goal:
     assert not states.is_false()
 
     goals: list[Goal] = []
-    limit = GOAL_SIZE_LIMIT
-    for clause in _optimized_recursive_dnf_generator(states):
+    limit = config["pint_goal_size_limit"]
+    for clause in optimized_recursive_dnf_generator(states):
         named_clause = {
             states.__ctx__().get_variable_name(var): int(value)
             for var, value in clause.items()
@@ -92,7 +81,7 @@ def _pint_build_symbolic_goal(states: Bdd) -> Goal:
             # If the goal is too large to be passed as a command line argument,
             # break here and don't continue. This is not ideal but I'm not sure
             # how to fix this other than modifying `pint` itself.
-            if biobalm.succession_diagram.DEBUG:
+            if config["debug"]:
                 print(
                     "WARNING: `pint` goal size limit exceeded. A partial goal is used."
                 )
@@ -127,8 +116,8 @@ def _petri_net_as_automata_network(petri_net: DiGraph) -> str:
         if kind != "transition":
             continue
 
-        predecessors = set(cast(Iterable[str], petri_net.predecessors(transition)))
-        successors = set(cast(Iterable[str], petri_net.successors(transition)))
+        predecessors = set(cast(Iterable[str], petri_net.predecessors(transition)))  # type: ignore
+        successors = set(cast(Iterable[str], petri_net.successors(transition)))  # type: ignore
 
         # The value under modification is the only
         # value that is different between successors and predecessors.

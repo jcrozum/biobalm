@@ -4,10 +4,9 @@ from typing import TYPE_CHECKING, cast, Literal
 
 if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
-    from biodivine_aeon import VariableId, VertexSet
+    from biodivine_aeon import VariableId
 
-import biobalm
-from biodivine_aeon import AsynchronousGraph, ColoredVertexSet
+from biodivine_aeon import AsynchronousGraph, ColoredVertexSet, VertexSet
 from biobalm.symbolic_utils import state_list_to_bdd
 from biobalm.types import BooleanSpace
 
@@ -50,10 +49,12 @@ def compute_attractors_symbolic(
 
     # Ignore variables that are already fixed in the nodes space.
     # These are not used in the reduced network.
-    candidate_states_reduced = []
+    candidate_states_reduced: list[BooleanSpace] = []
     for candidate in candidate_states:
-        candidate = {k: v for (k, v) in candidate.items() if k not in node_space}
-        candidate_states_reduced.append(candidate)
+        candidate_reduced: BooleanSpace = {
+            k: v for (k, v) in candidate.items() if k not in node_space
+        }
+        candidate_states_reduced.append(candidate_reduced)
 
     child_motifs_reduced = []
     if node_data["expanded"]:
@@ -70,13 +71,13 @@ def compute_attractors_symbolic(
 
     avoid = candidate_set.union(children_set)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(
             f"[{node_id}] > Start symbolic seed state identification with {len(candidate_states)} candidates and {avoid} avoid states."
         )
 
     seeds: list[BooleanSpace] = []
-    sets = []
+    sets: list[ColoredVertexSet] = []
     for i, candidate in enumerate(candidate_states_reduced):
         is_last = i == len(candidate_states_reduced) - 1
         is_minimal = len(child_motifs_reduced) == 0
@@ -84,7 +85,7 @@ def compute_attractors_symbolic(
             # This node is pseudo-minimal, so it must contain at least
             # one attractor seed. If we only care about the attractor seeds,
             # we can thus return the last candidate without checking it.
-            if biobalm.succession_diagram.DEBUG:
+            if sd.config["debug"]:
                 print(
                     f"[{node_id}] > Single seed remaining in a (pseduo) minimal space. Done."
                 )
@@ -93,7 +94,7 @@ def compute_attractors_symbolic(
 
         avoid = avoid.minus(candidate_singleton)
 
-        closure = symbolic_attractor_test(node_id, graph_reduced, candidate, avoid)
+        closure = symbolic_attractor_test(sd, node_id, graph_reduced, candidate, avoid)
 
         if closure is None:
             # This candidate can reach someone else in the candidate set,
@@ -107,11 +108,11 @@ def compute_attractors_symbolic(
         seeds.append(candidate | node_space)
         sets.append(closure)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(f"[{node_id}] > Finished identification with {len(seeds)} seed states.")
 
     space_symbolic = sd.symbolic.mk_subspace(node_space).vertices()
-    sets_converted = []
+    sets_converted: list[VertexSet] = []
     for s in sets:
         # Extend the attractor set with fixed nodes from the node space.
         vertices = s.vertices()
@@ -123,6 +124,7 @@ def compute_attractors_symbolic(
 
 
 def symbolic_attractor_test(
+    sd: SuccessionDiagram,
     node_id: int,
     graph: AsynchronousGraph,
     pivot: BooleanSpace,
@@ -173,7 +175,7 @@ def symbolic_attractor_test(
     ]
     other_vars = sort_variable_list(other_vars)
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(
             f"[{node_id}] > Start symbolic reachability with {len(conflict_vars)} conflict variables and {len(other_vars)} other variables."
         )
@@ -186,7 +188,7 @@ def symbolic_attractor_test(
         saturation_done = False
         while not saturation_done:
             if avoid is not None and not avoid.intersect(reach_set).is_empty():
-                if biobalm.succession_diagram.DEBUG:
+                if sd.config["debug"]:
                     print(f"[{node_id}] > Discovered avoid state. Done.")
                 return None
 
@@ -196,10 +198,7 @@ def symbolic_attractor_test(
                 if not successors.is_empty():
                     reach_set = reach_set.union(successors)
                     saturation_done = False
-                    if (
-                        reach_set.symbolic_size() > 100_000
-                        and biobalm.succession_diagram.DEBUG
-                    ):
+                    if reach_set.symbolic_size() > 100_000 and sd.config["debug"]:
                         print(
                             f"[{node_id}] > Saturation({len(saturated_vars)}) Expanded reach_set: {reach_set}"
                         )
@@ -227,13 +226,13 @@ def symbolic_attractor_test(
                 saturated_vars.append(var)
                 saturated_vars = sort_variable_list(saturated_vars)
 
-                if biobalm.succession_diagram.DEBUG:
+                if sd.config["debug"]:
                     print(
                         f"[{node_id}] > Saturation({len(saturated_vars)}) Added saturation variable. {len(conflict_vars)} conflict and {len(other_vars)} other variables remaining."
                     )
                 break
 
-    if biobalm.succession_diagram.DEBUG:
+    if sd.config["debug"]:
         print(f"[{node_id}] > Reachability completed with {reach_set}.")
 
     return reach_set
