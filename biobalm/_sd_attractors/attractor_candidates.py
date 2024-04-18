@@ -65,21 +65,21 @@ def compute_attractor_candidates(
 
     Subsequently, the method can further optimize this set of candidates.
 
-    ### Greedy ASP minification
-
+    Greedy ASP minification
+    -----------------------
     Depending on which values are chosen for the NFVS nodes, a different set of
     candidates is obtained. This optimization method flips the initial NFVS node
     values and retains modifications that lead to a smaller candidate set, until
     a local minimum is achieved.
 
-    ### Simulation minification
-
+    Simulation minification
+    -----------------------
     It is often possible to reduce the candidate set using a pseudo-random walk
     which eventually leads to one of the child spaces, or to one of the existing
     candidate states.
 
-    ### Pint minification
-
+    Pint minification
+    -----------------
     The tool `pint` can perform (incomplete) reachability check for any network
     state, hence we can also use it to reduce the list of candidate states.
     This option is only available if pint is actually installed.
