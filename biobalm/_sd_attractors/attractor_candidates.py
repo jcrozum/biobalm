@@ -212,7 +212,7 @@ def compute_attractor_candidates(
         )
         if len(candidate_states) == CANDIDATES_HARD_LIMIT:
             raise RuntimeError(
-                f"Exceeded the maximum amount of attractor candidates (CANDIDATES_HARD_LIMIT={CANDIDATES_HARD_LIMIT})."
+                f"Exceeded the maximum amount of attractor candidates ({CANDIDATES_HARD_LIMIT=})."
             )
         if biobalm.succession_diagram.DEBUG:
             print(
@@ -285,7 +285,7 @@ def compute_attractor_candidates(
                     and len(candidate_states_one) == CANDIDATES_HARD_LIMIT
                 ):
                     raise RuntimeError(
-                        f"Exceeded the maximum amount of attractor candidates (CANDIDATES_HARD_LIMIT={CANDIDATES_HARD_LIMIT})."
+                        f"Exceeded the maximum amount of attractor candidates ({CANDIDATES_HARD_LIMIT=})."
                     )
 
                 if len(candidate_states_one) <= len(candidate_states):
