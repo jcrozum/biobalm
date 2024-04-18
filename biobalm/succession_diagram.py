@@ -180,6 +180,7 @@ class SuccessionDiagram:
     def from_rules(
         rules: str,
         format: Literal["bnet", "aeon", "sbml"] = "bnet",
+        config: SuccessionDiagramConfiguration | None = None,
     ) -> SuccessionDiagram:
         """
         Generate a succession diagram from the given string.
@@ -191,6 +192,9 @@ class SuccessionDiagram:
         format : Literal['bnet', 'aeon', 'sbml']
             The format of the string. One of `"bnet"`, `"aeon"`, or `"sbml"`.
             Defaults to `"bnet"`.
+        config : SuccessionDiagramConfiguration | None
+            An optional configuration object with internal settings
+            and default values.
 
         Returns
         -------
@@ -199,21 +203,26 @@ class SuccessionDiagram:
         """
 
         if format == "bnet":
-            return SuccessionDiagram(BooleanNetwork.from_bnet(rules))
+            return SuccessionDiagram(BooleanNetwork.from_bnet(rules), config)
         elif format == "aeon":
-            return SuccessionDiagram(BooleanNetwork.from_aeon(rules))
+            return SuccessionDiagram(BooleanNetwork.from_aeon(rules), config)
         elif format == "sbml":
-            return SuccessionDiagram(BooleanNetwork.from_sbml(rules))
+            return SuccessionDiagram(BooleanNetwork.from_sbml(rules), config)
         else:
             raise ValueError(f"Unknown format: {format}")
 
     @staticmethod
-    def from_file(path: str) -> SuccessionDiagram:
+    def from_file(
+        path: str, config: SuccessionDiagramConfiguration | None = None
+    ) -> SuccessionDiagram:
         """
         Read a `BooleanNetwork` from the given file path. The format is automatically inferred from
         the file extension.
+
+        Optionally, you can also supply a configuration object to customize the
+        resulting succession diagram.
         """
-        return SuccessionDiagram(BooleanNetwork.from_file(path))
+        return SuccessionDiagram(BooleanNetwork.from_file(path), config)
 
     def expanded_attractor_candidates(self) -> dict[int, list[BooleanSpace]]:
         """
