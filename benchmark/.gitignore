@@ -1,6 +1,0 @@
-
-# Ignore benchmark runs.
-_run_*
-
-# Ignore generated succession diagram files.
-_sd_expand_*
