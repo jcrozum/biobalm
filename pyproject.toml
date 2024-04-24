@@ -3,7 +3,7 @@ name = "biobalm"
 authors = [{ name = "Jordan Rozum", email = "jrozum@binghamton.edu" }]
 description = "Boolean Attractor Landscape Mapper"
 readme = "README.md"
-license = { file = "LISENSE" }
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
 dependencies = [
     'biodivine_aeon ==1.0.0a6',
