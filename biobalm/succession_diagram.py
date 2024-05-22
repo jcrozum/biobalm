@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 if TYPE_CHECKING:
     from typing import Iterator
 
+import copy
 import networkx as nx  # type: ignore
-from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId, VertexSet
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VertexSet
 
 # Attractor detection algorithms.
 from biobalm._sd_attractors.attractor_candidates import compute_attractor_candidates
@@ -173,7 +174,7 @@ class SuccessionDiagram:
             "nfvs_size_threshold": 2_000,
             "pint_goal_size_limit": 8_192,
             "attractor_candidates_limit": 100_000,
-            "retained_set_optimization_threshold": 100,
+            "retained_set_optimization_threshold": 1_000,
         }
 
     @staticmethod
@@ -1124,47 +1125,16 @@ class SuccessionDiagram:
         if node_id is None:
             node_id = self.root()
 
-        reference_bn = percolate_network(
-            self.network,
-            self.node_data(node_id)["space"],
-            remove_constants=True,
-        )
+        reference_bn = self.node_percolated_network(node_id, compute=True)
 
         source_scc_list = source_SCCs(reference_bn)
 
         for component_variables in source_scc_list:
-            new_bn = BooleanNetwork(component_variables)
-
-            # Build a mapping between the old and new network variables.
-            id_map: dict[VariableId, VariableId] = {}
-            for var in component_variables:
-                old_id = reference_bn.find_variable(var)
-                assert old_id is not None
-                new_id = new_bn.find_variable(var)
-                assert new_id is not None
-                id_map[old_id] = new_id
-
-            # Copy regulations that are in the source component.
-            for reg in reference_bn.regulations():
-                if reg["source"] in id_map and reg["target"] in id_map:
-                    new_bn.add_regulation(
-                        {
-                            "source": reference_bn.get_variable_name(reg["source"]),
-                            "target": reference_bn.get_variable_name(reg["target"]),
-                            "essential": reg["essential"],
-                            "sign": reg["sign"],
-                        }
-                    )
-
-            # Copy update functions from the source component after translating them
-            # to the new IDs.
-            for var_id in id_map.keys():
-                old_function = reference_bn.get_update_function(var_id)
-                assert old_function is not None
-                new_function = old_function.rename_all(new_bn, variables=id_map)
-                new_bn.set_update_function(id_map[var_id], new_function)
-
-            yield SuccessionDiagram(new_bn)
+            remaining_variables = [
+                v for v in reference_bn.variable_names() if v not in component_variables
+            ]
+            new_bn = reference_bn.drop(remaining_variables)
+            yield SuccessionDiagram(new_bn, copy.copy(self.config))
 
     def build(self):
         """
@@ -1436,11 +1406,7 @@ class SuccessionDiagram:
         assert child_id is not None
 
         if parent_id is not None:
-            # TODO: It seems that there are some networks where the same child
-            # can be reached through multiple stable motifs. Not sure how to
-            # approach these... but this is probably good enough for now.
-            self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
-            self._update_node_depth(child_id, parent_id)
+            self._ensure_edge(parent_id, child_id, stable_motif)
 
         # Compute the percolated petri net here, because we know the parent node ID
         # and using its already percolated petri net helps a lot.
@@ -1450,3 +1416,10 @@ class SuccessionDiagram:
         self.node_percolated_petri_net(child_id, compute=True, parent_id=parent_id)
 
         return child_id
+
+    def _ensure_edge(self, parent_id: int, child_id: int, stable_motif: BooleanSpace):
+        # TODO: It seems that there are some networks where the same child
+        # can be reached through multiple stable motifs. Not sure how to
+        # approach these... but this is probably good enough for now.
+        self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+        self._update_node_depth(child_id, parent_id)

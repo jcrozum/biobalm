@@ -7,9 +7,6 @@ import biobalm.succession_diagram
 from biobalm.succession_diagram import SuccessionDiagram
 from biobalm.types import BooleanSpace
 
-# This just ensures that the debug outputs are a part of the test output.
-biobalm.succession_diagram.DEBUG = True
-
 
 class SuccessionDiagramTest(unittest.TestCase):
     def test_succession_diagram_structure(self):
@@ -160,7 +157,6 @@ def test_expansion_size_limit_dfs():
 
 def test_expansion_comparisons(network_file: str):
     # Compare the succession diagrams for various expansion methods.
-    biobalm.succession_diagram.DEBUG = True
     NODE_LIMIT = 100
     DEPTH_LIMIT = 10
 

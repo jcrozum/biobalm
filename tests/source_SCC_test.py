@@ -1,38 +1,8 @@
-from biodivine_aeon import AsynchronousGraph, BooleanNetwork
+from biodivine_aeon import BooleanNetwork
 
 from biobalm import SuccessionDiagram
-from biobalm._sd_algorithms.expand_source_SCCs import (
-    expand_source_SCCs,
-    find_source_nodes,
-    find_subnetwork_sd,
-)
-from biobalm.space_utils import percolate_network, percolate_space
-
-
-def test_find_source_nodes():
-    bn = BooleanNetwork.from_bnet(
-        """targets,factors
-    constant1_1, (constant1_1 | !constant1_1)
-    constant1_0, (constant1_0 & !constant1_0)
-    constant2_1, true
-    constant2_0, false
-    source, source
-    oscillator, !oscillator
-    source_after_perc, source_after_perc & constant1_1
-    after_perc_0, after_perc_0 & constant1_0"""
-    ).infer_valid_graph()
-    graph = AsynchronousGraph(bn)
-
-    source_nodes = find_source_nodes(bn)
-
-    assert source_nodes == ["source"]
-
-    perc_space = percolate_space(graph, {})
-    perc_bn = percolate_network(bn, perc_space, symbolic_network=graph)
-
-    source_nodes = find_source_nodes(perc_bn)
-
-    assert source_nodes == ["source", "source_after_perc"]
+from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from biobalm.space_utils import percolate_network
 
 
 def test_perc_and_remove_constants_from_bn():
@@ -60,30 +30,6 @@ def test_perc_and_remove_constants_from_bn():
     clean_bnet2 = percolate_network(bn2, {}, remove_constants=True).to_bnet()
 
     assert clean_bnet == clean_bnet2
-
-
-def test_find_scc_sd():
-    bn = BooleanNetwork.from_bnet(
-        """targets,factors
-A, B
-B, A | C"""
-    )
-
-    # This "simulates" what would happen in the SCC expansion algorithm.
-    bn = percolate_network(bn, {"C": 0}, remove_constants=True)
-
-    scc_sd, _ = find_subnetwork_sd(
-        SuccessionDiagram(bn),
-        expander=SuccessionDiagram.expand_bfs,
-        check_maa=True,
-    )
-
-    for node in scc_sd.node_ids():
-        print(scc_sd.node_data(node)["space"])
-
-    assert scc_sd.dag.nodes[0]["space"] == {}
-    assert scc_sd.dag.nodes[1]["space"] == {"A": 0, "B": 0}
-    assert scc_sd.dag.nodes[2]["space"] == {"A": 1, "B": 1}
 
 
 def expansion(bn: BooleanNetwork):
@@ -145,7 +91,7 @@ def test_expansion():
 
 def attractor_search(bn: BooleanNetwork):
     sd = SuccessionDiagram(bn)
-    fully_expanded = expand_source_SCCs(sd)
+    fully_expanded = sd.expand_scc()
     assert fully_expanded
 
     attractor_count = 0
@@ -300,7 +246,7 @@ def test_attractor_search():
     )
     n, size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 4
+    assert size == 3
     assert depth == 2
     assert att == 4
     assert maa == 3
@@ -318,7 +264,7 @@ def test_attractor_search():
     )
     n, size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 7
+    assert size == 6
     assert depth == 3
     assert att == 5
     assert maa == 2
@@ -343,7 +289,7 @@ def test_attractor_search():
     )
     n, size, depth, att, maa, min = attractor_search(bn)
     assert n == 13
-    assert size == 41
+    assert size == 28
     assert depth == 6
     assert att == 28
     assert maa == 14
@@ -363,6 +309,37 @@ def test_attractor_search():
     assert maa == 0
     assert min == 2
 
+    # interesting example uncovered during testing (random-nk2/n20_29.bnet)
+
+    bn = BooleanNetwork.from_bnet(
+        """targets, factors
+    n0, (n12 & !n5) | (n12 & n5)
+    n1, (!n1 & !n15) | (n1 & !n15) | (n1 & n15)
+    n2, (n3 & !n15) | (n3 & n15)
+    n3, (!n17 & n3) | (n17 & !n3)
+    n4, (n0 & !n18) | (n0 & n18)
+    n5, (!n13 & !n16) | (!n13 & n16) | (n13 & n16)
+    n6, true
+    n7, (!n10 & !n1) | (n10 & !n1) | (n10 & n1)
+    n8, true
+    n9, (!n0 & !n19) | (!n0 & n19) | (n0 & !n19)
+    n10, (!n2 & !n17) | (!n2 & n17)
+    n11, (n16 & !n1)
+    n12, (!n3 & n12) | (n3 & n12)
+    n13, (!n8 & n3) | (n8 & !n3)
+    n14, (!n3 & !n15) | (n3 & !n15)
+    n15, (!n14 & !n15) | (!n14 & n15)
+    n16, (!n15 & !n11) | (n15 & !n11)
+    n17, (n2 & !n11) | (n2 & n11)
+    n18, (!n7 & !n18) | (!n7 & n18)
+    n19, (!n5 & !n12) | (!n5 & n12)"""
+    )
+    n, size, depth, att, maa, min = attractor_search(bn)
+    assert size == 15
+    assert min == 6
+    assert att == 6
+    assert maa == 0
+
 
 def test_isomorph():
     path = "models/bbm-bnet-inputs-true/005.bnet"
@@ -372,7 +349,7 @@ def test_isomorph():
     sd_bfs.expand_bfs()
 
     sd_scc = SuccessionDiagram(bn)
-    expand_source_SCCs(sd_scc)
+    sd_scc.expand_scc()
 
     assert [sd_bfs.node_data(id)["space"] for id in sd_bfs.node_ids()] == [
         sd_scc.node_data(id)["space"] for id in sd_scc.node_ids()

@@ -302,18 +302,22 @@ def compute_attractor_candidates(
 
                 # At this point, we know the candidate count increased and so we should
                 # try to bring it back down.
-                if sd.config["debug"]:
-                    print(f"[{node_id}] Optimizing partial retained set...")
-                optimized = asp_greedy_retained_set_optimization(
-                    sd,
-                    node_id,
-                    petri_net=pn_reduced,
-                    retained_set=retained_set,
-                    candidate_states=candidate_states,
-                    avoid_dnf=child_motifs_reduced,
-                )
-                retained_set = optimized[0]
-                candidate_states = optimized[1]
+                if (
+                    len(candidate_states)
+                    > sd.config["retained_set_optimization_threshold"]
+                ):
+                    if sd.config["debug"]:
+                        print(f"[{node_id}] Optimizing partial retained set...")
+                    optimized = asp_greedy_retained_set_optimization(
+                        sd,
+                        node_id,
+                        petri_net=pn_reduced,
+                        retained_set=retained_set,
+                        candidate_states=candidate_states,
+                        avoid_dnf=child_motifs_reduced,
+                    )
+                    retained_set = optimized[0]
+                    candidate_states = optimized[1]
 
     # Terminate if done.
     if len(candidate_states) == 0:

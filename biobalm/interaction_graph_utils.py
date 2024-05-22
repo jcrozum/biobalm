@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 from typing import cast
 
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SymbolicContext, SignType
 from networkx import DiGraph  # type: ignore
 
 
@@ -181,3 +181,34 @@ def source_SCCs(bn: BooleanNetwork) -> list[list[str]]:
             result.append(scc_names)
 
     return sorted(result)
+
+
+def source_nodes(
+    network: BooleanNetwork, ctx: SymbolicContext | None = None
+) -> list[str]:
+    """
+    Return the source nodes of a `BooleanNetwork`. That is, variables whose value
+    cannot change, but is not fixed to a `true`/`false` constant.
+
+    Note that this internally uses BDD translation to detect identity functions
+    semantically rather than syntactically. If you already have a `SymbolicContext`
+    for the given `network` available, you can supply it as the second argument.
+    """
+    if ctx is None:
+        ctx = SymbolicContext(network)
+
+    result: list[str] = []
+    for var in network.variable_names():
+        update_function = network.get_update_function(var)
+        if update_function is None:
+            # This is an input variable with unspecified update
+            # (this defaults to identity in most tools).
+            assert len(network.predecessors(var)) == 0
+            result.append(var)
+        else:
+            fn_bdd = ctx.mk_update_function(update_function)
+            var_bdd = ctx.mk_network_variable(var)
+            if fn_bdd == var_bdd:
+                result.append(network.get_variable_name(var))
+
+    return result
