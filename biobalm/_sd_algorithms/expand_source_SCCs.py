@@ -107,7 +107,7 @@ def expand_source_SCCs(
         # For each node in the current level, we expand all source SCCs and put the
         # results into a new level.
         for node_id in sorted(current_level):
-            source_scc_diagrams = list(sd.component_subdiagrams(node_id))
+            source_scc_diagrams = list(sd.source_scc_subdiagrams(node_id))
             if sd.config["debug"]:
                 print(
                     f" > [{node_id}] Found {len(source_scc_diagrams)} sub-diagrams while expanding node."
