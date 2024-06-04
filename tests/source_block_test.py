@@ -1,14 +1,13 @@
 from biodivine_aeon import BooleanNetwork
 
 from biobalm import SuccessionDiagram
-from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 
 def expansion(bn: BooleanNetwork):
     sd = SuccessionDiagram(bn)
-    fully_expanded = expand_source_SCCs(sd, check_maa=False)
+    fully_expanded = sd.expand_block(find_motif_avoidant_attractors=False)
     assert fully_expanded
 
-    return bn.variable_count(), len(sd), sd.depth(), len(sd.minimal_trap_spaces())
+    return bn.variable_count(), len(sd), len(list(sd.expanded_ids())), sd.depth(), len(sd.minimal_trap_spaces())
 
 
 def test_expansion():
@@ -19,9 +18,10 @@ def test_expansion():
     B, !A & !B | C
     C, A & B"""
     )
-    n, size, depth, min = expansion(bn)
+    n, size, e_size, depth, min = expansion(bn)
     assert n == 3
     assert size == 2
+    assert e_size == 2
     assert depth == 1
     assert min == 1
 
@@ -32,9 +32,10 @@ def test_expansion():
     B, !A | (A & B & C)
     C, !B | (A & B & C)"""
     )
-    n, size, depth, min = expansion(bn)
+    n, size, e_size, depth, min = expansion(bn)
     assert n == 3
     assert size == 2
+    assert e_size == 2
     assert depth == 1
     assert min == 1
 
@@ -48,26 +49,27 @@ def test_expansion():
     Y, !X | (X & Y & Z)
     Z, !Y | (X & Y & Z)"""
     )
-    n, size, depth, min = expansion(bn)
+    n, size, e_size, depth, min = expansion(bn)
     assert n == 6
-    assert size == 3
+    assert size == 4
+    assert e_size == 3
     assert depth == 2
     assert min == 1
 
     # real bnet
     bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/002.bnet")
-    _, _, _, min = expansion(bn)
+    _, _, _, _, min = expansion(bn)
     assert min == 24
 
 
 def attractor_search(bn: BooleanNetwork):
     sd = SuccessionDiagram(bn)
-    fully_expanded = sd.expand_scc()
+    fully_expanded = sd.expand_block(find_motif_avoidant_attractors=True)
     assert fully_expanded
 
     attractor_count = 0
     motif_avoidant_count = 0
-    for node in sd.node_ids():
+    for node in sd.expanded_ids():
         attr = sd.node_attractor_seeds(node, compute=True)
         attractor_count += len(attr)
         if not sd.node_is_minimal(node):
@@ -76,6 +78,7 @@ def attractor_search(bn: BooleanNetwork):
     return (
         bn.variable_count(),
         len(sd),
+        len(list(sd.expanded_ids())),
         sd.depth(),
         attractor_count,
         motif_avoidant_count,
@@ -95,9 +98,10 @@ def test_attractor_search():
     source_after_perc, source_after_perc & constant1_1
     after_perc_0, after_perc_0 & constant1_0"""
     )
-    N, size, depth, att, maa, min = attractor_search(bn)
+    N, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert N == 8
     assert size == 5
+    assert e_size == 5
     assert depth == 1
     assert att == 4
     assert maa == 0
@@ -109,9 +113,10 @@ def test_attractor_search():
     source2, source2
     oscillator, !oscillator"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 3
     assert size == 5
+    assert e_size == 5
     assert depth == 1
     assert att == 4
     assert maa == 0
@@ -121,9 +126,10 @@ def test_attractor_search():
         """targets,factors
     constant, true"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 1
     assert size == 1
+    assert e_size == 1
     assert depth == 0
     assert att == 1
     assert maa == 0
@@ -133,9 +139,10 @@ def test_attractor_search():
         """targets,factors
     oscillator, !oscillator"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 1
     assert size == 1
+    assert e_size == 1
     assert depth == 0
     assert att == 1
     assert maa == 0
@@ -150,9 +157,10 @@ def test_attractor_search():
     C, D & source2
     D, C"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 15
+    assert size == 17
+    assert e_size == 15
     assert depth == 3
     assert att == 9
     assert maa == 0
@@ -167,9 +175,10 @@ def test_attractor_search():
     C, D & source2
     D, C"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 15
+    assert size == 17
+    assert e_size == 15
     assert depth == 3
     assert att == 9
     assert maa == 0
@@ -182,9 +191,10 @@ def test_attractor_search():
     B, !A & !B | C
     C, A & B"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 3
     assert size == 2
+    assert e_size == 2
     assert depth == 1
     assert att == 2
     assert maa == 1
@@ -197,9 +207,10 @@ def test_attractor_search():
     B, !A | (A & B & C)
     C, !B | (A & B & C)"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 3
     assert size == 2
+    assert e_size == 2
     assert depth == 1
     assert att == 2
     assert maa == 1
@@ -215,9 +226,10 @@ def test_attractor_search():
     Y, !X | (X & Y & Z)
     Z, !Y | (X & Y & Z)"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 3
+    assert size == 4
+    assert e_size == 4
     assert depth == 2
     assert att == 4
     assert maa == 3
@@ -233,9 +245,10 @@ def test_attractor_search():
     B, !A & !B | C
     C, A & B & source"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 6
-    assert size == 6
+    assert size == 8
+    assert e_size == 7
     assert depth == 3
     assert att == 5
     assert maa == 2
@@ -258,9 +271,10 @@ def test_attractor_search():
     X3, Y3 & X2
     Y3, X3"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert n == 13
-    assert size == 28
+    assert size == 75
+    assert e_size == 41
     assert depth == 6
     assert att == 28
     assert maa == 14
@@ -268,14 +282,14 @@ def test_attractor_search():
 
     # real bnet
     bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/014.bnet")
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert att == 2
     assert maa == 0
     assert min == 2
 
     # real bnet
     bn = BooleanNetwork.from_file("models/bbm-bnet-inputs-true/177.bnet")
-    n, size, depth, att, maa, min = attractor_search(bn)
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
     assert att == 2
     assert maa == 0
     assert min == 2
@@ -305,8 +319,9 @@ def test_attractor_search():
     n18, (!n7 & !n18) | (!n7 & n18)
     n19, (!n5 & !n12) | (!n5 & n12)"""
     )
-    n, size, depth, att, maa, min = attractor_search(bn)
-    assert size == 15
+    n, size, e_size, depth, att, maa, min = attractor_search(bn)
+    assert size == 21
+    assert e_size == 13
     assert min == 6
     assert att == 6
     assert maa == 0

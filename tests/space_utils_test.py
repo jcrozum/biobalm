@@ -143,3 +143,30 @@ def test_space_unique_key():
     )
     assert space_unique_key({"a": 1}, bn) == space_unique_key({"a": 1}, bn)
     assert space_unique_key({"a": 1}, bn) != space_unique_key({"b": 1}, bn)
+
+
+def test_perc_and_remove_constants_from_bn():
+    bn = BooleanNetwork.from_bnet(
+        """targets,factors
+    constant1_1, (constant1_1 | !constant1_1)
+    constant1_0, (constant1_0 & !constant1_0)
+    constant2_1, true
+    constant2_0, false
+    source, source
+    oscillator, !oscillator
+    source_after_perc, source_after_perc & constant1_1
+    after_perc_0, after_perc_0 & constant1_0"""
+    ).infer_valid_graph()
+
+    clean_bnet = percolate_network(bn, {}, remove_constants=True).to_bnet()
+
+    bn2 = BooleanNetwork.from_bnet(
+        """targets,factors
+    source, source
+    oscillator, !oscillator
+    source_after_perc, source_after_perc"""
+    )
+
+    clean_bnet2 = percolate_network(bn2, {}, remove_constants=True).to_bnet()
+
+    assert clean_bnet == clean_bnet2

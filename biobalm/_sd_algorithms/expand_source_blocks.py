@@ -155,51 +155,57 @@ def expand_source_blocks(
                     f" > [{node}] Minimal blocks: {[(len(k), len(v)) for (k, v) in minimal_blocks]}"
                 )
 
-            # We will expand all nodes that are in the smallest block.
-            to_expand = minimal_blocks[0][1]
+            if not check_maa:
+                # We will expand all nodes that are in the smallest block.
+                to_expand = minimal_blocks[0][1]
 
-            if sd.config["debug"]:
-                print(f" > [{node}] Final block ({len(to_expand)}): {to_expand}")
+                if sd.config["debug"]:
+                    print(f" > [{node}] Final block ({len(to_expand)}): {to_expand}")
 
-            next_level = next_level | set(to_expand)
+                next_level = next_level | set(to_expand)
+            else:
+                # Here, we want to find the smallest block without any MAAs and choose it.
+                # If such block does not exist, we expand the whole node, because the MAAs
+                # can be either in this node, or in any of the child nodes. If a clean block
+                # is found, we know that it is safe to expand it without "missing" any MAAs.
+                clean_block_found = False
+                for (block, block_nodes) in minimal_blocks:
+                    block_sd = sd.component_subdiagram(list(block), node)
 
-            if check_maa:
-                # If we are checking for MAAs, it is sufficient to check the succession diagram
-                # that is induced by the chosen block. Every state that eventually always reaches
-                # one of the subspaces in the smaller network will do so in the larger network as
-                # well, since these trajectories can be repeated exactly as they do not depend
-                # on any of the other network variables.
-                chosen_block = minimal_blocks[0][0]
-                block_sd = sd.component_subdiagram(list(chosen_block), node)
+                    # The succession diagram "restricted" to the considered block should have
+                    # the same (restricted) successor nodes.
+                    assert len(
+                        block_sd.node_successors(block_sd.root(), compute=True)
+                    ) == len(block_nodes)
 
-                # The succession diagram "restricted" to our chosen block should have
-                # the same (restricted) successor nodes.
-                assert len(
-                    block_sd.node_successors(block_sd.root(), compute=True)
-                ) == len(to_expand)
-
-                # We could also consider using `seeds` instead of `candidates` here. Ultimately, this
-                # matters very rarely. The reasoning for why we use `candidates` is that we can (almost)
-                # always guarantee that the expansion is going to finish, even if some nodes do not
-                # have their MAAs eliminated. As such, one can try to use other techniques to disprove
-                # MAAs in the problematic nodes while using the nice properties of the expansion to
-                # still disprove MAAs in the remaining nodes. If we used `seeds`, the expansion could
-                # just get stuck on this node and the "partial" results wouldn't be usable.
-                block_sd_candidates = block_sd.node_attractor_candidates(
-                    block_sd.root(), compute=True
-                )
-                if len(block_sd_candidates) == 0:
+                    # We could also consider using `seeds` instead of `candidates` here. Ultimately, this
+                    # matters very rarely. The reasoning for why we use `candidates` is that we can (almost)
+                    # always guarantee that the expansion is going to finish, even if some nodes do not
+                    # have their MAAs eliminated. As such, one can try to use other techniques to disprove
+                    # MAAs in the problematic nodes while using the nice properties of the expansion to
+                    # still disprove MAAs in the remaining nodes. If we used `seeds`, the expansion could
+                    # just get stuck on this node and the "partial" results wouldn't be usable.
+                    block_sd_candidates = block_sd.node_attractor_candidates(
+                        block_sd.root(), compute=True
+                    )
+                    if len(block_sd_candidates) == 0:
+                        if sd.config["debug"]:
+                            print(f" > [{node}] Found clean block with no MAAs ({len(block_nodes)}): {block_nodes}")
+                        clean_block_found = True
+                        next_level = next_level | set(block_nodes)
+                        sd.node_data(node)["attractor_seeds"] = []
+                        sd.node_data(node)["attractor_sets"] = []
+                        break
+                    else:
+                        if sd.config["debug"]:
+                            print(
+                                f"[{node}] > Found {len(block_sd_candidates)} MAA cnadidates in a block. Delaying expansion."
+                            )
+                if not clean_block_found:
+                    # If all blocks have MAAs, we expand all successors.
                     if sd.config["debug"]:
-                        print(
-                            f"[{node}] > Motif-avoidant attractors ruled out based on the sub-diagram."
-                        )
-                    sd.node_data(node)["attractor_seeds"] = []
-                    sd.node_data(node)["attractor_sets"] = []
-                else:
-                    if sd.config["debug"]:
-                        print(
-                            f"[{node}] > Cannot rule out MAA attractors. Found {len(block_sd_candidates)} candidates."
-                        )
+                        print(f" > [{node}] No clean block found. Expanding all {len(successors)} successors.")
+                    next_level = next_level | set(successors)
 
         current_level = next_level
         next_level = set()

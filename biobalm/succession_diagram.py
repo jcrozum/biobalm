@@ -1192,6 +1192,12 @@ class SuccessionDiagram:
     def expand_block(self, find_motif_avoidant_attractors: bool = True) -> bool:
         """
         Expand the succession diagram using the source block method.
+
+        There is a minor difference in behavior depending on `find_motif_avoidant_attractors`.
+        If set to `False`, the expansion only expands one "source block" for each node,
+        without checking any attractor properties. If set to `True`, the expansion might
+        expand some nodes fully to uncover nodes that precisely cover motif
+        avoidant attractors.
         """
         return expand_source_blocks(self, find_motif_avoidant_attractors)
 
