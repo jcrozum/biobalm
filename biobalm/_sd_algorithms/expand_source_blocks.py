@@ -169,7 +169,7 @@ def expand_source_blocks(
                 # can be either in this node, or in any of the child nodes. If a clean block
                 # is found, we know that it is safe to expand it without "missing" any MAAs.
                 clean_block_found = False
-                for (block, block_nodes) in minimal_blocks:
+                for block, block_nodes in minimal_blocks:
                     block_sd = sd.component_subdiagram(list(block), node)
 
                     # The succession diagram "restricted" to the considered block should have
@@ -190,7 +190,9 @@ def expand_source_blocks(
                     )
                     if len(block_sd_candidates) == 0:
                         if sd.config["debug"]:
-                            print(f" > [{node}] Found clean block with no MAAs ({len(block_nodes)}): {block_nodes}")
+                            print(
+                                f" > [{node}] Found clean block with no MAAs ({len(block_nodes)}): {block_nodes}"
+                            )
                         clean_block_found = True
                         next_level = next_level | set(block_nodes)
                         sd.node_data(node)["attractor_seeds"] = []
@@ -204,7 +206,9 @@ def expand_source_blocks(
                 if not clean_block_found:
                     # If all blocks have MAAs, we expand all successors.
                     if sd.config["debug"]:
-                        print(f" > [{node}] No clean block found. Expanding all {len(successors)} successors.")
+                        print(
+                            f" > [{node}] No clean block found. Expanding all {len(successors)} successors."
+                        )
                     next_level = next_level | set(successors)
 
         current_level = next_level

@@ -3,6 +3,7 @@ from biodivine_aeon import BooleanNetwork
 from biobalm import SuccessionDiagram
 from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
 
+
 def expansion(bn: BooleanNetwork):
     sd = SuccessionDiagram(bn)
     fully_expanded = expand_source_SCCs(sd, check_maa=False)

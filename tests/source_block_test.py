@@ -2,12 +2,19 @@ from biodivine_aeon import BooleanNetwork
 
 from biobalm import SuccessionDiagram
 
+
 def expansion(bn: BooleanNetwork):
     sd = SuccessionDiagram(bn)
     fully_expanded = sd.expand_block(find_motif_avoidant_attractors=False)
     assert fully_expanded
 
-    return bn.variable_count(), len(sd), len(list(sd.expanded_ids())), sd.depth(), len(sd.minimal_trap_spaces())
+    return (
+        bn.variable_count(),
+        len(sd),
+        len(list(sd.expanded_ids())),
+        sd.depth(),
+        len(sd.minimal_trap_spaces()),
+    )
 
 
 def test_expansion():
