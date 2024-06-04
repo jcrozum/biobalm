@@ -19,6 +19,7 @@ from biobalm._sd_algorithms.expand_bfs import expand_bfs
 from biobalm._sd_algorithms.expand_dfs import expand_dfs
 from biobalm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from biobalm._sd_algorithms.expand_source_blocks import expand_source_blocks
 from biobalm._sd_algorithms.expand_to_target import expand_to_target
 
 from biobalm.interaction_graph_utils import (
@@ -1187,6 +1188,12 @@ class SuccessionDiagram:
         Expand the succession diagram using the source SCC method.
         """
         return expand_source_SCCs(self, check_maa=find_motif_avoidant_attractors)
+
+    def expand_block(self, find_motif_avoidant_attractors: bool = True) -> bool:
+        """
+        Expand the succession diagram using the source block method.
+        """
+        return expand_source_blocks(self, find_motif_avoidant_attractors)
 
     def expand_bfs(
         self,
