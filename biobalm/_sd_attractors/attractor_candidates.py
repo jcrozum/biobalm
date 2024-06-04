@@ -345,8 +345,9 @@ def compute_attractor_candidates(
 
         # Here, we gradually increase the iteration count while
         # the candidate set is being actively reduced. If the simulation
-        # cannot reduce any further states, we are done.
-        iterations = 1024
+        # cannot reduce any further states and exceeds the proposed budget,
+        # we are done.
+        iterations = 2 ** 10
         while len(candidate_states) > 0:
             if sd.config["debug"]:
                 print(
@@ -362,7 +363,7 @@ def compute_attractor_candidates(
                 simulation_seed=123,
             )
 
-            if len(reduced) == len(candidate_states):
+            if len(reduced) == len(candidate_states) and (iterations * len(candidate_states)) > sd.config["minimum_simulation_budget"]:
                 candidate_states = reduced
                 break
 

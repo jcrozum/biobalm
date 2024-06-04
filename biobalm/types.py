@@ -228,3 +228,15 @@ class SuccessionDiagramConfiguration(TypedDict):
     If there are more than this amount of attractor candidates, the attractor
     detection process will try to optimize the retained set using ASP (if enabled).
     """
+
+    minimum_simulation_budget: int
+    """
+    The minimum number of simulation steps that is guaranteed to be spent on eliminating
+    attractor candidate states.
+
+    Note that this is a budget that applies to all candidates collectively. So if the number
+    of candidates is larger, the number of steps per candidate is proportionally smaller. 
+    However, this budget only applies when simulation has not been able to make progress
+    in the recent round. That is, if simulation has actively eliminated some candidates in 
+    the recent round, it will still continue regardless of the budget limit.
+    """
