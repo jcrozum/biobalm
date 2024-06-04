@@ -175,7 +175,7 @@ class SuccessionDiagram:
             "pint_goal_size_limit": 8_192,
             "attractor_candidates_limit": 100_000,
             "retained_set_optimization_threshold": 1_000,
-            "minimum_simulation_budget": 1_000_000,
+            "minimum_simulation_budget": 1_000,
         }
 
     @staticmethod

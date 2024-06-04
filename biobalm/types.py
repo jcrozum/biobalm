@@ -231,8 +231,10 @@ class SuccessionDiagramConfiguration(TypedDict):
 
     minimum_simulation_budget: int
     """
-    The minimum number of simulation steps that is guaranteed to be spent on eliminating
-    attractor candidate states.
+    The minimum number of simulation steps per network variable that is guaranteed to be 
+    spent on eliminating attractor candidate states. That is, if budget is `1_000` and
+    the network has `200` variables, the total number of allowed 
+    simulation steps is `200_000`.
 
     Note that this is a budget that applies to all candidates collectively. So if the number
     of candidates is larger, the number of steps per candidate is proportionally smaller. 
