@@ -1094,33 +1094,33 @@ class SuccessionDiagram:
             return cast(BooleanSpace, self.dag.edges[parent_id, child_id]["motif"])
 
     def component_subdiagram(
-            self,
-            component_variables: list[str],
-            node_id: int | None = None,
+        self,
+        component_variables: list[str],
+        node_id: int | None = None,
     ) -> SuccessionDiagram:
         """
-        Return an *unexpanded* `SuccessionDiagram` that is restricted to 
+        Return an *unexpanded* `SuccessionDiagram` that is restricted to
         a subnetwork induced by the provided `component_variables`.  Furthermore,
         If `node_id` is given, the subnetwork is first percolated to the
         subspace of the specified node.
-        
+
         The `component_variables` must be backward-closed in the considered network
-        (i.e. either the full network, or the percolated network if `node_id` is given), 
+        (i.e. either the full network, or the percolated network if `node_id` is given),
         meaning there is no variable outside this list that regulates any variable in the
-        subnetwork. If this is not satisfied, the function will fail while 
+        subnetwork. If this is not satisfied, the function will fail while
         creating the subnetwork.
 
         Also note that the symbolic encoding of the new network is not
         compatible with the encoding of the original network, because the
         underlying networks have different sets of variables.
-        
+
         Parameters
         ----------
         component_variables : list[str]
             Names of variables which induce the subnetwork of the resulting
-            succession diagram. 
+            succession diagram.
         node_id : int | None
-            The ID of a succession diagram node that will define a subspace 
+            The ID of a succession diagram node that will define a subspace
             to which the subnetwork is percolated. If not given, the full
             network is considered.
 
@@ -1134,11 +1134,12 @@ class SuccessionDiagram:
         if node_id is not None:
             network = self.node_percolated_network(node_id, compute=True)
 
-        to_remove = [ v for v in network.variable_names() if v not in component_variables ]
+        to_remove = [
+            v for v in network.variable_names() if v not in component_variables
+        ]
         component_bn = network.drop(to_remove)
         config_copy: SuccessionDiagramConfiguration = copy.copy(self.config)
         return SuccessionDiagram(component_bn, config_copy)
-
 
     def source_scc_subdiagrams(
         self,
@@ -1172,7 +1173,7 @@ class SuccessionDiagram:
 
         for component_variables in source_scc_list:
             yield self.component_subdiagram(component_variables, node_id)
-            
+
     def build(self):
         """
         Expand the succession diagram and search for attractors using default methods.
