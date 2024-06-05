@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 from typing import cast
 
-from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SymbolicContext, SignType
+from biodivine_aeon import BooleanNetwork, RegulatoryGraph, SignType, SymbolicContext
 from networkx import DiGraph  # type: ignore
 
 
@@ -187,12 +187,28 @@ def source_nodes(
     network: BooleanNetwork, ctx: SymbolicContext | None = None
 ) -> list[str]:
     """
-    Return the source nodes of a `BooleanNetwork`. That is, variables whose value
-    cannot change, but is not fixed to a `true`/`false` constant.
+    Identify the source nodes of a given `BooleanNetwork`.
+
+    Return the source nodes of a `BooleanNetwork`. That is, variables whose
+    value cannot change, but is not fixed to a `true`/`false` constant.
 
     Note that this internally uses BDD translation to detect identity functions
-    semantically rather than syntactically. If you already have a `SymbolicContext`
-    for the given `network` available, you can supply it as the second argument.
+    semantically rather than syntactically. If you already have a
+    `SymbolicContext` for the given `network` available, you can supply it as
+    the second argument.
+
+    Parameters
+    ----------
+    network : BooleanNetwork
+        The Boolean network to be examined.
+    ctx : SymbolicContext
+        The context used to translate the network to BDDs. A
+        `biodivine_aeon.SymbolicContext` object.
+
+    Returns
+    -------
+    list[str]
+        The list of source nodes.
     """
     if ctx is None:
         ctx = SymbolicContext(network)
