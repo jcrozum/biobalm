@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 if TYPE_CHECKING:
     from typing import Iterator
 
+import copy
 import networkx as nx  # type: ignore
-from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VariableId, VertexSet
+from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VertexSet
 
 # Attractor detection algorithms.
 from biobalm._sd_attractors.attractor_candidates import compute_attractor_candidates
@@ -18,6 +19,7 @@ from biobalm._sd_algorithms.expand_bfs import expand_bfs
 from biobalm._sd_algorithms.expand_dfs import expand_dfs
 from biobalm._sd_algorithms.expand_minimal_spaces import expand_minimal_spaces
 from biobalm._sd_algorithms.expand_source_SCCs import expand_source_SCCs
+from biobalm._sd_algorithms.expand_source_blocks import expand_source_blocks
 from biobalm._sd_algorithms.expand_to_target import expand_to_target
 
 from biobalm.interaction_graph_utils import (
@@ -173,7 +175,8 @@ class SuccessionDiagram:
             "nfvs_size_threshold": 2_000,
             "pint_goal_size_limit": 8_192,
             "attractor_candidates_limit": 100_000,
-            "retained_set_optimization_threshold": 100,
+            "retained_set_optimization_threshold": 1_000,
+            "minimum_simulation_budget": 1_000,
         }
 
     @staticmethod
@@ -1091,20 +1094,62 @@ class SuccessionDiagram:
         else:
             return cast(BooleanSpace, self.dag.edges[parent_id, child_id]["motif"])
 
-    def component_subdiagrams(
+    def component_subdiagram(
+        self,
+        component_variables: list[str],
+        node_id: int | None = None,
+    ) -> SuccessionDiagram:
+        """
+        Return an *unexpanded* `SuccessionDiagram` that is restricted to
+        a subnetwork induced by the provided `component_variables`.  Furthermore,
+        If `node_id` is given, the subnetwork is first percolated to the
+        subspace of the specified node.
+
+        The `component_variables` must be backward-closed in the considered network
+        (i.e. either the full network, or the percolated network if `node_id` is given),
+        meaning there is no variable outside this list that regulates any variable in the
+        subnetwork. If this is not satisfied, the function will fail while
+        creating the subnetwork.
+
+        Also note that the symbolic encoding of the new network is not
+        compatible with the encoding of the original network, because the
+        underlying networks have different sets of variables.
+
+        Parameters
+        ----------
+        component_variables : list[str]
+            Names of variables which induce the subnetwork of the resulting
+            succession diagram.
+        node_id : int | None
+            The ID of a succession diagram node that will define a subspace
+            to which the subnetwork is percolated. If not given, the full
+            network is considered.
+
+        Returns
+        -------
+        SuccessionDiagram
+            An unexpanded succession diagram of the subnetwork.
+        """
+
+        network = self.network
+        if node_id is not None:
+            network = self.node_percolated_network(node_id, compute=True)
+
+        to_remove = [
+            v for v in network.variable_names() if v not in component_variables
+        ]
+        component_bn = network.drop(to_remove)
+        config_copy: SuccessionDiagramConfiguration = copy.copy(self.config)
+        return SuccessionDiagram(component_bn, config_copy)
+
+    def source_scc_subdiagrams(
         self,
         node_id: int | None = None,
     ) -> Iterator[SuccessionDiagram]:
         """
         Return unexpanded subdiagrams for the source SCCs in a node subspace.
 
-        The subnetwork on which the subdiagram is defined is defined by the
-        variables in `component_variables`, which is a list of variable names.
-        The `component_variables` must be backward-closed, meaning there is no
-        variable outside this list that regulates any variable in the
-        subnetwork. Note that this is not explicitly checked in this function.
-
-        Also note that the symbolic encoding of the new network is not
+        Note that the symbolic encoding of the new network is not
         compatible with the encoding of the original network, because the
         underlying networks have different sets of variables.
 
@@ -1124,47 +1169,11 @@ class SuccessionDiagram:
         if node_id is None:
             node_id = self.root()
 
-        reference_bn = percolate_network(
-            self.network,
-            self.node_data(node_id)["space"],
-            remove_constants=True,
-        )
-
+        reference_bn = self.node_percolated_network(node_id, compute=True)
         source_scc_list = source_SCCs(reference_bn)
 
         for component_variables in source_scc_list:
-            new_bn = BooleanNetwork(component_variables)
-
-            # Build a mapping between the old and new network variables.
-            id_map: dict[VariableId, VariableId] = {}
-            for var in component_variables:
-                old_id = reference_bn.find_variable(var)
-                assert old_id is not None
-                new_id = new_bn.find_variable(var)
-                assert new_id is not None
-                id_map[old_id] = new_id
-
-            # Copy regulations that are in the source component.
-            for reg in reference_bn.regulations():
-                if reg["source"] in id_map and reg["target"] in id_map:
-                    new_bn.add_regulation(
-                        {
-                            "source": reference_bn.get_variable_name(reg["source"]),
-                            "target": reference_bn.get_variable_name(reg["target"]),
-                            "essential": reg["essential"],
-                            "sign": reg["sign"],
-                        }
-                    )
-
-            # Copy update functions from the source component after translating them
-            # to the new IDs.
-            for var_id in id_map.keys():
-                old_function = reference_bn.get_update_function(var_id)
-                assert old_function is not None
-                new_function = old_function.rename_all(new_bn, variables=id_map)
-                new_bn.set_update_function(id_map[var_id], new_function)
-
-            yield SuccessionDiagram(new_bn)
+            yield self.component_subdiagram(component_variables, node_id)
 
     def build(self):
         """
@@ -1179,6 +1188,18 @@ class SuccessionDiagram:
         Expand the succession diagram using the source SCC method.
         """
         return expand_source_SCCs(self, check_maa=find_motif_avoidant_attractors)
+
+    def expand_block(self, find_motif_avoidant_attractors: bool = True) -> bool:
+        """
+        Expand the succession diagram using the source block method.
+
+        There is a minor difference in behavior depending on `find_motif_avoidant_attractors`.
+        If set to `False`, the expansion only expands one "source block" for each node,
+        without checking any attractor properties. If set to `True`, the expansion might
+        expand some nodes fully to uncover nodes that precisely cover motif
+        avoidant attractors.
+        """
+        return expand_source_blocks(self, find_motif_avoidant_attractors)
 
     def expand_bfs(
         self,
@@ -1436,11 +1457,7 @@ class SuccessionDiagram:
         assert child_id is not None
 
         if parent_id is not None:
-            # TODO: It seems that there are some networks where the same child
-            # can be reached through multiple stable motifs. Not sure how to
-            # approach these... but this is probably good enough for now.
-            self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
-            self._update_node_depth(child_id, parent_id)
+            self._ensure_edge(parent_id, child_id, stable_motif)
 
         # Compute the percolated petri net here, because we know the parent node ID
         # and using its already percolated petri net helps a lot.
@@ -1450,3 +1467,10 @@ class SuccessionDiagram:
         self.node_percolated_petri_net(child_id, compute=True, parent_id=parent_id)
 
         return child_id
+
+    def _ensure_edge(self, parent_id: int, child_id: int, stable_motif: BooleanSpace):
+        # TODO: It seems that there are some networks where the same child
+        # can be reached through multiple stable motifs. Not sure how to
+        # approach these... but this is probably good enough for now.
+        self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+        self._update_node_depth(child_id, parent_id)

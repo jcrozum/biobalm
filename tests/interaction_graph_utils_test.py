@@ -1,7 +1,8 @@
-from biodivine_aeon import BooleanNetwork
+from biodivine_aeon import BooleanNetwork, AsynchronousGraph
 from networkx import DiGraph  # type:ignore
 
-from biobalm.interaction_graph_utils import feedback_vertex_set
+from biobalm.interaction_graph_utils import feedback_vertex_set, source_nodes
+from biobalm.space_utils import percolate_network, percolate_space
 
 # There should be a negative cycle between b_1 and b_2,
 # a positive cycle between d_1 and d_2, and a negative cycle
@@ -39,6 +40,32 @@ CYCLES_DIGRAPH.add_edges_from(  # type: ignore
         ("e", "e", {"sign": "+"}),
     ]
 )
+
+
+def test_source_nodes():
+    bn = BooleanNetwork.from_bnet(
+        """targets,factors
+    constant1_1, (constant1_1 | !constant1_1)
+    constant1_0, (constant1_0 & !constant1_0)
+    constant2_1, true
+    constant2_0, false
+    source, source
+    oscillator, !oscillator
+    source_after_perc, source_after_perc & constant1_1
+    after_perc_0, after_perc_0 & constant1_0"""
+    ).infer_valid_graph()
+    graph = AsynchronousGraph(bn)
+
+    sources = source_nodes(bn)
+
+    assert sources == ["source"]
+
+    perc_space = percolate_space(graph, {})
+    perc_bn = percolate_network(bn, perc_space, symbolic_network=graph)
+
+    sources = source_nodes(perc_bn)
+
+    assert sources == ["source", "source_after_perc"]
 
 
 def test_fvs():

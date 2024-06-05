@@ -1,41 +1,29 @@
 from __future__ import annotations
 
 import itertools as it
-import sys
 from typing import TYPE_CHECKING, Callable, cast
 
-from biodivine_aeon import BooleanNetwork, SymbolicContext
-
-from biobalm._sd_algorithms.expand_bfs import expand_bfs
-from biobalm.space_utils import percolate_network, percolate_space
+from biobalm.space_utils import percolate_network
 from biobalm.types import BooleanSpace
+from biobalm.interaction_graph_utils import source_nodes
 
 if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
 
-    ExpanderFunctionType = Callable[
-        [SuccessionDiagram, int | None, int | None, int | None],
-        bool,
-    ]
-
-sys.path.append(".")
-
-DEBUG = False
+    ExpanderFunctionType = Callable[[SuccessionDiagram], bool]
 
 
 def expand_source_SCCs(
     sd: SuccessionDiagram,
-    expander: ExpanderFunctionType = expand_bfs,
-    check_maa: bool = True,
+    check_maa: bool,
+    recursion: int = 0,
+    expander: ExpanderFunctionType | None = None,
 ) -> bool:
     """
     1. percolate
     2. find source nodes, fix combinations and then percolate
     3. at every level, find all source SCCs, expand them
     4. when there are no more SCCs, expand in a usual way.
-
-    TODO: the function uses bfs for source SCCs and for remaining nodes.
-    it should be able to import any expansion strategy and use it.
 
     TODO: it will be rare especially for empirical models,
     but there can be source SCCs even before fixing source node combinations.
@@ -51,230 +39,231 @@ def expand_source_SCCs(
 
     """
 
+    if expander is None:
+        # By default, we recursively call the SCC expansion.
+        def default_expander(sd: SuccessionDiagram):
+            return expand_source_SCCs(sd, check_maa, recursion + 1)
+
+        expander = default_expander
+
+    if sd.config["debug"]:
+        print(
+            f"Start SD expansion using SCC decomposition on {sd.network}, recursion level {recursion}."
+        )
+
     root = sd.root()
 
-    current_level = [root]
-    next_level: list[int] = []
-    final_level: list[int] = []  # from here there are no more source SCCs
+    # Usage of sets prevents node repetition in levels (this can happen if we independently
+    # percolate to the same "downstream" node after fixing different source SCC values).
+    current_level: set[int] = set([root])
+    next_level: set[int] = set()
 
-    # percolate constant nodes
-    perc_space = percolate_space(sd.symbolic, {})
-    sd.node_data(root)["space"] = perc_space
+    # This already accounts for constant percolation.
+    node_space = sd.node_data(root)["space"]
 
     # find source nodes
-    perc_bn = percolate_network(sd.network, perc_space)
-    source_nodes = find_source_nodes(perc_bn)
+    perc_bn = percolate_network(sd.network, node_space)
+    sources = source_nodes(perc_bn)
+
+    if sd.config["debug"]:
+        print(f" > Computed source/input variable(s): {sources}")
 
     # get source nodes combinations and expand root node
-    if len(source_nodes) != 0:
-        bin_values_iter = it.product(range(2), repeat=len(source_nodes))
-        for bin_values in bin_values_iter:
-            source_comb = cast(BooleanSpace, dict(zip(source_nodes, bin_values)))
-
-            sub_space = source_comb
-            sub_space.update(perc_space)
-
-            next_level.append(sd._ensure_node(root, sub_space))  # type: ignore
-
-        sd.node_data(root)["expanded"] = True
-        sd.node_data(root)[
-            "attractor_seeds"
-        ] = []  # no need to look for attractors here
-        current_level = next_level
-        next_level = []
-
-    while len(current_level) > 0:
-        if DEBUG:
-            print(f"{current_level=}")
-
-        # each level consists of one round of fixing all source SCCs
-        for node_id in current_level:
-            sub_sds = list(sd.component_subdiagrams(node_id))
-            # if there are no more source SCCs in this node, move it to the final level
-            if not sub_sds:
-                final_level.append(node_id)
-                continue
-
-            # attach all source scc sd one by one
-            current_branches = [
-                node_id
-            ]  # this is where the scc_sd should be "attached"
-            next_branches: list[int] = []
-            for sub_network_diagram in sub_sds:
-                scc_sd, exist_maa = find_subnetwork_sd(
-                    sub_network_diagram, expander, check_maa
+    if len(sources) != 0:
+        # If there are too many source nodes, this can generate an absurdly large SD.
+        # This would be a problem even without the SCC expansion, but we can just
+        # stop the whole thing faster because we know how many nodes it generates now.
+        if 2 ** len(sources) > sd.config["max_motifs_per_node"]:
+            raise RuntimeError(
+                f"Exceeded the maximum amount of stable motifs per node ({sd.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
+            )
+        else:
+            if sd.config["debug"]:
+                print(
+                    f" > Expanding {len(sources)} source node into {2 ** len(sources)} SD nodes."
                 )
 
-                if exist_maa:  # we check for maa, and it exists
-                    continue
-                # add scc_sd to every single branch in the original sd
-                for branch in current_branches:
-                    new_branches = attach_scc_sd(sd, scc_sd, branch, check_maa)
-                    next_branches.extend(new_branches)
+        bin_values_iter = it.product(range(2), repeat=len(sources))
+        for bin_values in bin_values_iter:
+            valuation = cast(BooleanSpace, dict(zip(sources, bin_values)))
+            sub_space = node_space | valuation
 
-                current_branches = next_branches
-                next_branches = []
+            next_level.add(sd._ensure_node(root, sub_space))  # type: ignore
 
-            # nothing was attached
-            # This happens when there were only source SCCs with motif avoidant attractors
-            if current_branches == [node_id]:
-                final_level.append(node_id)
-            # once all the source SCCs are expanded, move on to the next level
-            # the final branches become the next level
+        # This makes the root artificially "expanded". Also, there
+        # can be no attractors here because we are just fixing the source nodes.
+        sd.node_data(root)["expanded"] = True
+        sd.node_data(root)["attractor_seeds"] = []
+        sd.node_data(root)["attractor_sets"] = []
+        current_level = next_level
+        next_level = set()
+
+    while len(current_level) > 0:
+        if sd.config["debug"]:
+            print(
+                f" > Start SCC expansion of a BFS level with {len(current_level)} node(s)."
+            )
+
+        # For each node in the current level, we expand all source SCCs and put the
+        # results into a new level.
+        for node_id in sorted(current_level):
+            source_scc_diagrams = list(sd.source_scc_subdiagrams(node_id))
+            if sd.config["debug"]:
+                print(
+                    f" > [{node_id}] Found {len(source_scc_diagrams)} sub-diagrams while expanding node."
+                )
+
+            # If there are no source SCCs, this node is a fixed-point and we can save it
+            # into the last level (every other node has at least one source SCC).
+            if len(source_scc_diagrams) == 0:
+                if sd.config["debug"]:
+                    print(f"[{node_id}] > No source SCCs found. Node is a fixed-point.")
+                assert len(sd.node_successors(node_id, compute=True)) == 0
+                continue
+
+            # If there is only one source SCC, we can do a normal expansion to get to the next level,
+            # because the attach sub-diagram process would just expand it a copy it into node_id.
+            # Furthermore, if we want to recursively use SCC expansion in SCC expansion, we *have to*
+            # do this, otherwise we would just recursively call ourselves forver on a minimal trap spaces,
+            # since the recursion wouldn't know where to stop.
+            if len(source_scc_diagrams) == 1:
+                if sd.config["debug"]:
+                    print(f"[{node_id}] > Singe source SCCs found. Expanding normally.")
+                next_level = next_level | set(sd.node_successors(node_id, compute=True))
+                continue
+
+            attach_at_list: list[int] = [node_id]
+            for scc_diagram in source_scc_diagrams:
+                fully_expanded = expander(scc_diagram)
+                if not fully_expanded:
+                    # Something bad happened in the expander function and we can't continue.
+                    return False
+
+                if sd.config["debug"]:
+                    print(
+                        f"[{node_id}] > Source SCC diagram expanded to {len(scc_diagram)} nodes."
+                    )
+
+                # At this point, diagram is fully expanded and we can attach its
+                # nodes as the successors of `node_id`.
+                next_attach_at_list: list[int] = []
+                for attach_at in attach_at_list:
+                    next_attach_at_list += attach_scc_subdiagram(
+                        sd, scc_diagram, attach_at, check_maa
+                    )
+                attach_at_list = next_attach_at_list
+
+            if attach_at_list == [node_id]:
+                # Nothing was attached at this level. This means that all source SCCs
+                # have a trivial succession diagram where we can't further "fix" anything else.
+                # Usually, this means that we are in a minimal trap space. However, there can also
+                # be another SCC connected to the source SCCs that can still have some
+                # non-trivial trap space structure.
+                #
+                # Ideally, we should be able to "ignore" the current source SCCs and move on to the
+                # following level of SCCs (because those source SCC stay "unstable" forever), but
+                # that is currently not possible, so we just expand normally.
+                if sd.config["debug"]:
+                    print(
+                        f"[{node_id}] > No further nodes attached. Expanding normally."
+                    )
+                next_level = next_level | set(sd.node_successors(node_id, compute=True))
             else:
-                next_level.extend(current_branches)
+                # Otherwise, move everything into the next layer.
+                next_level = next_level | set(attach_at_list)
 
         current_level = next_level
-        next_level = []
+        next_level = set()
 
-    # Finally, expand the sd in a usual way.
-    # TODO: motif avoidance that is already calculated in the source SCCs should be used here somehow.
-    if DEBUG:
-        print(f"{final_level=}")
-    for node_id in final_level:
-        # These assertions should be unnecessary, but just to be sure.
-        assert not sd.node_data(node_id)["expanded"]  # expand nodes from here
-        assert (
-            sd.node_data(node_id)["attractor_seeds"] is None
-        )  # check attractors from here
-
-        # restore this once we allow all expansion algorithms to expand from a node
-        # expander(sd, node_id)
-        sd.expand_bfs(node_id)
+    if sd.config["debug"]:
+        print(
+            f" > SCC expansion terminated with {len(sd)} node(s) on recursion level {recursion}."
+        )
 
     return True
 
 
-def find_source_nodes(
-    network: BooleanNetwork, ctx: SymbolicContext | None = None
-) -> list[str]:
-    """
-    Return the "source nodes" of a `BooleanNetwork`. That is, variables whose value
-    cannot change, but is not fixed to a `true`/`false` constant.
-
-    Note that this internally uses BDD translation to detect identity functions
-    semantically rather than syntactically. If you already have a `SymbolicContext`
-    for the given `network` available, you can supply it as the second argument.
-    """
-    if ctx is None:
-        ctx = SymbolicContext(network)
-
-    result: list[str] = []
-    for var in network.variables():
-        update_function = network.get_update_function(var)
-        assert update_function is not None  # Parameters are not allowed.
-        fn_bdd = ctx.mk_update_function(update_function)
-        var_bdd = ctx.mk_network_variable(var)
-        if fn_bdd == var_bdd:
-            result.append(network.get_variable_name(var))
-
-    return result
-
-
-def find_subnetwork_sd(
-    sub_network_diagram: SuccessionDiagram,
-    expander: ExpanderFunctionType,
-    check_maa: bool,
-) -> tuple[SuccessionDiagram, bool]:
-    """
-    Computes a `SuccessionDiagram` of a particular sub-network using an expander function.
-
-    If `check_maa` is set to `True`, also checks if the resulting succession diagram admits
-    motif avoidant attractors.
-
-    Returns
-    -------
-    scc_sd - succession diagram of the source SCC
-    exist_maa - False if motif avoidance is not checked, or if motif avoidance does not exist
-                True if there is motif avoidance
-
-    """
-    fully_expanded = expander(sub_network_diagram, None, None, None)
-    assert fully_expanded
-
-    has_maa = False
-    if check_maa:
-        # check for motif avoidant attractors
-        # TODO: somehow skip this calculation when this source SCC appears again later.
-        # it will appear again, since souce SCC with maa are not fixed.
-        motif_avoidant_count = 0
-        for node in sub_network_diagram.node_ids():
-            attr = sub_network_diagram.node_attractor_seeds(node, compute=True)
-            if not sub_network_diagram.node_is_minimal(node):
-                motif_avoidant_count += len(attr)
-        if motif_avoidant_count != 0:
-            # ignore source SCCs with motif avoidant attractors
-            has_maa = True
-
-    return sub_network_diagram, has_maa
-
-
-def attach_scc_sd(
-    sd: SuccessionDiagram,
-    scc_sd: SuccessionDiagram,
-    branch: int,
-    check_maa: bool,
+def attach_scc_subdiagram(
+    sd: SuccessionDiagram, scc_sd: SuccessionDiagram, attach_at: int, check_maa: bool
 ) -> list[int]:
     """
-    Attach scc_sd to the given branch point of the sd.
-    Returns the new branching points.
+    Attach the `scc_sd` to the `attach_at` node of `sd`.
+
+    This means that every node of `scc_sd` will be extended to the full context of `sd`
+    and attached as if `attach_at` was the root of `scc_sd`.
+
+    If `check_maa` is set to `True`, the method will also check `scc_sd` for motif-avoidant
+    attractors and if MAAs are disproven, the corresponding nodes of `sd` will be also marked
+    as not having any MAAs.
 
     Parameters
     ----------
-    check_maa - If true, it is assumed that scc_sd is already checked
-                to not have motif avoidant attractors.
-                Make sure only give scc_sd with no maa
+    sd - The main succession diagram into which we are attaching the `scc_sd`.
+    scc_sd - A component subdiagram which will be copied into `sd`.
+    attach_at - A node id from `sd` that will be used as the virtual "root" of `scc_sd` while attaching.
+    check_maa - A flag that indicates that MAAs absence information should be propagated from the `scc_sd`
+                to the main `sd`.
+
+    Returns
+    -------
+    The IDs of `sd` nodes that correspond to the minimal trap spaces of `scc_sd`.
     """
+
     if len(scc_sd) == 1:
-        return [branch]
+        # This `scc_sd` has a single minimal SCC, which thus corresponds to the `attach_at` point.
+        return [attach_at]
 
-    next_branches: list[int] = []
-    size_before_attach = sd.dag.number_of_nodes()
-    # first add all the nodes using their first parent
+    # Maps node IDs from the `scc_sd` to the extended and copied nodes in `sd`.
+    node_id_map: dict[int, int] = {scc_sd.root(): attach_at}
+
+    attach_at_space = sd.node_data(attach_at)["space"]
+
+    # First, copy every node from `scc_sd`` into main `sd`.
+    min_traps: list[int] = []
     for scc_node_id in scc_sd.node_ids():
-        if scc_node_id == 0:  # no need to add the root of scc_sd
-            continue
+        if scc_node_id == scc_sd.root():
+            continue  # Root is implicitly copied.
 
-        scc_parent_id = cast(
-            int,
-            list(scc_sd.dag.predecessors(scc_node_id))[0],  # type: ignore
-        )  # get the first parent
-        assert scc_parent_id < scc_node_id
+        scc_node_space = scc_sd.node_data(scc_node_id)["space"]
+        extended_node_space = scc_node_space | attach_at_space
 
-        if scc_parent_id == 0:  # the parent is the root of scc_sd
-            parent_id = branch
+        main_node_id = sd._ensure_node(parent_id=None, stable_motif=extended_node_space)  # type: ignore
+        node_id_map[scc_node_id] = main_node_id
+
+        if scc_sd.node_is_minimal(scc_node_id):
+            min_traps.append(main_node_id)
         else:
-            parent_id = size_before_attach + scc_parent_id - 1
+            # This node can be marked as expanded, because we know its successors.
+            # We just need to add them in the for loop below.
+            sd.node_data(main_node_id)["expanded"] = True
 
-        motif = scc_sd.edge_stable_motif(scc_parent_id, scc_node_id)
-        motif.update(cast(BooleanSpace, sd.dag.nodes[branch]["space"]))
-
-        child_id = sd._ensure_node(parent_id, motif)  # type: ignore
         if check_maa:
-            sd.dag.nodes[parent_id][
-                "attractors"
-            ] = []  # no need to check for attractors in these nodes
+            if len(scc_sd.node_attractor_candidates(scc_node_id, compute=True)) == 0:
+                sd.node_data(main_node_id)["attractor_seeds"] = []
+                sd.node_data(main_node_id)["attractor_sets"] = []
 
-        if scc_sd.node_is_minimal(scc_node_id) and child_id not in next_branches:
-            next_branches.append(child_id)
+    assert len(node_id_map) == len(scc_sd)
 
-    # now add all the missing edges
+    # Then copy all the edges.
     for scc_node_id in scc_sd.node_ids():
-        if scc_node_id == 0:
-            parent_id = branch
-        else:
-            parent_id = size_before_attach + scc_node_id - 1
+        for scc_node_succ in scc_sd.node_successors(scc_node_id):
+            inner_stable_motif = scc_sd.edge_stable_motif(scc_node_id, scc_node_succ)
 
-        scc_child_ids = cast(list[int], list(scc_sd.dag.successors(scc_node_id)))  # type: ignore
-        for scc_child_id in scc_child_ids:
-            motif = scc_sd.edge_stable_motif(scc_node_id, scc_child_id)
-            motif.update(cast(BooleanSpace, sd.dag.nodes[branch]["space"]))
+            main_node_id = node_id_map[scc_node_id]
+            main_succ_id = node_id_map[scc_node_succ]
 
-            child_id = sd._ensure_node(parent_id, motif)  # type: ignore
-            assert child_id == size_before_attach + scc_child_id - 1
+            # This should not happen, because the source SCCs are independent.
+            # But I don't have a formal proof.
+            assert main_node_id != main_succ_id
 
-        # if the node had any child node, consider it expanded.
-        if len(scc_child_ids) > 0:
-            sd.dag.nodes[parent_id]["expanded"] = True
+            sd._ensure_edge(main_node_id, main_succ_id, inner_stable_motif)  # type: ignore
 
-    return next_branches
+    # This makes the `attach_at` node expanded. We will not be adding new nodes to it later.
+    sd.node_data(attach_at)["expanded"] = True
+    # Finally, if we are checking for MAAs, we can do that for the root too:
+    if check_maa:
+        if len(scc_sd.node_attractor_candidates(scc_sd.root(), compute=True)) == 0:
+            sd.node_data(attach_at)["attractor_seeds"] = []
+            sd.node_data(attach_at)["attractor_sets"] = []
+
+    return min_traps
