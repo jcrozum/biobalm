@@ -14,12 +14,17 @@ if TYPE_CHECKING:
 def expand_source_blocks(
     sd: SuccessionDiagram,
     check_maa: bool = True,
+    size_limit: int | None = None,
+    optimize_source_nodes: bool = True,
 ) -> bool:
     """
     Base correctness assumptions:
 
-     - Expanding two minimal blocks is always independent.
-     -
+     - Expanding two minimal blocks is always independent. Every minimal trap space is contained in one of the maximal trap
+       spaces of a single block. Furthermore, expanding a minimal block cannot intrfere with the expansion of the other
+       stable motifs.
+     - Any path in the "inner" succession diagram based on a single block can be reproduced in the larger succession diagram,
+       meaning absence of attractors in the inner diagram proves absence of attractors in the outer diagram.
     """
 
     if sd.config["debug"]:
@@ -41,7 +46,7 @@ def expand_source_blocks(
         print(f" > Computed source/input variable(s): {sources}")
 
     # get source nodes combinations and expand root node
-    if len(sources) != 0:
+    if len(sources) != 0 and optimize_source_nodes:
         # If there are too many source nodes, this can generate an absurdly large SD.
         # This would be a problem even without the SCC expansion, but we can just
         # stop the whole thing faster because we know how many nodes it generates.
@@ -49,6 +54,9 @@ def expand_source_blocks(
             raise RuntimeError(
                 f"Exceeded the maximum amount of stable motifs per node ({sd.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
             )
+        elif size_limit is not None and 2 ** len(sources) > size_limit:
+            # Cannot expand. Size limit would be exceeded.
+            return False
         else:
             if sd.config["debug"]:
                 print(
@@ -83,6 +91,11 @@ def expand_source_blocks(
             if sd.node_data(node)["expanded"]:
                 # We re-discovered a previously expanded node.
                 continue
+
+            # Only continue if the succession diagram isn't too large.
+            if (size_limit is not None) and (len(sd) >= size_limit):
+                # Size limit reached.
+                return False
 
             # Compute successors as if this was a normal expansion procedure.
             successors = sd.node_successors(node, compute=True)

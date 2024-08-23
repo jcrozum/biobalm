@@ -175,6 +175,10 @@ def test_expansion_comparisons(network_file: str):
     sd_min = SuccessionDiagram(bn)
     assert sd_min.expand_minimal_spaces(size_limit=NODE_LIMIT)
 
+    assert sd_bfs.is_isomorphic(sd_dfs)
+    assert sd_min.is_subgraph(sd_bfs)
+    assert sd_min.is_subgraph(sd_dfs)
+
     # Expand the first node fully, and then expand the rest
     # until minimal trap spaces are found.
     sd_min_larger = SuccessionDiagram(bn)
@@ -183,12 +187,29 @@ def test_expansion_comparisons(network_file: str):
         if not sd_min_larger.node_data(node_id)["expanded"]:
             assert sd_min_larger.expand_minimal_spaces(node_id=node_id)
 
-    assert sd_bfs.is_isomorphic(sd_dfs)
-    assert sd_min.is_subgraph(sd_bfs)
-    assert sd_min.is_subgraph(sd_dfs)
     assert sd_min_larger.is_subgraph(sd_bfs)
     assert sd_min_larger.is_subgraph(sd_dfs)
     assert len(sd_min_larger) >= len(sd_min)
+
+    # Normal block expansion with size limit.
+    sd_block = SuccessionDiagram(bn)
+    assert sd_block.expand_block(
+        find_motif_avoidant_attractors=True,
+        size_limit=NODE_LIMIT,
+        optimize_source_nodes=False,  # Needed for compatibility.
+    )
+
+    assert sd_block.is_subgraph(sd_bfs)
+    assert sd_block.is_subgraph(sd_dfs)
+
+    block_trap = [
+        sd_block.node_data(i)["space"] for i in sd_block.minimal_trap_spaces()
+    ]
+    min_trap = [sd_min.node_data(i)["space"] for i in sd_min.minimal_trap_spaces()]
+    for t in block_trap:
+        assert t in min_trap
+    for t in min_trap:
+        assert t in block_trap
 
     sd_attr = SuccessionDiagram(bn)
     assert sd_attr.expand_attractor_seeds(size_limit=NODE_LIMIT)
