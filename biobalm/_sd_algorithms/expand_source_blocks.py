@@ -3,7 +3,6 @@ from __future__ import annotations
 import itertools as it
 from typing import TYPE_CHECKING, cast
 
-from biobalm.space_utils import percolate_network
 from biobalm.types import BooleanSpace
 from biobalm.interaction_graph_utils import source_nodes
 
@@ -35,49 +34,6 @@ def expand_source_blocks(
     current_level: set[int] = set([root])
     next_level: set[int] = set()
 
-    # This already accounts for constant percolation.
-    node_space = sd.node_data(root)["space"]
-
-    # find source nodes
-    perc_bn = percolate_network(sd.network, node_space)
-    sources = source_nodes(perc_bn)
-
-    if sd.config["debug"]:
-        print(f" > Computed source/input variable(s): {sources}")
-
-    # get source nodes combinations and expand root node
-    if len(sources) != 0 and optimize_source_nodes:
-        # If there are too many source nodes, this can generate an absurdly large SD.
-        # This would be a problem even without the SCC expansion, but we can just
-        # stop the whole thing faster because we know how many nodes it generates.
-        if 2 ** len(sources) > sd.config["max_motifs_per_node"]:
-            raise RuntimeError(
-                f"Exceeded the maximum amount of stable motifs per node ({sd.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
-            )
-        elif size_limit is not None and 2 ** len(sources) > size_limit:
-            # Cannot expand. Size limit would be exceeded.
-            return False
-        else:
-            if sd.config["debug"]:
-                print(
-                    f" > Expanding {len(sources)} source node into {2 ** len(sources)} SD nodes."
-                )
-
-        bin_values_iter = it.product(range(2), repeat=len(sources))
-        for bin_values in bin_values_iter:
-            valuation = cast(BooleanSpace, dict(zip(sources, bin_values)))
-            sub_space = node_space | valuation
-
-            next_level.add(sd._ensure_node(root, sub_space))  # type: ignore
-
-        # This makes the root artificially "expanded". Also, there
-        # can be no attractors here because we are just fixing the source nodes.
-        sd.node_data(root)["expanded"] = True
-        sd.node_data(root)["attractor_seeds"] = []
-        sd.node_data(root)["attractor_sets"] = []
-        current_level = next_level
-        next_level = set()
-
     bfs_depth = 0
 
     while len(current_level) > 0:
@@ -97,6 +53,49 @@ def expand_source_blocks(
                 # Size limit reached.
                 return False
 
+            node_bn = sd.node_percolated_network(node, compute=True)
+            node_space = sd.node_data(node)["space"]
+
+            # Check for source nodes in the percolated network. We can "fast-forward" these the
+            # same way we would skip them in the root node.
+            sources = source_nodes(node_bn)
+            if len(sources) != 0 and optimize_source_nodes:
+                if sd.config["debug"]:
+                    print(
+                        f" > Found {len(sources)} source nodes in node {node}. Fast-forwarding instead of expansion."
+                    )
+
+                # Check if size limits are exceeded.
+                expected_size = len(sd) + (2 ** len(sources))
+                if expected_size > sd.config["max_motifs_per_node"]:
+                    raise RuntimeError(
+                        f"Exceeded the maximum amount of stable motifs per node ({sd.config['max_motifs_per_node']}; see `SuccessionDiagramConfiguration.max_motifs_per_node`)."
+                    )
+                elif size_limit is not None and expected_size > size_limit:
+                    # Cannot expand. Size limit would be exceeded.
+                    return False
+                else:
+                    if sd.config["debug"]:
+                        print(
+                            f" > Fast-forwarding {len(sources)} source nodes into {2 ** len(sources)} SD nodes."
+                        )
+
+                bin_values_iter = it.product(range(2), repeat=len(sources))
+                for bin_values in bin_values_iter:
+                    valuation = cast(BooleanSpace, dict(zip(sources, bin_values)))
+                    sub_space = node_space | valuation
+
+                    next_level.add(sd._ensure_node(node, sub_space))  # type: ignore
+
+                # This makes the node artificially "expanded". Also, there
+                # can be no attractors here because we are just fixing the source nodes.
+                sd.node_data(node)["expanded"] = True
+                sd.node_data(node)["attractor_seeds"] = []
+                sd.node_data(node)["attractor_sets"] = []
+
+                # This node is done, more work will be done at the next level.
+                continue
+
             # Compute successors as if this was a normal expansion procedure.
             successors = sd.node_successors(node, compute=True)
             # Sort successors to avoid non-determinism.
@@ -115,8 +114,6 @@ def expand_source_blocks(
 
                 next_level.add(successors[0])
                 continue
-
-            node_bn = sd.node_percolated_network(node, compute=True)
 
             # Split successors into "blocks" based on the regulatory component
             # of the variables fixed by the stable motif.
