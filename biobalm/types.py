@@ -161,8 +161,8 @@ class NodeData(TypedDict):
 
     parent_node: int | None
     """
-    The ID of one of the predecessor nodes through which this node was first 
-    discovered, or `None` if the node was discovered through other means 
+    The ID of one of the predecessor nodes through which this node was first
+    discovered, or `None` if the node was discovered through other means
     (usually either the root, or a minimal trap space that was added without
     expanding its predecessors).
     """
