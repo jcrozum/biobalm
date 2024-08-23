@@ -9,18 +9,24 @@ from biobalm.space_utils import is_subspace
 from biobalm.trappist_core import trappist
 
 
-def expand_minimal_spaces(sd: SuccessionDiagram, size_limit: int | None = None) -> bool:
+def expand_minimal_spaces(
+    sd: SuccessionDiagram, node_id: int | None, size_limit: int | None = None
+) -> bool:
     """
     See `SuccessionDiagram.expand_minimal_spaces` for documentation.
     """
 
-    minimal_traps = trappist(sd.petri_net, problem="min")
+    if node_id is None:
+        node_id = sd.root()
 
-    root = sd.root()
+    pn = sd.node_percolated_petri_net(node_id, compute=True)
+    node_space = sd.node_data(node_id)["space"]
 
-    seen = set([root])
+    minimal_traps = trappist(network=pn, problem="min", ensure_subspace=node_space)
 
-    stack: list[tuple[int, list[int] | None]] = [(root, None)]
+    seen = set([node_id])
+
+    stack: list[tuple[int, list[int] | None]] = [(node_id, None)]
 
     while len(stack) > 0:
         (node, successors) = stack.pop()

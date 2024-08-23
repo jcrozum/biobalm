@@ -171,12 +171,24 @@ def test_expansion_comparisons(network_file: str):
         # succession_diagram is too large for this test.
         return
 
+    # Normal minimal trap space expansion.
     sd_min = SuccessionDiagram(bn)
     assert sd_min.expand_minimal_spaces(size_limit=NODE_LIMIT)
+
+    # Expand the first node fully, and then expand the rest
+    # until minimal trap spaces are found.
+    sd_min_larger = SuccessionDiagram(bn)
+    sd_min_larger._expand_one_node(sd_min_larger.root())  # type: ignore
+    for node_id in sd_min_larger.node_ids():
+        if not sd_min_larger.node_data(node_id)["expanded"]:
+            assert sd_min_larger.expand_minimal_spaces(node_id=node_id)
 
     assert sd_bfs.is_isomorphic(sd_dfs)
     assert sd_min.is_subgraph(sd_bfs)
     assert sd_min.is_subgraph(sd_dfs)
+    assert sd_min_larger.is_subgraph(sd_bfs)
+    assert sd_min_larger.is_subgraph(sd_dfs)
+    assert len(sd_min_larger) >= len(sd_min)
 
     sd_attr = SuccessionDiagram(bn)
     assert sd_attr.expand_attractor_seeds(size_limit=NODE_LIMIT)
