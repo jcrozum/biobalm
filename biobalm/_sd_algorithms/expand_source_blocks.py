@@ -3,7 +3,6 @@ from __future__ import annotations
 import itertools as it
 from typing import TYPE_CHECKING, cast
 
-from biobalm.space_utils import percolate_network
 from biobalm.types import BooleanSpace
 from biobalm.interaction_graph_utils import source_nodes
 
