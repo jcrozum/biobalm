@@ -1033,6 +1033,10 @@ class SuccessionDiagram:
         if percolated_pn is None and not compute:
             raise KeyError(f"Percolated network not computed for node {node_id}.")
 
+        if parent_id is None:
+            # If no parent node is directly provided, we can try to use a cached one.
+            parent_id = node["parent_node"]
+
         if percolated_pn is None:
             base_pn = self.petri_net
             percolate_space = node_space
@@ -1449,6 +1453,7 @@ class SuccessionDiagram:
                 attractor_candidates=None,
                 attractor_seeds=None,
                 attractor_sets=None,
+                parent_node=parent_id,
             )
             self.node_indices[key] = child_id
         else:
@@ -1458,13 +1463,6 @@ class SuccessionDiagram:
 
         if parent_id is not None:
             self._ensure_edge(parent_id, child_id, stable_motif)
-
-        # Compute the percolated petri net here, because we know the parent node ID
-        # and using its already percolated petri net helps a lot.
-        #
-        # (For percolated network and nfvs, knowing the parent ID is not as useful,
-        #  so the parent is not used and we can just compute them lazily)
-        self.node_percolated_petri_net(child_id, compute=True, parent_id=parent_id)
 
         return child_id
 
