@@ -1183,7 +1183,7 @@ class SuccessionDiagram:
         """
         Expand the succession diagram and search for attractors using default methods.
         """
-        self.expand_scc()
+        self.expand_block()
         for node_id in self.node_ids():
             self.node_attractor_seeds(node_id, compute=True)
 
