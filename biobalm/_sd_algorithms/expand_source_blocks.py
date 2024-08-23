@@ -172,11 +172,14 @@ def expand_source_blocks(
                 for block, block_nodes in minimal_blocks:
                     block_sd = sd.component_subdiagram(list(block), node)
 
-                    # The succession diagram "restricted" to the considered block should have
-                    # the same (restricted) successor nodes.
-                    assert len(
-                        block_sd.node_successors(block_sd.root(), compute=True)
-                    ) == len(block_nodes)
+                    # Instead of expanding the inner succession diagram "normally", we can
+                    # copy the successors/stable motifs that we already know. This doesn't
+                    # make too much of a difference unless the maximal trap space computation
+                    # is complex, but that is sometimes true, especially for large networks.
+                    for succ_id in block_nodes:
+                        succ_motif = sd.edge_stable_motif(node, succ_id, reduced=True)
+                        block_sd._ensure_node(block_sd.root(), succ_motif)  # type: ignore
+                    block_sd.node_data(block_sd.root())["expanded"] = True
 
                     # We could also consider using `seeds` instead of `candidates` here. Ultimately, this
                     # matters very rarely. The reasoning for why we use `candidates` is that we can (almost)
