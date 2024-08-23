@@ -1193,7 +1193,12 @@ class SuccessionDiagram:
         """
         return expand_source_SCCs(self, check_maa=find_motif_avoidant_attractors)
 
-    def expand_block(self, find_motif_avoidant_attractors: bool = True) -> bool:
+    def expand_block(
+        self,
+        find_motif_avoidant_attractors: bool = True,
+        size_limit: int | None = None,
+        optimize_source_nodes: bool = True,
+    ) -> bool:
         """
         Expand the succession diagram using the source block method.
 
@@ -1201,9 +1206,22 @@ class SuccessionDiagram:
         If set to `False`, the expansion only expands one "source block" for each node,
         without checking any attractor properties. If set to `True`, the expansion might
         expand some nodes fully to uncover nodes that precisely cover motif
-        avoidant attractors.
+        avoidant attractors. As a byproduct, if set to `True` and no motif avoidant attractors
+        are detected for some node, this is result is saved and the attractors don't
+        need to be recomputed later.
+
+        By default, the method also detects any source nodes and directly expands these
+        into trap spaces where all source nodes are fixed. This has no correctness impact on
+        attractor search and always produces a smaller succession diagram, but if you need to
+        obtain a succession diagram where this does not happen (e.g. for testing), you can turn
+        this off using `optimize_source_nodes`.
         """
-        return expand_source_blocks(self, find_motif_avoidant_attractors)
+        return expand_source_blocks(
+            self,
+            find_motif_avoidant_attractors,
+            size_limit=size_limit,
+            optimize_source_nodes=optimize_source_nodes,
+        )
 
     def expand_bfs(
         self,
@@ -1257,7 +1275,9 @@ class SuccessionDiagram:
         """
         return expand_dfs(self, node_id, dfs_stack_limit, size_limit)
 
-    def expand_minimal_spaces(self, size_limit: int | None = None) -> bool:
+    def expand_minimal_spaces(
+        self, node_id: int | None = None, size_limit: int | None = None
+    ) -> bool:
         """
         Expands the succession diagram in a way that guarantees every minimal
         trap space to be reachable from the root node, but otherwise (greedily)
@@ -1272,8 +1292,15 @@ class SuccessionDiagram:
         vary if some nodes are already expanded initially. In such case, the
         procedure still tries to avoid expanding unnecessary nodes, which means
         existing expanded nodes can be prioritised over the "canonical" ones.
+
+        Optionally, you can start the expansion from a specific node that is not
+        the root using `node_id`, or restrict the size of the succession diagram
+        with `size_limit`.
+
+        Returns `True` if the expansion procedure terminated without exceeding
+        the size limit.
         """
-        return expand_minimal_spaces(self, size_limit)
+        return expand_minimal_spaces(self, node_id, size_limit)
 
     def expand_attractor_seeds(self, size_limit: int | None = None) -> bool:
         """

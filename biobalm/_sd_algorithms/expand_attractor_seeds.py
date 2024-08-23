@@ -22,7 +22,7 @@ def expand_attractor_seeds(sd: SuccessionDiagram, size_limit: int | None = None)
     # because for every attractor in a minimal trap space, we already have the
     # closest trap space, now we just need to do the same for (potential)
     # motif-avoidant attractors.
-    sd.expand_minimal_spaces(size_limit)
+    sd.expand_minimal_spaces(size_limit=size_limit)
 
     if sd.config["debug"]:
         print(
