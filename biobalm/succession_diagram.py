@@ -11,7 +11,10 @@ from biodivine_aeon import AsynchronousGraph, BooleanNetwork, VertexSet
 
 # Attractor detection algorithms.
 from biobalm._sd_attractors.attractor_candidates import compute_attractor_candidates
-from biobalm._sd_attractors.attractor_symbolic import compute_attractors_symbolic
+from biobalm._sd_attractors.attractor_symbolic import (
+    compute_attractors_symbolic,
+    symbolic_attractor_fallback,
+)
 
 # SD expansion algorithms/heuristics.
 from biobalm._sd_algorithms.expand_attractor_seeds import expand_attractor_seeds
@@ -780,6 +783,7 @@ class SuccessionDiagram:
         self,
         node_id: int,
         compute: bool = False,
+        symbolic_fallback: bool = False,
     ) -> list[BooleanSpace]:
         """
         Return the list of attractor seed states for the given `node_id`.
@@ -797,6 +801,11 @@ class SuccessionDiagram:
             The ID of the node.
         compute: bool
             Whether to compute the attractor seeds if they are not already known.
+        symbolic_fallback: bool
+            If active, the method will attempt to compute the attractor seeds fully
+            symbolically if the default NFVS-based method fails. However, note that
+            the program can become unresponsive if the symbolic encoding of the
+            result grows to be too large. [Default: False]
 
         Returns
         -------
@@ -810,32 +819,48 @@ class SuccessionDiagram:
         if seeds is None and not compute:
             raise KeyError(f"Attractor seeds not computed for node {node_id}.")
 
-        if seeds is None:
-            candidates = self.node_attractor_candidates(node_id, compute=True)
-            # Typically, this should be done when computing the candidates, but just in case
-            # something illegal happended... if we can show that the current candidate set
-            # is optimal, we just keep it and don't compute the attractors symbolically.
-            node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
-                node_id
-            )
-            if len(candidates) == 0 or (
-                node_is_pseudo_minimal and len(candidates) == 1
-            ):
-                node["attractor_seeds"] = candidates
-                seeds = candidates
-            else:
-                result = compute_attractors_symbolic(
-                    self, node_id, candidate_states=candidates, seeds_only=True
+        try:
+            if seeds is None:
+                candidates = self.node_attractor_candidates(node_id, compute=True)
+                # Typically, this should be done when computing the candidates, but just in case
+                # something illegal happended... if we can show that the current candidate set
+                # is optimal, we just keep it and don't compute the attractors symbolically.
+                node_is_pseudo_minimal = (not node["expanded"]) or self.node_is_minimal(
+                    node_id
                 )
-                node["attractor_seeds"] = result[0]
-                # At this point, attractor_sets could be `None`, but that
-                # is valid, as long as we actually compute them later when
-                # they are needed.
-                node["attractor_sets"] = result[1]
-                seeds = result[0]
+                if len(candidates) == 0 or (
+                    node_is_pseudo_minimal and len(candidates) == 1
+                ):
+                    node["attractor_seeds"] = candidates
+                    seeds = candidates
+                else:
+                    result = compute_attractors_symbolic(
+                        self, node_id, candidate_states=candidates, seeds_only=True
+                    )
+                    node["attractor_seeds"] = result[0]
+                    # At this point, attractor_sets could be `None`, but that
+                    # is valid, as long as we actually compute them later when
+                    # they are needed.
+                    node["attractor_sets"] = result[1]
+                    seeds = result[0]
 
-            # Release memory once attractor seeds are known. We might need these
-            # for attractor set computation later, but only if the seeds are not empty.
+                # Release memory once attractor seeds are known. We might need these
+                # for attractor set computation later, but only if the seeds are not empty.
+                if len(seeds) == 0:
+                    node["percolated_network"] = None
+                    node["percolated_nfvs"] = None
+                    node["percolated_petri_net"] = None
+        except RuntimeError as e:
+            if not symbolic_fallback:
+                raise e
+
+            # The NFVS method failed, likely because the candidate set was too large.
+            # We can still try to fix this and compute the attractors symbolically.
+            (seeds, sets) = symbolic_attractor_fallback(self, node_id)
+
+            node["attractor_seeds"] = seeds
+            node["attractor_sets"] = sets
+
             if len(seeds) == 0:
                 node["percolated_network"] = None
                 node["percolated_nfvs"] = None
