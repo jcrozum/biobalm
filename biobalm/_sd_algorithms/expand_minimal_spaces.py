@@ -24,6 +24,11 @@ def expand_minimal_spaces(
 
     minimal_traps = trappist(network=pn, problem="min", ensure_subspace=node_space)
 
+    if sd.config["debug"]:
+        print(
+            f"Start minimal trap SD expansion using {len(minimal_traps)} minimal traps."
+        )
+
     seen = set([node_id])
 
     stack: list[tuple[int, list[int] | None]] = [(node_id, None)]

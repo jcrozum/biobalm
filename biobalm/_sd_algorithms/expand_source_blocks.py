@@ -39,8 +39,11 @@ def expand_source_blocks(
     while len(current_level) > 0:
         bfs_depth += 1
         if sd.config["debug"]:
+            total_fixed_vars = 0
+            for node in current_level:
+                total_fixed_vars += len(sd.node_data(node)["space"])
             print(
-                f" > Start block expansion of a BFS level {bfs_depth} with {len(current_level)} node(s)."
+                f" > Start block expansion of a BFS level {bfs_depth} with {len(current_level)} node(s). Average number of fixed variables: {total_fixed_vars / len(current_level)}/{sd.network.variable_count()}"
             )
 
         for node in sorted(current_level):  # Sorted for determinism
