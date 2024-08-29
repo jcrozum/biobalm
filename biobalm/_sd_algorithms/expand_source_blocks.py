@@ -201,10 +201,16 @@ def expand_source_blocks(
                     # MAAs in the problematic nodes while using the nice properties of the expansion to
                     # still disprove MAAs in the remaining nodes. If we used `seeds`, the expansion could
                     # just get stuck on this node and the "partial" results wouldn't be usable.
-                    block_sd_candidates = block_sd.node_attractor_candidates(
-                        block_sd.root(), compute=True
-                    )
-                    if len(block_sd_candidates) == 0:
+                    is_clean = False
+                    try:
+                        block_sd_candidates = block_sd.node_attractor_candidates(
+                            block_sd.root(), compute=True
+                        )
+                        is_clean = len(block_sd_candidates) == 0
+                    except RuntimeError:
+                        is_clean = False
+
+                    if is_clean:
                         if sd.config["debug"]:
                             print(
                                 f" > [{node}] Found clean block with no MAAs ({len(block_nodes)}): {block_nodes}"
@@ -217,7 +223,7 @@ def expand_source_blocks(
                     else:
                         if sd.config["debug"]:
                             print(
-                                f"[{node}] > Found {len(block_sd_candidates)} MAA cnadidates in a block. Delaying expansion."
+                                f"[{node}] > Found MAA candidates in a block (or failed candidate search). Delaying expansion."
                             )
                 if not clean_block_found:
                     # If all blocks have MAAs, we expand all successors.

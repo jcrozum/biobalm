@@ -6,6 +6,7 @@ import biobalm
 import biobalm.succession_diagram
 from biobalm.succession_diagram import SuccessionDiagram
 from biobalm.types import BooleanSpace
+from biobalm._sd_attractors.attractor_symbolic import symbolic_attractor_fallback
 
 
 class SuccessionDiagramTest(unittest.TestCase):
@@ -171,13 +172,13 @@ def test_expansion_comparisons(network_file: str):
         # succession_diagram is too large for this test.
         return
 
+    assert sd_bfs.is_isomorphic(sd_dfs)
+
     # Normal minimal trap space expansion.
     sd_min = SuccessionDiagram(bn)
     assert sd_min.expand_minimal_spaces(size_limit=NODE_LIMIT)
 
-    assert sd_bfs.is_isomorphic(sd_dfs)
     assert sd_min.is_subgraph(sd_bfs)
-    assert sd_min.is_subgraph(sd_dfs)
 
     # Expand the first node fully, and then expand the rest
     # until minimal trap spaces are found.
@@ -188,7 +189,6 @@ def test_expansion_comparisons(network_file: str):
             assert sd_min_larger.expand_minimal_spaces(node_id=node_id)
 
     assert sd_min_larger.is_subgraph(sd_bfs)
-    assert sd_min_larger.is_subgraph(sd_dfs)
     assert len(sd_min_larger) >= len(sd_min)
 
     # Normal block expansion with size limit.
@@ -200,7 +200,6 @@ def test_expansion_comparisons(network_file: str):
     )
 
     assert sd_block.is_subgraph(sd_bfs)
-    assert sd_block.is_subgraph(sd_dfs)
 
     block_trap = [
         sd_block.node_data(i)["space"] for i in sd_block.minimal_trap_spaces()
@@ -210,6 +209,15 @@ def test_expansion_comparisons(network_file: str):
         assert t in min_trap
     for t in min_trap:
         assert t in block_trap
+
+    # Block expansion with symbolic fallback.
+    sd_config = SuccessionDiagram.default_config()
+    sd_fallback = SuccessionDiagram(bn, sd_config)
+    assert sd_fallback.expand_bfs()
+    for n in sd_fallback.node_ids():
+        symbolic = symbolic_attractor_fallback(sd_fallback, n)
+        normal = sd_fallback.node_attractor_seeds(n, compute=True)
+        assert len(normal) == len(symbolic[0])
 
     sd_attr = SuccessionDiagram(bn)
     assert sd_attr.expand_attractor_seeds(size_limit=NODE_LIMIT)

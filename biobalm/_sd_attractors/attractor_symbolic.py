@@ -6,9 +6,104 @@ if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
     from biodivine_aeon import VariableId
 
-from biodivine_aeon import AsynchronousGraph, ColoredVertexSet, VertexSet
+from biodivine_aeon import (
+    AsynchronousGraph,
+    ColoredVertexSet,
+    VertexSet,
+    Attractors,
+    Reachability,
+)
 from biobalm.symbolic_utils import state_list_to_bdd
 from biobalm.types import BooleanSpace
+import biodivine_aeon
+
+
+def symbolic_attractor_fallback(
+    sd: SuccessionDiagram,
+    node_id: int,
+) -> tuple[list[BooleanSpace], list[VertexSet]]:
+    """
+    In case the attractor candidates cannot be computed, this fallback method
+    can be used to attempt fully symbolic attractor computation for the given node.
+
+    If the normal method works, then it is usually faster, but in the rare cases
+    where it fails, this can sometimes help to solve the few outlier nodes that
+    would otherwise block the computation.
+    """
+
+    old_log_level = biodivine_aeon.LOG_LEVEL
+
+    if sd.config["debug"]:
+        print(f"[{node_id}] > Start symbolic fallback.")
+        biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_ESSENTIAL
+
+    node_data = sd.node_data(node_id)
+    node_space = node_data["space"]
+
+    candidates = sd.symbolic.mk_subspace(node_space)
+    if node_data["expanded"]:
+        # This node has successors that we should exclude from the attractor search.
+        for s in sd.node_successors(node_id, compute=False):
+            s_space = sd.node_data(s)["space"]
+            candidates = candidates.minus(sd.symbolic.mk_subspace(s_space))
+
+    fixed_variables = list(node_space.keys())
+    free_variables = [
+        v for v in sd.network.variable_names() if v not in fixed_variables
+    ]
+
+    if sd.config["debug"]:
+        print(f"[{node_id}] > Initial attractor candidates: {candidates}")
+
+    candidates = Attractors.transition_guided_reduction(
+        sd.symbolic, candidates, free_variables
+    )
+
+    if not sd.node_is_minimal(node_id) and not candidates.is_empty():
+        # This like it could be a motif-avoidant attractor. We better investigate this further,
+        # because this could get complicated...
+        avoid = sd.symbolic.mk_empty_colored_vertices()
+        if node_data["expanded"]:
+            for s in sd.node_successors(node_id):
+                s_space = sd.node_data(s)["space"]
+                avoid = avoid.union(sd.symbolic.mk_subspace(s_space))
+
+        if sd.config["debug"]:
+            print(
+                f"[{node_id}] > Reduction was ineffective. Start computing avoid set: {avoid}"
+            )
+
+        avoid = Reachability.reach_bwd(sd.symbolic, avoid)
+
+        if sd.config["debug"]:
+            print(f"[{node_id}] > Avoid set: {avoid}")
+
+        candidates = candidates.minus(avoid)
+    else:
+        if sd.config["debug"]:
+            print(
+                f"[{node_id}] > Node is minimal and the reduction did not finish with an empty set. This is fine."
+            )
+
+    if sd.config["debug"]:
+        print(f"[{node_id}] > Attractor candidates after reduction: {candidates}")
+
+    attractors = Attractors.xie_beerel(sd.symbolic, candidates)
+
+    biodivine_aeon.LOG_LEVEL = old_log_level
+
+    result_seeds: list[BooleanSpace] = []
+    result_sets: list[VertexSet] = []
+    for attr in attractors:
+        attr_vertices = attr.vertices()
+        attr_seed = next(attr_vertices.items()).to_dict()
+        attr_seed_named = {
+            sd.network.get_variable_name(k): v for (k, v) in attr_seed.items()
+        }
+        result_seeds.append(cast(BooleanSpace, attr_seed_named))
+        result_sets.append(attr_vertices)
+
+    return (result_seeds, result_sets)
 
 
 def compute_attractors_symbolic(
