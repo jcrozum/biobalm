@@ -1637,6 +1637,6 @@ class SuccessionDiagram:
         # approach these... but this is probably good enough for now.
         if not self.dag.has_edge(parent_id, child_id):  # type: ignore
             self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
-            if self.config["debug"]:
-                print(f"[{parent_id}] Created edge into node {child_id}.")
+            #if self.config["debug"]:
+            #    print(f"[{parent_id}] Created edge into node {child_id}.")
         self._update_node_depth(child_id, parent_id)
