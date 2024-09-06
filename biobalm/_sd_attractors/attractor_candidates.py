@@ -19,6 +19,7 @@ import biobalm
 from biodivine_aeon import Bdd, AsynchronousGraph, BddVariable
 from biobalm.trappist_core import compute_fixed_point_reduced_STG
 from biobalm.symbolic_utils import state_list_to_bdd, valuation_to_state, state_to_bdd
+from biobalm.space_utils import intersect, is_subspace
 
 try:
     pint_available = True
@@ -121,6 +122,37 @@ def compute_attractor_candidates(
         child_motifs_reduced = [
             sd.edge_stable_motif(node_id, s, reduced=True) for s in children
         ]
+
+    if node_data["skipped"]:
+        # For skip nodes, it does not holds that the successors are the maximal subspaces.
+        # This means that a skip node can intersect with some other SD node and that intersection
+        # is not a subset of one of its children. In such case, we can use this intersection
+        # to further simplify the attractor detection process.
+        total_skip_nodes_applied = 0
+        for n in sd.node_ids():
+            n_data = sd.node_data(n)
+            if is_subspace(node_space, n_data["space"]):
+                # This means that (in a fully expanded SD), `node` would be a (transitive)
+                # successor of `n`, which means that a result for `n` is "attractors in n
+                # that are not in node". Hence, we can't use it to reason about `node`.
+                # This is not a problem if the intersection of the two nodes is non-triviall,
+                # because that means they have common successors (and those should be
+                # solved separately), but the nodes themselves do not depend on each other.
+                continue
+            if n_data["attractor_candidates"] == [] or n_data["attractor_seeds"] == []:
+                # This will create a lot of duplicates, but it seems to be better than
+                # not doing it at all.
+                common_subspace = intersect(node_space, n_data["space"])
+                if common_subspace is not None:
+                    reduced_subspace: BooleanSpace = {
+                        k: v for k, v in common_subspace.items() if k not in node_space
+                    }
+                    child_motifs_reduced.append(reduced_subspace)
+                    total_skip_nodes_applied += 1
+        if sd.config["debug"]:
+            print(
+                f"[{node_id}] Extended child motifs with {total_skip_nodes_applied} skip-node intersections."
+            )
 
     # Indicates that this space is either minimal, or has no computed successors.
     # In either case, the space must contain at least one attractor.

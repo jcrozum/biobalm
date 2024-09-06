@@ -35,7 +35,12 @@ from biobalm.petri_net_translation import (
     network_to_petrinet,
     restrict_petrinet_to_subspace,
 )
-from biobalm.space_utils import percolate_network, percolate_space, space_unique_key
+from biobalm.space_utils import (
+    percolate_network,
+    percolate_space,
+    space_unique_key,
+    is_subspace,
+)
 from biobalm.trappist_core import trappist
 from biobalm.types import (
     BooleanSpace,
@@ -1223,6 +1228,7 @@ class SuccessionDiagram:
         find_motif_avoidant_attractors: bool = True,
         size_limit: int | None = None,
         optimize_source_nodes: bool = True,
+        exact_attractor_detection: bool = False,
     ) -> bool:
         """
         Expand the succession diagram using the source block method.
@@ -1240,12 +1246,21 @@ class SuccessionDiagram:
         attractor search and always produces a smaller succession diagram, but if you need to
         obtain a succession diagram where this does not happen (e.g. for testing), you can turn
         this off using `optimize_source_nodes`.
+
+        If `exact_attractor_detection` is selected, the method will use attractor seeds instead
+        of attractor candidates to check for motif-avoidant attractors. This means that the attractor
+        detection can take much longer. In particular, it will not expand the SD if it cannot detect
+        all attractors, meaning it can get "stuck". However, assuming you want to run full attractor
+        detection anyway, this might save you some time, as you won't need to re-run  the failed
+        candidate detection. (This is only relevant for models where the attractors are very
+        complex and the candidate state detection can fail with default settings)
         """
         return expand_source_blocks(
             self,
             find_motif_avoidant_attractors,
             size_limit=size_limit,
             optimize_source_nodes=optimize_source_nodes,
+            check_maa_exact=exact_attractor_detection,
         )
 
     def expand_bfs(
@@ -1301,7 +1316,10 @@ class SuccessionDiagram:
         return expand_dfs(self, node_id, dfs_stack_limit, size_limit)
 
     def expand_minimal_spaces(
-        self, node_id: int | None = None, size_limit: int | None = None
+        self,
+        node_id: int | None = None,
+        size_limit: int | None = None,
+        skip_remaining: bool = False,
     ) -> bool:
         """
         Expands the succession diagram in a way that guarantees every minimal
@@ -1324,8 +1342,14 @@ class SuccessionDiagram:
 
         Returns `True` if the expansion procedure terminated without exceeding
         the size limit.
+
+        If `skip_remaining` is set, any nodes that are not expanded by this procedure
+        are "skipped" with edges redirected to the corresponding minimal trap spaces
+        (see also `SuccessionDiagram.skip_remaining`). This is usually faster than
+        using `skip_remaining` directly, since the minimal trap spaces are only
+        computed once.
         """
-        return expand_minimal_spaces(self, node_id, size_limit)
+        return expand_minimal_spaces(self, node_id, size_limit, skip_remaining)
 
     def expand_attractor_seeds(self, size_limit: int | None = None) -> bool:
         """
@@ -1354,6 +1378,97 @@ class SuccessionDiagram:
         subspace" are expanded as much as necessary, but not more.
         """
         return expand_to_target(self, target, size_limit)
+
+    def skip_to_minimal(self, node_id: int) -> bool:
+        """
+        Skip the expansion of this node (see also `NodeData.skipped`) and add extra
+        edges that connect it directly to its minimal trap spaces. Returns `False`
+        if the node is already expanded.
+
+        Note that this method is relatively inefficient when applied to multiple
+        nodes repeatedly, as it has to recompute the minimal trap spaces for each node.
+        To turn multiple nodes into skip nodes, see also `skip_remaining`.
+        """
+
+        node = self.node_data(node_id)
+
+        if node["expanded"]:
+            return False
+
+        pn = self.node_percolated_petri_net(node_id, compute=True)
+        minimal_traps = trappist(
+            network=pn, problem="min", ensure_subspace=node["space"]
+        )
+
+        if len(minimal_traps) == 1 and minimal_traps[0] == node["space"]:
+            # This node is a minimal trap space
+            # and thus cannot be skipped.
+            node["expanded"] = True
+            return True
+
+        for m_trap in minimal_traps:
+            m_id = self._ensure_node(node_id, m_trap)
+            # Also expand the minimal trap space, since we know
+            # it has no successors.
+            m_data = self.node_data(m_id)
+            m_data["expanded"] = True
+
+        node["expanded"] = True
+        node["skipped"] = True
+
+        if self.config["debug"]:
+            print(f"[{node_id}] Added {len(minimal_traps)} skip edges.")
+
+        return True
+
+    def skip_remaining(self) -> int:
+        """
+        Apply `skip_to_minimal` to every node that is not expanded.
+
+        This is faster than calling the method individually if the number of
+        nodes is high since we can cache the minimal trap spaces.
+
+        Returns the number of created skip nodes.
+        """
+
+        pn = self.node_percolated_network(self.root(), compute=True)
+        minimal_traps = trappist(network=pn, problem="min")
+
+        if self.config["debug"]:
+            print(f"Skipping remaining nodes. Found {len(minimal_traps)} trap spaces.")
+
+        trap_with_id: list[tuple[int, BooleanSpace]] = []
+        for m_trap in minimal_traps:
+            m_id = self._ensure_node(None, m_trap)
+            m_data = self.node_data(m_id)
+            trap_with_id.append((m_id, m_trap))
+            # We can expand the minimal trap spaces since
+            # they don't have successors.
+            m_data["expanded"] = True
+
+        skipped_nodes = 0
+        for node_id in self.node_ids():
+            node = self.node_data(node_id)
+
+            if node["expanded"]:
+                continue
+
+            skip_edges = 0
+            for m_id, m_trap in trap_with_id:
+                if is_subspace(m_trap, node["space"]):
+                    self._ensure_edge(node_id, m_id, m_trap)
+                    skip_edges += 1
+
+            node["skipped"] = True
+            node["expanded"] = True
+            skipped_nodes += 1
+
+            if self.config["debug"]:
+                print(
+                    f"[{node_id}] Added {skipped_nodes} skip edges into minimal trap spaces."
+                )
+
+        return skipped_nodes
 
     def _update_node_depth(self, node_id: int, parent_id: int):
         """
@@ -1464,10 +1579,7 @@ class SuccessionDiagram:
             print(f"[{node_id}] Found sub-spaces: {len(sub_spaces)}")
 
         for sub_space in sub_spaces:
-            child_id = self._ensure_node(node_id, sub_space)
-
-            if self.config["debug"]:
-                print(f"[{node_id}] Created edge into node {child_id}.")
+            self._ensure_node(node_id, sub_space)
 
         # If everything else worked out, we can mark the node as expanded.
         node["expanded"] = True
@@ -1506,6 +1618,7 @@ class SuccessionDiagram:
                 attractor_seeds=None,
                 attractor_sets=None,
                 parent_node=parent_id,
+                skipped=None,
             )
             self.node_indices[key] = child_id
         else:
@@ -1522,5 +1635,8 @@ class SuccessionDiagram:
         # TODO: It seems that there are some networks where the same child
         # can be reached through multiple stable motifs. Not sure how to
         # approach these... but this is probably good enough for now.
-        self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+        if not self.dag.has_edge(parent_id, child_id):  # type: ignore
+            self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+            if self.config["debug"]:
+                print(f"[{parent_id}] Created edge into node {child_id}.")
         self._update_node_depth(child_id, parent_id)

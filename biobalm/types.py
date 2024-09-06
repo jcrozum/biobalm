@@ -167,6 +167,26 @@ class NodeData(TypedDict):
     expanding its predecessors).
     """
 
+    skipped: bool | None
+    """
+    If `True`, indicates that the successors of this node are not the normal
+    maximal trap spaces, but rather some smaller trap spaces deeper in the
+    succession diagram. The only requirement is that all minimal trap spaces
+    that are reachable from this "skip node" are still reachable through
+    this modified set of successors (in the most basic form, the successors
+    can be the minimal trap spaces themselves).
+
+    For skip nodes, attractor detection still works, but can over-count
+    motif-avoidant attractors assuming the attractor intersects multiple
+    skip nodes. In other words, each attractor is still found, but it is
+    not necessarily true that its smallest trap space is discovered.
+    Nevertheless, if the network has no motif-avoidant attractors, the
+    result is always the same regardless of how many skip nodes are used.
+
+    A skip node is considered "expanded", since its outgoing edges are
+    computed.
+    """
+
 
 class SuccessionDiagramConfiguration(TypedDict):
     """
