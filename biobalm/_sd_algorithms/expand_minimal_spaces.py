@@ -5,12 +5,17 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from biobalm.succession_diagram import SuccessionDiagram
 
+import copy
 from biobalm.space_utils import is_subspace
 from biobalm.trappist_core import trappist
+from biobalm.types import BooleanSpace
 
 
 def expand_minimal_spaces(
-    sd: SuccessionDiagram, node_id: int | None, size_limit: int | None = None
+    sd: SuccessionDiagram,
+    node_id: int | None,
+    size_limit: int | None = None,
+    skip_remaining: bool = False,
 ) -> bool:
     """
     See `SuccessionDiagram.expand_minimal_spaces` for documentation.
@@ -22,7 +27,10 @@ def expand_minimal_spaces(
     pn = sd.node_percolated_petri_net(node_id, compute=True)
     node_space = sd.node_data(node_id)["space"]
 
-    minimal_traps = trappist(network=pn, problem="min", ensure_subspace=node_space)
+    all_minimal_traps = trappist(network=pn, problem="min", ensure_subspace=node_space)
+    all_minimal_traps = [(node_space | x) for x in all_minimal_traps]
+    # We don't need to duplicate the actual trap spaces, just the list.
+    minimal_traps = copy.copy(all_minimal_traps)
 
     if sd.config["debug"]:
         print(
@@ -32,6 +40,28 @@ def expand_minimal_spaces(
     seen = set([node_id])
 
     stack: list[tuple[int, list[int] | None]] = [(node_id, None)]
+
+    def make_skip_node(
+        sd: SuccessionDiagram, node_id: int, all_minimal_traps: list[BooleanSpace]
+    ):
+        node = sd.node_data(node_id)
+        if node["expanded"]:
+            return
+
+        skip_edges = 0
+        for m_trap in all_minimal_traps:
+            if is_subspace(m_trap, sd.node_data(node_id)["space"]):
+                m_id = sd._ensure_node(node_id, m_trap)  # type: ignore
+                m_data = sd.node_data(m_id)
+                m_data["expanded"] = True
+                assert sd.node_is_minimal(m_id)
+                skip_edges += 1
+
+        node["expanded"] = True
+        node["skipped"] = True
+
+        if sd.config["debug"]:
+            print(f"[{node_id}] Node skipped with {skip_edges} edges.")
 
     while len(stack) > 0:
         (node, successors) = stack.pop()
@@ -51,10 +81,13 @@ def expand_minimal_spaces(
         # do not cover any new minimal trap space.
         while len(successors) > 0:
             if successors[-1] in seen:
+                # Everything in seen is expanded, so no need to skip it.
                 successors.pop()
                 continue
             if len([s for s in minimal_traps if is_subspace(s, node_space)]) == 0:
-                successors.pop()
+                skipped = successors.pop()
+                if skip_remaining:
+                    make_skip_node(sd, skipped, all_minimal_traps)
                 continue
             break
 
@@ -64,6 +97,8 @@ def expand_minimal_spaces(
         if len(successors) == 0:
             if sd.node_is_minimal(node):
                 minimal_traps.remove(sd.node_data(node)["space"])
+                if sd.config["debug"]:
+                    print(f"Remaining minimal traps: {len(minimal_traps)}.")
             continue
 
         # At this point, we know that `s` is not visited and it contains
@@ -76,6 +111,9 @@ def expand_minimal_spaces(
         stack.append((node, successors))
         # Push the successor onto the stack.
         stack.append((s, None))
+
+        if sd.config["debug"]:
+            print(f"[{s}] Expanding...")
 
     assert len(minimal_traps) == 0
     return True

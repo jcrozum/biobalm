@@ -2,6 +2,7 @@ import unittest
 
 from biodivine_aeon import AsynchronousGraph, Attractors, BooleanNetwork
 
+import copy
 import biobalm
 import biobalm.succession_diagram
 from biobalm.succession_diagram import SuccessionDiagram
@@ -254,6 +255,26 @@ def test_attractor_detection(network_file: str):
     if not fully_expanded:
         return
 
+    # Build partial succession diagrams.
+    sd_min_partial = SuccessionDiagram(bn)
+    sd_min_partial.expand_minimal_spaces(size_limit=10, skip_ignored=True)
+    sd_min_partial.skip_remaining()
+    sd_block_partial = SuccessionDiagram(bn)
+    sd_block_partial.expand_block(size_limit=10)
+    sd_block_partial.skip_remaining()
+
+    # Check that the minimal trap spaces match
+    for node in sd_min_partial.node_ids():
+        sd_id = sd.find_node(sd_min_partial.node_data(node)["space"])
+        assert sd_id is not None
+        assert sd.node_is_minimal(sd_id) == sd_min_partial.node_is_minimal(node)
+    for node in sd_block_partial.node_ids():
+        sd_id = sd.find_node(sd_block_partial.node_data(node)["space"])
+        assert sd_id is not None
+        assert sd.node_is_minimal(sd_id) == sd_block_partial.node_is_minimal(node)
+    assert len(sd.minimal_trap_spaces()) == len(sd_min_partial.minimal_trap_spaces())
+    assert len(sd.minimal_trap_spaces()) == len(sd_block_partial.minimal_trap_spaces())
+
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
     nfvs_attractors: list[BooleanSpace] = []
@@ -265,12 +286,25 @@ def test_attractor_detection(network_file: str):
         if len(attr) > 0:
             nfvs_attractors += attr
 
+    min_partial_attractors: list[BooleanSpace] = []
+    for i in sd_min_partial.node_ids():
+        attr = sd_min_partial.node_attractor_seeds(i, compute=True)
+        if len(attr) > 0:
+            min_partial_attractors += attr
+
+    block_partial_attractors: list[BooleanSpace] = []
+    for i in sd_block_partial.node_ids():
+        attr = sd_block_partial.node_attractor_seeds(i, compute=True)
+        if len(attr) > 0:
+            block_partial_attractors += attr
+
     # Compute symbolic attractors using AEON.
-    symbolic_attractors = Attractors.attractors(stg, stg.mk_unit_colored_vertices())
+    symbolic_attractors_all = Attractors.attractors(stg, stg.mk_unit_colored_vertices())
 
     # Check that every "seed" returned by SuccessionDiagram appears in
     # some symbolic attractor, and that every symbolic attractor contains
     # at most one such "seed" state.
+    symbolic_attractors = copy.copy(symbolic_attractors_all)
     for seed in nfvs_attractors:
         symbolic_seed = stg.mk_subspace(seed)
         found = None
@@ -284,9 +318,35 @@ def test_attractor_detection(network_file: str):
 
         symbolic_attractors.pop(found)
 
-    print("Attractors:", len(nfvs_attractors))
-
     # All symbolic attractors must be covered by some seed at this point.
+    assert len(symbolic_attractors) == 0
+
+    # Copy of the test above, but for the results from partially expanded diagrams.
+
+    symbolic_attractors = copy.copy(symbolic_attractors_all)
+    for seed in min_partial_attractors:
+        symbolic_seed = stg.mk_subspace(seed)
+        found = None
+
+        for i in range(len(symbolic_attractors)):
+            if symbolic_seed.is_subset(symbolic_attractors[i]):
+                found = i
+        assert found is not None
+
+        symbolic_attractors.pop(found)
+    assert len(symbolic_attractors) == 0
+
+    symbolic_attractors = copy.copy(symbolic_attractors_all)
+    for seed in block_partial_attractors:
+        symbolic_seed = stg.mk_subspace(seed)
+        found = None
+
+        for i in range(len(symbolic_attractors)):
+            if symbolic_seed.is_subset(symbolic_attractors[i]):
+                found = i
+        assert found is not None
+
+        symbolic_attractors.pop(found)
     assert len(symbolic_attractors) == 0
 
 

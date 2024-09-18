@@ -14,6 +14,7 @@ from biodivine_aeon import (
     Reachability,
 )
 from biobalm.symbolic_utils import state_list_to_bdd
+from biobalm.space_utils import is_subspace, intersect
 from biobalm.types import BooleanSpace
 import biodivine_aeon
 import copy
@@ -48,16 +49,37 @@ def symbolic_attractor_fallback(
             s_space = sd.node_data(s)["space"]
             candidates = candidates.minus(sd.symbolic.mk_subspace(s_space))
 
-    fixed_variables = list(node_space.keys())
-    free_variables = [
-        v for v in sd.network.variable_names() if v not in fixed_variables
-    ]
+    if node_data["skipped"]:
+        # This is the same method that we applied to candidate states computation.
+        initial_size = candidates.cardinality()
+        for n in sd.node_ids():
+            n_data = sd.node_data(n)
+            if is_subspace(node_space, n_data["space"]):
+                continue
+            if n_data["attractor_candidates"] == [] or n_data["attractor_seeds"] == []:
+                # This will create a lot of duplicates, but it seems to be better than
+                # not doing it at all.
+                common_subspace = intersect(node_space, n_data["space"])
+                if common_subspace is not None:
+                    candidates = candidates.minus(
+                        sd.symbolic.mk_subspace(common_subspace)
+                    )
+        if sd.config["debug"]:
+            print(
+                f"[{node_id}] Simplified symbolic fallback candidates with skip nodes from {initial_size} to {candidates.cardinality()}."
+            )
+
+    # These should cover all cycles in the network, so transition-guided reduction
+    # only needs to consider these variables.
+    internal_nfvs = sd.node_percolated_nfvs(node_id, compute=True)
 
     if sd.config["debug"]:
         print(f"[{node_id}] > Initial attractor candidates: {candidates}")
 
     candidates = Attractors.transition_guided_reduction(
-        sd.symbolic, candidates, free_variables
+        sd.symbolic,
+        candidates,
+        internal_nfvs,
     )
 
     if not sd.node_is_minimal(node_id) and not candidates.is_empty():

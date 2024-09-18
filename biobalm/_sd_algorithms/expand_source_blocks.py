@@ -15,6 +15,7 @@ def expand_source_blocks(
     check_maa: bool = True,
     size_limit: int | None = None,
     optimize_source_nodes: bool = True,
+    check_maa_exact: bool = False,
 ) -> bool:
     """
     Base correctness assumptions:
@@ -203,9 +204,14 @@ def expand_source_blocks(
                     # just get stuck on this node and the "partial" results wouldn't be usable.
                     is_clean = False
                     try:
-                        block_sd_candidates = block_sd.node_attractor_candidates(
-                            block_sd.root(), compute=True
-                        )
+                        if check_maa_exact:
+                            block_sd_candidates = block_sd.node_attractor_seeds(
+                                block_sd.root(), compute=True, symbolic_fallback=True
+                            )
+                        else:
+                            block_sd_candidates = block_sd.node_attractor_candidates(
+                                block_sd.root(), compute=True
+                            )
                         is_clean = len(block_sd_candidates) == 0
                     except RuntimeError:
                         is_clean = False
