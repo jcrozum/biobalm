@@ -1253,7 +1253,7 @@ class SuccessionDiagram:
         all attractors, meaning it can get "stuck". However, assuming you want to run full attractor
         detection anyway, this might save you some time, as you won't need to re-run  the failed
         candidate detection. (This is only relevant for models where the attractors are very
-        complex and the candidate state detection can fail with default settings)
+        complex and the candidate state detection can fail with default settings).
         """
         return expand_source_blocks(
             self,

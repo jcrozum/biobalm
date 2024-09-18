@@ -124,7 +124,7 @@ def compute_attractor_candidates(
         ]
 
     if node_data["skipped"]:
-        # For skip nodes, it does not holds that the successors are the maximal subspaces.
+        # For skip nodes, it does not hold that the successors are the maximal subspaces.
         # This means that a skip node can intersect with some other SD node and that intersection
         # is not a subset of one of its children. In such case, we can use this intersection
         # to further simplify the attractor detection process.
