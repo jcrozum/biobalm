@@ -10,7 +10,7 @@
 project = "biobalm"
 copyright = "2024, Trinh, Park, Pastva, Rozum"
 author = "Trinh, Park, Pastva, Rozum"
-release = "0.1.0"
+release = "0.4.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
