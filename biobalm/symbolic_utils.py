@@ -73,14 +73,7 @@ def state_list_to_bdd(
         if isinstance(bdd_context, BddVariableSet)
         else bdd_context.bdd_variable_set()
     )
-    # There seems to be some bug in the "mk_dnf" function that makes some
-    # input instances shockingly slow. I am switching back to the "normal"
-    # enumeration method for now.
-    result = bdd.mk_false()
-    for clause in states:
-        result = result.l_or(bdd.mk_conjunctive_clause(clause))
-    return result
-    # return bdd.mk_dnf(states)
+    return bdd.mk_dnf(states)
 
 
 def function_eval(f: Bdd, state: BooleanSpace) -> Literal[0, 1] | None:
