@@ -28,6 +28,7 @@ def expand_minimal_spaces(
     node_space = sd.node_data(node_id)["space"]
 
     all_minimal_traps = trappist(network=pn, problem="min", ensure_subspace=node_space)
+    all_minimal_traps = [(node_space | x) for x in all_minimal_traps]
     # We don't need to duplicate the actual trap spaces, just the list.
     minimal_traps = copy.copy(all_minimal_traps)
 
@@ -53,6 +54,7 @@ def expand_minimal_spaces(
                 m_id = sd._ensure_node(node_id, m_trap)  # type: ignore
                 m_data = sd.node_data(m_id)
                 m_data["expanded"] = True
+                assert sd.node_is_minimal(m_id)
                 skip_edges += 1
 
         node["expanded"] = True

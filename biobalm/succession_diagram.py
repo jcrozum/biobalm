@@ -1319,7 +1319,7 @@ class SuccessionDiagram:
         self,
         node_id: int | None = None,
         size_limit: int | None = None,
-        skip_remaining: bool = False,
+        skip_ignored: bool = False,
     ) -> bool:
         """
         Expands the succession diagram in a way that guarantees every minimal
@@ -1343,13 +1343,15 @@ class SuccessionDiagram:
         Returns `True` if the expansion procedure terminated without exceeding
         the size limit.
 
-        If `skip_remaining` is set, any nodes that are not expanded by this procedure
+        If `skip_ignored` is set, any nodes that are not expanded by this procedure
         are "skipped" with edges redirected to the corresponding minimal trap spaces
         (see also `SuccessionDiagram.skip_remaining`). This is usually faster than
         using `skip_remaining` directly, since the minimal trap spaces are only
-        computed once.
+        computed once. However, note that if used with `size_limit`, nodes that
+        are not processed when `size_limit` is reached remain unprocessed
+        (i.e. it is not guaranteed that all nodes are either fully expanded or skipped).
         """
-        return expand_minimal_spaces(self, node_id, size_limit, skip_remaining)
+        return expand_minimal_spaces(self, node_id, size_limit, skip_ignored)
 
     def expand_attractor_seeds(self, size_limit: int | None = None) -> bool:
         """
@@ -1396,9 +1398,8 @@ class SuccessionDiagram:
             return False
 
         pn = self.node_percolated_petri_net(node_id, compute=True)
-        minimal_traps = trappist(
-            network=pn, problem="min", ensure_subspace=node["space"]
-        )
+        minimal_traps = trappist(network=pn, problem="min")
+        minimal_traps = [(node["space"] | x) for x in minimal_traps]
 
         if len(minimal_traps) == 1 and minimal_traps[0] == node["space"]:
             # This node is a minimal trap space
@@ -1432,7 +1433,9 @@ class SuccessionDiagram:
         """
 
         pn = self.node_percolated_network(self.root(), compute=True)
+        root_space = self.node_data(self.root())["space"]
         minimal_traps = trappist(network=pn, problem="min")
+        minimal_traps = [root_space | x for x in minimal_traps]
 
         if self.config["debug"]:
             print(f"Skipping remaining nodes. Found {len(minimal_traps)} trap spaces.")
@@ -1463,10 +1466,12 @@ class SuccessionDiagram:
             node["expanded"] = True
             skipped_nodes += 1
 
-            if self.config["debug"]:
-                print(
-                    f"[{node_id}] Added {skipped_nodes} skip edges into minimal trap spaces."
-                )
+            # At this point, all minimal traps must be expanded,
+            # hence we should never skip one.
+            assert not self.node_is_minimal(node_id)
+
+        if self.config["debug"]:
+            print(f"Skipped {skipped_nodes} nodes.")
 
         return skipped_nodes
 

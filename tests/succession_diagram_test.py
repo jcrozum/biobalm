@@ -255,12 +255,25 @@ def test_attractor_detection(network_file: str):
     if not fully_expanded:
         return
 
-    # Partial succession diagrams
+    # Build partial succession diagrams.
     sd_min_partial = SuccessionDiagram(bn)
-    sd_min_partial.expand_minimal_spaces(size_limit=10, skip_remaining=True)
+    sd_min_partial.expand_minimal_spaces(size_limit=10, skip_ignored=True)
+    sd_min_partial.skip_remaining()
     sd_block_partial = SuccessionDiagram(bn)
     sd_block_partial.expand_block(size_limit=10)
     sd_block_partial.skip_remaining()
+
+    # Check that the minimal trap spaces match
+    for node in sd_min_partial.node_ids():
+        sd_id = sd.find_node(sd_min_partial.node_data(node)["space"])
+        assert sd_id is not None
+        assert sd.node_is_minimal(sd_id) == sd_min_partial.node_is_minimal(node)
+    for node in sd_block_partial.node_ids():
+        sd_id = sd.find_node(sd_block_partial.node_data(node)["space"])
+        assert sd_id is not None
+        assert sd.node_is_minimal(sd_id) == sd_block_partial.node_is_minimal(node)
+    assert len(sd.minimal_trap_spaces()) == len(sd_min_partial.minimal_trap_spaces())
+    assert len(sd.minimal_trap_spaces()) == len(sd_block_partial.minimal_trap_spaces())
 
     # Compute attractors in diagram nodes.
     # TODO: There will probably be a method that does this in one "go".
