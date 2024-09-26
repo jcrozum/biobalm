@@ -359,6 +359,14 @@ def network_to_petrinet(
     return pn
 
 
+def optimized_dnf(bdd: Bdd) -> list[BddPartialValuation]:
+    """
+    This method uses internal AEON DNF construction. Originally, this was not very effective,
+    but with new methods, it is now actually smaller and faster than the "optimized" version
+    that we have here. The "optimized" version is kept here for archival purposes.
+    """
+    return bdd.to_dnf(optimize=True, size_limit=1_000_000)
+
 def optimized_recursive_dnf_generator(
     bdd: Bdd,
 ) -> Generator[BddPartialValuation, None, None]:
@@ -421,7 +429,7 @@ def _create_transitions(
     """
     dir_str = "up" if go_up else "down"
     total = 0
-    for t_id, implicant in enumerate(optimized_recursive_dnf_generator(implicant_bdd)):
+    for t_id, implicant in enumerate(optimized_dnf(implicant_bdd)):
         total += 1
         t_name = f"tr_{var_name}_{dir_str}_{t_id + 1}"
         pn.add_node(  # type: ignore[reportUnknownMemberType]

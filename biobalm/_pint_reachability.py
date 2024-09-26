@@ -16,7 +16,7 @@ from pypint import Goal, InMemoryModel  # type:ignore
 
 from biobalm.petri_net_translation import (
     place_to_variable,
-    optimized_recursive_dnf_generator,
+    optimized_dnf,
 )
 from biobalm.types import BooleanSpace, SuccessionDiagramConfiguration
 
@@ -70,7 +70,7 @@ def _pint_build_symbolic_goal(
 
     goals: list[Goal] = []
     limit = config["pint_goal_size_limit"]
-    for clause in optimized_recursive_dnf_generator(states):
+    for clause in optimized_dnf(states):
         named_clause = {
             states.__ctx__().get_variable_name(var): int(value)
             for var, value in clause.items()
