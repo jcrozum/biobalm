@@ -11,7 +11,7 @@ dependencies = [
     'networkx >=2.8.8',    
 ]
 # To reflect the change in the documentation, please also update `docs/conf.py`.
-version = "0.4.0"
+version = "0.4.1"
 
 # Pint can be used for static analysis, but is not mandatory.
 [project.optional-dependencies]
