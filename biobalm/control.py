@@ -339,9 +339,22 @@ def successions_to_target(
             target=target,
         )
 
+    found_valid_target_node = False
+
     for s in succession_diagram.node_ids():
+        # don't try to get to s if it's not in the target
         fixed_vars = succession_diagram.node_data(s)["space"]
         if not is_subspace(fixed_vars, target):
+            continue
+
+        found_valid_target_node = True
+        # no need to specifically control to s if getting to any of its parents is sufficient
+        parents = succession_diagram.dag.predecessors(s)  # type: ignore
+        if all(
+            is_subspace(succession_diagram.node_data(c)["space"], target)  # type: ignore
+            for p in parents  # type: ignore
+            for c in succession_diagram.dag.successors(p)  # type: ignore
+        ):
             continue
 
         for path in cast(
@@ -357,6 +370,9 @@ def successions_to_target(
                 for x, y in zip(path[:-1], path[1:])
             ]
             successions.append(succession)
+
+    if found_valid_target_node and len(successions) == 0:
+        successions = [[]]
 
     return successions
 

@@ -305,3 +305,36 @@ def test_size_restriction():
         sd, target, max_drivers_per_succession_node=1, successful_only=True
     )
     assert len(interventions) == 0
+
+
+def test_no_control_needed():
+    rules = """
+    a, b
+    b, a | c
+    c, !a
+    """
+    target: BooleanSpace = {"a": 1, "b": 1, "c": 0}
+
+    sd = SuccessionDiagram.from_rules(rules)
+    sd.build()
+    interventions = succession_control(sd, target)
+
+    assert len(interventions) == 1
+    intervention = interventions[0]
+    assert intervention.successful
+    assert intervention.control == []
+
+
+def test_no_control_possible():
+    rules = """
+    a, b
+    b, a | c
+    c, !a
+    """
+    target: BooleanSpace = {"a": 0, "b": 1, "c": 0}
+
+    sd = SuccessionDiagram.from_rules(rules)
+    sd.build()
+    interventions = succession_control(sd, target)
+
+    assert len(interventions) == 0
