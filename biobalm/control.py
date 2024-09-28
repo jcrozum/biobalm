@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from itertools import combinations, product
 from functools import reduce
-from typing import Literal, cast
+from typing import Literal, cast, Iterator
 
 import networkx as nx  # type: ignore
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
@@ -158,6 +158,19 @@ class Intervention:
             )
         else:
             return "unknown strategy: " + self.__repr__()
+
+    def all_control_strategies(self) -> Iterator[ControlOverrides]:
+        """
+        Returns all possible combinations of `ControlOverrides` sequences that
+        can be used to execute this `Intervention`.
+
+        Internally, an intervention consists of multiple control steps that
+        need to be taken sequentially. For each step in the sequence, an intervention
+        can have multiple options of how to execute it. With this method,
+        we can generate the actual sequences that arise by combining all the
+        available options for each step.
+        """
+        return map(lambda x: list(x), product(*self._control))
 
 
 def succession_control(
