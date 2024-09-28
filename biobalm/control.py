@@ -407,32 +407,34 @@ def successions_to_target(
                 target=s,
             ),
         ):
-            succession = [
-                succession_diagram.edge_stable_motif(x, y, reduced=True)
+            motif_list = [
+                succession_diagram.edge_all_stable_motifs(x, y, reduced=True)
                 for x, y in zip(path[:-1], path[1:])
             ]
-            if skip_feedforward_successions:
-                signature = reduce(lambda x, y: x | y, succession)
-                # First, check if any existing successions can be eliminated
-                # because they are redundant w.r.t. to this succession.
-                # (`reversed` is important here, because that way a delete
-                # only impacts indices that we already processed)
-                skip_completely = False
-                for i in reversed(range(len(succession_signatures))):
-                    existing_signature = succession_signatures[i]
-                    if is_subspace(signature, existing_signature):
-                        # The current `path` is already superseded by a path in successions.
-                        skip_completely = True
-                        break
-                    if is_subspace(existing_signature, signature):
-                        # A path in successions is made redundant by the current path.
-                        del succession_signatures[i]
-                        del successions[i]
-                if skip_completely:
-                    continue
+            for succession_tuple in product(*motif_list):
+                succession = list(succession_tuple)
+                if skip_feedforward_successions:
+                    signature = reduce(lambda x, y: x | y, succession)
+                    # First, check if any existing successions can be eliminated
+                    # because they are redundant w.r.t. to this succession.
+                    # (`reversed` is important here, because that way a delete
+                    # only impacts indices that we already processed)
+                    skip_completely = False
+                    for i in reversed(range(len(succession_signatures))):
+                        existing_signature = succession_signatures[i]
+                        if is_subspace(signature, existing_signature):
+                            # The current `path` is already superseded by a path in successions.
+                            skip_completely = True
+                            break
+                        if is_subspace(existing_signature, signature):
+                            # A path in successions is made redundant by the current path.
+                            del succession_signatures[i]
+                            del successions[i]
+                    if skip_completely:
+                        continue
 
-                succession_signatures.append(signature)
-            successions.append(succession)
+                    succession_signatures.append(signature)
+                successions.append(succession)
 
     if found_valid_target_node and len(successions) == 0:
         successions = [[]]

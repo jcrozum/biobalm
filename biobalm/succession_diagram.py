@@ -1087,6 +1087,22 @@ class SuccessionDiagram:
 
         return percolated_pn
 
+    def edge_all_stable_motifs(
+        self, parent_id: int, child_id: int, reduced: bool = False
+    ) -> list[BooleanSpace]:
+        """
+        Similar to `edge_stable_motif`, but returns all motifs associated with an edge.
+        """
+        all_motifs: list[BooleanSpace] = cast(list[BooleanSpace], self.dag.edges[parent_id, child_id]["all_motifs"])  # type: ignore
+        if reduced:
+            result: list[BooleanSpace] = []
+            node_space = self.node_data(parent_id)["space"]
+            for m in all_motifs:
+                result.append({k: v for k, v in m.items() if k not in node_space})
+            return result
+        else:
+            return all_motifs
+
     def edge_stable_motif(
         self, parent_id: int, child_id: int, reduced: bool = False
     ) -> BooleanSpace:
@@ -1641,5 +1657,7 @@ class SuccessionDiagram:
         # can be reached through multiple stable motifs. Not sure how to
         # approach these... but this is probably good enough for now.
         if not self.dag.has_edge(parent_id, child_id):  # type: ignore
-            self.dag.add_edge(parent_id, child_id, motif=stable_motif)  # type: ignore
+            self.dag.add_edge(parent_id, child_id, motif=stable_motif, all_motifs=[stable_motif])  # type: ignore
+        else:
+            self.dag.edges[parent_id, child_id]["all_motifs"].append(stable_motif)  # type: ignore
         self._update_node_depth(child_id, parent_id)
