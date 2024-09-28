@@ -180,6 +180,7 @@ def succession_control(
     max_drivers_per_succession_node: int | None = None,
     forbidden_drivers: set[str] | None = None,
     successful_only: bool = True,
+    skip_feedforward_successions: bool = False,
 ) -> list[Intervention]:
     """
     Performs succession-diagram control to reach a target subspace.
@@ -294,7 +295,10 @@ def succession_control(
     interventions: list[Intervention] = []
 
     successions = successions_to_target(
-        succession_diagram, target=target, expand_diagram=True
+        succession_diagram,
+        target=target,
+        expand_diagram=True,
+        skip_feedforward_successions=skip_feedforward_successions,
     )
 
     for succession in successions:
