@@ -386,7 +386,6 @@ def successions_to_target(
                 if is_subspace(signature, existing_signature):
                     # The current `path` is already superseded by a path in successions.
                     skip_completely = True
-                    print("Skipping", succession, path)
                     break
                 if is_subspace(existing_signature, signature):
                     # A path in successions is made redundant by the current path.
