@@ -5,14 +5,14 @@ based on the structure of a succession diagram.
 
 from __future__ import annotations
 
-from itertools import combinations, product
 from functools import reduce
+from itertools import combinations, product
 from typing import Literal, cast
 
 import networkx as nx  # type: ignore
 from biodivine_aeon import AsynchronousGraph, BooleanNetwork
 
-from biobalm.space_utils import is_subspace, percolate_space
+from biobalm.space_utils import intersect, is_subspace, percolate_space
 from biobalm.succession_diagram import SuccessionDiagram
 from biobalm.types import BooleanSpace, ControlOverrides, SubspaceSuccession
 
@@ -345,21 +345,32 @@ def successions_to_target(
             target=target,
         )
 
-    found_valid_target_node = False
+    # these contradict the target or have a motif avoidant attractor that isn't
+    # in full agreement with the target
+    hot_lava_nodes: set[int] = set()
 
+    descendant_map: dict[int, set[int]] = {}
     for s in succession_diagram.node_ids():
-        # don't try to get to s if it's not in the target
-        fixed_vars = succession_diagram.node_data(s)["space"]
-        if not is_subspace(fixed_vars, target):
-            continue
+        is_consistent = intersect(succession_diagram.node_data(s)["space"], target)
+        is_goal = is_subspace(succession_diagram.node_data(s)["space"], target)
+        is_minimal = succession_diagram.node_is_minimal(s)
+        if not is_consistent or (not is_goal and is_minimal):
+            hot_lava_nodes.add(s)
 
+        descendant_map[s] = set(nx.descendants(succession_diagram.dag, s))  # type: ignore
+        descendant_map[s].add(s)  # for our purposes, s is its own descendant
+    found_valid_target_node = False
+    for s in succession_diagram.node_ids():
+        # a node is a valid end point if all
+        # 1) its descendents (including itself) are not "hot lava"
+        # 2) it has a parent that is or can reach "hot lava" (otherwise, we can just control to the parent)
+        # note that all nodes are either cold lava or hot lava, but not both or neither
+        if descendant_map[s] & hot_lava_nodes:
+            continue
         found_valid_target_node = True
-        # no need to specifically control to s if getting to any of its parents is sufficient
-        parents = succession_diagram.dag.predecessors(s)  # type: ignore
-        if all(
-            is_subspace(succession_diagram.node_data(c)["space"], target)  # type: ignore
-            for p in parents  # type: ignore
-            for c in succession_diagram.dag.successors(p)  # type: ignore
+        if not any(
+            descendant_map[p] & hot_lava_nodes
+            for p in succession_diagram.dag.predecessors(s)  # type: ignore
         ):
             continue
 
@@ -393,7 +404,7 @@ def successions_to_target(
                     del succession_signatures[i]
                     del successions[i]
             if skip_completely:
-                continue
+                pass
 
             successions.append(succession)
             succession_signatures.append(signature)
