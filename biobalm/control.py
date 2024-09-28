@@ -317,16 +317,17 @@ def successions_to_target(
     succession_diagram: SuccessionDiagram,
     target: BooleanSpace,
     expand_diagram: bool = True,
+    skip_feedforward_successions: bool = False,
 ) -> list[SubspaceSuccession]:
     """Find lists of nested trap spaces (successions) that lead to the
     specified target subspace.
 
     Generally, it is not necessary to call this function directly, as it is
     automatically invoked by
-    :func:`succession_control<biobalm.control.succession_control>`. It is primarily
-    provided in the public API for testing and benchmarking purposes, or in the
-    case that the user wants to implement a custom strategy to identify
-    succession drivers rather than relying on
+    :func:`succession_control<biobalm.control.succession_control>`. It is
+    primarily provided in the public API for testing and benchmarking purposes,
+    or in the case that the user wants to implement a custom strategy to
+    identify succession drivers rather than relying on
     :func:`drivers_of_succession<biobalm.control.drivers_of_succession>`.
 
     Parameters
@@ -338,6 +339,12 @@ def successions_to_target(
     expand_diagram: bool
         Whether to ensure that the succession diagram is expanded enough to
         capture all paths to the target (default: True).
+    skip_feedforward_successions: bool
+        Whether to skip redundant successions (default: False). Skipping these
+        can reduce the number of interventions to test, yielding performance
+        improvements, but can also cause the algorithm to miss some valid
+        interventions, particularly in cases when the order of intervention
+        application is important.
 
     Returns
     -------
@@ -346,10 +353,10 @@ def successions_to_target(
         nested trap spaces that specify the target.
     """
     successions: list[SubspaceSuccession] = []
-    # Tracks the combined perturbation that needs to be applied
-    # for the whole succession to take effect. We use this to detect
-    # which successions are redundant when they can be replaced by
-    # a succession with a subset signature.
+    # Tracks the combined perturbation that needs to be applied for the whole
+    # succession to take effect. We use this to detect which successions are
+    # redundant when they can be replaced by a succession with a subset
+    # signature. Used when skip_feedforward_successions is True
     succession_signatures: list[BooleanSpace] = []
 
     # expand the succession_diagram toward the target
@@ -376,8 +383,9 @@ def successions_to_target(
     for s in succession_diagram.node_ids():
         # a node is a valid end point if all
         # 1) its descendents (including itself) are not "hot lava"
-        # 2) it has a parent that is or can reach "hot lava" (otherwise, we can just control to the parent)
-        # note that all nodes are either cold lava or hot lava, but not both or neither
+        # 2) it has a parent that is or can reach "hot lava" (otherwise, we can
+        # just control to the parent) note that all nodes are either cold lava
+        # or hot lava, but not both or neither
         if descendant_map[s] & hot_lava_nodes:
             continue
         found_valid_target_node = True
@@ -399,27 +407,28 @@ def successions_to_target(
                 succession_diagram.edge_stable_motif(x, y, reduced=True)
                 for x, y in zip(path[:-1], path[1:])
             ]
-            signature = reduce(lambda x, y: x | y, succession)
-            # First, check if any existing successions can be eliminated
-            # because they are redundant w.r.t. to this succession.
-            # (`reversed` is important here, because that way a delete
-            # only impacts indices that we already processed)
-            skip_completely = False
-            for i in reversed(range(len(succession_signatures))):
-                existing_signature = succession_signatures[i]
-                if is_subspace(signature, existing_signature):
-                    # The current `path` is already superseded by a path in successions.
-                    skip_completely = True
-                    break
-                if is_subspace(existing_signature, signature):
-                    # A path in successions is made redundant by the current path.
-                    del succession_signatures[i]
-                    del successions[i]
-            if skip_completely:
-                pass
+            if skip_feedforward_successions:
+                signature = reduce(lambda x, y: x | y, succession)
+                # First, check if any existing successions can be eliminated
+                # because they are redundant w.r.t. to this succession.
+                # (`reversed` is important here, because that way a delete
+                # only impacts indices that we already processed)
+                skip_completely = False
+                for i in reversed(range(len(succession_signatures))):
+                    existing_signature = succession_signatures[i]
+                    if is_subspace(signature, existing_signature):
+                        # The current `path` is already superseded by a path in successions.
+                        skip_completely = True
+                        break
+                    if is_subspace(existing_signature, signature):
+                        # A path in successions is made redundant by the current path.
+                        del succession_signatures[i]
+                        del successions[i]
+                if skip_completely:
+                    continue
 
+                succession_signatures.append(signature)
             successions.append(succession)
-            succession_signatures.append(signature)
 
     if found_valid_target_node and len(successions) == 0:
         successions = [[]]
