@@ -1,0 +1,105 @@
+biobalm.symbolic_utils
+======================
+
+.. py:module:: biobalm.symbolic_utils
+
+.. autoapi-nested-parse::
+
+   Utility operations for creating and manipulating symbolic functions.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.symbolic_utils.state_to_bdd
+   biobalm.symbolic_utils.state_list_to_bdd
+   biobalm.symbolic_utils.function_eval
+   biobalm.symbolic_utils.function_is_true
+   biobalm.symbolic_utils.valuation_to_state
+
+
+Module Contents
+---------------
+
+.. py:function:: state_to_bdd(bdd_context: biodivine_aeon.SymbolicContext | biodivine_aeon.BddVariableSet, state: biobalm.types.BooleanSpace) -> biodivine_aeon.Bdd
+
+   Convert a `BooleanSpace` to a BDD encoding the state singleton.
+
+   :param bdd_context: The BDD context in which the state is represented. This is a
+                       a `biodivine_aeon.BddVariableSet` or `biodivine_aeon.SymbolicContext`
+                       (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+                       The context object ensures compatibility between BDDs by
+                       maintaining a shared collection of variable names and their ordering.
+   :type bdd_context: SymbolicContext | BddVariableSet
+   :param state: The state to convert to a BDD.
+   :type state: BooleanSpace
+
+   :returns: The BDD encoding the given state.
+   :rtype: Bdd
+
+
+.. py:function:: state_list_to_bdd(bdd_context: biodivine_aeon.SymbolicContext | biodivine_aeon.BddVariableSet, states: list[biobalm.types.BooleanSpace]) -> biodivine_aeon.Bdd
+
+   Convert a list of state dictionaries to a BDD representation.
+
+   The BDD will be satisfied in any state in the list and in no others.
+
+   :param bdd_context: The BDD context in which the state is represented. This is a
+                       a `biodivine_aeon.BddVariableSet` or `biodivine_aeon.SymbolicContext`
+                       (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+                       The context object ensures compatibility between BDDs by
+                       maintaining a shared collection of variable names and their ordering.
+   :type bdd_context: SymbolicContext | BddVariableSet
+   :param states: The list of states to convert to a BDD.
+   :type states: list[BooleanSpace]
+
+   :returns: The BDD encoding the given list of states.
+   :rtype: Bdd
+
+
+.. py:function:: function_eval(f: biodivine_aeon.Bdd, state: biobalm.types.BooleanSpace) -> Literal[0, 1] | None
+
+   Evaluate a BDD Boolean function in the given state.
+
+   If the state is incomplete (i.e. it is a space), the function value can be
+   undetermined. In such case, `None` is returned.
+
+   :param f: The function to evaluate.
+   :type f: Bdd
+   :param state: The state in which the function is evaluated.
+   :type state: BooleanSpace
+
+   :returns: The function value in the given state, or `None` if the function is
+             undetermined.
+   :rtype: Literal[0, 1] | None
+
+
+.. py:function:: function_is_true(f: biodivine_aeon.Bdd, state: biobalm.types.BooleanSpace) -> bool
+
+   `True` if the BDD function evaluates to `1` for the given state (or space).
+
+   :param f: The function to evaluate.
+   :type f: Bdd
+   :param state: The state in which the function is evaluated.
+   :type state: BooleanSpace
+
+   :returns: `True` if the function evaluates to `1` in the given state.
+   :rtype: bool
+
+
+.. py:function:: valuation_to_state(ctx: biodivine_aeon.SymbolicContext, valuation: biodivine_aeon.BddValuation) -> biobalm.types.BooleanSpace
+
+   Extract network state from a `BddValuation` into a `BooleanSpace`.
+
+   :param f: A context which maps between network variables and their symbolic counterparts.
+   :type f: SymbolicContext
+   :param state: A valuation of the network's symbolic encoding.
+   :type state: BddValuation
+
+   :returns: A `BooleanSpace` encoding the state data from the given valuation.
+   :rtype: BooleanSpace
+
+

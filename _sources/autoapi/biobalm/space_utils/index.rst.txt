@@ -1,0 +1,289 @@
+biobalm.space_utils
+===================
+
+.. py:module:: biobalm.space_utils
+
+.. autoapi-nested-parse::
+
+   Some basic utility operations on spaces (partial assignments of BN variables).
+
+   Each space is represented as a dictionary with a subset of variable names as
+   keys and values `0`/`1` assigned to fixed variables. See also
+   :class:`BooleanSpace<biobalm.types.BooleanSpace>`.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.space_utils.intersect
+   biobalm.space_utils.is_subspace
+   biobalm.space_utils.dnf_function_is_true
+   biobalm.space_utils.remove_state_from_dnf
+   biobalm.space_utils.percolate_space_strict
+   biobalm.space_utils.percolate_space
+   biobalm.space_utils.percolation_conflicts
+   biobalm.space_utils.percolate_network
+   biobalm.space_utils.restrict_expression
+   biobalm.space_utils.expression_to_space_list
+   biobalm.space_utils.space_unique_key
+
+
+Module Contents
+---------------
+
+.. py:function:: intersect(x: biobalm.types.BooleanSpace, y: biobalm.types.BooleanSpace) -> biobalm.types.BooleanSpace | None
+
+   Compute the intersection of two spaces.
+
+   Returns the intersection as a new space, or `None` if the spaces don't
+   intersect.
+
+   :param x: The first space.
+   :type x: BooleanSpace
+   :param y: The second space.
+   :type y: BooleanSpace
+
+   :returns: The intersection of `x` and `y`, or `None` if the spaces don't
+             intersect.
+   :rtype: BooleanSpace | None
+
+
+.. py:function:: is_subspace(x: biobalm.types.BooleanSpace, y: biobalm.types.BooleanSpace) -> bool
+
+   Checks if `x` is a subspace of `y`.
+
+   :param x: The first space.
+   :type x: BooleanSpace
+   :param y: The second space.
+   :type y: BooleanSpace
+
+   :returns: `True` if `x` is a subspace of `y`.
+   :rtype: bool
+
+
+.. py:function:: dnf_function_is_true(dnf: list[biobalm.types.BooleanSpace], state: biobalm.types.BooleanSpace) -> bool
+
+   Checks if a DNF function evaluates to `1` for the given state (or space).
+
+   The DNF function is represented as a list of spaces, such that each space represents
+   exactly one DNF clause.
+
+   :param dnf: The DNF function to evaluate.
+   :type dnf: list[BooleanSpace]
+   :param state: The state in which the function is evaluated.
+   :type state: BooleanSpace
+
+   :returns: `True` if the function evaluates to `1` in the given state.
+   :rtype: bool
+
+
+.. py:function:: remove_state_from_dnf(dnf: list[biobalm.types.BooleanSpace], state: biobalm.types.BooleanSpace) -> list[biobalm.types.BooleanSpace]
+
+   Removes all clauses (conjunctions) that are `True` in the given `state` from a DNF function.
+
+   The result is a new list (i.e., it does not modify the original list).
+
+   :param dnf: The DNF function to modify.
+   :type dnf: list[BooleanSpace]
+   :param state: The state to remove from the function.
+   :type state: BooleanSpace
+
+   :returns: The modified DNF function.
+   :rtype: list[BooleanSpace]
+
+
+.. py:function:: percolate_space_strict(network: biodivine_aeon.AsynchronousGraph, space: biobalm.types.BooleanSpace) -> biobalm.types.BooleanSpace
+
+   Percolates a space through a Boolean network, disregarding constants.
+
+   Returns the set of variables which become fixed as a result of fixing the
+   variables from `space` within the given `AsynchronousGraph`.
+
+   Note that the strict percolation process does not propagate constants that
+   are already fixed within the `network`, only those that are specified in
+   `space`. Also, the result only contains any *new* constants, not those that
+   are already fixed in `space`.
+
+   :param network: A symbolic representation of the Boolean network (from which state
+                   transitions can be generated) in which the percolation is performed. If
+                   needed, an `AsynchronousGraph` object can be constructed from a
+                   `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+   :type network: AsynchronousGraph
+   :param space: The space to percolate.
+   :type space: BooleanSpace
+
+   :returns: The percolated space.
+   :rtype: BooleanSpace
+
+
+.. py:function:: percolate_space(network: biodivine_aeon.AsynchronousGraph, space: biobalm.types.BooleanSpace) -> biobalm.types.BooleanSpace
+
+   Percolates a space through a Boolean network.
+
+   Takes a symbolic `AsynchronousGraph` and a `BooleanSpace`. It then percolates
+   any values that are effectively constant within the `network` assuming the variables
+   from `space` are fixed accordingly.
+
+   If the argument is a trap space, then the result is a subspace of the
+   argument and is also a trap space.
+
+   However, when the argument is a general space, the percolation can actually
+   lead "outside" of the original space. In such case, the original fixed value
+   is *not* modified and the conflict will remain in the resulting space.
+
+   :param network: A symbolic representation of the Boolean network (from which state
+                   transitions can be generated) in which the percolation is performed. If
+                   needed, an `AsynchronousGraph` object can be constructed from a
+                   `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+   :type network: AsynchronousGraph
+   :param space: The space to percolate.
+   :type space: BooleanSpace
+
+   :returns: The percolated space.
+   :rtype: BooleanSpace
+
+
+.. py:function:: percolation_conflicts(network: biodivine_aeon.AsynchronousGraph, space: biobalm.types.BooleanSpace, strict_percolation: bool = True) -> set[str]
+
+   Find variables that conflict with the percolation of the given space.
+
+   Returns a set of variables from `space` that are in conflict with the
+   percolation of the given space (see `percolate_space`).
+
+   :param network: A symbolic representation of the Boolean network (from which state
+                   transitions can be generated) in which the percolation is performed. If
+                   needed, an `AsynchronousGraph` object can be constructed from a
+                   `BooleanNetwork` via `biodivine_aeon.AsynchronousGraph(bn)`.
+   :type network: AsynchronousGraph
+   :param space: The space to percolate.
+   :type space: BooleanSpace
+   :param strict_percolation: If `True` (the default), then the percolation is performed using
+                              :func:`percolate_space_strict`. Otherwise, it is performed using
+                              :func:`percolate_space`.
+   :type strict_percolation: bool
+
+   :returns: A set of variables from `space` that are in conflict with the
+             percolation of the given space.
+   :rtype: set[str]
+
+
+.. py:function:: percolate_network(bn: biodivine_aeon.BooleanNetwork, space: biobalm.types.BooleanSpace, symbolic_network: biodivine_aeon.AsynchronousGraph | None = None, remove_constants: bool = False) -> biodivine_aeon.BooleanNetwork
+
+   Reduces a Boolean network by percolating a given space.
+
+   Takes a `BooleanNetwork` and a `BooleanSpace`. It then produces a new network with
+   update functions percolated based on the supplied space.
+
+   The dynamics of the resulting network correspond to the dynamics of the
+   network obtained by percolating the given space. If the space (or the
+   percolated space) is a trap space, then the resulting dynamics are a
+   subgraph of the original network's state transition graph. Otherwise, the
+   dynamics correspond to the effects of an external intervention.
+
+   The percolation process is based on BDD conversion. For this purpose, an optional
+   `SymbolicContext` can be provided. If not given, a temporary `SymbolicContext` will
+   be created instead. Note that this is necessary to resolve non-trivial tautologies or
+   contradictions that can arise once the variables from `space` are fixed.
+
+   :param bn: The network to percolate.
+   :type bn: BooleanNetwork
+   :param space: The space to percolate.
+   :type space: BooleanSpace
+   :param symbolic_network: An optional symbolic representation to use to perform the percolation. If not
+                            given, a temporary one will be created from `bn`.
+   :type symbolic_network: AsynchronousGraph | None
+   :param remove_constants: If `True`, then the constants are removed from the resulting network. By
+                            default, `False`.
+   :type remove_constants: bool
+
+   :returns: The percolated network.
+   :rtype: BooleanNetwork
+
+
+.. py:function:: restrict_expression(expression: biodivine_aeon.BooleanExpression, space: biobalm.types.BooleanSpace, symbolic_context: biodivine_aeon.BddVariableSet | biodivine_aeon.SymbolicContext | None = None) -> biodivine_aeon.BooleanExpression
+
+   Restricts a Boolean expression to a given space.
+
+   Takes a `BooleanExpression` and a `BooleanSpace`. Returns a simplified `BooleanExpression`
+   that is valid for exactly the same members of the given `space` as the original expression.
+   The resulting expression does not depend on the variables which are fixed in the given `space`.
+
+   The percolation process is based on BDD conversion. For this purpose, an optional `BddVariableSet`
+   can be provided. If not given, a temporary `BddVariableSet` will be created instead. Note that
+   this is necessary to resolve non-trivial tautologies/contradictions that can arise once the
+   variables from `space` are fixed.
+
+   :param expression: The expression to restrict.
+   :type expression: BooleanExpression
+   :param space: The space to restrict to.
+   :type space: BooleanSpace
+   :param symbolic_context: An optional symbolic context to use to perform the percolation. If not given,
+                            a temporary one will be created.
+
+                            This is a `biodivine_aeon.BddVariableSet` or a `biodivine_aeon.SymbolicContext`
+                            (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+                            The context object ensures compatibility between BDDs by
+                            maintaining a shared collection of variable names and their ordering.
+   :type symbolic_context: BddVariableSet | SymbolicContext | None
+
+   :returns: The restricted expression.
+   :rtype: BooleanExpression
+
+
+.. py:function:: expression_to_space_list(expression: biodivine_aeon.BooleanExpression, symbolic_context: biodivine_aeon.BddVariableSet | biodivine_aeon.SymbolicContext | None = None) -> list[biobalm.types.BooleanSpace]
+
+   Convert a Boolean expression to a list of subspaces for which it is true.
+
+   Equivalent to a disjunctive normal form. Convert a `BooleanExpression` to a
+   list of subspaces whose union represents an equivalent set of the network
+   states which satisfy the expression.
+
+   Note that the spaces are not necessarily pair-wise disjoint. Also, the list
+   is not necessarily minimal.
+
+   The translation uses a DNF conversion based on BDDs. For this purpose, an optional
+   `BddVariableSet` can be provided. If not given, a temporary `BddVariableSet` will be
+   created instead.
+
+   :param expression: The expression to convert.
+   :type expression: BooleanExpression
+   :param symbolic_context: An optional symbolic context to use to perform the percolation. If not given,
+                            a temporary one will be created.
+
+                            This is a `biodivine_aeon.BddVariableSet` or a `biodivine_aeon.SymbolicContext`
+                            (which is automatically converted to `biodivine_aeon.BddVariableSet`).
+                            The context object ensures compatibility between BDDs by
+                            maintaining a shared collection of variable names and their ordering.
+   :type symbolic_context: BddVariableSet | SymbolicContext | None
+
+   :returns: The list of subspaces on which the expression is true.
+   :rtype: list[BooleanSpace]
+
+
+.. py:function:: space_unique_key(space: biobalm.types.BooleanSpace, network: biodivine_aeon.BooleanNetwork) -> int
+
+   Provide a unique hash key for the provided space in a given network.
+
+   Computes an integer which is a unique representation of the provided `space`
+   (with respect to the given `network`).
+
+   This integer key can be used instead of the original `space` in places where
+   dictionaries are not allowed, such as a key within a larger dictionary, or
+   a sorting key.
+
+   Note that when used for sorting, this key essentially implements a particular
+   form of lexicographic ordering on spaces. This is always a total ordering
+   (there is no ambiguity).
+
+   :param space: The space to encode.
+   :type space: BooleanSpace
+   :param network: The network in which the space is defined.
+   :type network: BooleanNetwork
+
+   :returns: A unique key for the space.
+   :rtype: int
+
+
