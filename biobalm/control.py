@@ -6,6 +6,7 @@ based on the structure of a succession diagram.
 from __future__ import annotations
 
 from itertools import combinations, product
+from functools import reduce
 from typing import Literal, cast
 
 import networkx as nx  # type: ignore
@@ -332,6 +333,11 @@ def successions_to_target(
         nested trap spaces that specify the target.
     """
     successions: list[SubspaceSuccession] = []
+    # Tracks the combined perturbation that needs to be applied
+    # for the whole succession to take effect. We use this to detect
+    # which successions are redundant when they can be replaced by
+    # a succession with a subset signature.
+    succession_signatures: list[BooleanSpace] = []
 
     # expand the succession_diagram toward the target
     if expand_diagram:
@@ -369,7 +375,28 @@ def successions_to_target(
                 succession_diagram.edge_stable_motif(x, y, reduced=True)
                 for x, y in zip(path[:-1], path[1:])
             ]
+            signature = reduce(lambda x, y: x | y, succession)
+            # First, check if any existing successions can be eliminated
+            # because they are redundant w.r.t. to this succession.
+            # (`reversed` is important here, because that way a delete
+            # only impacts indices that we already processed)
+            skip_completely = False
+            for i in reversed(range(len(succession_signatures))):
+                existing_signature = succession_signatures[i]
+                if is_subspace(signature, existing_signature):
+                    # The current `path` is already superseded by a path in successions.
+                    skip_completely = True
+                    print("Skipping", succession, path)
+                    break
+                if is_subspace(existing_signature, signature):
+                    # A path in successions is made redundant by the current path.
+                    del succession_signatures[i]
+                    del successions[i]
+            if skip_completely:
+                continue
+
             successions.append(succession)
+            succession_signatures.append(signature)
 
     if found_valid_target_node and len(successions) == 0:
         successions = [[]]
