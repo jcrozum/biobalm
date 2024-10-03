@@ -1,9 +1,8 @@
 [![PyPI](https://img.shields.io/pypi/v/biobalm?style=flat-square)](https://pypi.org/project/biobalm/) 
 [![Api Docs](https://img.shields.io/badge/docs-api-yellowgreen?style=flat-square)](https://jcrozum.github.io/biobalm/)
 [![Continuous integration](https://img.shields.io/github/actions/workflow/status/jcrozum/biobalm/test.yml?branch=main&style=flat-square)](https://github.com/jcrozum/biobalm/actions?query=workflow%3Atest)
-[![Coverage](https://img.shields.io/codecov/c/github/jcrozum/biobalm?style=flat-square)](https://codecov.io/gh/jcrozum/biobalm) 
 [![GitHub issues](https://img.shields.io/github/issues/jcrozum/biobalm?style=flat-square)](https://github.com/jcrozum/biobalm/issues) 
-[![License](https://img.shields.io/pypi/l/biobalm?style=flat-square)](https://github.com/jcrozum/biobalm/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/jcrozum/biobalm?style=flat-square)](https://github.com/jcrozum/biobalm/blob/main/LICENSE)
 
 # Boolean Attractor Landscape Mapper (`biobalm`)
 
