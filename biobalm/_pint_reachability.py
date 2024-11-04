@@ -12,7 +12,6 @@ from functools import reduce
 from typing import TYPE_CHECKING, cast, Iterable
 
 from networkx import DiGraph  # type: ignore
-from pypint import Goal, InMemoryModel  # type:ignore
 
 from biobalm.petri_net_translation import (
     place_to_variable,
@@ -37,6 +36,8 @@ def pint_reachability(
     If the reachability analysis is inconclusive, the method
     raises a `RuntimeError`.
     """
+    from pypint import Goal, InMemoryModel  # type:ignore
+    
     if target_states.is_false():
         return False  # Cannot reach a stat in an empty set.
 
@@ -56,7 +57,7 @@ def pint_reachability(
 
 def _pint_build_symbolic_goal(
     states: Bdd, config: SuccessionDiagramConfiguration
-) -> Goal:
+) -> object:
     """
     A helper method which (very explicitly) converts a set of states
     represented through a BDD into a Pint `Goal`.
@@ -66,6 +67,8 @@ def _pint_build_symbolic_goal(
     exceeding the argument list size limit, but introduces additional source
     of incompleteness into the reachability process.
     """
+    from pypint import Goal, InMemoryModel  # type:ignore
+
     assert not states.is_false()
 
     goals: list[Goal] = []
