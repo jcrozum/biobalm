@@ -36,7 +36,7 @@ def pint_reachability(
     If the reachability analysis is inconclusive, the method
     raises a `RuntimeError`.
     """
-    from pypint import Goal, InMemoryModel  # type:ignore
+    from pypint import InMemoryModel  # type:ignore
 
     if target_states.is_false():
         return False  # Cannot reach a stat in an empty set.
@@ -67,7 +67,7 @@ def _pint_build_symbolic_goal(
     exceeding the argument list size limit, but introduces additional source
     of incompleteness into the reachability process.
     """
-    from pypint import Goal, InMemoryModel  # type:ignore
+    from pypint import Goal  # type:ignore
 
     assert not states.is_false()
 
