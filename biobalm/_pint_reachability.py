@@ -37,7 +37,7 @@ def pint_reachability(
     raises a `RuntimeError`.
     """
     from pypint import Goal, InMemoryModel  # type:ignore
-    
+
     if target_states.is_false():
         return False  # Cannot reach a stat in an empty set.
 
