@@ -50,3 +50,4 @@ pip install git+https://github.com/jcrozum/biobalm.git@main
 
 To learn more about how biobalm functions, API documentation is available [online](https://jcrozum.github.io/biobalm/). You can also explore the analysis artefact mentioned above for more in-depth examples of biobalm usage.
 
+Usage examples are also available in the `example` directory. First, a simple usage example is provided in Jupyter notebook `example/tutorial.ipynb`. You can also run `python3 example/attractors.py PATH_TO_NETWORK` to compute all attractor seeds of a Boolean network. This scripts demonstrates basic configuration options for the attractor detection process (limits the succession diagram size and shows how to deal with succession diagrams that exceed this node limit). 
