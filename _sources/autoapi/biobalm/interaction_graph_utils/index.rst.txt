@@ -1,0 +1,127 @@
+biobalm.interaction_graph_utils
+===============================
+
+.. py:module:: biobalm.interaction_graph_utils
+
+.. autoapi-nested-parse::
+
+   A utility module which provides several methods for manipulating the influence graph
+   of a Boolean network.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.interaction_graph_utils.feedback_vertex_set
+   biobalm.interaction_graph_utils.cleanup_network
+   biobalm.interaction_graph_utils.source_SCCs
+   biobalm.interaction_graph_utils.source_nodes
+
+
+Module Contents
+---------------
+
+.. py:function:: feedback_vertex_set(network: biodivine_aeon.RegulatoryGraph | networkx.DiGraph, parity: Literal['positive', 'negative'] | None = None, subgraph: Sequence[str | biodivine_aeon.VariableId] | None = None) -> list[str]
+
+   Compute an approximately minimal feedback vertex set (FVS).
+
+   Uses the implementation of `biodivine_aeon`.
+
+   An FVS is a set of nodes in a network whose removal from the network
+   results in an acyclic network. An FVS is minimal if it does not contain any
+   FVS as a proper subset. This method uses a heuristic approach to attempt to find a
+   minimal FVS. The result is guaranteed to be a feedback vertex set, but it might not be minimal.
+
+   A paritiy can be specified. If the parity is specified, only cycles of the
+   specified parity are considered (e.g. if `parity='negative'`, there can still be positive
+   cycles in the graph not covered by the returned feedback vertex set).
+
+   The method is deterministic (the same pseudo-optimal FVS is returned every time).
+
+   :param network: Network to consider. If a `DiGraph` is given, it is converted to a `RegulatoryGraph`.
+   :type network: RegulatoryGraph | DiGraph
+   :param parity: Must be `"positive"`, `"negative"`, or `None` (default). If
+                  `"positive"`, only cycles with an even number of negative edges are
+                  considered. If `"negative"`, only cycles with an odd number of negative
+                  edges are considered. Edges with no monotonicity are counted as both
+                  positive and negative. Otherwise, all cycles are considered.
+   :type parity: Literal["positive";, "negative"] | None, optional
+   :param subgraph: A list of network variables (either string names or AEON `VariableId`
+                    objects are fine). If given, the result is the FVS of the sub-graph induced by
+                    these network nodes.
+   :type subgraph: Sequence[str  |  VariableId] | None, optional
+
+   :returns: A list of node names representing the smallest FVS found during the
+             search. Sorted in the same order as in the input network (usually
+             lexicographically).
+   :rtype: list[str]
+
+   .. rubric:: Examples
+
+   >>> import biobalm
+   >>> from biobalm.interaction_graph_utils import feedback_vertex_set
+   >>> sd = biobalm.SuccessionDiagram.from_rules("""
+   ...     A, B
+   ...     B, A
+   ...     C, D
+   ...     D, !C""")
+   >>> feedback_vertex_set(sd.network)
+   ['A', 'C']
+   >>> feedback_vertex_set(sd.network, parity="positive")
+   ['A']
+   >>> feedback_vertex_set(sd.network, parity="negative")
+   ['C']
+
+
+.. py:function:: cleanup_network(network: biodivine_aeon.BooleanNetwork) -> biodivine_aeon.BooleanNetwork
+
+   Prepare a `BooleanNetwork` object for use in a `SuccessionDiagram`. This
+   mainly ensures that the network does not use parameters and fixes all static
+   constraints to ensure that they are actually correct.
+
+   :param network: The Boolean network to be prepared.
+   :type network: BooleanNetwork
+
+   :returns: The prepared network.
+   :rtype: BooleanNetwork
+
+
+.. py:function:: source_SCCs(bn: biodivine_aeon.BooleanNetwork) -> list[list[str]]
+
+   Find source SCCs of the given `BooleanNetwork`.
+
+   Here, SCC stands for "strongly connected component". An SCC is a source SCC
+   if it has no incoming edges.
+
+   :param bn: The Boolean network to be examined.
+   :type bn: BooleanNetwork
+
+   :returns: The list of source SCCs.
+   :rtype: list[list[str]]
+
+
+.. py:function:: source_nodes(network: biodivine_aeon.BooleanNetwork, ctx: biodivine_aeon.SymbolicContext | None = None) -> list[str]
+
+   Identify the source nodes of a given `BooleanNetwork`.
+
+   Return the source nodes of a `BooleanNetwork`. That is, variables whose
+   value cannot change, but is not fixed to a `true`/`false` constant.
+
+   Note that this internally uses BDD translation to detect identity functions
+   semantically rather than syntactically. If you already have a
+   `SymbolicContext` for the given `network` available, you can supply it as
+   the second argument.
+
+   :param network: The Boolean network to be examined.
+   :type network: BooleanNetwork
+   :param ctx: The context used to translate the network to BDDs. A
+               `biodivine_aeon.SymbolicContext` object.
+   :type ctx: SymbolicContext
+
+   :returns: The list of source nodes.
+   :rtype: list[str]
+
+
