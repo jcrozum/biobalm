@@ -7,8 +7,8 @@ astroid==3.1.0
 autodocsumm==0.2.12
 Babel==2.14.0
 beautifulsoup4==4.12.3
-biodivine_aeon==1.0.0a8
-black==24.2.0
+biodivine_aeon==1.2.5
+black==25.1.0
 boolean.py==4.0
 CacheControl==0.14.0
 certifi==2024.2.2

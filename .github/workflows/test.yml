@@ -25,7 +25,7 @@ jobs:
       uses: psf/black@stable
       with:
         options: "--check --diff"
-        version: "25.1.0"
+        version: "25.1.0" # If you change this, also update requirements-dev.txt
     - name: Check types
       run: |
         mypy biobalm
