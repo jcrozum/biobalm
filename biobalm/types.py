@@ -281,12 +281,12 @@ class SuccessionDiagramConfiguration(TypedDict):
     [Default: 1_000]
     """
 
-    auto_expand_input_nodes: bool
+    auto_expand_source_nodes: bool
     """
-    When `biobalm` detects that the network has input nodes, it expands them all simultaneously,
-    instead of expanding them one by one. This is useful for networks with many input nodes,
+    When `biobalm` detects that the network has source nodes, it expands them all simultaneously,
+    instead of expanding them one by one. This is useful for networks with many source nodes,
     because it produces a much smaller succession diagram without losing any "interesting" behavior.
-    However, this setting needs to be disabled if only specific input nodes are to be expanded.
+    However, this setting needs to be disabled if only specific source nodes are to be expanded.
 
     [Default: True]
     """

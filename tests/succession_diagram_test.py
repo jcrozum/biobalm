@@ -419,20 +419,20 @@ def test_attractor_extraction():
     eas = sd.expanded_attractor_seeds()
     assert eas == {1: [{"A": 0, "B": 0, "C": 1}], 2: [{"A": 1, "B": 1, "C": 1}]}
 
-def test_input_auto_expand():
+def test_source_auto_expand():
     net = """
         A, A
         B, B
         """
     cfg = biobalm.SuccessionDiagram.default_config()
-    cfg["auto_expand_input_nodes"] = False
+    cfg["auto_expand_source_nodes"] = False
     sd = biobalm.SuccessionDiagram.from_rules(net, config=cfg)
     sd.expand_dfs()
     # root, A fixed, B fixed, A+B fixed
     assert len(sd) == (1 + 2 + 2 + 4)
 
     cfg = biobalm.SuccessionDiagram.default_config()
-    cfg["auto_expand_input_nodes"] = True
+    cfg["auto_expand_source_nodes"] = True
     sd = biobalm.SuccessionDiagram.from_rules(net, config=cfg)
     sd.expand_dfs()
     # root, A+B fixed
