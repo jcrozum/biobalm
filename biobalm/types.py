@@ -229,6 +229,8 @@ class SuccessionDiagramConfiguration(TypedDict):
     intersect negative cycles to find an NFVS subset. Typically,
     for smaller networks, the trade-off is in favor of
     computing a smaller NFVS.
+
+    [Default: 2_000]
     """
 
     pint_goal_size_limit: int
@@ -242,6 +244,8 @@ class SuccessionDiagramConfiguration(TypedDict):
     The default value was empirically tested as safe on Debian linux, but other operating
     systems may need a different limit to stay safe. Nevertheless, this should not be
     an issue on smaller/simpler networks.
+
+    [Default: 8_192]
     """
 
     attractor_candidates_limit: int
@@ -249,12 +253,16 @@ class SuccessionDiagramConfiguration(TypedDict):
     If more than `attractor_candidates_limit` states are produced during the
     attractor detection process, then the process fails with a `RuntimeError`.
     This is mainly to avoid out-of-memory errors or crashing `clingo`.
+
+    [Default: 100_000]
     """
 
     retained_set_optimization_threshold: int
     """
     If there are more than this amount of attractor candidates, the attractor
     detection process will try to optimize the retained set using ASP (if enabled).
+
+    [Default: 1_000]
     """
 
     minimum_simulation_budget: int
@@ -269,6 +277,9 @@ class SuccessionDiagramConfiguration(TypedDict):
     However, this budget only applies when simulation has not been able to make progress
     in the recent round. That is, if simulation has actively eliminated some candidates in
     the recent round, it will still continue regardless of the budget limit.
+
+    [Default: 1_000]
+    """
 
     auto_expand_input_nodes: bool
     """
