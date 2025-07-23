@@ -419,6 +419,7 @@ def test_attractor_extraction():
     eas = sd.expanded_attractor_seeds()
     assert eas == {1: [{"A": 0, "B": 0, "C": 1}], 2: [{"A": 1, "B": 1, "C": 1}]}
 
+
 def test_source_auto_expand():
     net = """
         A, A
