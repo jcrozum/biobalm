@@ -269,4 +269,13 @@ class SuccessionDiagramConfiguration(TypedDict):
     However, this budget only applies when simulation has not been able to make progress
     in the recent round. That is, if simulation has actively eliminated some candidates in
     the recent round, it will still continue regardless of the budget limit.
+
+    auto_expand_input_nodes: bool
+    """
+    When `biobalm` detects that the network has input nodes, it expands them all simultaneously,
+    instead of expanding them one by one. This is useful for networks with many input nodes,
+    because it produces a much smaller succession diagram without losing any "interesting" behavior.
+    However, this setting needs to be disabled if only specific input nodes are to be expanded.
+
+    [Default: True]
     """
