@@ -1,0 +1,729 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>biobalm.petri_net_translation &#8212; biobalm 0.4.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c4038f1e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=34866086"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/biobalm/petri_net_translation/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="biobalm.space_utils" href="../space_utils/index.html" />
+    <link rel="prev" title="biobalm.interaction_graph_utils" href="../interaction_graph_utils/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">biobalm 0.4.3 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">biobalm</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../control/index.html">biobalm.control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers/index.html">biobalm.drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_graph_utils/index.html">biobalm.interaction_graph_utils</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">biobalm.petri_net_translation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../space_utils/index.html">biobalm.space_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../succession_diagram/index.html">biobalm.succession_diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../symbolic_utils/index.html">biobalm.symbolic_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trappist_core/index.html">biobalm.trappist_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../types/index.html">biobalm.types</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">biobalm</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">biobalm.petri_net_translation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-biobalm.petri_net_translation">
+<span id="biobalm-petri-net-translation"></span><h1>biobalm.petri_net_translation<a class="headerlink" href="#module-biobalm.petri_net_translation" title="Link to this heading">#</a></h1>
+<p>Utilities for translating Boolean networks into Petri nets.</p>
+<p>Implements the translation from a <code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> object into a Petri net that
+can be processed by Trappist (for finding trap spaces). The Petri net is
+represented as a <code class="code docutils literal notranslate"><span class="pre">networkx.DiGraph</span></code>, with nodes having either a <code class="code docutils literal notranslate"><span class="pre">kind=place</span></code> or
+a <code class="code docutils literal notranslate"><span class="pre">kind=transition</span></code> attribute.</p>
+<p>The variable names in the network have to be “sanitized” before translation. In
+particular, this means they can’t use any special characters beyond “_”. In the
+resulting Petri net, we then use a “b0_*” and “b1_*” prefix to distinguish the
+“zero” and “one” places created for each variable. This is also important for
+<code class="code docutils literal notranslate"><span class="pre">clingo</span></code>, as we have to guarantee that in our logic program, symbols start with
+a lowercase letter.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.DEBUG" title="biobalm.petri_net_translation.DEBUG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEBUG</span></code></a></p></td>
+<td><p>Enables debug logging to stdout.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.sanitize_network_names" title="biobalm.petri_net_translation.sanitize_network_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanitize_network_names</span></code></a>(network[, check_only])</p></td>
+<td><p>Rename variables in a network so that they can be safely used in Trappist.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.variable_to_place" title="biobalm.petri_net_translation.variable_to_place"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variable_to_place</span></code></a>(→ str)</p></td>
+<td><p>Generate a Petri net place name from a network variable name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.place_to_variable" title="biobalm.petri_net_translation.place_to_variable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">place_to_variable</span></code></a>(→ tuple[str, bool])</p></td>
+<td><p>Extract the variable name and state from a Petri net place name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.extract_variable_names" title="biobalm.petri_net_translation.extract_variable_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_variable_names</span></code></a>(→ list[str])</p></td>
+<td><p>Extract the variable names from a Petri net encoded Boolean network.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.extract_source_variables" title="biobalm.petri_net_translation.extract_source_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_source_variables</span></code></a>(→ list[str])</p></td>
+<td><p>List variable names that represent source nodes of the encoded network.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.restrict_petrinet_to_subspace" title="biobalm.petri_net_translation.restrict_petrinet_to_subspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restrict_petrinet_to_subspace</span></code></a>(→ networkx.DiGraph)</p></td>
+<td><p>Create a copy of a Petri net restricted to a sub-space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.network_to_petrinet" title="biobalm.petri_net_translation.network_to_petrinet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">network_to_petrinet</span></code></a>(→ networkx.DiGraph)</p></td>
+<td><p>Convert a Boolean network to a Petri net.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.petri_net_translation.optimized_recursive_dnf_generator" title="biobalm.petri_net_translation.optimized_recursive_dnf_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">optimized_recursive_dnf_generator</span></code></a>(...)</p></td>
+<td><p>Yields a generator of <code class="code docutils literal notranslate"><span class="pre">BddPartialValuation</span></code> objects, similar to</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.DEBUG">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.DEBUG" title="Link to this definition">#</a></dt>
+<dd><p>Enables debug logging to stdout.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.sanitize_network_names">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">sanitize_network_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.sanitize_network_names" title="Link to this definition">#</a></dt>
+<dd><p>Rename variables in a network so that they can be safely used in Trappist.</p>
+<p>Verifies that all network variable names contain only alphanumeric
+characters and underscores. If this is not the case, attempts to rename the
+variables to make them compliant. Returns a <em>copy</em> of the original network
+that only uses sanitized names.</p>
+<p>Note that AEON should already prune away most of the special characters when
+parsing models, but it still allows names like <code class="code docutils literal notranslate"><span class="pre">Gene_{Subscript}</span></code> (i.e.
+curly brackets) which we have to sanitize here.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">check_only=True</span></code> is specified, no renaming takes place and the function
+fails with a <code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code> instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>BooleanNetwork</em>) – The network to sanitize.</p></li>
+<li><p><strong>check_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code>, no renaming takes place and the function fails with a
+<code class="code docutils literal notranslate"><span class="pre">RuntimeError</span></code> if the network contains invalid variable names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A copy of the original network with sanitized variable names.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.variable_to_place">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">variable_to_place</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.variable_to_place" title="Link to this definition">#</a></dt>
+<dd><p>Generate a Petri net place name from a network variable name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the network variable.</p></li>
+<li><p><strong>positive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – <code class="code docutils literal notranslate"><span class="pre">True</span></code> if the place corresponding to the variable should be positive,
+<code class="code docutils literal notranslate"><span class="pre">False</span></code> if it shoudl be negative.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The name of the corresponding Petri net place.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.place_to_variable">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">place_to_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">place</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.place_to_variable" title="Link to this definition">#</a></dt>
+<dd><p>Extract the variable name and state from a Petri net place name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>place</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the Petri net place.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The name of the variable, and whether the variable is positive or negative.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.extract_variable_names">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">extract_variable_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.extract_variable_names" title="Link to this definition">#</a></dt>
+<dd><p>Extract the variable names from a Petri net encoded Boolean network.</p>
+<p>The variables are  sorted lexicographically, since the original BN ordering
+is not preserved by the Petri net. However, BNs order variables
+lexicographically by default, so unless the Petri net was created from a
+custom BN (i.e. not from a normal model file), the ordering should be the
+same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoded_network</strong> (<em>DiGraph</em>) – The Petri net encoded Boolean network.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of variable names.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.extract_source_variables">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">extract_source_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.extract_source_variables" title="Link to this definition">#</a></dt>
+<dd><p>List variable names that represent source nodes of the encoded network.</p>
+<p>Source nodes are those nodes with an identity update function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoded_network</strong> (<em>DiGraph</em>) – The Petri net encoded Boolean network.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of source variable names.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.restrict_petrinet_to_subspace">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">restrict_petrinet_to_subspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">petri_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.restrict_petrinet_to_subspace" title="Link to this definition">#</a></dt>
+<dd><p>Create a copy of a Petri net restricted to a sub-space.</p>
+<p>Creates a copy of the given Petri net, but with the variables given in
+<code class="code docutils literal notranslate"><span class="pre">sub_space</span></code> fixed to their respective values.</p>
+<p>Note that this completely eliminates the constant variables from the Petri
+net, but it does not perform any further constant propagation or
+percolation. Variables that are fixed in the <code class="code docutils literal notranslate"><span class="pre">sub_space</span></code> but do not exist in
+the Petri net are ignored.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">sub_space</span></code> can contain variables that do not appear
+in the <code class="code docutils literal notranslate"><span class="pre">petri_net</span></code>. Such variables are simply ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>petri_net</strong> (<em>DiGraph</em>) – The Petri net to restrict.</p></li>
+<li><p><strong>sub_space</strong> (<em>BooleanSpace</em>) – The sub-space to restrict the Petri net to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The restricted Petri net.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.network_to_petrinet">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">network_to_petrinet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.SymbolicContext</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.network_to_petrinet" title="Link to this definition">#</a></dt>
+<dd><p>Convert a Boolean network to a Petri net.</p>
+<p>Converts a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BooleanNetwork</span></code> to a <code class="code docutils literal notranslate"><span class="pre">DiGraph</span></code> representing a Petri net encoding
+of the original network. For details about the encoding, see module
+description.</p>
+<p>Note that the given network needs to have “sanitized” names, otherwise the
+method will fail (see <code class="code docutils literal notranslate"><span class="pre">sanitize_network_names</span></code> in this module).</p>
+<p>The operation uses translation through <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.Bdd</span></code> to generate a
+disjunctive normal form of the network’s update functions. This is
+facilitated by <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.SymbolicContext</span></code>. If a suitable context already
+exists, it can be provided as the second argument. Otherwise it will be
+created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>BooleanNetwork</em>) – The network to convert.</p></li>
+<li><p><strong>symbolic_context</strong> (<em>SymbolicContext</em><em> | </em><em>None</em>) – The context used for the symbolic conversion, as an
+<code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.SymbolicContext</span></code> object. This is a mapping from the
+network nodes to BDD variables that preserves variable ordering in BDDs.
+If not given, a new one will be created from the network.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Petri net encoding of the given network.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.petri_net_translation.optimized_recursive_dnf_generator">
+<span class="sig-prename descclassname"><span class="pre">biobalm.petri_net_translation.</span></span><span class="sig-name descname"><span class="pre">optimized_recursive_dnf_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bdd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.Bdd</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">biodivine_aeon.BddPartialValuation</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/petri_net_translation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.petri_net_translation.optimized_recursive_dnf_generator" title="Link to this definition">#</a></dt>
+<dd><p>Yields a generator of <code class="code docutils literal notranslate"><span class="pre">BddPartialValuation</span></code> objects, similar to
+<code class="code docutils literal notranslate"><span class="pre">Bdd.clause_iterator</span></code> in AEON, but uses a recursive optimization strategy
+to return a smaller result than the default method <code class="code docutils literal notranslate"><span class="pre">Bdd</span></code> clause sequence.
+Note that this is still not the “optimal” DNF, but is often close enough.</p>
+<p>This is technically slower for BDDs that already have a small clause count,
+but can be much better in the long-term when the clause count is high.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../interaction_graph_utils/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">biobalm.interaction_graph_utils</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../space_utils/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">biobalm.space_utils</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.DEBUG"><code class="docutils literal notranslate"><span class="pre">DEBUG</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.sanitize_network_names"><code class="docutils literal notranslate"><span class="pre">sanitize_network_names()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.variable_to_place"><code class="docutils literal notranslate"><span class="pre">variable_to_place()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.place_to_variable"><code class="docutils literal notranslate"><span class="pre">place_to_variable()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.extract_variable_names"><code class="docutils literal notranslate"><span class="pre">extract_variable_names()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.extract_source_variables"><code class="docutils literal notranslate"><span class="pre">extract_source_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.restrict_petrinet_to_subspace"><code class="docutils literal notranslate"><span class="pre">restrict_petrinet_to_subspace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.network_to_petrinet"><code class="docutils literal notranslate"><span class="pre">network_to_petrinet()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.petri_net_translation.optimized_recursive_dnf_generator"><code class="docutils literal notranslate"><span class="pre">optimized_recursive_dnf_generator()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/autoapi/biobalm/petri_net_translation/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Trinh, Park, Pastva, Rozum.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

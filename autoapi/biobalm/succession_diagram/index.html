@@ -1,0 +1,1429 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>biobalm.succession_diagram &#8212; biobalm 0.4.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c4038f1e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=34866086"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/biobalm/succession_diagram/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="biobalm.symbolic_utils" href="../symbolic_utils/index.html" />
+    <link rel="prev" title="biobalm.space_utils" href="../space_utils/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">biobalm 0.4.3 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">biobalm</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../control/index.html">biobalm.control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers/index.html">biobalm.drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_graph_utils/index.html">biobalm.interaction_graph_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../petri_net_translation/index.html">biobalm.petri_net_translation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../space_utils/index.html">biobalm.space_utils</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">biobalm.succession_diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../symbolic_utils/index.html">biobalm.symbolic_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trappist_core/index.html">biobalm.trappist_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../types/index.html">biobalm.types</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">biobalm</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">biobalm.succession_diagram</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-biobalm.succession_diagram">
+<span id="biobalm-succession-diagram"></span><h1>biobalm.succession_diagram<a class="headerlink" href="#module-biobalm.succession_diagram" title="Link to this heading">#</a></h1>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SuccessionDiagram</span></code></a></p></td>
+<td><p>Succession diagram of a Boolean network.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biobalm.succession_diagram.</span></span><span class="sig-name descname"><span class="pre">SuccessionDiagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#biobalm.types.SuccessionDiagramConfiguration" title="biobalm.types.SuccessionDiagramConfiguration"><span class="pre">biobalm.types.SuccessionDiagramConfiguration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram" title="Link to this definition">#</a></dt>
+<dd><p>Succession diagram of a Boolean network.</p>
+<p>This encodes relationships between minimal trap spaces and can be used for
+attractor detection and control. Note that the succession diagram is
+expanded lazily, so it is not built until <code class="code docutils literal notranslate"><span class="pre">build</span></code> or a similar method is
+called.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">    A, B</span>
+<span class="gp">... </span><span class="s2">    B, A &amp; C</span>
+<span class="gp">... </span><span class="s2">    C, !A | B</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span> <span class="c1"># not built yet!</span>
+<span class="go">Succession Diagram with 1 nodes and depth 0.</span>
+<span class="go">State order: A, B, C</span>
+
+<span class="go">Attractors in diagram:</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span> <span class="c1"># now it&#39;s built</span>
+<span class="go">Succession Diagram with 3 nodes and depth 1.</span>
+<span class="go">State order: A, B, C</span>
+
+<span class="go">Attractors in diagram:</span>
+
+<span class="go">minimal trap space 001</span>
+<span class="go">...................001</span>
+
+<span class="go">minimal trap space 111</span>
+<span class="go">...................111</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.network">
+<span class="sig-name descname"><span class="pre">network</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">biodivine_aeon.BooleanNetwork</span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.network" title="Link to this definition">#</a></dt>
+<dd><p>The Boolean network represented as a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BooleanNetwork</span></code> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.symbolic">
+<span class="sig-name descname"><span class="pre">symbolic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">biodivine_aeon.AsynchronousGraph</span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.symbolic" title="Link to this definition">#</a></dt>
+<dd><p>The symbolic representation of the network using <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.AsynchronousGraph</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.petri_net">
+<span class="sig-name descname"><span class="pre">petri_net</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.petri_net" title="Link to this definition">#</a></dt>
+<dd><p>The Petri net representation of the network (see <a class="reference internal" href="../petri_net_translation/index.html#module-biobalm.petri_net_translation" title="biobalm.petri_net_translation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">petri_net_translation</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.nfvs">
+<span class="sig-name descname"><span class="pre">nfvs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.nfvs" title="Link to this definition">#</a></dt>
+<dd><p>The negative feedback vertex set of <code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram.network</span></code>, or <code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed yet.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.dag">
+<span class="sig-name descname"><span class="pre">dag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.dag" title="Link to this definition">#</a></dt>
+<dd><p>The directed acyclic graph (DAG) representation of the succession
+diagram structure.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_indices">
+<span class="sig-name descname"><span class="pre">node_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_indices" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary mapping subspace keys to their positions in the succession
+diagram (see <a class="reference internal" href="../space_utils/index.html#biobalm.space_utils.space_unique_key" title="biobalm.space_utils.space_unique_key"><code class="xref py py-func docutils literal notranslate"><span class="pre">biobalm.space_utils.space_unique_key()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.default_config">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../types/index.html#biobalm.types.SuccessionDiagramConfiguration" title="biobalm.types.SuccessionDiagramConfiguration"><span class="pre">biobalm.types.SuccessionDiagramConfiguration</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.default_config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.from_rules">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'bnet'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'aeon'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sbml'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#biobalm.types.SuccessionDiagramConfiguration" title="biobalm.types.SuccessionDiagramConfiguration"><span class="pre">biobalm.types.SuccessionDiagramConfiguration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.from_rules" title="Link to this definition">#</a></dt>
+<dd><p>Generate a succession diagram from the given string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rules</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The string representation of the network rules.</p></li>
+<li><p><strong>format</strong> (<em>Literal</em><em>[</em><em>'bnet'</em><em>, </em><em>'aeon'</em><em>, </em><em>'sbml'</em><em>]</em>) – The format of the string. One of <code class="code docutils literal notranslate"><span class="pre">&quot;bnet&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;aeon&quot;</span></code>, or <code class="code docutils literal notranslate"><span class="pre">&quot;sbml&quot;</span></code>.
+Defaults to <code class="code docutils literal notranslate"><span class="pre">&quot;bnet&quot;</span></code>.</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="../types/index.html#biobalm.types.SuccessionDiagramConfiguration" title="biobalm.types.SuccessionDiagramConfiguration"><em>SuccessionDiagramConfiguration</em></a><em> | </em><em>None</em>) – An optional configuration object with internal settings
+and default values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated succession diagram. Initially unexpanded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram">SuccessionDiagram</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.from_file">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#biobalm.types.SuccessionDiagramConfiguration" title="biobalm.types.SuccessionDiagramConfiguration"><span class="pre">biobalm.types.SuccessionDiagramConfiguration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.from_file" title="Link to this definition">#</a></dt>
+<dd><p>Read a <code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> from the given file path. The format is automatically inferred from
+the file extension.</p>
+<p>Optionally, you can also supply a configuration object to customize the
+resulting succession diagram.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates">
+<span class="sig-name descname"><span class="pre">expanded_attractor_candidates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates" title="Link to this definition">#</a></dt>
+<dd><p>Attractor candidates for each expanded node. The candidate list is
+computed for nodes where it is not known yet.</p>
+<p>Collectively, for every attractor in every expanded node, this returns
+at least one candidate state for said attractor. However, for complex
+attractors, there can be more than one candidate state, and there can
+be candidates that are not contained in any attractor.</p>
+<p><em>If called before the `SuccessionDiagram` is fully built, this will not
+be a complete accounting of attractors, since any node that isn’t expanded
+is not included in the result.</em></p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each key is the id of an expanded succession diagram node, whose
+corresponding value is a list of attractor candidates for that node. Note
+that one succession diagram node can have multiple attractors. Ordering
+of the lists in the returned dictionary is not guaranteed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">    A, B</span>
+<span class="gp">... </span><span class="s2">    B, A &amp; C</span>
+<span class="gp">... </span><span class="s2">    C, !A | B</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eas</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">expanded_attractor_candidates</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">atts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">eas</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atts</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">1: {&#39;A&#39;: 0, &#39;B&#39;: 0, &#39;C&#39;: 1}</span>
+<span class="go">2: {&#39;A&#39;: 1, &#39;B&#39;: 1, &#39;C&#39;: 1}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds">
+<span class="sig-name descname"><span class="pre">expanded_attractor_seeds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds" title="Link to this definition">#</a></dt>
+<dd><p>Attractor seeds for each expanded node. The seed list is
+computed for nodes where it is not known yet.</p>
+<p>Collectively, for every attractor in every expanded node, this returns
+exactly one seed state for said attractor.</p>
+<p><em>If called before the `SuccessionDiagram` is fully built, this will not
+be a complete accounting of attractors, since any node that isn’t expanded
+is not included in the result.</em></p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each key is the id of an expanded succession diagram node, whose
+corresponding value is a list of attractor seeds for that node. Note
+that one succession diagram node can have multiple attractors. Ordering
+of the lists in the returned dictionary is not guaranteed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p><em>Note that for this simple network, attractor candidates and attractor
+seeds are the same states.</em></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">    A, B</span>
+<span class="gp">... </span><span class="s2">    B, A &amp; C</span>
+<span class="gp">... </span><span class="s2">    C, !A | B</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eas</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">expanded_attractor_seeds</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">atts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">eas</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atts</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">1: {&#39;A&#39;: 0, &#39;B&#39;: 0, &#39;C&#39;: 1}</span>
+<span class="go">2: {&#39;A&#39;: 1, &#39;B&#39;: 1, &#39;C&#39;: 1}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets">
+<span class="sig-name descname"><span class="pre">expanded_attractor_sets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biodivine_aeon.VertexSet</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets" title="Link to this definition">#</a></dt>
+<dd><p>Attractor sets for each expanded node. The sets are
+computed for nodes where they are not known yet.</p>
+<p>These sets represent the complete collection of attractor states in each
+expanded node. For fixed-point attractors, this is effectively equivalent
+to the attractor seeds. For complex attractors, this set contains the
+full attractor. Hence, it is harder to compute but can facilitate richer
+post-processing and analysis.</p>
+<p><em>If called before the `SuccessionDiagram` is fully built, this will not
+be a complete accounting of attractors, since any node that isn’t expanded
+is not included in the result.</em></p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds" title="biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+<li><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expanded_attractor_seeds</span></code></a></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each key is the id of an expanded succession diagram node, whose
+corresponding value is a list of attractor sets for that node. Note
+that one succession diagram node can have multiple attractors. Ordering
+of the lists in the returned dictionary is not guaranteed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[biodivine_aeon.VertexSet]]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">    A, B</span>
+<span class="gp">... </span><span class="s2">    B, A &amp; C</span>
+<span class="gp">... </span><span class="s2">    C, !A | B</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eas</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">expanded_attractor_sets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">atts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">eas</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atts</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">1: VertexSet(cardinality=1, symbolic_size=5)</span>
+<span class="go">2: VertexSet(cardinality=1, symbolic_size=5)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.summary" title="Link to this definition">#</a></dt>
+<dd><p>Return a summary of the succession diagram as a string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.root">
+<span class="sig-name descname"><span class="pre">root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.root" title="Link to this definition">#</a></dt>
+<dd><p>Return the ID of the root node.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.depth">
+<span class="sig-name descname"><span class="pre">depth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.depth" title="Link to this definition">#</a></dt>
+<dd><p>Compute the maximal node depth in the diagram.</p>
+<p>Depth is counted from zero (root has depth zero).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_ids">
+<span class="sig-name descname"><span class="pre">node_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_ids" title="Link to this definition">#</a></dt>
+<dd><p>Iterator over all available node IDs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.stub_ids">
+<span class="sig-name descname"><span class="pre">stub_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.stub_ids" title="Link to this definition">#</a></dt>
+<dd><p>Iterator over all node IDs that are currently <em>not</em> expanded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expanded_ids">
+<span class="sig-name descname"><span class="pre">expanded_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_ids" title="Link to this definition">#</a></dt>
+<dd><p>Iterator over all node IDs that are currently expanded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.minimal_trap_spaces">
+<span class="sig-name descname"><span class="pre">minimal_trap_spaces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.minimal_trap_spaces" title="Link to this definition">#</a></dt>
+<dd><p>List of node IDs that represent the minimal trap spaces within this
+succession diagram.</p>
+<p>Note that stub nodes do not count as minimal!</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.find_node">
+<span class="sig-name descname"><span class="pre">find_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.find_node" title="Link to this definition">#</a></dt>
+<dd><p>Return the ID of the node matching the provided <code class="code docutils literal notranslate"><span class="pre">node_space</span></code>, or <code class="code docutils literal notranslate"><span class="pre">None</span></code>
+if no such node exists in this succession diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_space</strong> (<em>BooleanSpace</em>) – The space of the node to find.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ID of the node matching the provided <code class="code docutils literal notranslate"><span class="pre">node_space</span></code>, or <code class="code docutils literal notranslate"><span class="pre">None</span></code>
+if no such node exists in this succession diagram.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.is_subgraph">
+<span class="sig-name descname"><span class="pre">is_subgraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.is_subgraph" title="Link to this definition">#</a></dt>
+<dd><p>Returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if this succession diagram is a subgraph of the <code class="code docutils literal notranslate"><span class="pre">other</span></code>
+succession diagram.</p>
+<p>Note that this function works even for diagrams based on different
+Boolean networks, as long as both succession diagrams only depend on the
+same subset of network variables.</p>
+<p>WARNING: This does not take into account the stable motifs on individual
+edges. Just the subspaces associated with nodes and the presence of
+edges between nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><em>SuccessionDiagram</em></a>) – The other succession diagram.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="code docutils literal notranslate"><span class="pre">True</span></code> if this succession diagram is a subgraph of the <code class="code docutils literal notranslate"><span class="pre">other</span></code>
+succession diagram.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.is_isomorphic">
+<span class="sig-name descname"><span class="pre">is_isomorphic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.is_isomorphic" title="Link to this definition">#</a></dt>
+<dd><p>Returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if the two succession diagrams are isomorphic.</p>
+<p>Note that this function works even for diagrams based on different
+Boolean networks, as long as both succession diagrams only depend on the
+same subset of network variables.</p>
+<p>WARNING: This does not take into account the stable motifs on individual
+edges. Just the subspaces associated with nodes and the presence of
+edges between nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><em>SuccessionDiagram</em></a>) – The other succession diagram.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="code docutils literal notranslate"><span class="pre">True</span></code> if the two succession diagrams are isomorphic.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_data">
+<span class="sig-name descname"><span class="pre">node_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../types/index.html#biobalm.types.NodeData" title="biobalm.types.NodeData"><span class="pre">biobalm.types.NodeData</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_data" title="Link to this definition">#</a></dt>
+<dd><p>Get the data associated with the provided <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>.</p>
+<p>Returns a <code class="code docutils literal notranslate"><span class="pre">NodeData</span></code> object with the following attributes:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">depth</span></code>: The depth of the node.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">space</span></code>: The sub-space of the node.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">expanded</span></code>: Whether the node is expanded or not.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">percolated_network</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] The percolation of</p></li>
+</ul>
+<p><code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram.network</span></code> with respect to the node’s <code class="code docutils literal notranslate"><span class="pre">space</span></code>.
+- <code class="code docutils literal notranslate"><span class="pre">percolated_petri_net</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] The percolation of
+<code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram.petri_net</span></code> with respect to the node’s <code class="code docutils literal notranslate"><span class="pre">space</span></code>.
+- <code class="code docutils literal notranslate"><span class="pre">percolated_nfvs</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] The NFVS of <code class="code docutils literal notranslate"><span class="pre">percolated_network</span></code>.
+- <code class="code docutils literal notranslate"><span class="pre">attractor_candidates</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] A collection of states
+that collectively cover every attractor of this node.
+- <code class="code docutils literal notranslate"><span class="pre">attractor_seeds</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] A collection of states
+one-to-one corresponding to the attractors of this node.
+- <code class="code docutils literal notranslate"><span class="pre">attractor_sets</span></code>: [<code class="code docutils literal notranslate"><span class="pre">None</span></code> if not computed] A complete collection of
+attractors of this node.</p>
+<p>See <a class="reference internal" href="../types/index.html#biobalm.types.NodeData" title="biobalm.types.NodeData"><code class="xref py py-class docutils literal notranslate"><span class="pre">biobalm.types.NodeData</span></code></a> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The data associated with the provided <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>. Note that at
+runtime, this object is an untyped dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../types/index.html#biobalm.types.NodeData" title="biobalm.types.NodeData">NodeData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.reclaim_node_data">
+<span class="sig-name descname"><span class="pre">reclaim_node_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.reclaim_node_data" title="Link to this definition">#</a></dt>
+<dd><p>Removes non-essential data from the <code class="code docutils literal notranslate"><span class="pre">NodeData</span></code> dictionary of each node.</p>
+<p>This method can be used to reduce the memory footprint of the succession
+diagram, especially before serialization. However, note that this can
+also slow down subsequent computations if the erased data needs
+to be re-computed.</p>
+<p>The method removes the <code class="code docutils literal notranslate"><span class="pre">percolated_network</span></code>, <code class="code docutils literal notranslate"><span class="pre">percolated_petri_net</span></code>,
+and the <code class="code docutils literal notranslate"><span class="pre">percolated_nfvs</span></code>. Furthermore, if <code class="code docutils literal notranslate"><span class="pre">attractor_seeds</span></code> are known,
+it erases the <code class="code docutils literal notranslate"><span class="pre">attractor_candidates</span></code>, since seeds can be used for the
+same tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_is_minimal">
+<span class="sig-name descname"><span class="pre">node_is_minimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_is_minimal" title="Link to this definition">#</a></dt>
+<dd><p>True if the node represents a minimal trap space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="code docutils literal notranslate"><span class="pre">True</span></code> if the node is expanded and it has no successors, i.e. it is a
+minimal trap space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_successors">
+<span class="sig-name descname"><span class="pre">node_successors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="Link to this definition">#</a></dt>
+<dd><p>Return the successor nodes for the given <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>.</p>
+<p>If the node is already expanded, known results are simply returned. If
+the node is not expanded, but <code class="code docutils literal notranslate"><span class="pre">compute</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>, then the node
+is expanded and the newly computed results are returned. If the node is
+not expanded and <code class="code docutils literal notranslate"><span class="pre">compute</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">False</span></code>, the method raises a
+<code class="code docutils literal notranslate"><span class="pre">KeyError</span></code> exception.</p>
+<p>The default behaviour intentionally does not compute successors to
+prevent “accidental complexity”.</p>
+<p>WARNING: We do not guarantee the order of the returned nodes. If you
+need the successors in a repeatable order, you should sort the list
+manually.</p>
+<p>Also note that if the given <code class="code docutils literal notranslate"><span class="pre">node_id</span></code> already has associated attractor
+data but is not expanded, this data will be deleted as it is no longer
+up to date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the successors if they are not already known.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of successor node ids.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates">
+<span class="sig-name descname"><span class="pre">node_attractor_candidates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">greedy_asp_minification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_minification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pint_minification</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="Link to this definition">#</a></dt>
+<dd><p>Return the list of attractor candidate states for the given <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>.</p>
+<p>If attractor candidates are not computed but seeds are, returns
+attractor seeds, as these are also valid as candidate states, but
+even more precise.</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag. If <code class="code docutils literal notranslate"><span class="pre">compute</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>, additional flags can be used
+to adjust the candidate identification process (see <em>Parameters</em>).</p>
+<p>Note that you can compute attractor candidates for nodes that are not expanded,
+but (a) multiple unexpanded nodes can contain the same attractor, and hence also
+the same/similar candidates (i.e. you can “discover” the same attractor in multiple
+unexpanded nodes, if the nodes intersect), and (b) this data is erased if the
+node is later expanded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the attractor candidates if they are not already known.</p></li>
+<li><p><strong>greedy_asp_minification</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Indicate that the initial candidate set should be first greedily minified
+through repeated ASP queries. [Default: True]</p></li>
+<li><p><strong>simulation_minification</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Indicate that the candidate set should be refined through stochastic
+simulation. [Default: True]</p></li>
+<li><p><strong>pint_minification</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Indicate that the candidate set should be refined through reachability
+analysis using <code class="code docutils literal notranslate"><span class="pre">pint</span></code>. Only enable this option if you actually have <code class="code docutils literal notranslate"><span class="pre">pint</span></code>
+installed (it is an optional dependency). [Default: False]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of attractor candidate states.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds">
+<span class="sig-name descname"><span class="pre">node_attractor_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds" title="Link to this definition">#</a></dt>
+<dd><p>Return the list of attractor seed states for the given <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>.</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag.</p>
+<p>Note that the same considerations regarding attractors in unexpanded
+nodes apply as for <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_attractor_candidates()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the attractor seeds if they are not already known.</p></li>
+<li><p><strong>symbolic_fallback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If active, the method will attempt to compute the attractor seeds fully
+symbolically if the default NFVS-based method fails. However, note that
+the program can become unresponsive if the symbolic encoding of the
+result grows to be too large. [Default: False]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of attractor seed states.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets">
+<span class="sig-name descname"><span class="pre">node_attractor_sets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biodivine_aeon.VertexSet</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets" title="Link to this definition">#</a></dt>
+<dd><p>Return the list of attractor sets for the given <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>.</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag.</p>
+<p>Note that the same considerations regarding attractors in unexpanded
+nodes apply as for <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates" title="biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_attractor_candidates()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the attractor sets if they are not already known.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of attractor sets.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[biodivine_aeon.VertexSet]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_percolated_nfvs">
+<span class="sig-name descname"><span class="pre">node_percolated_nfvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_nfvs" title="Link to this definition">#</a></dt>
+<dd><p>Approximate minimum negative feedback vertex set on the Boolean network
+percolated to the node’s sub-space.</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag.</p>
+<p>See <a class="reference internal" href="../interaction_graph_utils/index.html#biobalm.interaction_graph_utils.feedback_vertex_set" title="biobalm.interaction_graph_utils.feedback_vertex_set"><code class="xref py py-func docutils literal notranslate"><span class="pre">biobalm.interaction_graph_utils.feedback_vertex_set()</span></code></a> for
+further details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the node NFVS if it is not already known.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The negative feedback vertex set, as a list of node names.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_percolated_network">
+<span class="sig-name descname"><span class="pre">node_percolated_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_network" title="Link to this definition">#</a></dt>
+<dd><p>The Boolean network percolated to the node’s sub-space, with
+constant variables removed.</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the node NFVS if it is not already known.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The percolated Boolean network.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>biodivine_aeon.BooleanNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.node_percolated_petri_net">
+<span class="sig-name descname"><span class="pre">node_percolated_petri_net</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_petri_net" title="Link to this definition">#</a></dt>
+<dd><p>The Petri net representation of the Boolean network percolated to the
+node’s sub-space (with constant variables removed).</p>
+<p>Similar to <a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors" title="biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">node_successors()</span></code></a>, the method either computes the
+data if unknown, or throws an exception, depending on the <code class="code docutils literal notranslate"><span class="pre">compute</span></code>
+flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the node.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to compute the node NFVS if it is not already known.</p></li>
+<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – If given, the percolation process starts with the Petri net of the given
+parent node (if computed). If parent is not given, the percolation starts
+with <code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram.petri_net</span></code>, which can be slower but yields the
+same result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The percolated Boolean network.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)">networkx.DiGraph</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.edge_all_stable_motifs">
+<span class="sig-name descname"><span class="pre">edge_all_stable_motifs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">child_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.edge_all_stable_motifs" title="Link to this definition">#</a></dt>
+<dd><p>Similar to <code class="code docutils literal notranslate"><span class="pre">edge_stable_motif</span></code>, but returns all motifs associated with an edge.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.edge_stable_motif">
+<span class="sig-name descname"><span class="pre">edge_stable_motif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">child_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biobalm.types.BooleanSpace</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.edge_stable_motif" title="Link to this definition">#</a></dt>
+<dd><p>Return the stable motif for the given parent-child edge.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">reduced</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">False</span></code> (default), the unpercolated stable
+motif trap space corresponding to the child node is returned; this
+includes the nodes that are fixed in the percolated trap space of the
+parent node. If <code class="code docutils literal notranslate"><span class="pre">reduced</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>, the nodes fixed in the
+parent are removed (and thus the reduced stable motif is not a trap
+space of the original network, but is a maximal trap space in the
+network reduced by the parent node).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the parent node.</p></li>
+<li><p><strong>child_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The ID of the child node.</p></li>
+<li><p><strong>reduced</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to return the reduced stable motif.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The stable motif (maximal trap space) represented by the edge.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanSpace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.component_subdiagram">
+<span class="sig-name descname"><span class="pre">component_subdiagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.component_subdiagram" title="Link to this definition">#</a></dt>
+<dd><p>Return an <em>unexpanded</em> <code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram</span></code> that is restricted to
+a subnetwork induced by the provided <code class="code docutils literal notranslate"><span class="pre">component_variables</span></code>.  Furthermore,
+If <code class="code docutils literal notranslate"><span class="pre">node_id</span></code> is given, the subnetwork is first percolated to the
+subspace of the specified node.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">component_variables</span></code> must be backward-closed in the considered network
+(i.e. either the full network, or the percolated network if <code class="code docutils literal notranslate"><span class="pre">node_id</span></code> is given),
+meaning there is no variable outside this list that regulates any variable in the
+subnetwork. If this is not satisfied, the function will fail while
+creating the subnetwork.</p>
+<p>Also note that the symbolic encoding of the new network is not
+compatible with the encoding of the original network, because the
+underlying networks have different sets of variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component_variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – Names of variables which induce the subnetwork of the resulting
+succession diagram.</p></li>
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – The ID of a succession diagram node that will define a subspace
+to which the subnetwork is percolated. If not given, the full
+network is considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An unexpanded succession diagram of the subnetwork.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram">SuccessionDiagram</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.source_scc_subdiagrams">
+<span class="sig-name descname"><span class="pre">source_scc_subdiagrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">SuccessionDiagram</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.source_scc_subdiagrams" title="Link to this definition">#</a></dt>
+<dd><p>Return unexpanded subdiagrams for the source SCCs in a node subspace.</p>
+<p>Note that the symbolic encoding of the new network is not
+compatible with the encoding of the original network, because the
+underlying networks have different sets of variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>) – The ID of a succession diagram node that will define a subspace on
+which the subnetworks should be considered. By default, the root node
+is used.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An iterator over unexpanded succession diagrams of the subnetwork.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Iterator[<a class="reference internal" href="#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram">SuccessionDiagram</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.build" title="Link to this definition">#</a></dt>
+<dd><p>Expand the succession diagram and search for attractors using default methods.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_scc">
+<span class="sig-name descname"><span class="pre">expand_scc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">find_motif_avoidant_attractors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_scc" title="Link to this definition">#</a></dt>
+<dd><p>Expand the succession diagram using the source SCC method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_block">
+<span class="sig-name descname"><span class="pre">expand_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">find_motif_avoidant_attractors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_source_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact_attractor_detection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_block" title="Link to this definition">#</a></dt>
+<dd><p>Expand the succession diagram using the source block method.</p>
+<p>There is a minor difference in behavior depending on <code class="code docutils literal notranslate"><span class="pre">find_motif_avoidant_attractors</span></code>.
+If set to <code class="code docutils literal notranslate"><span class="pre">False</span></code>, the expansion only expands one “source block” for each node,
+without checking any attractor properties. If set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>, the expansion might
+expand some nodes fully to uncover nodes that precisely cover motif
+avoidant attractors. As a byproduct, if set to <code class="code docutils literal notranslate"><span class="pre">True</span></code> and no motif avoidant attractors
+are detected for some node, this is result is saved and the attractors don’t
+need to be recomputed later.</p>
+<p>By default, the method also detects any source nodes and directly expands these
+into trap spaces where all source nodes are fixed. This has no correctness impact on
+attractor search and always produces a smaller succession diagram, but if you need to
+obtain a succession diagram where this does not happen (e.g. for testing), you can turn
+this off using <code class="code docutils literal notranslate"><span class="pre">optimize_source_nodes</span></code>.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">exact_attractor_detection</span></code> is selected, the method will use attractor seeds instead
+of attractor candidates to check for motif-avoidant attractors. This means that the attractor
+detection can take much longer. In particular, it will not expand the SD if it cannot detect
+all attractors, meaning it can get “stuck”. However, assuming you want to run full attractor
+detection anyway, this might save you some time, as you won’t need to re-run  the failed
+candidate detection. (This is only relevant for models where the attractors are very
+complex and the candidate state detection can fail with default settings).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_bfs">
+<span class="sig-name descname"><span class="pre">expand_bfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bfs_level_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_bfs" title="Link to this definition">#</a></dt>
+<dd><p>Explore the succession diagram in a BFS manner.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">node_id</span></code> is given, initiate BFS from this node. Otherwise use root.
+If <code class="code docutils literal notranslate"><span class="pre">bfs_level_limit</span></code> is given, this is the last “level” (distance from
+the initial node) of nodes that should be expanded (any subsequent child
+nodes are left unexplored).</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">size_limit</span></code> is given, the procedure stops once <code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram</span></code>
+exceeds the given size.</p>
+<p>With default settings, the method will explore the whole succession
+diagram without any restrictions.</p>
+<p>The method returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if the whole exploration was completed and
+<code class="code docutils literal notranslate"><span class="pre">False</span></code> if it was terminated early based on one of the aforementioned
+conditions.</p>
+<p>Note that the procedure also explores nodes that are already expanded.
+I.e. if all nodes at levels 0,1,2 are expanded, but there are stub nodes
+on level 3, the procedure will still discover and expand these stub
+nodes (assuming sufficient level and size limit).</p>
+<p>Also note that the <code class="code docutils literal notranslate"><span class="pre">size_limit</span></code> is only a soft limit: for each node, we
+always have to create all child nodes when expanding it. Hence the
+procedure can only check the condition in between expanding new nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_dfs">
+<span class="sig-name descname"><span class="pre">expand_dfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs_stack_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_dfs" title="Link to this definition">#</a></dt>
+<dd><p>Similar to <code class="code docutils literal notranslate"><span class="pre">expand_bfs</span></code>, but uses DFS instead of BFS.</p>
+<p>The only major difference is the <code class="code docutils literal notranslate"><span class="pre">dfs_stack_limit</span></code> which restricts the
+size of the DFS stack. Nodes that would appear “deeper” in the stack
+than this limit are left unexpanded. Note that this stack size is
+technically <em>some</em> form of distance from the initial node, but not
+necessarily the minimal distance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_minimal_spaces">
+<span class="sig-name descname"><span class="pre">expand_minimal_spaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ignored</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_minimal_spaces" title="Link to this definition">#</a></dt>
+<dd><p>Expands the succession diagram in a way that guarantees every minimal
+trap space to be reachable from the root node, but otherwise (greedily)
+avoids unnecesary expansion of nodes whenever possible.</p>
+<p>The algorithm is loosely based on <code class="code docutils literal notranslate"><span class="pre">expand_bfs</span></code> implementation, but on
+each BFS level only expands the first node that still contains some
+minimal trap space not covered by a previously expanded node at that
+level.</p>
+<p>The resulting succession diagram construction is deterministic, but can
+vary if some nodes are already expanded initially. In such case, the
+procedure still tries to avoid expanding unnecessary nodes, which means
+existing expanded nodes can be prioritised over the “canonical” ones.</p>
+<p>Optionally, you can start the expansion from a specific node that is not
+the root using <code class="code docutils literal notranslate"><span class="pre">node_id</span></code>, or restrict the size of the succession diagram
+with <code class="code docutils literal notranslate"><span class="pre">size_limit</span></code>.</p>
+<p>Returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if the expansion procedure terminated without exceeding
+the size limit.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">skip_ignored</span></code> is set, any nodes that are not expanded by this procedure
+are “skipped” with edges redirected to the corresponding minimal trap spaces
+(see also <code class="code docutils literal notranslate"><span class="pre">SuccessionDiagram.skip_remaining</span></code>). This is usually faster than
+using <code class="code docutils literal notranslate"><span class="pre">skip_remaining</span></code> directly, since the minimal trap spaces are only
+computed once. However, note that if used with <code class="code docutils literal notranslate"><span class="pre">size_limit</span></code>, nodes that
+are not processed when <code class="code docutils literal notranslate"><span class="pre">size_limit</span></code> is reached remain unprocessed
+(i.e. it is not guaranteed that all nodes are either fully expanded or skipped).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_attractor_seeds">
+<span class="sig-name descname"><span class="pre">expand_attractor_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_attractor_seeds" title="Link to this definition">#</a></dt>
+<dd><p>Expands the succession diagram such that for every asynchronous
+attractor, there is at least one expanded trap space which is the
+minimal trap space containing this attractor. In other words, the
+procedure expands the succession diagram as little as possible, but
+ensures that every attractor is “as easy to identify” as possible.</p>
+<p>After this procedure, it is sufficient to search for attractors in
+expanded nodes. Note that this method does not perform exact attractor
+identification. It is possible that some nodes are expanded spuriously
+and the succession diagram is thus larger than necessary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.expand_to_target">
+<span class="sig-name descname"><span class="pre">expand_to_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.expand_to_target" title="Link to this definition">#</a></dt>
+<dd><p>Expands the succession diagram using BFS in such a way that only nodes
+which intersect <code class="code docutils literal notranslate"><span class="pre">target</span></code> but are not fully contained in it are expanded.</p>
+<p>This is used for example in control, as it ensures that all possible
+branches of the succession diagram relevant for a particular “target
+subspace” are expanded as much as necessary, but not more.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.skip_to_minimal">
+<span class="sig-name descname"><span class="pre">skip_to_minimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.skip_to_minimal" title="Link to this definition">#</a></dt>
+<dd><p>Skip the expansion of this node (see also <code class="code docutils literal notranslate"><span class="pre">NodeData.skipped</span></code>) and add extra
+edges that connect it directly to its minimal trap spaces. Returns <code class="code docutils literal notranslate"><span class="pre">False</span></code>
+if the node is already expanded.</p>
+<p>Note that this method is relatively inefficient when applied to multiple
+nodes repeatedly, as it has to recompute the minimal trap spaces for each node.
+To turn multiple nodes into skip nodes, see also <code class="code docutils literal notranslate"><span class="pre">skip_remaining</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.succession_diagram.SuccessionDiagram.skip_remaining">
+<span class="sig-name descname"><span class="pre">skip_remaining</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/succession_diagram.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.succession_diagram.SuccessionDiagram.skip_remaining" title="Link to this definition">#</a></dt>
+<dd><p>Apply <code class="code docutils literal notranslate"><span class="pre">skip_to_minimal</span></code> to every node that is not expanded.</p>
+<p>This is faster than calling the method individually if the number of
+nodes is high since we can cache the minimal trap spaces.</p>
+<p>Returns the number of created skip nodes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../space_utils/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">biobalm.space_utils</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../symbolic_utils/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">biobalm.symbolic_utils</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.config"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.network"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.network</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.symbolic"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.symbolic</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.petri_net"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.petri_net</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.nfvs"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.nfvs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.dag"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.dag</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_indices"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.default_config"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.default_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.from_rules"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.from_rules()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.from_file"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.from_file()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_candidates"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expanded_attractor_candidates()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_seeds"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expanded_attractor_seeds()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_attractor_sets"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expanded_attractor_sets()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.summary"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.summary()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.root"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.root()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.depth"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.depth()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_ids"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.stub_ids"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.stub_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expanded_ids"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expanded_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.minimal_trap_spaces"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.minimal_trap_spaces()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.find_node"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.find_node()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.is_subgraph"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.is_subgraph()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.is_isomorphic"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.is_isomorphic()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_data"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_data()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.reclaim_node_data"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.reclaim_node_data()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_is_minimal"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_is_minimal()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_successors"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_successors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_candidates"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_attractor_candidates()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_seeds"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_attractor_seeds()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_attractor_sets"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_attractor_sets()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_nfvs"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_percolated_nfvs()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_network"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_percolated_network()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.node_percolated_petri_net"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.node_percolated_petri_net()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.edge_all_stable_motifs"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.edge_all_stable_motifs()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.edge_stable_motif"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.edge_stable_motif()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.component_subdiagram"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.component_subdiagram()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.source_scc_subdiagrams"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.source_scc_subdiagrams()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.build"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.build()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_scc"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_scc()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_block"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_block()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_bfs"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_bfs()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_dfs"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_dfs()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_minimal_spaces"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_minimal_spaces()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_attractor_seeds"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_attractor_seeds()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.expand_to_target"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.expand_to_target()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.skip_to_minimal"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.skip_to_minimal()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.succession_diagram.SuccessionDiagram.skip_remaining"><code class="docutils literal notranslate"><span class="pre">SuccessionDiagram.skip_remaining()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/autoapi/biobalm/succession_diagram/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Trinh, Park, Pastva, Rozum.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

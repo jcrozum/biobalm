@@ -1,0 +1,841 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>biobalm.space_utils &#8212; biobalm 0.4.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c4038f1e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=34866086"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/biobalm/space_utils/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="biobalm.succession_diagram" href="../succession_diagram/index.html" />
+    <link rel="prev" title="biobalm.petri_net_translation" href="../petri_net_translation/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">biobalm 0.4.3 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">biobalm</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../control/index.html">biobalm.control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers/index.html">biobalm.drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_graph_utils/index.html">biobalm.interaction_graph_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../petri_net_translation/index.html">biobalm.petri_net_translation</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">biobalm.space_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../succession_diagram/index.html">biobalm.succession_diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../symbolic_utils/index.html">biobalm.symbolic_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trappist_core/index.html">biobalm.trappist_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../types/index.html">biobalm.types</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">biobalm</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">biobalm.space_utils</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-biobalm.space_utils">
+<span id="biobalm-space-utils"></span><h1>biobalm.space_utils<a class="headerlink" href="#module-biobalm.space_utils" title="Link to this heading">#</a></h1>
+<p>Some basic utility operations on spaces (partial assignments of BN variables).</p>
+<p>Each space is represented as a dictionary with a subset of variable names as
+keys and values <code class="code docutils literal notranslate"><span class="pre">0</span></code>/<code class="code docutils literal notranslate"><span class="pre">1</span></code> assigned to fixed variables. See also
+<a class="reference internal" href="../types/index.html#biobalm.types.BooleanSpace" title="biobalm.types.BooleanSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanSpace</span></code></a>.</p>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.intersect" title="biobalm.space_utils.intersect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersect</span></code></a>(→ biobalm.types.BooleanSpace | None)</p></td>
+<td><p>Compute the intersection of two spaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.space_utils.is_subspace" title="biobalm.space_utils.is_subspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_subspace</span></code></a>(→ bool)</p></td>
+<td><p>Checks if <code class="code docutils literal notranslate"><span class="pre">x</span></code> is a subspace of <code class="code docutils literal notranslate"><span class="pre">y</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.dnf_function_is_true" title="biobalm.space_utils.dnf_function_is_true"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dnf_function_is_true</span></code></a>(→ bool)</p></td>
+<td><p>Checks if a DNF function evaluates to <code class="code docutils literal notranslate"><span class="pre">1</span></code> for the given state (or space).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.space_utils.remove_state_from_dnf" title="biobalm.space_utils.remove_state_from_dnf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_state_from_dnf</span></code></a>(→ list[biobalm.types.BooleanSpace])</p></td>
+<td><p>Removes all clauses (conjunctions) that are <code class="code docutils literal notranslate"><span class="pre">True</span></code> in the given <code class="code docutils literal notranslate"><span class="pre">state</span></code> from a DNF function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.percolate_space_strict" title="biobalm.space_utils.percolate_space_strict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">percolate_space_strict</span></code></a>(→ biobalm.types.BooleanSpace)</p></td>
+<td><p>Percolates a space through a Boolean network, disregarding constants.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.space_utils.percolate_space" title="biobalm.space_utils.percolate_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">percolate_space</span></code></a>(→ biobalm.types.BooleanSpace)</p></td>
+<td><p>Percolates a space through a Boolean network.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.percolation_conflicts" title="biobalm.space_utils.percolation_conflicts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">percolation_conflicts</span></code></a>(→ set[str])</p></td>
+<td><p>Find variables that conflict with the percolation of the given space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.space_utils.percolate_network" title="biobalm.space_utils.percolate_network"><code class="xref py py-obj docutils literal notranslate"><span class="pre">percolate_network</span></code></a>(→ biodivine_aeon.BooleanNetwork)</p></td>
+<td><p>Reduces a Boolean network by percolating a given space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.restrict_expression" title="biobalm.space_utils.restrict_expression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restrict_expression</span></code></a>(→ biodivine_aeon.BooleanExpression)</p></td>
+<td><p>Restricts a Boolean expression to a given space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.space_utils.expression_to_space_list" title="biobalm.space_utils.expression_to_space_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">expression_to_space_list</span></code></a>(...)</p></td>
+<td><p>Convert a Boolean expression to a list of subspaces for which it is true.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.space_utils.space_unique_key" title="biobalm.space_utils.space_unique_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">space_unique_key</span></code></a>(→ int)</p></td>
+<td><p>Provide a unique hash key for the provided space in a given network.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.intersect">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biobalm.types.BooleanSpace</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.intersect" title="Link to this definition">#</a></dt>
+<dd><p>Compute the intersection of two spaces.</p>
+<p>Returns the intersection as a new space, or <code class="code docutils literal notranslate"><span class="pre">None</span></code> if the spaces don’t
+intersect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>BooleanSpace</em>) – The first space.</p></li>
+<li><p><strong>y</strong> (<em>BooleanSpace</em>) – The second space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The intersection of <code class="code docutils literal notranslate"><span class="pre">x</span></code> and <code class="code docutils literal notranslate"><span class="pre">y</span></code>, or <code class="code docutils literal notranslate"><span class="pre">None</span></code> if the spaces don’t
+intersect.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanSpace | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.is_subspace">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">is_subspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.is_subspace" title="Link to this definition">#</a></dt>
+<dd><p>Checks if <code class="code docutils literal notranslate"><span class="pre">x</span></code> is a subspace of <code class="code docutils literal notranslate"><span class="pre">y</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>BooleanSpace</em>) – The first space.</p></li>
+<li><p><strong>y</strong> (<em>BooleanSpace</em>) – The second space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="code docutils literal notranslate"><span class="pre">True</span></code> if <code class="code docutils literal notranslate"><span class="pre">x</span></code> is a subspace of <code class="code docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.dnf_function_is_true">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">dnf_function_is_true</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dnf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.dnf_function_is_true" title="Link to this definition">#</a></dt>
+<dd><p>Checks if a DNF function evaluates to <code class="code docutils literal notranslate"><span class="pre">1</span></code> for the given state (or space).</p>
+<p>The DNF function is represented as a list of spaces, such that each space represents
+exactly one DNF clause.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dnf</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>BooleanSpace</em><em>]</em>) – The DNF function to evaluate.</p></li>
+<li><p><strong>state</strong> (<em>BooleanSpace</em>) – The state in which the function is evaluated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="code docutils literal notranslate"><span class="pre">True</span></code> if the function evaluates to <code class="code docutils literal notranslate"><span class="pre">1</span></code> in the given state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.remove_state_from_dnf">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">remove_state_from_dnf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dnf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.remove_state_from_dnf" title="Link to this definition">#</a></dt>
+<dd><p>Removes all clauses (conjunctions) that are <code class="code docutils literal notranslate"><span class="pre">True</span></code> in the given <code class="code docutils literal notranslate"><span class="pre">state</span></code> from a DNF function.</p>
+<p>The result is a new list (i.e., it does not modify the original list).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dnf</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>BooleanSpace</em><em>]</em>) – The DNF function to modify.</p></li>
+<li><p><strong>state</strong> (<em>BooleanSpace</em>) – The state to remove from the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified DNF function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.percolate_space_strict">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">percolate_space_strict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.AsynchronousGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biobalm.types.BooleanSpace</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.percolate_space_strict" title="Link to this definition">#</a></dt>
+<dd><p>Percolates a space through a Boolean network, disregarding constants.</p>
+<p>Returns the set of variables which become fixed as a result of fixing the
+variables from <code class="code docutils literal notranslate"><span class="pre">space</span></code> within the given <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code>.</p>
+<p>Note that the strict percolation process does not propagate constants that
+are already fixed within the <code class="code docutils literal notranslate"><span class="pre">network</span></code>, only those that are specified in
+<code class="code docutils literal notranslate"><span class="pre">space</span></code>. Also, the result only contains any <em>new</em> constants, not those that
+are already fixed in <code class="code docutils literal notranslate"><span class="pre">space</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>AsynchronousGraph</em>) – A symbolic representation of the Boolean network (from which state
+transitions can be generated) in which the percolation is performed. If
+needed, an <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> object can be constructed from a
+<code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> via <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.AsynchronousGraph(bn)</span></code>.</p></li>
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to percolate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The percolated space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanSpace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.percolate_space">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">percolate_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.AsynchronousGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biobalm.types.BooleanSpace</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.percolate_space" title="Link to this definition">#</a></dt>
+<dd><p>Percolates a space through a Boolean network.</p>
+<p>Takes a symbolic <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> and a <code class="code docutils literal notranslate"><span class="pre">BooleanSpace</span></code>. It then percolates
+any values that are effectively constant within the <code class="code docutils literal notranslate"><span class="pre">network</span></code> assuming the variables
+from <code class="code docutils literal notranslate"><span class="pre">space</span></code> are fixed accordingly.</p>
+<p>If the argument is a trap space, then the result is a subspace of the
+argument and is also a trap space.</p>
+<p>However, when the argument is a general space, the percolation can actually
+lead “outside” of the original space. In such case, the original fixed value
+is <em>not</em> modified and the conflict will remain in the resulting space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>AsynchronousGraph</em>) – A symbolic representation of the Boolean network (from which state
+transitions can be generated) in which the percolation is performed. If
+needed, an <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> object can be constructed from a
+<code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> via <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.AsynchronousGraph(bn)</span></code>.</p></li>
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to percolate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The percolated space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanSpace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.percolation_conflicts">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">percolation_conflicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.AsynchronousGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_percolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.percolation_conflicts" title="Link to this definition">#</a></dt>
+<dd><p>Find variables that conflict with the percolation of the given space.</p>
+<p>Returns a set of variables from <code class="code docutils literal notranslate"><span class="pre">space</span></code> that are in conflict with the
+percolation of the given space (see <code class="code docutils literal notranslate"><span class="pre">percolate_space</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>AsynchronousGraph</em>) – A symbolic representation of the Boolean network (from which state
+transitions can be generated) in which the percolation is performed. If
+needed, an <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> object can be constructed from a
+<code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> via <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.AsynchronousGraph(bn)</span></code>.</p></li>
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to percolate.</p></li>
+<li><p><strong>strict_percolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> (the default), then the percolation is performed using
+<a class="reference internal" href="#biobalm.space_utils.percolate_space_strict" title="biobalm.space_utils.percolate_space_strict"><code class="xref py py-func docutils literal notranslate"><span class="pre">percolate_space_strict()</span></code></a>. Otherwise, it is performed using
+<a class="reference internal" href="#biobalm.space_utils.percolate_space" title="biobalm.space_utils.percolate_space"><code class="xref py py-func docutils literal notranslate"><span class="pre">percolate_space()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A set of variables from <code class="code docutils literal notranslate"><span class="pre">space</span></code> that are in conflict with the
+percolation of the given space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.percolate_network">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">percolate_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.AsynchronousGraph</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_constants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.percolate_network" title="Link to this definition">#</a></dt>
+<dd><p>Reduces a Boolean network by percolating a given space.</p>
+<p>Takes a <code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> and a <code class="code docutils literal notranslate"><span class="pre">BooleanSpace</span></code>. It then produces a new network with
+update functions percolated based on the supplied space.</p>
+<p>The dynamics of the resulting network correspond to the dynamics of the
+network obtained by percolating the given space. If the space (or the
+percolated space) is a trap space, then the resulting dynamics are a
+subgraph of the original network’s state transition graph. Otherwise, the
+dynamics correspond to the effects of an external intervention.</p>
+<p>The percolation process is based on BDD conversion. For this purpose, an optional
+<code class="code docutils literal notranslate"><span class="pre">SymbolicContext</span></code> can be provided. If not given, a temporary <code class="code docutils literal notranslate"><span class="pre">SymbolicContext</span></code> will
+be created instead. Note that this is necessary to resolve non-trivial tautologies or
+contradictions that can arise once the variables from <code class="code docutils literal notranslate"><span class="pre">space</span></code> are fixed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bn</strong> (<em>BooleanNetwork</em>) – The network to percolate.</p></li>
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to percolate.</p></li>
+<li><p><strong>symbolic_network</strong> (<em>AsynchronousGraph</em><em> | </em><em>None</em>) – An optional symbolic representation to use to perform the percolation. If not
+given, a temporary one will be created from <code class="code docutils literal notranslate"><span class="pre">bn</span></code>.</p></li>
+<li><p><strong>remove_constants</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code>, then the constants are removed from the resulting network. By
+default, <code class="code docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The percolated network.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.restrict_expression">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">restrict_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanExpression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BddVariableSet</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">biodivine_aeon.SymbolicContext</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biodivine_aeon.BooleanExpression</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.restrict_expression" title="Link to this definition">#</a></dt>
+<dd><p>Restricts a Boolean expression to a given space.</p>
+<p>Takes a <code class="code docutils literal notranslate"><span class="pre">BooleanExpression</span></code> and a <code class="code docutils literal notranslate"><span class="pre">BooleanSpace</span></code>. Returns a simplified <code class="code docutils literal notranslate"><span class="pre">BooleanExpression</span></code>
+that is valid for exactly the same members of the given <code class="code docutils literal notranslate"><span class="pre">space</span></code> as the original expression.
+The resulting expression does not depend on the variables which are fixed in the given <code class="code docutils literal notranslate"><span class="pre">space</span></code>.</p>
+<p>The percolation process is based on BDD conversion. For this purpose, an optional <code class="code docutils literal notranslate"><span class="pre">BddVariableSet</span></code>
+can be provided. If not given, a temporary <code class="code docutils literal notranslate"><span class="pre">BddVariableSet</span></code> will be created instead. Note that
+this is necessary to resolve non-trivial tautologies/contradictions that can arise once the
+variables from <code class="code docutils literal notranslate"><span class="pre">space</span></code> are fixed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>BooleanExpression</em>) – The expression to restrict.</p></li>
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to restrict to.</p></li>
+<li><p><strong>symbolic_context</strong> (<em>BddVariableSet</em><em> | </em><em>SymbolicContext</em><em> | </em><em>None</em>) – <p>An optional symbolic context to use to perform the percolation. If not given,
+a temporary one will be created.</p>
+<p>This is a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BddVariableSet</span></code> or a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.SymbolicContext</span></code>
+(which is automatically converted to <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BddVariableSet</span></code>).
+The context object ensures compatibility between BDDs by
+maintaining a shared collection of variable names and their ordering.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The restricted expression.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanExpression</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.expression_to_space_list">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">expression_to_space_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanExpression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BddVariableSet</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">biodivine_aeon.SymbolicContext</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.expression_to_space_list" title="Link to this definition">#</a></dt>
+<dd><p>Convert a Boolean expression to a list of subspaces for which it is true.</p>
+<p>Equivalent to a disjunctive normal form. Convert a <code class="code docutils literal notranslate"><span class="pre">BooleanExpression</span></code> to a
+list of subspaces whose union represents an equivalent set of the network
+states which satisfy the expression.</p>
+<p>Note that the spaces are not necessarily pair-wise disjoint. Also, the list
+is not necessarily minimal.</p>
+<p>The translation uses a DNF conversion based on BDDs. For this purpose, an optional
+<code class="code docutils literal notranslate"><span class="pre">BddVariableSet</span></code> can be provided. If not given, a temporary <code class="code docutils literal notranslate"><span class="pre">BddVariableSet</span></code> will be
+created instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>BooleanExpression</em>) – The expression to convert.</p></li>
+<li><p><strong>symbolic_context</strong> (<em>BddVariableSet</em><em> | </em><em>SymbolicContext</em><em> | </em><em>None</em>) – <p>An optional symbolic context to use to perform the percolation. If not given,
+a temporary one will be created.</p>
+<p>This is a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BddVariableSet</span></code> or a <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.SymbolicContext</span></code>
+(which is automatically converted to <code class="code docutils literal notranslate"><span class="pre">biodivine_aeon.BddVariableSet</span></code>).
+The context object ensures compatibility between BDDs by
+maintaining a shared collection of variable names and their ordering.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of subspaces on which the expression is true.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.space_utils.space_unique_key">
+<span class="sig-prename descclassname"><span class="pre">biobalm.space_utils.</span></span><span class="sig-name descname"><span class="pre">space_unique_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/space_utils.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.space_utils.space_unique_key" title="Link to this definition">#</a></dt>
+<dd><p>Provide a unique hash key for the provided space in a given network.</p>
+<p>Computes an integer which is a unique representation of the provided <code class="code docutils literal notranslate"><span class="pre">space</span></code>
+(with respect to the given <code class="code docutils literal notranslate"><span class="pre">network</span></code>).</p>
+<p>This integer key can be used instead of the original <code class="code docutils literal notranslate"><span class="pre">space</span></code> in places where
+dictionaries are not allowed, such as a key within a larger dictionary, or
+a sorting key.</p>
+<p>Note that when used for sorting, this key essentially implements a particular
+form of lexicographic ordering on spaces. This is always a total ordering
+(there is no ambiguity).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>space</strong> (<em>BooleanSpace</em>) – The space to encode.</p></li>
+<li><p><strong>network</strong> (<em>BooleanNetwork</em>) – The network in which the space is defined.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A unique key for the space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../petri_net_translation/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">biobalm.petri_net_translation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../succession_diagram/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">biobalm.succession_diagram</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.intersect"><code class="docutils literal notranslate"><span class="pre">intersect()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.is_subspace"><code class="docutils literal notranslate"><span class="pre">is_subspace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.dnf_function_is_true"><code class="docutils literal notranslate"><span class="pre">dnf_function_is_true()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.remove_state_from_dnf"><code class="docutils literal notranslate"><span class="pre">remove_state_from_dnf()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.percolate_space_strict"><code class="docutils literal notranslate"><span class="pre">percolate_space_strict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.percolate_space"><code class="docutils literal notranslate"><span class="pre">percolate_space()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.percolation_conflicts"><code class="docutils literal notranslate"><span class="pre">percolation_conflicts()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.percolate_network"><code class="docutils literal notranslate"><span class="pre">percolate_network()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.restrict_expression"><code class="docutils literal notranslate"><span class="pre">restrict_expression()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.expression_to_space_list"><code class="docutils literal notranslate"><span class="pre">expression_to_space_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.space_utils.space_unique_key"><code class="docutils literal notranslate"><span class="pre">space_unique_key()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/autoapi/biobalm/space_utils/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Trinh, Park, Pastva, Rozum.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

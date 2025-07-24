@@ -1,0 +1,878 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>biobalm.control &#8212; biobalm 0.4.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c4038f1e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=34866086"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/biobalm/control/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="biobalm.drivers" href="../drivers/index.html" />
+    <link rel="prev" title="biobalm" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">biobalm 0.4.3 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">biobalm</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">biobalm.control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers/index.html">biobalm.drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_graph_utils/index.html">biobalm.interaction_graph_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../petri_net_translation/index.html">biobalm.petri_net_translation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../space_utils/index.html">biobalm.space_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../succession_diagram/index.html">biobalm.succession_diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../symbolic_utils/index.html">biobalm.symbolic_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trappist_core/index.html">biobalm.trappist_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../types/index.html">biobalm.types</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">biobalm</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">biobalm.control</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-biobalm.control">
+<span id="biobalm-control"></span><h1>biobalm.control<a class="headerlink" href="#module-biobalm.control" title="Link to this heading">#</a></h1>
+<p>This module implementes methods for permanent target control of Boolean networks
+based on the structure of a succession diagram.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.control.Intervention" title="biobalm.control.Intervention"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Intervention</span></code></a></p></td>
+<td><p>A class for encoding an intervention to a network to reach a target subspace.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.control.succession_control" title="biobalm.control.succession_control"><code class="xref py py-obj docutils literal notranslate"><span class="pre">succession_control</span></code></a>(→ list[Intervention])</p></td>
+<td><p>Performs succession-diagram control to reach a target subspace.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.control.successions_to_target" title="biobalm.control.successions_to_target"><code class="xref py py-obj docutils literal notranslate"><span class="pre">successions_to_target</span></code></a>(...)</p></td>
+<td><p>Find lists of nested trap spaces (successions) that lead to the</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.control.drivers_of_succession" title="biobalm.control.drivers_of_succession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">drivers_of_succession</span></code></a>(...)</p></td>
+<td><p>Find driver nodes of a list of sequentially nested trap spaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.control.find_drivers" title="biobalm.control.find_drivers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_drivers</span></code></a>(→ biobalm.types.ControlOverrides)</p></td>
+<td><p>Finds drives of a given target trap space</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.control.controls_are_equal" title="biobalm.control.controls_are_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">controls_are_equal</span></code></a>(→ bool)</p></td>
+<td><p>Determine if two <a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="biobalm.control.Intervention">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">Intervention</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.ControlOverrides</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'internal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'all'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">succession</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.SubspaceSuccession</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention" title="Link to this definition">#</a></dt>
+<dd><p>A class for encoding an intervention to a network to reach a target subspace.</p>
+<p>Generally, this class is created by the
+<a class="reference internal" href="#biobalm.control.succession_control" title="biobalm.control.succession_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">succession_control</span></code></a> function,
+which returns a list of <code class="code docutils literal notranslate"><span class="pre">Intervention</span></code> objects. Manipulating the
+contents of these objects is only recommended for advanced use cases.
+Typically, it is sufficient to print this object to see a human-readable
+explanation of how to interpret the intervention.</p>
+<p>Note that two interventions are considered to be equal if they act on the same succession with
+equal controls applied to each subspace in the succession. Thus, two
+interventions that override the same nodes in the same way can be
+unequal, even when applied to the same subspaces. This is because each
+subspace imposes a duration condition on the overrides, i.e., the
+override must be maintained until the succession subspace is reached.
+Changing the order of the subspaces considered can alter this stop
+condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>control</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>ControlOverrides</em><em>]</em>) – The <a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> objects,
+in order, that are applied. The order of the list corresponds the
+order of the subspaces in the succession. Each
+<a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> object
+represens a list of overrides, stored as a dictionary of node-value
+pairs, that drive the system to the corresponding subspace. Each
+<a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> object is
+sorted by key value (i.e., alphabetically) upon creation of the
+<code class="code docutils literal notranslate"><span class="pre">Intervention</span></code> object to maintain a canonical ordering.</p></li>
+<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Either “internal” or “all”; “internal” means that the
+<a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a></p></li>
+<li><p><strong>succession</strong> (<em>SubspaceSuccession</em>) – A sequence of subspaces that are targeted by the corresponding
+entries of <code class="code docutils literal notranslate"><span class="pre">control</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="sd">    A, B &amp; C</span>
+<span class="gp">... </span><span class="sd">    B, A &amp; C</span>
+<span class="gp">... </span><span class="sd">    C, A &amp; B</span>
+<span class="gp">... </span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interventions</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">succession_control</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervention</span> <span class="o">=</span> <span class="n">interventions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># only one in this case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervention</span><span class="o">.</span><span class="n">control</span>
+<span class="go">[[{&#39;A&#39;: 1, &#39;B&#39;: 1}, {&#39;A&#39;: 1, &#39;C&#39;: 1}, {&#39;B&#39;: 1, &#39;C&#39;: 1}]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervention</span><span class="o">.</span><span class="n">strategy</span>
+<span class="go">&#39;internal&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervention</span><span class="o">.</span><span class="n">succession</span>
+<span class="go">[{&#39;A&#39;: 1, &#39;B&#39;: 1, &#39;C&#39;: 1}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervention</span><span class="o">.</span><span class="n">successful</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">intervention</span><span class="p">)</span>
+<span class="go">Intervention is SUCCESSFUL operating on</span>
+<span class="go">{&#39;A&#39;: 1, &#39;B&#39;: 1, &#39;C&#39;: 1}</span>
+<span class="go">override</span>
+<span class="go">({&#39;A&#39;: 1, &#39;B&#39;: 1} or {&#39;A&#39;: 1, &#39;C&#39;: 1} or {&#39;B&#39;: 1, &#39;C&#39;: 1})</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="biobalm.control.Intervention.control">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control</span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention.control" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biobalm.control.Intervention.strategy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">strategy</span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention.strategy" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biobalm.control.Intervention.succession">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">succession</span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention.succession" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biobalm.control.Intervention.successful">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">successful</span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention.successful" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biobalm.control.Intervention.all_control_strategies">
+<span class="sig-name descname"><span class="pre">all_control_strategies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.ControlOverrides</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.Intervention.all_control_strategies" title="Link to this definition">#</a></dt>
+<dd><p>Returns all possible combinations of <code class="code docutils literal notranslate"><span class="pre">ControlOverrides</span></code> sequences that
+can be used to execute this <code class="code docutils literal notranslate"><span class="pre">Intervention</span></code>.</p>
+<p>Internally, an intervention consists of multiple control steps that
+need to be taken sequentially. For each step in the sequence, an intervention
+can have multiple options of how to execute it. With this method,
+we can generate the actual sequences that arise by combining all the
+available options for each step.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.control.succession_control">
+<span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">succession_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">succession_diagram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../succession_diagram/index.html#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">biobalm.succession_diagram.SuccessionDiagram</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'internal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'all'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'internal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_drivers_per_succession_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_drivers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">successful_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_feedforward_successions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#biobalm.control.Intervention" title="biobalm.control.Intervention"><span class="pre">Intervention</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.succession_control" title="Link to this definition">#</a></dt>
+<dd><p>Performs succession-diagram control to reach a target subspace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>succession_diagram</strong> (<a class="reference internal" href="../index.html#biobalm.SuccessionDiagram" title="biobalm.SuccessionDiagram"><em>SuccessionDiagram</em></a>) – The succession diagram from which successions and rules will be
+extracted.</p></li>
+<li><p><strong>target</strong> (<em>BooleanSpace</em>) – The target subspace.</p></li>
+<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The searching strategy to use to look for driver nodes. Options are
+‘internal’ (default) and ‘all’.</p></li>
+<li><p><strong>max_drivers_per_succession_node</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None = None</em><em>,</em>) – The maximum number of drivers that will be tested for a succession
+diagram node. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, then a number of drivers up to the size of the
+succession diagram node’s stable motif will be tested</p></li>
+<li><p><strong>forbidden_drivers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – A set of forbidden drivers that will not be overridden for control. If
+<code class="code docutils literal notranslate"><span class="pre">None</span></code>, then all nodes are candidates for control.</p></li>
+<li><p><strong>successful_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to only return successful interventions (default: <code class="code docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of control <a class="reference internal" href="#biobalm.control.Intervention" title="biobalm.control.Intervention"><code class="xref py py-class docutils literal notranslate"><span class="pre">Intervention</span></code></a>
+objects. Note that when <code class="code docutils literal notranslate"><span class="pre">successful_only</span></code> is <code class="code docutils literal notranslate"><span class="pre">False</span></code>, returned
+interventions may be unsuccessful if <code class="code docutils literal notranslate"><span class="pre">max_drivers_per_succession_node</span></code>
+is set too small, or crucial nodes are included in <code class="code docutils literal notranslate"><span class="pre">forbidden_drivers</span></code>.
+To test, examine the <code class="code docutils literal notranslate"><span class="pre">successful</span></code> property of the intervention.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference internal" href="#biobalm.control.Intervention" title="biobalm.control.Intervention">Intervention</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">biobalm.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">succession_control</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="sd">    S, S</span>
+<span class="gp">... </span><span class="sd">    A, S | B</span>
+<span class="gp">... </span><span class="sd">    B, A</span>
+<span class="gp">... </span><span class="sd">    C, A | D</span>
+<span class="gp">... </span><span class="sd">    D, C</span>
+<span class="gp">... </span><span class="sd">    E, false</span>
+<span class="gp">... </span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interventions</span> <span class="o">=</span> <span class="n">succession_control</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">forbidden_drivers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interventions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">control</span><span class="p">))</span> <span class="c1"># to maintain fixed order</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interventions</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Intervention is SUCCESSFUL operating on</span>
+<span class="go">{&#39;S&#39;: 0}</span>
+<span class="go">{&#39;A&#39;: 0, &#39;B&#39;: 0}</span>
+<span class="go">{&#39;C&#39;: 1, &#39;D&#39;: 1}</span>
+<span class="go">override</span>
+<span class="go">({&#39;S&#39;: 0}) and then</span>
+<span class="go">({&#39;B&#39;: 0}) and then</span>
+<span class="go">({&#39;C&#39;: 1} or {&#39;D&#39;: 1})</span>
+<span class="go">--------------------</span>
+<span class="go">Intervention is SUCCESSFUL operating on</span>
+<span class="go">{&#39;S&#39;: 0}</span>
+<span class="go">{&#39;C&#39;: 1, &#39;D&#39;: 1}</span>
+<span class="go">{&#39;A&#39;: 0, &#39;B&#39;: 0}</span>
+<span class="go">override</span>
+<span class="go">({&#39;S&#39;: 0}) and then</span>
+<span class="go">({&#39;C&#39;: 1} or {&#39;D&#39;: 1}) and then</span>
+<span class="go">({&#39;B&#39;: 0})</span>
+<span class="go">--------------------</span>
+</pre></div>
+</div>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">biobalm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">biobalm.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">succession_control</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">biobalm</span><span class="o">.</span><span class="n">SuccessionDiagram</span><span class="o">.</span><span class="n">from_rules</span><span class="p">(</span>
+<span class="gp">... </span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="sd">    S, S</span>
+<span class="gp">... </span><span class="sd">    A, S | B</span>
+<span class="gp">... </span><span class="sd">    B, A</span>
+<span class="gp">... </span><span class="sd">    C, A | D</span>
+<span class="gp">... </span><span class="sd">    D, C</span>
+<span class="gp">... </span><span class="sd">    E, false</span>
+<span class="gp">... </span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interventions</span> <span class="o">=</span> <span class="n">succession_control</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">strategy</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interventions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">control</span><span class="p">))</span> <span class="c1"># to maintain fixed order</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interventions</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">Intervention is SUCCESSFUL operating on</span>
+<span class="go">{&#39;S&#39;: 0}</span>
+<span class="go">{&#39;A&#39;: 0, &#39;B&#39;: 0}</span>
+<span class="go">{&#39;C&#39;: 1, &#39;D&#39;: 1}</span>
+<span class="go">override</span>
+<span class="go">({&#39;S&#39;: 0}) temporarily, and then</span>
+<span class="go">({&#39;A&#39;: 0} or {&#39;B&#39;: 0}) temporarily, and then</span>
+<span class="go">({&#39;C&#39;: 1} or {&#39;D&#39;: 1})</span>
+<span class="go">--------------------</span>
+<span class="go">Intervention is SUCCESSFUL operating on</span>
+<span class="go">{&#39;S&#39;: 0}</span>
+<span class="go">{&#39;C&#39;: 1, &#39;D&#39;: 1}</span>
+<span class="go">{&#39;A&#39;: 0, &#39;B&#39;: 0}</span>
+<span class="go">override</span>
+<span class="go">({&#39;S&#39;: 0}) temporarily, and then</span>
+<span class="go">({&#39;A&#39;: 1} or {&#39;B&#39;: 1} or {&#39;C&#39;: 1} or {&#39;D&#39;: 1}) temporarily, and then</span>
+<span class="go">({&#39;A&#39;: 0} or {&#39;B&#39;: 0})</span>
+<span class="go">--------------------</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.control.successions_to_target">
+<span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">successions_to_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">succession_diagram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../succession_diagram/index.html#biobalm.succession_diagram.SuccessionDiagram" title="biobalm.succession_diagram.SuccessionDiagram"><span class="pre">biobalm.succession_diagram.SuccessionDiagram</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_diagram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_feedforward_successions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.SubspaceSuccession</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.successions_to_target" title="Link to this definition">#</a></dt>
+<dd><p>Find lists of nested trap spaces (successions) that lead to the
+specified target subspace.</p>
+<p>Generally, it is not necessary to call this function directly, as it is
+automatically invoked by
+<a class="reference internal" href="#biobalm.control.succession_control" title="biobalm.control.succession_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">succession_control</span></code></a>. It is
+primarily provided in the public API for testing and benchmarking purposes,
+or in the case that the user wants to implement a custom strategy to
+identify succession drivers rather than relying on
+<a class="reference internal" href="#biobalm.control.drivers_of_succession" title="biobalm.control.drivers_of_succession"><code class="xref py py-func docutils literal notranslate"><span class="pre">drivers_of_succession</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>succession_diagram</strong> (<a class="reference internal" href="../index.html#biobalm.SuccessionDiagram" title="biobalm.SuccessionDiagram"><em>SuccessionDiagram</em></a>) – The succession diagram from which successions will be extracted.</p></li>
+<li><p><strong>target</strong> (<em>BooleanSpace</em>) – The target subspace.</p></li>
+<li><p><strong>expand_diagram</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to ensure that the succession diagram is expanded enough to
+capture all paths to the target (default: True).</p></li>
+<li><p><strong>skip_feedforward_successions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to skip redundant successions (default: False). Skipping these
+can reduce the number of interventions to test, yielding performance
+improvements, but can also cause the algorithm to miss some valid
+interventions, particularly in cases when the order of intervention
+application is important.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of successions, where each succession is a list of sequentially
+nested trap spaces that specify the target.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[SubspaceSuccession]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.control.drivers_of_succession">
+<span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">drivers_of_succession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">biodivine_aeon.AsynchronousGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">succession</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'internal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_drivers_per_succession_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_drivers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.ControlOverrides</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.drivers_of_succession" title="Link to this definition">#</a></dt>
+<dd><p>Find driver nodes of a list of sequentially nested trap spaces.</p>
+<p>Generally, it is not necessary to call this function directly, as it is
+automatically invoked by
+<a class="reference internal" href="#biobalm.control.succession_control" title="biobalm.control.succession_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">succession_control</span></code></a>. It is primarily
+provided in the public API for testing and benchmarking purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bn</strong> (<em>BooleanNetwork</em><em> | </em><em>AsynchronousGraph</em>) – The network to analyze, which contains the Boolean update functions. Ideally,
+the network should be already provided as a symbolic <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code>.
+Alternatively, a “raw” <code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> can be provided and the symbolic
+<code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> is created automatically.</p></li>
+<li><p><strong>succession</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>BooleanSpace</em><em>]</em>) – A list of sequentially nested trap spaces that specify the target.</p></li>
+<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The searching strategy to use to look for driver nodes. Options are
+‘internal’ (default) and ‘all’.</p></li>
+<li><p><strong>max_drivers_per_succession_node</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None = None</em><em>,</em>) – The maximum number of drivers that will be tested for a succession
+diagram node. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, then a number of drivers up to the size of the
+succession diagram node’s stable motif will be tested.</p></li>
+<li><p><strong>forbidden_drivers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – A set of forbidden drivers that will not be overridden for control. If
+<code class="code docutils literal notranslate"><span class="pre">None</span></code>, then all nodes are candidates for control.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of controls. Each control is a list of lists of driver sets,
+represented as state dictionaries. Each list item corresponds to a list
+of drivers for the corresponding trap space in the succession.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[ControlOverrides]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.control.find_drivers">
+<span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">find_drivers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">biodivine_aeon.AsynchronousGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_trap_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'internal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_fixed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_drivers_per_succession_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_drivers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">biobalm.types.ControlOverrides</span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.find_drivers" title="Link to this definition">#</a></dt>
+<dd><p>Finds drives of a given target trap space</p>
+<p>Generally, it is not necessary to call this function directly, as it is
+automatically invoked by
+<a class="reference internal" href="#biobalm.control.drivers_of_succession" title="biobalm.control.drivers_of_succession"><code class="xref py py-func docutils literal notranslate"><span class="pre">drivers_of_succession</span></code></a>, which in
+turn is invoked by
+<a class="reference internal" href="#biobalm.control.succession_control" title="biobalm.control.succession_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">succession_control</span></code></a>. It is primarily
+provided in the public API for testing and benchmarking purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bn</strong> (<em>BooleanNetwork</em><em> | </em><em>AsynchronousGraph</em>) – The network to analyze, which contains the Boolean update functions. Ideally,
+the network should be already provided as a symbolic <code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code>.
+Alternatively, a “raw” <code class="code docutils literal notranslate"><span class="pre">BooleanNetwork</span></code> can be provided and the symbolic
+<code class="code docutils literal notranslate"><span class="pre">AsynchronousGraph</span></code> is created automatically.</p></li>
+<li><p><strong>target_trap_space</strong> (<em>BooleanSpace</em>) – The trap space we want to find drivers for.</p></li>
+<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The searching strategy to use to look for driver nodes. Options are
+‘internal’ (default) and ‘all’.</p></li>
+<li><p><strong>assume_fixed</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – A dictionary of fixed variables that should be assumed to be fixed.</p></li>
+<li><p><strong>max_drivers_per_succession_node</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None = None</em><em>,</em>) – The maximum number of drivers that will be tested for a succession
+diagram node. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, then a number of drivers up to the size of the
+succession diagram node’s stable motif will be tested.</p></li>
+<li><p><strong>forbidden_drivers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – A set of forbidden drivers that will not be overridden for control. If
+<code class="code docutils literal notranslate"><span class="pre">None</span></code>, then all nodes are candidates for control.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of internal driver sets, represented as state dictionaries. If
+empty, then no drivers are found. This can happen if
+<code class="code docutils literal notranslate"><span class="pre">max_drivers_per_succession_node</span></code> is not <code class="code docutils literal notranslate"><span class="pre">None</span></code>, or if all controls
+require nodes in <code class="code docutils literal notranslate"><span class="pre">forbidden_drivers</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ControlOverrides</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.control.controls_are_equal">
+<span class="sig-prename descclassname"><span class="pre">biobalm.control.</span></span><span class="sig-name descname"><span class="pre">controls_are_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.ControlOverrides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.ControlOverrides</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/control.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.control.controls_are_equal" title="Link to this definition">#</a></dt>
+<dd><p>Determine if two <a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a>
+objects are equal.</p>
+<p>Two <code class="code docutils literal notranslate"><span class="pre">ControlOverrides</span></code> objects are equal if they contain the same
+<a class="reference internal" href="../types/index.html#biobalm.types.BooleanSpace" title="biobalm.types.BooleanSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanSpace</span></code></a> objects, regardless of their
+ordering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>ControlOverrides</em>) – First <a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> object for
+comparison.</p></li>
+<li><p><strong>b</strong> (<em>ControlOverrides</em>) – Second <a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> object for
+comparison.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns <code class="code docutils literal notranslate"><span class="pre">True</span></code> if the two
+<a class="reference internal" href="../types/index.html#biobalm.types.ControlOverrides" title="biobalm.types.ControlOverrides"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlOverrides</span></code></a> objects are
+equal.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">biobalm</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../drivers/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">biobalm.drivers</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention"><code class="docutils literal notranslate"><span class="pre">Intervention</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention.control"><code class="docutils literal notranslate"><span class="pre">Intervention.control</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention.strategy"><code class="docutils literal notranslate"><span class="pre">Intervention.strategy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention.succession"><code class="docutils literal notranslate"><span class="pre">Intervention.succession</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention.successful"><code class="docutils literal notranslate"><span class="pre">Intervention.successful</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.Intervention.all_control_strategies"><code class="docutils literal notranslate"><span class="pre">Intervention.all_control_strategies()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.succession_control"><code class="docutils literal notranslate"><span class="pre">succession_control()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.successions_to_target"><code class="docutils literal notranslate"><span class="pre">successions_to_target()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.drivers_of_succession"><code class="docutils literal notranslate"><span class="pre">drivers_of_succession()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.find_drivers"><code class="docutils literal notranslate"><span class="pre">find_drivers()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.control.controls_are_equal"><code class="docutils literal notranslate"><span class="pre">controls_are_equal()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/autoapi/biobalm/control/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Trinh, Park, Pastva, Rozum.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

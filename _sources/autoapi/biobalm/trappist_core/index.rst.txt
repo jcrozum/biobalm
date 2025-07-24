@@ -1,0 +1,140 @@
+biobalm.trappist_core
+=====================
+
+.. py:module:: biobalm.trappist_core
+
+.. autoapi-nested-parse::
+
+   Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
+   and maximum trap spaces, including time-reversed networks.
+
+   The implementation is based on the official [trappist package](https://github.com/soli/trap-spaces-as-siphons),
+   but has been significantly modified to better suite this project.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.trappist_core.trappist_async
+   biobalm.trappist_core.trappist
+   biobalm.trappist_core.compute_fixed_point_reduced_STG_async
+   biobalm.trappist_core.compute_fixed_point_reduced_STG
+
+
+Module Contents
+---------------
+
+.. py:function:: trappist_async(network: biodivine_aeon.BooleanNetwork | networkx.DiGraph, on_solution: Callable[[biobalm.types.BooleanSpace], bool], problem: Literal['min', 'max', 'fix'] = 'min', reverse_time: bool = False, ensure_subspace: biobalm.types.BooleanSpace | None = None, avoid_subspaces: list[biobalm.types.BooleanSpace] | None = None, optimize_source_variables: list[str] | None = None)
+
+   Asynchronous version of the :func:`trappist` method.
+
+   *Note that "asynchronous" refers to the execution of this function, not to
+   the update scheme used (which does not affect the trap spaces in any case).*
+
+   The same as the :func:`trappist` method, but instead of returning a list of spaces
+   as a result, the spaces are returned to the supplied `on_solution` callback.
+   You can stop the enumeration by returning `False` from this callback.
+
+   See :func:`trappist` for details.
+
+
+.. py:function:: trappist(network: biodivine_aeon.BooleanNetwork | networkx.DiGraph, problem: Literal['min', 'max', 'fix'] = 'min', reverse_time: bool = False, solution_limit: int | None = None, ensure_subspace: biobalm.types.BooleanSpace | None = None, avoid_subspaces: list[biobalm.types.BooleanSpace] | None = None, optimize_source_variables: list[str] | None = None) -> list[biobalm.types.BooleanSpace]
+
+   Trap space solver for Boolean networks.
+
+   Solves the given `problem` for the given `network` using the Trappist
+   algorithm, internally relying on the Python bindings of the `clingo` ASP
+   solver.
+
+   The `problem` can be either `"min"`, `"max"` or `"fix"`, corresponding to
+   finding all minimal trap spaces (`"min"`), maximal trap spaces (`"max"`), or
+   fixed points (`"fix"`).
+
+   The result is a list of spaces represented as :class:`BooleanSpace<biobalm.types.BooleanSpace>`
+   dictionaries. If you want to avoid enumerating all solutions explicitly as one list, you can use
+   :func:`trappist_async` which has a similar API but can yield solutions one by one.
+
+   Finally, recall that the supplied network must have its names sanitized (see
+   :mod:`petri_net_translation<biobalm.petri_net_translation>` module).
+
+
+   :param network: A Boolean network or a Petri net compatible with the encoding in
+                   :mod:`petri_net_translation<biobalm.petri_net_translation>` module. The behaviour is undefined for other
+                   `DiGraph` instances.
+   :type network: BooleanNetwork | DiGraph
+   :param problem: The problem to solve. Finds all minimal trap spaces (`"min"`), maximal
+                   trap spaces (`"max"`), or fixed points (`"fix"`). The default is `"min"`.
+   :type problem: Literal["min", "max", "fix"], optional
+   :param reverse_time: If `True`, a time-reversed network should be considered. The default is
+                        `False`.
+   :type reverse_time: bool, optional
+   :param solution_limit: If given, the result is limited to the given number of solutions.
+                          Default: `None`.
+   :type solution_limit: int, optional
+   :param ensure_subspace: If given, the result is restricted to the given subspace. Default: `None`.
+   :type ensure_subspace: BooleanSpace, optional
+   :param avoid_subspaces: If given, the result is restricted to not be in the given subspaces. Default:
+                           `None`.
+   :type avoid_subspaces: list[BooleanSpace], optional
+   :param optimize_source_variables: Desingates which variables should be treated as input nodes for the
+                                     purposes of trap space identification. Fixed values of these variables
+                                     will be considered together, reducing the number of trap spaces
+                                     associated with `k` source nodes to `2**k` from `(2**k)*k!`.
+   :type optimize_source_variables: list[str], optional
+
+   :returns: The :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects
+             describing the trap spaces that solve the specified problem.
+   :rtype: list[BooleanSpace]
+
+
+.. py:function:: compute_fixed_point_reduced_STG_async(petri_net: networkx.DiGraph, retained_set: biobalm.types.BooleanSpace, on_solution: Callable[[biobalm.types.BooleanSpace], bool], ensure_subspace: biobalm.types.BooleanSpace | None = None, avoid_subspaces: list[biobalm.types.BooleanSpace] | None = None)
+
+   Asynchronous version of :func:`compute_fixed_point_reduced_STG`.
+
+   *Note that "asynchronous" refers to the execution of this function, not to
+   the update scheme used to generate the STG (which is, coincidently, always
+   asynchronous).*
+
+   The same as the :func:`compute_fixed_point_reduced_STG`, but instead of returning a
+   list of fixed-points as a result, the states are returned to the supplied
+   `on_solution` callback. You can stop the enumeration by
+   returning `False` from this callback.
+
+   See :func:`compute_fixed_point_reduced_STG` for details.
+
+
+.. py:function:: compute_fixed_point_reduced_STG(petri_net: networkx.DiGraph, retained_set: biobalm.types.BooleanSpace = {}, ensure_subspace: biobalm.types.BooleanSpace = {}, avoid_subspaces: list[biobalm.types.BooleanSpace] = [], solution_limit: int | None = None) -> list[biobalm.types.BooleanSpace]
+
+   Compute fixed points of the given Petri-net-encoded Boolean network.
+
+   This method computes the fixed points of the given Petri-net-encoded Boolean
+   network faster than using the :func:`trappist` function (which considers
+   all minimal trap spaces, not just fixed points).
+
+   If you want to avoid enumerating all solutions explicitly as one list, you can use
+   :func:`trappist_async` which has a similar API but can yield solutions one by one.
+
+   :param petri_net: The Petri net which was created by the implicant encoding from a
+                     Boolean network. See :mod:`petri_net_translation<biobalm.petri_net_translation>`
+                     for details.
+   :type petri_net: DiGraph
+   :param retained_set: If set, specifies a set of variables that should only be allowed to update
+                        towards their "retained value". This condition is applied by modifying
+                        the structure of the Petri net encoding.
+   :type retained_set: BooleanSpace
+   :param ensure_subspace: Only fixed points in this subspace will be considered or returned.
+   :type ensure_subspace: BooleanSpace
+   :param avoid_subspaces: Only fixed points not in any of these subspaces will be considered or
+                           returned.
+   :type avoid_subspaces: list[BooleanSpace]
+   :param solution_limit: The maximum number of solutions to return. If `None`, all solutions will
+                          be returned.
+   :type solution_limit: int
+
+   :returns: A list of fixed points.
+   :rtype: list[BooleanSpace]
+
+

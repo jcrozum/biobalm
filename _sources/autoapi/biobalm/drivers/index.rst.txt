@@ -1,0 +1,101 @@
+biobalm.drivers
+===============
+
+.. py:module:: biobalm.drivers
+
+.. autoapi-nested-parse::
+
+   A module which provides functions for processing the stable motif driver nodes of a Boolean network.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.drivers.find_single_node_LDOIs
+   biobalm.drivers.find_single_drivers
+
+
+Module Contents
+---------------
+
+.. py:function:: find_single_node_LDOIs(network: biodivine_aeon.AsynchronousGraph | biodivine_aeon.BooleanNetwork) -> dict[tuple[str, int], biobalm.types.BooleanSpace]
+
+   Finds the the logical domain of influence for every single node state.
+
+   The logical domain of influence is equivalent to the set of node states that
+   become fixed after percolation. See
+   :func:`percolate_space<biobalm.space_utils.percolate_space>` for details.
+
+   This operation requires the symbolic update functions provided by an
+   `AsynchronousGraph`. If you provide a `BooleanNetwork`, the
+   `AsynchronousGraph` will be created automatically, but this can incur
+   additional overhead.
+
+   :param network: The symbolic update functions stored as a `AsynchronousGraph` or
+                   `BooleanNetwork` object from the `biodivine_aeon` library.
+   :type network: AsynchronousGraph | BooleanNetwork
+
+   :returns: The LDOI for every one-node state. The keys are `(variable, value)`
+             tuples, where `variable` is the name of the node that is fixed in the
+             state `value` (`0` or `1`). The keys are
+             :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects, which are dictionaries
+             of node values describing the node states that become fixed as a result
+             of percolation.
+   :rtype: dict[tuple[str, int], BooleanSpace]
+
+   .. rubric:: Example
+
+   >>> import biobalm
+   >>> sd = biobalm.SuccessionDiagram.from_rules('A, A\nB, A')
+   >>> ldois = biobalm.drivers.find_single_node_LDOIs(sd.network)
+   >>> for k in sorted(ldois):
+   ...     print(f'{k} ==> {sorted(ldois[k].items())}')
+   ...
+   ('A', 0) ==> [('A', 0), ('B', 0)]
+   ('A', 1) ==> [('A', 1), ('B', 1)]
+   ('B', 0) ==> []
+   ('B', 1) ==> []
+
+
+.. py:function:: find_single_drivers(target_subspace: biobalm.types.BooleanSpace, network: biodivine_aeon.AsynchronousGraph | biodivine_aeon.BooleanNetwork, LDOIs: dict[tuple[str, int], biobalm.types.BooleanSpace] | None = None) -> set[tuple[str, int]]
+
+   Find all one-node drivers for a target subspace.
+
+   This operation requires the symbolic update functions provided by an
+   `AsynchronousGraph`. If you provide a `BooleanNetwork`, the
+   `AsynchronousGraph` will be created automatically, but this can incur
+   additional overhead.
+
+   :param target_subspace: A :class:`BooleanSpace<biobalm.types.BooleanSpace>` object describing the
+                           target trap space.
+   :type target_subspace: BooleanSpace
+   :param network:
+                   The symbolic update functions stored as a `AsynchronousGraph` or
+                    `BooleanNetwork` object from the `biodivine_aeon` library.
+   :type network: AsynchronousGraph | BooleanNetwork
+   :param LDOIs: A dictionary encoding the LDOI for every one-node state to be
+                 considered. The keys should be `(variable, value)` tuples, where
+                 `variable` is the name of the node that is fixed in the state `value`
+                 (`0` or `1`). The keys are
+                 :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects, which are
+                 dictionaries of node values describing the node states that become fixed
+                 as a result of percolation. If not provided, the LDOI will be computed
+                 automatically for each node state using :func:`find_single_node_LDOIs`.
+   :type LDOIs: dict[tuple[str, int], BooleanSpace] | None, optional
+
+   :returns: A set of driver node states that result in the target subspace, with
+             each node state represented as a node name and value (`0` or `1`).
+   :rtype: set[tuple[str, int]]
+
+   .. rubric:: Example
+
+   >>> import biobalm
+   >>> sd = biobalm.SuccessionDiagram.from_rules('A, A\nB, A')
+   >>> drivers = biobalm.drivers.find_single_drivers({'B': 0}, sd.network)
+   >>> sorted(list(drivers))
+   [('A', 0), ('B', 0)]
+
+

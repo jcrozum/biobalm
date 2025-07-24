@@ -1,0 +1,359 @@
+biobalm.control
+===============
+
+.. py:module:: biobalm.control
+
+.. autoapi-nested-parse::
+
+   This module implementes methods for permanent target control of Boolean networks
+   based on the structure of a succession diagram.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   biobalm.control.Intervention
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biobalm.control.succession_control
+   biobalm.control.successions_to_target
+   biobalm.control.drivers_of_succession
+   biobalm.control.find_drivers
+   biobalm.control.controls_are_equal
+
+
+Module Contents
+---------------
+
+.. py:class:: Intervention(control: list[biobalm.types.ControlOverrides], strategy: Literal['internal', 'all'], succession: biobalm.types.SubspaceSuccession)
+
+   
+   A class for encoding an intervention to a network to reach a target subspace.
+
+   Generally, this class is created by the
+   :func:`succession_control<biobalm.control.succession_control>` function,
+   which returns a list of `Intervention` objects. Manipulating the
+   contents of these objects is only recommended for advanced use cases.
+   Typically, it is sufficient to print this object to see a human-readable
+   explanation of how to interpret the intervention.
+
+   Note that two interventions are considered to be equal if they act on the same succession with
+   equal controls applied to each subspace in the succession. Thus, two
+   interventions that override the same nodes in the same way can be
+   unequal, even when applied to the same subspaces. This is because each
+   subspace imposes a duration condition on the overrides, i.e., the
+   override must be maintained until the succession subspace is reached.
+   Changing the order of the subspaces considered can alter this stop
+   condition.
+
+   :param control: The :class:`ControlOverrides<biobalm.types.ControlOverrides>` objects,
+                   in order, that are applied. The order of the list corresponds the
+                   order of the subspaces in the succession. Each
+                   :class:`ControlOverrides<biobalm.types.ControlOverrides>` object
+                   represens a list of overrides, stored as a dictionary of node-value
+                   pairs, that drive the system to the corresponding subspace. Each
+                   :class:`ControlOverrides<biobalm.types.ControlOverrides>` object is
+                   sorted by key value (i.e., alphabetically) upon creation of the
+                   `Intervention` object to maintain a canonical ordering.
+   :type control: list[ControlOverrides]
+   :param strategy: Either "internal" or "all"; "internal" means that the
+                    :class:`ControlOverrides<biobalm.types.ControlOverrides>`
+   :type strategy: str
+   :param succession: A sequence of subspaces that are targeted by the corresponding
+                      entries of `control`.
+   :type succession: SubspaceSuccession
+
+   .. rubric:: Example
+
+   >>> import biobalm
+   >>> sd = biobalm.SuccessionDiagram.from_rules(
+   ...     """
+   ...     A, B & C
+   ...     B, A & C
+   ...     C, A & B
+   ...     """
+   ...     )
+   >>> target = {"A": 1, "B": 1, "C": 1}
+   >>> interventions = biobalm.control.succession_control(sd, target)
+   >>> intervention = interventions[0] # only one in this case
+   >>> intervention.control
+   [[{'A': 1, 'B': 1}, {'A': 1, 'C': 1}, {'B': 1, 'C': 1}]]
+   >>> intervention.strategy
+   'internal'
+   >>> intervention.succession
+   [{'A': 1, 'B': 1, 'C': 1}]
+   >>> intervention.successful
+   True
+   >>> print(intervention)
+   Intervention is SUCCESSFUL operating on
+   {'A': 1, 'B': 1, 'C': 1}
+   override
+   ({'A': 1, 'B': 1} or {'A': 1, 'C': 1} or {'B': 1, 'C': 1})
+
+
+   .. py:property:: control
+
+
+   .. py:property:: strategy
+
+
+   .. py:property:: succession
+
+
+   .. py:property:: successful
+
+
+   .. py:method:: all_control_strategies() -> Iterator[biobalm.types.ControlOverrides]
+
+      Returns all possible combinations of `ControlOverrides` sequences that
+      can be used to execute this `Intervention`.
+
+      Internally, an intervention consists of multiple control steps that
+      need to be taken sequentially. For each step in the sequence, an intervention
+      can have multiple options of how to execute it. With this method,
+      we can generate the actual sequences that arise by combining all the
+      available options for each step.
+
+
+
+.. py:function:: succession_control(succession_diagram: biobalm.succession_diagram.SuccessionDiagram, target: biobalm.types.BooleanSpace, strategy: Literal['internal', 'all'] = 'internal', max_drivers_per_succession_node: int | None = None, forbidden_drivers: set[str] | None = None, successful_only: bool = True, skip_feedforward_successions: bool = False) -> list[Intervention]
+
+   Performs succession-diagram control to reach a target subspace.
+
+   :param succession_diagram: The succession diagram from which successions and rules will be
+                              extracted.
+   :type succession_diagram: SuccessionDiagram
+   :param target: The target subspace.
+   :type target: BooleanSpace
+   :param strategy: The searching strategy to use to look for driver nodes. Options are
+                    'internal' (default) and 'all'.
+   :type strategy: str, optional
+   :param max_drivers_per_succession_node: The maximum number of drivers that will be tested for a succession
+                                           diagram node. If `None`, then a number of drivers up to the size of the
+                                           succession diagram node's stable motif will be tested
+   :type max_drivers_per_succession_node: int | None = None,
+   :param forbidden_drivers: A set of forbidden drivers that will not be overridden for control. If
+                             `None`, then all nodes are candidates for control.
+   :type forbidden_drivers: set[str] | None
+   :param successful_only: Whether to only return successful interventions (default: `True`).
+   :type successful_only: bool
+
+   :returns: A list of control :class:`Intervention<biobalm.control.Intervention>`
+             objects. Note that when `successful_only` is `False`, returned
+             interventions may be unsuccessful if `max_drivers_per_succession_node`
+             is set too small, or crucial nodes are included in `forbidden_drivers`.
+             To test, examine the `successful` property of the intervention.
+   :rtype: list[Intervention]
+
+   .. rubric:: Example
+
+   >>> import biobalm
+   >>> from biobalm.control import succession_control
+   >>> sd = biobalm.SuccessionDiagram.from_rules(
+   ...     """
+   ...     S, S
+   ...     A, S | B
+   ...     B, A
+   ...     C, A | D
+   ...     D, C
+   ...     E, false
+   ...     """
+   ...     )
+   >>> target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+   >>> interventions = succession_control(sd, target, forbidden_drivers = {"A"})
+   >>> interventions.sort(key=lambda x: len(x.control)) # to maintain fixed order
+   >>> for i in interventions:
+   ...     print(f'{i}\n'+'-'*20)
+   ...
+   Intervention is SUCCESSFUL operating on
+   {'S': 0}
+   {'A': 0, 'B': 0}
+   {'C': 1, 'D': 1}
+   override
+   ({'S': 0}) and then
+   ({'B': 0}) and then
+   ({'C': 1} or {'D': 1})
+   --------------------
+   Intervention is SUCCESSFUL operating on
+   {'S': 0}
+   {'C': 1, 'D': 1}
+   {'A': 0, 'B': 0}
+   override
+   ({'S': 0}) and then
+   ({'C': 1} or {'D': 1}) and then
+   ({'B': 0})
+   --------------------
+
+   .. rubric:: Example
+
+   >>> import biobalm
+   >>> from biobalm.control import succession_control
+   >>> sd = biobalm.SuccessionDiagram.from_rules(
+   ...         """
+   ...     S, S
+   ...     A, S | B
+   ...     B, A
+   ...     C, A | D
+   ...     D, C
+   ...     E, false
+   ...     """
+   ...     )
+   >>> target = {"S": 0, "E": 0, "A": 0, "B": 0, "C": 1, "D": 1}
+   >>> interventions = succession_control(sd, target, strategy = "all")
+   >>> interventions.sort(key=lambda x: len(x.control)) # to maintain fixed order
+   >>> for i in interventions:
+   ...     print(f'{i}\n'+'-'*20)
+   ...
+   Intervention is SUCCESSFUL operating on
+   {'S': 0}
+   {'A': 0, 'B': 0}
+   {'C': 1, 'D': 1}
+   override
+   ({'S': 0}) temporarily, and then
+   ({'A': 0} or {'B': 0}) temporarily, and then
+   ({'C': 1} or {'D': 1})
+   --------------------
+   Intervention is SUCCESSFUL operating on
+   {'S': 0}
+   {'C': 1, 'D': 1}
+   {'A': 0, 'B': 0}
+   override
+   ({'S': 0}) temporarily, and then
+   ({'A': 1} or {'B': 1} or {'C': 1} or {'D': 1}) temporarily, and then
+   ({'A': 0} or {'B': 0})
+   --------------------
+
+
+.. py:function:: successions_to_target(succession_diagram: biobalm.succession_diagram.SuccessionDiagram, target: biobalm.types.BooleanSpace, expand_diagram: bool = True, skip_feedforward_successions: bool = False) -> list[biobalm.types.SubspaceSuccession]
+
+   Find lists of nested trap spaces (successions) that lead to the
+   specified target subspace.
+
+   Generally, it is not necessary to call this function directly, as it is
+   automatically invoked by
+   :func:`succession_control<biobalm.control.succession_control>`. It is
+   primarily provided in the public API for testing and benchmarking purposes,
+   or in the case that the user wants to implement a custom strategy to
+   identify succession drivers rather than relying on
+   :func:`drivers_of_succession<biobalm.control.drivers_of_succession>`.
+
+   :param succession_diagram: The succession diagram from which successions will be extracted.
+   :type succession_diagram: SuccessionDiagram
+   :param target: The target subspace.
+   :type target: BooleanSpace
+   :param expand_diagram: Whether to ensure that the succession diagram is expanded enough to
+                          capture all paths to the target (default: True).
+   :type expand_diagram: bool
+   :param skip_feedforward_successions: Whether to skip redundant successions (default: False). Skipping these
+                                        can reduce the number of interventions to test, yielding performance
+                                        improvements, but can also cause the algorithm to miss some valid
+                                        interventions, particularly in cases when the order of intervention
+                                        application is important.
+   :type skip_feedforward_successions: bool
+
+   :returns: A list of successions, where each succession is a list of sequentially
+             nested trap spaces that specify the target.
+   :rtype: list[SubspaceSuccession]
+
+
+.. py:function:: drivers_of_succession(bn: biodivine_aeon.BooleanNetwork | biodivine_aeon.AsynchronousGraph, succession: list[biobalm.types.BooleanSpace], strategy: str = 'internal', max_drivers_per_succession_node: int | None = None, forbidden_drivers: set[str] | None = None) -> list[biobalm.types.ControlOverrides]
+
+   Find driver nodes of a list of sequentially nested trap spaces.
+
+   Generally, it is not necessary to call this function directly, as it is
+   automatically invoked by
+   :func:`succession_control<biobalm.control.succession_control>`. It is primarily
+   provided in the public API for testing and benchmarking purposes.
+
+   :param bn: The network to analyze, which contains the Boolean update functions. Ideally,
+              the network should be already provided as a symbolic `AsynchronousGraph`.
+              Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
+              `AsynchronousGraph` is created automatically.
+   :type bn: BooleanNetwork | AsynchronousGraph
+   :param succession: A list of sequentially nested trap spaces that specify the target.
+   :type succession: list[BooleanSpace]
+   :param strategy: The searching strategy to use to look for driver nodes. Options are
+                    'internal' (default) and 'all'.
+   :type strategy: str
+   :param max_drivers_per_succession_node: The maximum number of drivers that will be tested for a succession
+                                           diagram node. If `None`, then a number of drivers up to the size of the
+                                           succession diagram node's stable motif will be tested.
+   :type max_drivers_per_succession_node: int | None = None,
+   :param forbidden_drivers: A set of forbidden drivers that will not be overridden for control. If
+                             `None`, then all nodes are candidates for control.
+   :type forbidden_drivers: set[str] | None
+
+   :returns: A list of controls. Each control is a list of lists of driver sets,
+             represented as state dictionaries. Each list item corresponds to a list
+             of drivers for the corresponding trap space in the succession.
+   :rtype: list[ControlOverrides]
+
+
+.. py:function:: find_drivers(bn: biodivine_aeon.BooleanNetwork | biodivine_aeon.AsynchronousGraph, target_trap_space: biobalm.types.BooleanSpace, strategy: str = 'internal', assume_fixed: biobalm.types.BooleanSpace | None = None, max_drivers_per_succession_node: int | None = None, forbidden_drivers: set[str] | None = None) -> biobalm.types.ControlOverrides
+
+   Finds drives of a given target trap space
+
+   Generally, it is not necessary to call this function directly, as it is
+   automatically invoked by
+   :func:`drivers_of_succession<biobalm.control.drivers_of_succession>`, which in
+   turn is invoked by
+   :func:`succession_control<biobalm.control.succession_control>`. It is primarily
+   provided in the public API for testing and benchmarking purposes.
+
+   :param bn: The network to analyze, which contains the Boolean update functions. Ideally,
+              the network should be already provided as a symbolic `AsynchronousGraph`.
+              Alternatively, a "raw" `BooleanNetwork` can be provided and the symbolic
+              `AsynchronousGraph` is created automatically.
+   :type bn: BooleanNetwork | AsynchronousGraph
+   :param target_trap_space: The trap space we want to find drivers for.
+   :type target_trap_space: BooleanSpace
+   :param strategy: The searching strategy to use to look for driver nodes. Options are
+                    'internal' (default) and 'all'.
+   :type strategy: str
+   :param assume_fixed: A dictionary of fixed variables that should be assumed to be fixed.
+   :type assume_fixed: dict[str,int] | None
+   :param max_drivers_per_succession_node: The maximum number of drivers that will be tested for a succession
+                                           diagram node. If `None`, then a number of drivers up to the size of the
+                                           succession diagram node's stable motif will be tested.
+   :type max_drivers_per_succession_node: int | None = None,
+   :param forbidden_drivers: A set of forbidden drivers that will not be overridden for control. If
+                             `None`, then all nodes are candidates for control.
+   :type forbidden_drivers: set[str] | None
+
+   :returns: A list of internal driver sets, represented as state dictionaries. If
+             empty, then no drivers are found. This can happen if
+             `max_drivers_per_succession_node` is not `None`, or if all controls
+             require nodes in `forbidden_drivers`.
+   :rtype: ControlOverrides
+
+
+.. py:function:: controls_are_equal(a: biobalm.types.ControlOverrides, b: biobalm.types.ControlOverrides) -> bool
+
+   Determine if two :class:`ControlOverrides<biobalm.types.ControlOverrides>`
+   objects are equal.
+
+   Two `ControlOverrides` objects are equal if they contain the same
+   :class:`BooleanSpace<biobalm.types.BooleanSpace>` objects, regardless of their
+   ordering.
+
+   :param a: First :class:`ControlOverrides<biobalm.types.ControlOverrides>` object for
+             comparison.
+   :type a: ControlOverrides
+   :param b: Second :class:`ControlOverrides<biobalm.types.ControlOverrides>` object for
+             comparison.
+   :type b: ControlOverrides
+
+   :returns: Returns `True` if the two
+             :class:`ControlOverrides<biobalm.types.ControlOverrides>` objects are
+             equal.
+   :rtype: bool
+
+

@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>biobalm.trappist_core &#8212; biobalm 0.4.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c4038f1e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=34866086"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/biobalm/trappist_core/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="biobalm.types" href="../types/index.html" />
+    <link rel="prev" title="biobalm.symbolic_utils" href="../symbolic_utils/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">biobalm 0.4.3 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jcrozum/biobalm" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">biobalm</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../control/index.html">biobalm.control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers/index.html">biobalm.drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_graph_utils/index.html">biobalm.interaction_graph_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../petri_net_translation/index.html">biobalm.petri_net_translation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../space_utils/index.html">biobalm.space_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../succession_diagram/index.html">biobalm.succession_diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../symbolic_utils/index.html">biobalm.symbolic_utils</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">biobalm.trappist_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../types/index.html">biobalm.types</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">biobalm</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">biobalm.trappist_core</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-biobalm.trappist_core">
+<span id="biobalm-trappist-core"></span><h1>biobalm.trappist_core<a class="headerlink" href="#module-biobalm.trappist_core" title="Link to this heading">#</a></h1>
+<p>Here, we implement the Trappist method for computing fixed-points, minimum trap spaces
+and maximum trap spaces, including time-reversed networks.</p>
+<p>The implementation is based on the official [trappist package](<a class="github reference external" href="https://github.com/soli/trap-spaces-as-siphons">soli/trap-spaces-as-siphons</a>),
+but has been significantly modified to better suite this project.</p>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.trappist_core.trappist_async" title="biobalm.trappist_core.trappist_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trappist_async</span></code></a>(network, on_solution[, problem, ...])</p></td>
+<td><p>Asynchronous version of the <a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist()</span></code></a> method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trappist</span></code></a>(→ list[biobalm.types.BooleanSpace])</p></td>
+<td><p>Trap space solver for Boolean networks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG_async" title="biobalm.trappist_core.compute_fixed_point_reduced_STG_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG_async</span></code></a>(petri_net, ...)</p></td>
+<td><p>Asynchronous version of <a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG()</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG</span></code></a>(...)</p></td>
+<td><p>Compute fixed points of the given Petri-net-encoded Boolean network.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.trappist_core.trappist_async">
+<span class="sig-prename descclassname"><span class="pre">biobalm.trappist_core.</span></span><span class="sig-name descname"><span class="pre">trappist_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'min'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'max'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fix'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_subspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subspaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_source_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/trappist_core.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.trappist_core.trappist_async" title="Link to this definition">#</a></dt>
+<dd><p>Asynchronous version of the <a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist()</span></code></a> method.</p>
+<p><em>Note that “asynchronous” refers to the execution of this function, not to
+the update scheme used (which does not affect the trap spaces in any case).</em></p>
+<p>The same as the <a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist()</span></code></a> method, but instead of returning a list of spaces
+as a result, the spaces are returned to the supplied <code class="code docutils literal notranslate"><span class="pre">on_solution</span></code> callback.
+You can stop the enumeration by returning <code class="code docutils literal notranslate"><span class="pre">False</span></code> from this callback.</p>
+<p>See <a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.trappist_core.trappist">
+<span class="sig-prename descclassname"><span class="pre">biobalm.trappist_core.</span></span><span class="sig-name descname"><span class="pre">trappist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biodivine_aeon.BooleanNetwork</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'min'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'max'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fix'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_subspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subspaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_source_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/trappist_core.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.trappist_core.trappist" title="Link to this definition">#</a></dt>
+<dd><p>Trap space solver for Boolean networks.</p>
+<p>Solves the given <code class="code docutils literal notranslate"><span class="pre">problem</span></code> for the given <code class="code docutils literal notranslate"><span class="pre">network</span></code> using the Trappist
+algorithm, internally relying on the Python bindings of the <code class="code docutils literal notranslate"><span class="pre">clingo</span></code> ASP
+solver.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">problem</span></code> can be either <code class="code docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code> or <code class="code docutils literal notranslate"><span class="pre">&quot;fix&quot;</span></code>, corresponding to
+finding all minimal trap spaces (<code class="code docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>), maximal trap spaces (<code class="code docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>), or
+fixed points (<code class="code docutils literal notranslate"><span class="pre">&quot;fix&quot;</span></code>).</p>
+<p>The result is a list of spaces represented as <a class="reference internal" href="../types/index.html#biobalm.types.BooleanSpace" title="biobalm.types.BooleanSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanSpace</span></code></a>
+dictionaries. If you want to avoid enumerating all solutions explicitly as one list, you can use
+<a class="reference internal" href="#biobalm.trappist_core.trappist_async" title="biobalm.trappist_core.trappist_async"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist_async()</span></code></a> which has a similar API but can yield solutions one by one.</p>
+<p>Finally, recall that the supplied network must have its names sanitized (see
+<a class="reference internal" href="../petri_net_translation/index.html#module-biobalm.petri_net_translation" title="biobalm.petri_net_translation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">petri_net_translation</span></code></a> module).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>BooleanNetwork</em><em> | </em><em>DiGraph</em>) – A Boolean network or a Petri net compatible with the encoding in
+<a class="reference internal" href="../petri_net_translation/index.html#module-biobalm.petri_net_translation" title="biobalm.petri_net_translation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">petri_net_translation</span></code></a> module. The behaviour is undefined for other
+<code class="code docutils literal notranslate"><span class="pre">DiGraph</span></code> instances.</p></li>
+<li><p><strong>problem</strong> (<em>Literal</em><em>[</em><em>&quot;min&quot;</em><em>, </em><em>&quot;max&quot;</em><em>, </em><em>&quot;fix&quot;</em><em>]</em><em>, </em><em>optional</em>) – The problem to solve. Finds all minimal trap spaces (<code class="code docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>), maximal
+trap spaces (<code class="code docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>), or fixed points (<code class="code docutils literal notranslate"><span class="pre">&quot;fix&quot;</span></code>). The default is <code class="code docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>.</p></li>
+<li><p><strong>reverse_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code>, a time-reversed network should be considered. The default is
+<code class="code docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>solution_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – If given, the result is limited to the given number of solutions.
+Default: <code class="code docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>ensure_subspace</strong> (<em>BooleanSpace</em><em>, </em><em>optional</em>) – If given, the result is restricted to the given subspace. Default: <code class="code docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>avoid_subspaces</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>BooleanSpace</em><em>]</em><em>, </em><em>optional</em>) – If given, the result is restricted to not be in the given subspaces. Default:
+<code class="code docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>optimize_source_variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Desingates which variables should be treated as input nodes for the
+purposes of trap space identification. Fixed values of these variables
+will be considered together, reducing the number of trap spaces
+associated with <code class="code docutils literal notranslate"><span class="pre">k</span></code> source nodes to <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> from <code class="code docutils literal notranslate"><span class="pre">(2**k)*k!</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The <a class="reference internal" href="../types/index.html#biobalm.types.BooleanSpace" title="biobalm.types.BooleanSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanSpace</span></code></a> objects
+describing the trap spaces that solve the specified problem.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.trappist_core.compute_fixed_point_reduced_STG_async">
+<span class="sig-prename descclassname"><span class="pre">biobalm.trappist_core.</span></span><span class="sig-name descname"><span class="pre">compute_fixed_point_reduced_STG_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">petri_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">retained_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_subspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subspaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/trappist_core.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG_async" title="Link to this definition">#</a></dt>
+<dd><p>Asynchronous version of <a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG()</span></code></a>.</p>
+<p><em>Note that “asynchronous” refers to the execution of this function, not to
+the update scheme used to generate the STG (which is, coincidently, always
+asynchronous).</em></p>
+<p>The same as the <a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG()</span></code></a>, but instead of returning a
+list of fixed-points as a result, the states are returned to the supplied
+<code class="code docutils literal notranslate"><span class="pre">on_solution</span></code> callback. You can stop the enumeration by
+returning <code class="code docutils literal notranslate"><span class="pre">False</span></code> from this callback.</p>
+<p>See <a class="reference internal" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biobalm.trappist_core.compute_fixed_point_reduced_STG">
+<span class="sig-prename descclassname"><span class="pre">biobalm.trappist_core.</span></span><span class="sig-name descname"><span class="pre">compute_fixed_point_reduced_STG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">petri_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://networkx.org/documentation/stable/reference/classes/digraph.html#networkx.DiGraph" title="(in NetworkX v3.5)"><span class="pre">networkx.DiGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">retained_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_subspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">biobalm.types.BooleanSpace</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subspaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">biobalm.types.BooleanSpace</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/jcrozum/biobalm/blob/main/biobalm/trappist_core.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG" title="Link to this definition">#</a></dt>
+<dd><p>Compute fixed points of the given Petri-net-encoded Boolean network.</p>
+<p>This method computes the fixed points of the given Petri-net-encoded Boolean
+network faster than using the <a class="reference internal" href="#biobalm.trappist_core.trappist" title="biobalm.trappist_core.trappist"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist()</span></code></a> function (which considers
+all minimal trap spaces, not just fixed points).</p>
+<p>If you want to avoid enumerating all solutions explicitly as one list, you can use
+<a class="reference internal" href="#biobalm.trappist_core.trappist_async" title="biobalm.trappist_core.trappist_async"><code class="xref py py-func docutils literal notranslate"><span class="pre">trappist_async()</span></code></a> which has a similar API but can yield solutions one by one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>petri_net</strong> (<em>DiGraph</em>) – The Petri net which was created by the implicant encoding from a
+Boolean network. See <a class="reference internal" href="../petri_net_translation/index.html#module-biobalm.petri_net_translation" title="biobalm.petri_net_translation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">petri_net_translation</span></code></a>
+for details.</p></li>
+<li><p><strong>retained_set</strong> (<em>BooleanSpace</em>) – If set, specifies a set of variables that should only be allowed to update
+towards their “retained value”. This condition is applied by modifying
+the structure of the Petri net encoding.</p></li>
+<li><p><strong>ensure_subspace</strong> (<em>BooleanSpace</em>) – Only fixed points in this subspace will be considered or returned.</p></li>
+<li><p><strong>avoid_subspaces</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>BooleanSpace</em><em>]</em>) – Only fixed points not in any of these subspaces will be considered or
+returned.</p></li>
+<li><p><strong>solution_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The maximum number of solutions to return. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, all solutions will
+be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of fixed points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[BooleanSpace]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../symbolic_utils/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">biobalm.symbolic_utils</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../types/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">biobalm.types</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.trappist_core.trappist_async"><code class="docutils literal notranslate"><span class="pre">trappist_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.trappist_core.trappist"><code class="docutils literal notranslate"><span class="pre">trappist()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG_async"><code class="docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#biobalm.trappist_core.compute_fixed_point_reduced_STG"><code class="docutils literal notranslate"><span class="pre">compute_fixed_point_reduced_STG()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/autoapi/biobalm/trappist_core/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Trinh, Park, Pastva, Rozum.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
