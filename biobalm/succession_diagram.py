@@ -185,6 +185,7 @@ class SuccessionDiagram:
             "attractor_candidates_limit": 100_000,
             "retained_set_optimization_threshold": 1_000,
             "minimum_simulation_budget": 1_000,
+            "auto_expand_source_nodes": True,
         }
 
     @staticmethod
@@ -1545,7 +1546,7 @@ class SuccessionDiagram:
         # The SD created from the restricted Petri net is technically correct, but can
         # propagate some of the input values further and yields a smaller SD.
         source_nodes = []
-        if node_id == self.root():
+        if node_id == self.root() and self.config["auto_expand_source_nodes"]:
             source_nodes = extract_source_variables(self.petri_net)
 
         sub_spaces: list[BooleanSpace]

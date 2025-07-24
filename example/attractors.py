@@ -18,12 +18,12 @@ print(f"Simplified network: {bn}")
 # Prepare a config which will print progress.
 config = SuccessionDiagram.default_config()
 config["debug"] = True  # Print progress.
-config[
-    "max_motifs_per_node"
-] = 1_000_000  # Maximum number of outgoing edges for each node.
-config[
-    "attractor_candidates_limit"
-] = 100_000  # Maximum number of enumerated attractor candidates.
+config["max_motifs_per_node"] = (
+    1_000_000  # Maximum number of outgoing edges for each node.
+)
+config["attractor_candidates_limit"] = (
+    100_000  # Maximum number of enumerated attractor candidates.
+)
 
 sd = SuccessionDiagram(bn, config)
 
