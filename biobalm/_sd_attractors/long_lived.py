@@ -8,6 +8,7 @@ from biodivine_aeon import AsynchronousGraph, ColoredVertexSet
 def compute_long_lived_phenotypes(
     sd: SuccessionDiagram,
     node_id: int,
+    only_maximal: bool = True,
 ) -> list[BooleanSpace]:
     """
     Compute the phenotypes defined by long-lived components present
@@ -98,55 +99,61 @@ def compute_long_lived_phenotypes(
                     f"[{i+1} / {len(long_lived_components)}] Duplicate phenotype (size {len(phenotype)})."
                 )
 
-            for var in stg.network_variable_names():
-                if var in phenotype:
-                    continue  # This variable is fixed by the SCC.
-                var_true: ColoredVertexSet = trim(
-                    stg, component.intersect(stg.mk_subspace({var: True}))
-                )
-                var_false: ColoredVertexSet = trim(
-                    stg, component.intersect(stg.mk_subspace({var: False}))
-                )
-                if not var_true.is_empty() and not has_percolation(stg, var_true):
-                    true_subspace = var_true.vertices().enclosing_named_subspace()
-                    assert true_subspace is not None
-                    found = False
-                    # We have to check this explicitly, because it might have gotten there also from some larger value
-                    # of min_space_size, not just the one we are computing now.
-                    for x, _ in to_explore:
-                        if x.is_subset(var_true) and var_true.is_subset(x):
-                            found = True
-                            break
-                    if not found:
-                        print(
-                            f"\t\tNew search space with {len(true_subspace)} fixed vars ({var} = 1)."
-                        )
-                        to_explore.append(
-                            (
-                                var_true,
-                                {k: 1 if v else 0 for k, v in true_subspace.items()},
-                            )
-                        )
-                if not var_false.is_empty() and not has_percolation(stg, var_false):
-                    false_subspace = var_false.vertices().enclosing_named_subspace()
-                    assert false_subspace is not None
-                    print(
-                        f"\t\tNew search space with {len(false_subspace)} fixed vars ({var} = 0)."
+            if not only_maximal:
+                # Enqueue all smaller subspace combinations
+                for var in stg.network_variable_names():
+                    if var in phenotype:
+                        continue  # This variable is fixed by the SCC.
+                    var_true: ColoredVertexSet = trim(
+                        stg, component.intersect(stg.mk_subspace({var: True}))
                     )
-                    found = False
-                    for x, _ in to_explore:
-                        if x.is_subset(var_false) and var_false.is_subset(x):
-                            found = True
-                            break
-                    if not found:
-                        to_explore.append(
-                            (
-                                var_false,
-                                {k: 1 if v else 0 for k, v in false_subspace.items()},
+                    var_false: ColoredVertexSet = trim(
+                        stg, component.intersect(stg.mk_subspace({var: False}))
+                    )
+                    if not var_true.is_empty() and not has_percolation(stg, var_true):
+                        true_subspace = var_true.vertices().enclosing_named_subspace()
+                        assert true_subspace is not None
+                        found = False
+                        # We have to check this explicitly, because it might have gotten there also from some larger value
+                        # of min_space_size, not just the one we are computing now.
+                        for x, _ in to_explore:
+                            if x.is_subset(var_true) and var_true.is_subset(x):
+                                found = True
+                                break
+                        if not found:
+                            print(
+                                f"\t\tNew search space with {len(true_subspace)} fixed vars ({var} = 1)."
                             )
+                            to_explore.append(
+                                (
+                                    var_true,
+                                    {
+                                        k: 1 if v else 0
+                                        for k, v in true_subspace.items()
+                                    },
+                                )
+                            )
+                    if not var_false.is_empty() and not has_percolation(stg, var_false):
+                        false_subspace = var_false.vertices().enclosing_named_subspace()
+                        assert false_subspace is not None
+                        print(
+                            f"\t\tNew search space with {len(false_subspace)} fixed vars ({var} = 0)."
                         )
-
-    print(f">>> [{node_id}] Found {len(phenotypes)} long-lived phenotypes. <<<")
+                        found = False
+                        for x, _ in to_explore:
+                            if x.is_subset(var_false) and var_false.is_subset(x):
+                                found = True
+                                break
+                        if not found:
+                            to_explore.append(
+                                (
+                                    var_false,
+                                    {
+                                        k: 1 if v else 0
+                                        for k, v in false_subspace.items()
+                                    },
+                                )
+                            )
 
     return cast(
         list[BooleanSpace],
