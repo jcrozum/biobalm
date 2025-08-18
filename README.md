@@ -30,19 +30,21 @@ pip install git+https://github.com/jcrozum/biobalm.git@main
 
 ### Referencing biobalm
 
-`biobalm` is on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.09.30.615897v1):
+The manuscript introducing and benchmarking `biobalm` is freely available in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf280).
+Please cite the following if you use `biobalm` in your publication:
 
 ```
-@article {biobalm,
-	author = {Trinh, Van-Giang and Park, Kyu Hyong and Pastva, Samuel and Rozum, Jordan C},
-	title = {Mapping the attractor landscape of Boolean networks},
-	elocation-id = {2024.09.30.615897},
-	year = {2024},
-	doi = {10.1101/2024.09.30.615897},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2024/10/02/2024.09.30.615897},
-	eprint = {https://www.biorxiv.org/content/early/2024/10/02/2024.09.30.615897.full.pdf},
-	journal = {bioRxiv}
+@article{trinhBiobalmMappingAttractorLandscape2025,
+  title = {Mapping the attractor landscape of {{Boolean}} networks with biobalm},
+  author = {Trinh, Van-Giang and Park, Kyu Hyong and Pastva, Samuel and Rozum, Jordan C},
+  year = {2025},
+  month = may,
+  journal = {Bioinformatics},
+  volume = {41},
+  number = {5},
+  pages = {btaf280},
+  issn = {1367-4811},
+  doi = {10.1093/bioinformatics/btaf280}
 }
 ```
 
